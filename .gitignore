@@ -34,3 +34,4 @@
 # Visual Studio generated files
 .vs/
 .vscode/
+build/
