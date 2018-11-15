@@ -1,0 +1,5 @@
+C:/Users/szymon.welgus//CMakeBuilds//c86c8981-f7a9-3934-a3f9-147ae3ee7788//install//x86-Debug/lib/ccqlited.lib
+C:/Users/szymon.welgus//CMakeBuilds//c86c8981-f7a9-3934-a3f9-147ae3ee7788//install//x86-Debug/bin/ccqlited.dll
+C:/Users/szymon.welgus//CMakeBuilds//c86c8981-f7a9-3934-a3f9-147ae3ee7788//install//x86-Debug/include/database.hh
+C:/Users/szymon.welgus//CMakeBuilds//c86c8981-f7a9-3934-a3f9-147ae3ee7788//install//x86-Debug/lib/ccqlite/ccqlite-config.cmake
+C:/Users/szymon.welgus//CMakeBuilds//c86c8981-f7a9-3934-a3f9-147ae3ee7788//install//x86-Debug/lib/ccqlite/ccqlite-config-debug.cmake

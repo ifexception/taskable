@@ -1,0 +1,9 @@
+T:/wx-timesheets-tracker/build/x86-Debug/CMakeFiles/INSTALL.dir
+T:/wx-timesheets-tracker/build/x86-Debug/CMakeFiles/ALL_BUILD.dir
+T:/wx-timesheets-tracker/build/x86-Debug/CMakeFiles/ZERO_CHECK.dir
+T:/wx-timesheets-tracker/build/x86-Debug/ccqlite/CMakeFiles/ccqlite.dir
+T:/wx-timesheets-tracker/build/x86-Debug/ccqlite/CMakeFiles/INSTALL.dir
+T:/wx-timesheets-tracker/build/x86-Debug/ccqlite/CMakeFiles/ALL_BUILD.dir
+T:/wx-timesheets-tracker/build/x86-Debug/timesheets-tracker/CMakeFiles/wxTimesheetsTracker.dir
+T:/wx-timesheets-tracker/build/x86-Debug/timesheets-tracker/CMakeFiles/INSTALL.dir
+T:/wx-timesheets-tracker/build/x86-Debug/timesheets-tracker/CMakeFiles/ALL_BUILD.dir

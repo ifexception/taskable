@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="T:\wx-timesheets-tracker\ccqlite\src\database.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="T:\wx-timesheets-tracker\ccqlite\include\database.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="T:\wx-timesheets-tracker\ccqlite\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{636B4269-0B1D-3B94-9D65-EBDDC47D6D5D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{E2AC2595-2CEC-3208-B224-501AEDEFF043}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

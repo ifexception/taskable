@@ -1,0 +1,51 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ALL_BUILD", "ALL_BUILD.vcxproj", "{94D35719-EC6F-3F19-9E54-7267C708221B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{80324965-C892-35BE-850F-F398A6648147} = {80324965-C892-35BE-850F-F398A6648147}
+		{B252816B-D4DC-3724-A15B-AA388BD0A202} = {B252816B-D4DC-3724-A15B-AA388BD0A202}
+		{F3E691C9-8554-36C2-99A4-CAC6C8DB8383} = {F3E691C9-8554-36C2-99A4-CAC6C8DB8383}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "INSTALL", "INSTALL.vcxproj", "{6BE4686B-71C6-3EFB-9A4D-BD6918FBC95D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{94D35719-EC6F-3F19-9E54-7267C708221B} = {94D35719-EC6F-3F19-9E54-7267C708221B}
+		{80324965-C892-35BE-850F-F398A6648147} = {80324965-C892-35BE-850F-F398A6648147}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZERO_CHECK", "ZERO_CHECK.vcxproj", "{80324965-C892-35BE-850F-F398A6648147}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ccqlite", "ccqlite\ccqlite.vcxproj", "{B252816B-D4DC-3724-A15B-AA388BD0A202}"
+	ProjectSection(ProjectDependencies) = postProject
+		{80324965-C892-35BE-850F-F398A6648147} = {80324965-C892-35BE-850F-F398A6648147}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxTimesheetsTracker", "timesheets-tracker\wxTimesheetsTracker.vcxproj", "{F3E691C9-8554-36C2-99A4-CAC6C8DB8383}"
+	ProjectSection(ProjectDependencies) = postProject
+		{80324965-C892-35BE-850F-F398A6648147} = {80324965-C892-35BE-850F-F398A6648147}
+		{B252816B-D4DC-3724-A15B-AA388BD0A202} = {B252816B-D4DC-3724-A15B-AA388BD0A202}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{94D35719-EC6F-3F19-9E54-7267C708221B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{94D35719-EC6F-3F19-9E54-7267C708221B}.Debug|Win32.Build.0 = Debug|Win32
+		{6BE4686B-71C6-3EFB-9A4D-BD6918FBC95D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{80324965-C892-35BE-850F-F398A6648147}.Debug|Win32.ActiveCfg = Debug|Win32
+		{80324965-C892-35BE-850F-F398A6648147}.Debug|Win32.Build.0 = Debug|Win32
+		{B252816B-D4DC-3724-A15B-AA388BD0A202}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B252816B-D4DC-3724-A15B-AA388BD0A202}.Debug|Win32.Build.0 = Debug|Win32
+		{F3E691C9-8554-36C2-99A4-CAC6C8DB8383}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F3E691C9-8554-36C2-99A4-CAC6C8DB8383}.Debug|Win32.Build.0 = Debug|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {30FA3A0E-0C00-3872-BE54-EE9F0354D2BB}
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,16 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "native",
+      "name": "ccqlite",
+      "project": "ccqlite"
+    },
+    {
+      "type": "native",
+      "name": "timesheets-tracker",
+      "project": "timesheets-tracker"
+    }
+  ]
+}

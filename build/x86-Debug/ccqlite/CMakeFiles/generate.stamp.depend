@@ -1,0 +1,6 @@
+# CMake generation dependency list for this directory.
+C:/Microsoft/vcpkg/installed/x86-windows/share/sqlite3/sqlite3-config.cmake
+C:/Microsoft/vcpkg/installed/x86-windows/share/sqlite3/sqlite3-targets-debug.cmake
+C:/Microsoft/vcpkg/installed/x86-windows/share/sqlite3/sqlite3-targets-release.cmake
+C:/Microsoft/vcpkg/installed/x86-windows/share/sqlite3/sqlite3-targets.cmake
+T:/wx-timesheets-tracker/ccqlite/CMakeLists.txt
