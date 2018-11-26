@@ -23,9 +23,12 @@
 
 #pragma once
 
+#include <chrono>
 #include <string>
 
 #include <sqlite3.h>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/daily_file_sink.h>
 
 #include "ccqliteapi.hh"
 #include "permission.hh"
@@ -41,6 +44,8 @@ public:
     ~database();
 
 private:
+    void init_logging();
+
     sqlite3* pHandle;
 };
 } // namespace ccqlite

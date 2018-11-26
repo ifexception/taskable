@@ -27,19 +27,34 @@ namespace ccqlite
 {
 database::database(const std::string filePath)
     : pHandle(nullptr)
-{}
+{
+    const char* filename = filePath.c_str();
+    const permission defaultPermission = permission::ReadOnly;
+    const int flags = static_cast<int>(defaultPermission);
+    const int ret = sqlite3_open_v2(filename, &pHandle, flags, nullptr);
+}
 
 database::database(const std::string filePath, const permission permission)
     : pHandle(nullptr)
 {
     const char* filename = filePath.c_str();
-    int flags = static_cast<int>(permission);
-    int const ret = sqlite3_open_v2(filename, &pHandle, flags, nullptr);
+    const int flags = static_cast<int>(permission);
+    const int ret = sqlite3_open_v2(filename, &pHandle, flags, nullptr);
 }
 
 database::~database()
 {
     int const ret = sqlite3_close(pHandle);
     pHandle = nullptr;
+}
+
+void database::init_logging()
+{
+    try {
+        auto logger = spdlog::daily_logger_mt("ccqlite_logger",
+            "logs/ccqlite.log.txt");
+    } catch (const spdlog::spdlog_ex&) {
+        exit(EXIT_FAILURE);
+    }
 }
 } // namespace ccqlite
