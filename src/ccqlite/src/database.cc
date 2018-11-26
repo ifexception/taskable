@@ -23,29 +23,59 @@
 
 #include "database.hh"
 
+#include "database_exception.hh"
+
 namespace ccqlite
 {
 database::database(const std::string filePath)
     : pHandle(nullptr)
 {
+    init_logging();
+
     const char* filename = filePath.c_str();
     const permission defaultPermission = permission::ReadOnly;
     const int flags = static_cast<int>(defaultPermission);
     const int ret = sqlite3_open_v2(filename, &pHandle, flags, nullptr);
+
+    if (ret != SQLITE_OK) {
+        const database_exception exception(pHandle, ret);
+        sqlite3_close(pHandle);
+        throw exception;
+    }
 }
 
 database::database(const std::string filePath, const permission permission)
     : pHandle(nullptr)
 {
+    init_logging()
+
     const char* filename = filePath.c_str();
     const int flags = static_cast<int>(permission);
     const int ret = sqlite3_open_v2(filename, &pHandle, flags, nullptr);
+
+    if (ret != SQLITE_OK) {
+        const database_exception exception(pHandle, ret);
+        sqlite3_close(pHandle);
+        throw exception;
+    }
 }
 
 database::~database()
 {
     int const ret = sqlite3_close(pHandle);
     pHandle = nullptr;
+}
+
+const std::string database::get_lib_version()
+{
+    const char* libVersion = sqlite3_libversion();
+    return std::string(libVersion);
+}
+
+const int database::get_lib_version_number()
+{
+    const int versionNumber = sqlite3_libversion_number();
+    return versionNumber;
 }
 
 void database::init_logging()

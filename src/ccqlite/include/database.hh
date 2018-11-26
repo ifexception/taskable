@@ -26,9 +26,9 @@
 #include <chrono>
 #include <string>
 
-#include <sqlite3.h>
-#include <spdlog/spdlog.h>
 #include <spdlog/sinks/daily_file_sink.h>
+#include <spdlog/spdlog.h>
+#include <sqlite3.h>
 
 #include "ccqliteapi.hh"
 #include "permission.hh"
@@ -37,13 +37,16 @@ namespace ccqlite
 {
 class CCQLITE_API database
 {
-public:
+  public:
     database() = delete;
     explicit database(const std::string filePath);
     explicit database(const std::string filePath, const permission permission);
     ~database();
 
-private:
+    const std::string get_lib_version();
+    const int get_lib_version_number();
+
+  private:
     void init_logging();
 
     sqlite3* pHandle;
