@@ -6,8 +6,13 @@ project (ccqlite
 find_package (sqlite3 REQUIRED)
 message (STATUS "sqlite3 found: ${sqlite3_FOUND}")
 
-set (SRC "src/database.cc")
-set (HEADER "include/database.hh")
+set (HEADER "include/database.hh"
+    "include/permission.hh"
+    "include/database_exception.hh")
+
+set (SRC "src/database.cc"
+    "src/permission.cc"
+    "src/database_exception.cc")
 
 set(CMAKE_DEBUG_POSTFIX d)
 
