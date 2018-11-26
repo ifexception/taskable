@@ -4,7 +4,9 @@ project (ccqlite
     DESCRIPTION "A simple sqlite wrapper in modern C++")
 
 find_package (sqlite3 REQUIRED)
+find_package (spdlog CONFIG REQUIRED)
 message (STATUS "sqlite3 found: ${sqlite3_FOUND}")
+message (STATUS "spdlog found: ${spdlog_FOUND}")
 
 set (HEADER "include/database.hh"
     "include/permission.hh"
@@ -34,7 +36,9 @@ set_target_properties (${PROJECT_NAME} PROPERTIES
 target_compile_features (${PROJECT_NAME} PRIVATE
     cxx_std_17)
 
-target_link_libraries (${PROJECT_NAME} sqlite3)
+target_link_libraries (${PROJECT_NAME} PRIVATE
+    sqlite3
+    spdlog::spdlog)
 
 install (TARGETS ${PROJECT_NAME}
     EXPORT ${PROJECT_NAME}
