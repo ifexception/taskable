@@ -25,13 +25,21 @@
 
 namespace ccqlite
 {
-database::database(std::string const& filePath)
-    : pDatabase(nullptr)
+database::database(const std::string filePath)
+    : pHandle(nullptr)
 {}
+
+database::database(const std::string filePath, const permission permission)
+    : pHandle(nullptr)
+{
+    const char* filename = filePath.c_str();
+    int flags = static_cast<int>(permission);
+    int const ret = sqlite3_open_v2(filename, &pHandle, flags, nullptr);
+}
 
 database::~database()
 {
-    int const ret = sqlite3_close(pDatabase);
-    pDatabase = nullptr;
+    int const ret = sqlite3_close(pHandle);
+    pHandle = nullptr;
 }
-}
+} // namespace ccqlite

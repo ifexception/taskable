@@ -28,17 +28,19 @@
 #include <sqlite3.h>
 
 #include "ccqliteapi.hh"
+#include "permission.hh"
 
 namespace ccqlite
 {
 class CCQLITE_API database
 {
-  public:
+public:
     database() = delete;
-    database(std::string const& filePath);
+    explicit database(const std::string filePath);
+    explicit database(const std::string filePath, const permission permission);
     ~database();
 
-  private:
-    sqlite3* pDatabase;
+private:
+    sqlite3* pHandle;
 };
 } // namespace ccqlite
