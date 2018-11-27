@@ -27,43 +27,51 @@
 
 namespace ccqlite
 {
+database::database(database&& other)
+{
+    pHandle = other.pHandle;
+    pLogger = other.pLogger;
+
+    other.close_handle();
+    other.pLogger = nullptr;
+}
+
 database::database(const std::string filePath)
-    : pHandle(nullptr)
+    : pHandle(nullptr), pLogger(nullptr)
 {
     init_logging();
 
-    const char* filename = filePath.c_str();
     const permission defaultPermission = permission::ReadOnly;
-    const int flags = static_cast<int>(defaultPermission);
-    const int ret = sqlite3_open_v2(filename, &pHandle, flags, nullptr);
-
-    if (ret != SQLITE_OK) {
-        const database_exception exception(pHandle, ret);
-        sqlite3_close(pHandle);
-        throw exception;
-    }
+    init_sqlite_connection(filePath, defaultPermission);
 }
 
 database::database(const std::string filePath, const permission permission)
-    : pHandle(nullptr)
+    : pHandle(nullptr), pLogger(nullptr)
 {
-    init_logging()
+    init_logging();
 
-    const char* filename = filePath.c_str();
-    const int flags = static_cast<int>(permission);
-    const int ret = sqlite3_open_v2(filename, &pHandle, flags, nullptr);
-
-    if (ret != SQLITE_OK) {
-        const database_exception exception(pHandle, ret);
-        sqlite3_close(pHandle);
-        throw exception;
-    }
+    init_sqlite_connection(filePath, permission);
 }
 
 database::~database()
 {
-    int const ret = sqlite3_close(pHandle);
-    pHandle = nullptr;
+    close_handle();
+}
+
+database& database::operator=(database&& other)
+{
+    if (this != &other) {
+        close_handle();
+        pLogger = nullptr;
+
+        pHandle = other.pHandle;
+        pLogger = other.pLogger;
+
+        other.close_handle();
+        other.pLogger = nullptr;
+    }
+
+    return *this;
 }
 
 const std::string database::get_lib_version()
@@ -80,11 +88,38 @@ const int database::get_lib_version_number()
 
 void database::init_logging()
 {
+    spdlog::set_level(spdlog::level::info);
+
     try {
-        auto logger = spdlog::daily_logger_mt("ccqlite_logger",
-            "logs/ccqlite.log.txt");
+        pLogger =
+            spdlog::daily_logger_mt("ccqlite_logger", "logs/ccqlite.log.txt");
+        pLogger->info("Logger initialized");
+
+        spdlog::register_logger(pLogger);
     } catch (const spdlog::spdlog_ex&) {
         exit(EXIT_FAILURE);
     }
+}
+
+void database::init_sqlite_connection(const std::string filePath,
+                                      const permission permission)
+{
+    const char* filename = filePath.c_str();
+    const int flags = static_cast<int>(permission);
+    const int ret = sqlite3_open_v2(filename, &pHandle, flags, nullptr);
+
+    if (ret != SQLITE_OK) {
+        const database_exception exception(pHandle, ret);
+        close_handle();
+        pLogger->error("Failed to connect to sqlite3 instance {}", filePath);
+
+        throw exception;
+    }
+}
+
+void database::close_handle()
+{
+    sqlite3_close(pHandle);
+    pHandle = nullptr;
 }
 } // namespace ccqlite

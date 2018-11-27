@@ -23,12 +23,13 @@
 
 #pragma once
 
-#include <chrono>
 #include <string>
 
-#include <spdlog/sinks/daily_file_sink.h>
-#include <spdlog/spdlog.h>
 #include <sqlite3.h>
+
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/daily_file_sink.h>
 
 #include "ccqliteapi.hh"
 #include "permission.hh"
@@ -39,16 +40,25 @@ class CCQLITE_API database
 {
   public:
     database() = delete;
+    database(const database& other) = delete;
+    database(database&& other);
     explicit database(const std::string filePath);
     explicit database(const std::string filePath, const permission permission);
     ~database();
+
+    database& operator=(const database& other) = delete;
+    database& operator=(database&& other);
 
     const std::string get_lib_version();
     const int get_lib_version_number();
 
   private:
     void init_logging();
+    void init_sqlite_connection(const std::string filePath,
+        const permission permission);
+    void close_handle();
 
     sqlite3* pHandle;
+    std::shared_ptr<spdlog::logger> pLogger;
 };
 } // namespace ccqlite
