@@ -36,7 +36,7 @@ set_target_properties (${PROJECT_NAME} PROPERTIES
 target_compile_features (${PROJECT_NAME} PRIVATE
     cxx_std_17)
 
-target_link_libraries (${PROJECT_NAME} PRIVATE
+target_link_libraries (${PROJECT_NAME} PUBLIC
     sqlite3
     spdlog::spdlog)
 
