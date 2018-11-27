@@ -10,5 +10,4 @@ ColumnLimit: 80
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 AlwaysBreakTemplateDeclarations: true
-BreakBeforeInheritanceComma: true
 SpaceBeforeAssignmentOperators: true
