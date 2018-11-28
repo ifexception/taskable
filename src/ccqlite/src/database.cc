@@ -23,6 +23,7 @@
 
 #include "database.hh"
 
+#include "constants.hh"
 #include "database_exception.hh"
 
 namespace ccqlite
@@ -37,7 +38,8 @@ database::database(database&& other)
 }
 
 database::database(const std::string filePath)
-    : pHandle(nullptr), pLogger(nullptr)
+    : pHandle(nullptr)
+    , pLogger(nullptr)
 {
     init_logging();
 
@@ -46,7 +48,8 @@ database::database(const std::string filePath)
 }
 
 database::database(const std::string filePath, const permission permission)
-    : pHandle(nullptr), pLogger(nullptr)
+    : pHandle(nullptr)
+    , pLogger(nullptr)
 {
     init_logging();
 
@@ -91,9 +94,9 @@ void database::init_logging()
     spdlog::set_level(spdlog::level::info);
 
     try {
-        pLogger =
-            spdlog::daily_logger_mt("ccqlite_logger", "logs/ccqlite.log.txt");
-        pLogger->info("Logger initialized");
+        pLogger = spdlog::daily_logger_mt(Constants::LoggerName,
+            "logs/ccqlite.log.txt");
+        pLogger->info(Constants::Info::LoggerInitialized);
 
         spdlog::register_logger(pLogger);
     } catch (const spdlog::spdlog_ex&) {
@@ -102,7 +105,7 @@ void database::init_logging()
 }
 
 void database::init_sqlite_connection(const std::string filePath,
-                                      const permission permission)
+    const permission permission)
 {
     const char* filename = filePath.c_str();
     const int flags = static_cast<int>(permission);
@@ -111,7 +114,11 @@ void database::init_sqlite_connection(const std::string filePath,
     if (ret != SQLITE_OK) {
         const database_exception exception(pHandle, ret);
         close_handle();
-        pLogger->error("Failed to connect to sqlite3 instance {}", filePath);
+
+        pLogger->error(Constants::Error::SqliteConnection.c_str(),
+            filePath);
+        pLogger->error(Constants::Error::SqliteError.c_str(),
+            exception.get_error_code());
 
         throw exception;
     }
