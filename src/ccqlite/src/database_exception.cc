@@ -26,48 +26,48 @@
 namespace ccqlite
 {
 database_exception::database_exception(const char* errorMessage)
-    : std::runtime_error(errorMessage), mErrorCode(-1), mExtendedErrorCode(-1)
+    : std::runtime_error(errorMessage)
+    , mErrorCode(-1)
+{
+}
+database_exception::database_exception(int ret)
+    : std::runtime_error(sqlite3_errstr(ret))
+    , mErrorCode(ret)
 {
 }
 
 database_exception::database_exception(const char* errorMessage, int ret)
-    : std::runtime_error(errorMessage), mErrorCode(ret),
-      mExtendedErrorCode(-1)
+    : std::runtime_error(errorMessage)
+    , mErrorCode(ret)
 {
 }
 
 database_exception::database_exception(const std::string& errorMessage)
-    : std::runtime_error(errorMessage), mErrorCode(-1), mExtendedErrorCode(-1)
+    : std::runtime_error(errorMessage)
+    , mErrorCode(-1)
 {
 }
 
 database_exception::database_exception(const std::string& errorMessage, int ret)
-    : std::runtime_error(errorMessage), mErrorCode(ret),
-      mExtendedErrorCode(-1)
+    : std::runtime_error(errorMessage)
+    , mErrorCode(ret)
 {
 }
 
 database_exception::database_exception(sqlite3* handle)
     : std::runtime_error(sqlite3_errmsg(handle)),
-      mErrorCode(sqlite3_errcode(handle)),
-      mExtendedErrorCode(sqlite3_extended_errcode(handle))
+      mErrorCode(sqlite3_errcode(handle))
 {
 }
 
 database_exception::database_exception(sqlite3* handle, int ret)
-    : std::runtime_error(sqlite3_errmsg(handle)), mErrorCode(ret),
-      mExtendedErrorCode(sqlite3_extended_errcode(handle))
+    : std::runtime_error(sqlite3_errmsg(handle)), mErrorCode(ret)
 {
 }
 
 int database_exception::get_error_code() const noexcept
 {
     return mErrorCode;
-}
-
-int database_exception::get_extendend_error_code() const noexcept
-{
-    return mExtendedErrorCode;
 }
 }
 

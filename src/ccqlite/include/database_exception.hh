@@ -33,6 +33,7 @@ class database_exception : std::runtime_error
 public:
     database_exception() = delete;
     explicit database_exception(const char* errorMessage);
+    explicit database_exception(int ret);
     explicit database_exception(const char* errorMessage, int ret);
     explicit database_exception(const std::string& errorMessage);
     explicit database_exception(const std::string& errorMessage, int ret);
@@ -41,10 +42,8 @@ public:
     ~database_exception() = default;
 
     int get_error_code() const noexcept;
-    int get_extendend_error_code() const noexcept;
 
 private:
     int mErrorCode;
-    int mExtendedErrorCode;
 };
 } // namespace ccqlite
