@@ -24,16 +24,32 @@
 #pragma once
 
 #include <sqlite3.h>
+#include <spdlog/spdlog.h>
+
+#include "database.hh"
 
 namespace ccqlite
 {
-class Backup
+class backup
 {
   public:
-    Backup() = delete;
-    ~Backup();
+    backup() = delete;
+    explicit backup(const backup&) = delete;
+    explicit backup(database& destination,
+        const std::string& destinationName,
+        database& source,
+        const std::string& sourceName);
+    ~backup();
+
+    backup& operator=(const backup&) = delete;
+
+    int execute_step(const int numberPages);
+
+    int get_remaining_page_count();
+    int get_total_page_count();
 
   private:
     sqlite3_backup* pBackupHandle;
+    std::shared_ptr<spdlog::logger> pLogger;
 };
 } // namespace ccqlite
