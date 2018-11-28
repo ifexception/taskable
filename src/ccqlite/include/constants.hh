@@ -32,12 +32,18 @@ static const std::string LoggerName = "ccqlite_logger";
 namespace Info
 {
 static std::string LoggerInitialized = "Logger initialized...";
-}
+} // Info
 
 namespace Error
 {
-static std::string SqliteConnection =
-    "Failed to connect to sqlite3 instance: {0}";
 static std::string SqliteError = "Error was: {0}";
-}
-}
+
+static std::string SqliteConnection =
+    "Failed to connect to sqlite instance: {0}";
+
+static std::string BackupFailedToInit =
+    "Error initializing sqlite backup object";
+
+static std::string UnableToBackupPage = "Error while backing up"
+} // namespace Error
+} // namespace ccqlite::Constants
