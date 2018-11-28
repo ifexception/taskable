@@ -8,13 +8,17 @@ find_package (spdlog CONFIG REQUIRED)
 message (STATUS "sqlite3 found: ${sqlite3_FOUND}")
 message (STATUS "spdlog found: ${spdlog_FOUND}")
 
-set (HEADER "include/database.hh"
+set (HEADER "include/constants.hh"
+    "include/database.hh"
     "include/permission.hh"
-    "include/database_exception.hh")
+    "include/database_exception.hh"
+    "include/backup.hh")
 
-set (SRC "src/database.cc"
+set (SRC "src/constants.cc"
+    "src/database.cc"
     "src/permission.cc"
-    "src/database_exception.cc")
+    "src/database_exception.cc"
+    "src/backup.cc")
 
 set(CMAKE_DEBUG_POSTFIX d)
 
