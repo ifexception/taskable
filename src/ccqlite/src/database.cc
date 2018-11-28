@@ -77,6 +77,11 @@ database& database::operator=(database&& other)
     return *this;
 }
 
+sqlite3* database::get_handle() const
+{
+    return pHandle;
+}
+
 const std::string database::get_lib_version()
 {
     const char* libVersion = sqlite3_libversion();
