@@ -12,13 +12,17 @@ set (HEADER "include/constants.hh"
     "include/database.hh"
     "include/permission.hh"
     "include/database_exception.hh"
-    "include/backup.hh")
+    "include/backup.hh"
+    "include/value_type.hh"
+    "include/value.hh")
 
 set (SRC "src/constants.cc"
     "src/database.cc"
     "src/permission.cc"
     "src/database_exception.cc"
-    "src/backup.cc")
+    "src/backup.cc"
+    "src/value_type.cc"
+    "src/value.cc")
 
 set(CMAKE_DEBUG_POSTFIX d)
 
