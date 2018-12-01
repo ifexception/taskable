@@ -27,11 +27,12 @@
 
 #include <sqlite3.h>
 
+#include "ccqliteapi.hh"
 #include "value_type.hh"
 
 namespace ccqlite
 {
-class value
+class CCQLITE_API value
 {
   public:
     value() = delete;

@@ -24,13 +24,16 @@
 #pragma once
 
 #include <sqlite3.h>
+
+#define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
+#include "ccqliteapi.hh"
 #include "database.hh"
 
 namespace ccqlite
 {
-class backup
+class CCQLITE_API backup
 {
   public:
     backup() = delete;
@@ -50,6 +53,8 @@ class backup
 
   private:
     sqlite3_backup* pBackupHandle;
+
+#pragma warning(suppress : 4251) // pLogger is not exportable
     std::shared_ptr<spdlog::logger> pLogger;
 };
 } // namespace ccqlite

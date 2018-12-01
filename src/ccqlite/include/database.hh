@@ -60,6 +60,8 @@ class CCQLITE_API database
     void close_handle();
 
     sqlite3* pHandle;
+
+#pragma warning(suppress : 4251) // pLogger is not exportable
     std::shared_ptr<spdlog::logger> pLogger;
 };
 } // namespace ccqlite

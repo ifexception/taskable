@@ -43,7 +43,6 @@ backup::backup(database& destination,
 
     if (!pBackupHandle) {
         pLogger->error(Constants::Error::BackupFailedToInit);
-        pLogger->error(Constants::Error::SqliteError.c_str(), ret);
 
         throw database_exception(destination.get_handle());
     }

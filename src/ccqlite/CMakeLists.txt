@@ -33,6 +33,10 @@ message (STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 target_compile_definitions (${PROJECT_NAME} PUBLIC CCQLITE_EXPORTS)
 
+target_compile_options(${PROJECT_NAME} PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:/W3 /permissive- /TP /MD>
+    $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra>)
+
 target_include_directories (${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)

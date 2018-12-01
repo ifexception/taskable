@@ -23,14 +23,14 @@
 
 #pragma once
 
-#include <stdexcept>
 #include <sqlite3.h>
+#include <stdexcept>
 
 namespace ccqlite
 {
 class database_exception : std::runtime_error
 {
-public:
+  public:
     database_exception() = delete;
     explicit database_exception(const char* errorMessage);
     explicit database_exception(int ret);
@@ -43,7 +43,7 @@ public:
 
     int get_error_code() const noexcept;
 
-private:
+  private:
     int mErrorCode;
 };
 } // namespace ccqlite

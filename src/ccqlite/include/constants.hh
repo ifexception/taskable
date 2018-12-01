@@ -44,6 +44,6 @@ static std::string SqliteConnection =
 static std::string BackupFailedToInit =
     "Error initializing sqlite backup object";
 
-static std::string UnableToBackupPage = "Error while backing up"
+static std::string UnableToBackupPage = "Error while backing up";
 } // namespace Error
 } // namespace ccqlite::Constants
