@@ -1,7 +1,7 @@
 //  TimesheetsTracker is a desktop that aids you in tracking your timesheets
 //  and seeing what work you have done.
 //
-//  Copyright(C)<2018><Szymon Welgus>
+//  Copyright(C) <2018> <Szymon Welgus>
 //
 //  This program is free software : you can redistribute it and /
 //  or modify it under the terms of the GNU General Public License as published
@@ -21,17 +21,21 @@
 //  Contact:
 //    szymonwelgus at gmail dot com
 
-#include "app.hh"
-#include "frame/main_frame.hh"
+#pragma once
 
-namespace app
-{
-bool app::OnInit()
-{
-    frame::main_frame* mf = new frame::main_frame();
-    mf->Show(true);
-    return true;
-}
-}
+#include <wx/wx.h>
 
-wxIMPLEMENT_APP(app::app);
+namespace app::frame
+{
+class main_frame : public wxFrame
+{
+  public:
+    main_frame();
+    main_frame(const main_frame&) = delete;
+    ~main_frame();
+
+    main_frame& operator=(const main_frame&) = delete;
+
+  private:
+};
+} // namespace app::frame

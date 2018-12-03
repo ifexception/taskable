@@ -21,17 +21,16 @@
 //  Contact:
 //    szymonwelgus at gmail dot com
 
-#include "app.hh"
-#include "frame/main_frame.hh"
+#pragma once
+
+#include <wx/wx.h>
+#include <ccqlite.hh>
 
 namespace app
 {
-bool app::OnInit()
+class app : public wxApp
 {
-    frame::main_frame* mf = new frame::main_frame();
-    mf->Show(true);
-    return true;
-}
-}
-
-wxIMPLEMENT_APP(app::app);
+  public:
+    bool OnInit() override;
+};
+} // namespace app

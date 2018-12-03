@@ -21,17 +21,35 @@
 //  Contact:
 //    szymonwelgus at gmail dot com
 
-#include "app.hh"
-#include "frame/main_frame.hh"
+#include "main_frame.hh"
 
-namespace app
+namespace app::frame
 {
-bool app::OnInit()
+main_frame::main_frame()
+    : wxFrame(nullptr, wxID_ANY, "Timesheets Tracker")
 {
-    frame::main_frame* mf = new frame::main_frame();
-    mf->Show(true);
-    return true;
+    wxMenu* fileMenu = new wxMenu();
+    fileMenu->Append(wxID_EXIT);
+
+    wxMenu* helpMenu = new wxMenu();
+    helpMenu->Append(wxID_ABOUT);
+
+    wxMenuBar* menuBar = new wxMenuBar();
+    menuBar->Append(fileMenu, "&File");
+    menuBar->Append(helpMenu, "&Help");
+
+    SetMenuBar(menuBar);
+
+    Bind(wxEVT_MENU,
+         [=](wxCommandEvent&) {
+             wxMessageBox("About Timesheets Tracker",
+                          "About Timesheets Tracker", wxOK | wxICON_INFORMATION);
+         },
+         wxID_ABOUT);
+    Bind(wxEVT_MENU, [=](wxCommandEvent&) { Close(true); }, wxID_EXIT);
+}
+
+main_frame::~main_frame()
+{
 }
 }
-
-wxIMPLEMENT_APP(app::app);
