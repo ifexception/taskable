@@ -1,7 +1,7 @@
 //  TimesheetsTracker is a desktop that aids you in tracking your timesheets
 //  and seeing what work you have done.
 //
-//  Copyright(C)<2018><Szymon Welgus>
+//  Copyright(C) <2018> <Szymon Welgus>
 //
 //  This program is free software : you can redistribute it and /
 //  or modify it under the terms of the GNU General Public License as published
@@ -16,12 +16,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//
-//
-//  Contact:
-//    szymonwelgus at gmail dot com
 
 #include "main_frame.hh"
+
+#include "menu_ids.hh"
 
 namespace app::frame
 {
@@ -29,6 +27,10 @@ main_frame::main_frame()
     : wxFrame(nullptr, wxID_ANY, "Timesheets Tracker")
 {
     wxMenu* fileMenu = new wxMenu();
+    const int newEntryId = static_cast<int>(MenuIds::NewEntryId);
+    fileMenu->Append(newEntryId, "&New Entry...\tCtrl-N",
+        "Create new timesheet entry");
+    fileMenu->AppendSeparator();
     fileMenu->Append(wxID_EXIT);
 
     wxMenu* helpMenu = new wxMenu();

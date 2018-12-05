@@ -24,13 +24,14 @@
 #pragma once
 
 #include <wx/wx.h>
-#include <ccqlite.hh>
 
 namespace app
 {
 class app : public wxApp
 {
   public:
+    app() = default;
+    ~app();
     bool OnInit() override;
 };
 } // namespace app
