@@ -35,6 +35,7 @@ enum class value_type : int
     Float = SQLITE_FLOAT,
     Text = SQLITE_TEXT,
     Blob = SQLITE_BLOB,
-    Null = SQLITE_NULL
+    Null = SQLITE_NULL,
+    Unknown = 6
 };
 }
