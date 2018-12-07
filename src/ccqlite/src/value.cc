@@ -1,7 +1,7 @@
 //  TimesheetsTracker is a desktop that aids you in tracking your timesheets
 //  and seeing what work you have done.
 //
-//  Copyright(C)<2018><Szymon Welgus>
+//  Copyright(C) <2018> <Szymon Welgus>
 //
 //  This program is free software : you can redistribute it and /
 //  or modify it under the terms of the GNU General Public License as published
@@ -17,9 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
-//
-//  Contact:
-//    szymonwelgus at gmail dot com
+
 
 #include "value.hh"
 
