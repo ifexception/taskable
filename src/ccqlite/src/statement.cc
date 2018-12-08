@@ -48,6 +48,9 @@ statement::statement(const database& db, const std::string& query)
         nullptr);
 
     if (ret != SQLITE_OK) {
+        pLogger->error(Constants::Error::StatementInitialization);
+        pLogger->error(Constants::Error::SqliteError.c_str(), ret);
+
         throw database_exception(db.get_handle(), ret);
     }
 
@@ -195,6 +198,9 @@ bool statement::run()
 
     if ((ret != SQLITE_ROW) && (ret != SQLITE_DONE))
     {
+        pLogger->error(Constants::Error::StatementExecution.c_str(), mQuery);
+        pLogger->error(Constants::Error::SqliteError.c_str(), ret);
+
         throw database_exception(ret);
     }
 

@@ -34,14 +34,20 @@ static std::string LoggerInitialized = "Logger initialized...";
 
 namespace Error
 {
-static std::string SqliteError = "Error was: {0}";
+static std::string SqliteError = "Error sqlite code: {0}";
 
 static std::string SqliteConnection =
     "Failed to connect to sqlite instance: {0}";
 
-static std::string BackupFailedToInit =
-    "Error initializing sqlite backup object";
+static std::string BackupInitialization =
+    "Error initializing sqlite backup handle";
 
 static std::string UnableToBackupPage = "Error while backing up";
+
+static std::string StatementInitialization =
+    "Error initializing sqlite statement handle";
+
+static std::string StatementExecution =
+    "Error while executing query: {0}";
 } // namespace Error
 } // namespace ccqlite::Constants
