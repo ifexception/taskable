@@ -33,13 +33,19 @@
 namespace ccqlite
 {
 statement::statement(const database& db, const std::string& query)
-    : pStatement(nullptr), mColumnCount(0), mQuery(query), bHasRow(false),
-      bIsDone(false)
+    : pStatement(nullptr)
+    , mColumnCount(0)
+    , mQuery(query)
+    , bHasRow(false)
+    , bIsDone(false)
 {
     pLogger = spdlog::get(Constants::LoggerName);
 
-    const int ret = sqlite3_prepare_v2(db.get_handle(), mQuery.c_str(),
-                                       mQuery.size(), &pStatement, nullptr);
+    const int ret = sqlite3_prepare_v2(db.get_handle(),
+        mQuery.c_str(),
+        mQuery.size(),
+        &pStatement,
+        nullptr);
 
     if (ret != SQLITE_OK) {
         throw database_exception(db.get_handle(), ret);
