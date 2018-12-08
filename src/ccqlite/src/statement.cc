@@ -26,25 +26,20 @@
 #include <sqlite3.h>
 
 #include "constants.hh"
+#include "copy_semantic.hh"
 #include "database.hh"
 #include "database_exception.hh"
 
 namespace ccqlite
 {
 statement::statement(const database& db, const std::string& query)
-    : pStatement(nullptr)
-    , mColumnCount(0)
-    , mQuery(query)
-    , bHasRow(false)
-    , bIsDone(false)
+    : pStatement(nullptr), mColumnCount(0), mQuery(query), bHasRow(false),
+      bIsDone(false)
 {
     pLogger = spdlog::get(Constants::LoggerName);
 
-    const int ret = sqlite3_prepare_v2(db.get_handle(),
-        mQuery.c_str(),
-        mQuery.size(),
-        &pStatement,
-        nullptr);
+    const int ret = sqlite3_prepare_v2(db.get_handle(), mQuery.c_str(),
+                                       mQuery.size(), &pStatement, nullptr);
 
     if (ret != SQLITE_OK) {
         throw database_exception(db.get_handle(), ret);
@@ -68,38 +63,74 @@ void statement::reset()
 
 void statement::clear()
 {
+    const int ret = sqlite3_clear_bindings(pStatement);
+    check(ret);
 }
 
 void statement::bind(const int index, const int value)
 {
+    const int ret = sqlite3_bind_int(pStatement, index, value);
+    check(ret);
 }
 
 void statement::bind(const int index, const unsigned int value)
 {
+    const int ret = sqlite3_bind_int64(pStatement, index, value);
+    check(ret);
 }
 
 void statement::bind(const int index, const long value)
 {
+    const int ret = sqlite3_bind_int64(pStatement, index, value);
+    check(ret);
 }
 
 void statement::bind(const int index, const long long value)
 {
+    const int ret = sqlite3_bind_int64(pStatement, index, value);
+    check(ret);
 }
 
 void statement::bind(const int index, const double value)
 {
+    const int ret = sqlite3_bind_double(pStatement, index, value);
+    check(ret);
 }
 
-void statement::bind(const int index, const std::string& value)
+void statement::bind(const int index, const std::string& value,
+    copy_semantic copy)
 {
+    int ret;
+    if (copy == copy_semantic::Copy) {
+        ret = sqlite3_bind_text(pStatement, index, value.c_str(), value.size(),
+            SQLITE_TRANSIENT);
+    } else {
+        ret = sqlite3_bind_text(pStatement, index, value.c_str(), value.size(),
+            SQLITE_STATIC);
+    }
+
+    check(ret);
 }
 
-void statement::bind(const int index, const void* value, int size)
+void statement::bind(const int index, const void* value, int size,
+    copy_semantic copy)
 {
+    int ret;
+    if (copy == copy_semantic::Copy) {
+        ret = sqlite3_bind_blob(pStatement, index, value, size,
+            SQLITE_TRANSIENT);
+    } else {
+        ret = sqlite3_bind_blob(pStatement, index, value, size,
+            SQLITE_STATIC);
+    }
+
+    check(ret);
 }
 
-void statement::bind(const int index)
+void statement::bind(const int index, const void* null = nullptr)
 {
+    const int ret = sqlite3_bind_null(pStatement, index);
+    check(ret);
 }
 
 void statement::bind(const std::string& name, const int value)
@@ -122,11 +153,13 @@ void statement::bind(const std::string& name, const double value)
 {
 }
 
-void statement::bind(const std::string& name, const std::string& value)
+void statement::bind(const std::string& name, const std::string& value,
+    copy_semantic copy)
 {
 }
 
-void statement::bind(const std::string& name, const void* value, int size)
+void statement::bind(const std::string& name, const void* value, int size,
+    copy_semantic copy)
 {
 }
 
