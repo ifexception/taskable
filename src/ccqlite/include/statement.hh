@@ -25,6 +25,7 @@
 namespace spdlog
 {
 class spdlog;
+class logger;
 }
 
 struct sqlite3_stmt;
@@ -65,17 +66,18 @@ class statement
         copy_semantic copy);
     void bind(const std::string& name, const void* value, int size,
         copy_semantic copy);
-    void bind(const std::string& name);
+    void bind(const std::string& name, const void* null);
+
+    bool run();
 
     bool has_row() const;
     bool is_done() const;
-    bool is_value_null(const int index) const;
-    bool is_value_null(const std::string& name) const;
 
   private:
     void check(const int returnCode);
     void check_row() const;
-    void check_index() const;
+    void check_index(const int index) const;
+    int step();
 
     sqlite3_stmt* pStatement;
 #pragma warning(suppress : 4251) // pLogger is not exportable

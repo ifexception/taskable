@@ -141,56 +141,74 @@ void statement::bind(const int index, const void* null = nullptr)
 
 void statement::bind(const std::string& name, const int value)
 {
+    int index = sqlite3_bind_parameter_index(pStatement, name.c_str());
+    bind(index, value);
 }
 
 void statement::bind(const std::string& name, const unsigned int value)
 {
+    int index = sqlite3_bind_parameter_index(pStatement, name.c_str());
+    bind(index, value);
 }
 
 void statement::bind(const std::string& name, const long value)
 {
+    int index = sqlite3_bind_parameter_index(pStatement, name.c_str());
+    bind(index, value);
 }
 
 void statement::bind(const std::string& name, const long long value)
 {
+    int index = sqlite3_bind_parameter_index(pStatement, name.c_str());
+    bind(index, value);
 }
 
 void statement::bind(const std::string& name, const double value)
 {
+    int index = sqlite3_bind_parameter_index(pStatement, name.c_str());
+    bind(index, value);
 }
 
 void statement::bind(const std::string& name, const std::string& value,
     copy_semantic copy)
 {
+    int index = sqlite3_bind_parameter_index(pStatement, name.c_str());
+    bind(index, value, copy);
 }
 
 void statement::bind(const std::string& name, const void* value, int size,
     copy_semantic copy)
 {
+    int index = sqlite3_bind_parameter_index(pStatement, name.c_str());
+    bind(index, value, size, copy);
 }
 
-void statement::bind(const std::string& name)
+void statement::bind(const std::string& name, const void* null = nullptr)
 {
+    int index = sqlite3_bind_parameter_index(pStatement, name.c_str());
+    bind(index);
+}
+
+bool statement::run()
+{
+    const int ret = step();
+
+    if ((ret != SQLITE_ROW) && (ret != SQLITE_DONE))
+    {
+        throw database_exception(ret);
+    }
+
+    return has_row();
 }
 
 bool statement::has_row() const
 {
-    return false;
+    return bHasRow;
 }
 
 bool statement::is_done() const
 {
-    return false;
-}
-
-bool statement::is_value_null(const int index) const
-{
-    return false;
-}
-
-bool statement::is_value_null(const std::string& name) const
-{
-    return false;
+    return bIsDone;
 }
 
 void statement::check(const int returnCode)
@@ -202,10 +220,46 @@ void statement::check(const int returnCode)
 
 void statement::check_row() const
 {
+    if (bHasRow == false)
+    {
+        throw database_exception("No row to get a column from. run() was not called, or returned false.");
+    }
 }
 
-void statement::check_index() const
+void statement::check_index(const int index) const
 {
+    if ((index < 0) || (index >= mColumnCount))
+    {
+        throw database_exception("Column index out of range");
+    }
+}
+
+int statement::step()
+{
+    if (bIsDone == false)
+    {
+        const int ret = sqlite3_step(pStatement);
+        if (ret == SQLITE_ROW)
+        {
+            bHasRow = true;
+        }
+        else if (ret == SQLITE_DONE)
+        {
+            bHasRow = false;
+            bIsDone = true;
+        }
+        else
+        {
+            bHasRow = false;
+            bIsDone = false;
+        }
+
+        return ret;
+    }
+    else
+    {
+        return SQLITE_MISUSE;
+    }
 }
 
 } // namespace ccqlite
