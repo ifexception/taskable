@@ -18,5 +18,155 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-
 #include "statement.hh"
+
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
+
+#include <sqlite3.h>
+
+#include "constants.hh"
+#include "database.hh"
+#include "database_exception.hh"
+
+namespace ccqlite
+{
+statement::statement(const database& db, const std::string& query)
+    : pStatement(nullptr)
+    , mColumnCount(0)
+    , mQuery(query)
+    , bHasRow(false)
+    , bIsDone(false)
+{
+    pLogger = spdlog::get(Constants::LoggerName);
+
+    const int ret = sqlite3_prepare_v2(db.get_handle(),
+        mQuery.c_str(),
+        mQuery.size(),
+        &pStatement,
+        nullptr);
+
+    if (ret != SQLITE_OK) {
+        throw database_exception(db.get_handle(), ret);
+    }
+
+    mColumnCount = sqlite3_column_count(pStatement);
+}
+
+statement::~statement()
+{
+    sqlite3_finalize(pStatement);
+}
+
+void statement::reset()
+{
+    bHasRow = false;
+    bIsDone = false;
+    const int ret = sqlite3_reset(pStatement);
+    check(ret);
+}
+
+void statement::clear()
+{
+}
+
+void statement::bind(const int index, const int value)
+{
+}
+
+void statement::bind(const int index, const unsigned int value)
+{
+}
+
+void statement::bind(const int index, const long value)
+{
+}
+
+void statement::bind(const int index, const long long value)
+{
+}
+
+void statement::bind(const int index, const double value)
+{
+}
+
+void statement::bind(const int index, const std::string& value)
+{
+}
+
+void statement::bind(const int index, const void* value, int size)
+{
+}
+
+void statement::bind(const int index)
+{
+}
+
+void statement::bind(const std::string& name, const int value)
+{
+}
+
+void statement::bind(const std::string& name, const unsigned int value)
+{
+}
+
+void statement::bind(const std::string& name, const long value)
+{
+}
+
+void statement::bind(const std::string& name, const long long value)
+{
+}
+
+void statement::bind(const std::string& name, const double value)
+{
+}
+
+void statement::bind(const std::string& name, const std::string& value)
+{
+}
+
+void statement::bind(const std::string& name, const void* value, int size)
+{
+}
+
+void statement::bind(const std::string& name)
+{
+}
+
+bool statement::has_row() const
+{
+    return false;
+}
+
+bool statement::is_done() const
+{
+    return false;
+}
+
+bool statement::is_value_null(const int index) const
+{
+    return false;
+}
+
+bool statement::is_value_null(const std::string& name) const
+{
+    return false;
+}
+
+void statement::check(const int returnCode)
+{
+    if (returnCode != SQLITE_OK) {
+        throw database_exception(returnCode);
+    }
+}
+
+void statement::check_row() const
+{
+}
+
+void statement::check_index() const
+{
+}
+
+} // namespace ccqlite

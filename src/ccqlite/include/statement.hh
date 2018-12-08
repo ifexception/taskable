@@ -18,5 +18,69 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-
 #pragma once
+
+#include <string>
+
+namespace spdlog
+{
+class spdlog;
+}
+
+struct sqlite3_stmt;
+
+namespace ccqlite
+{
+class database;
+
+class statement
+{
+  public:
+    statement() = delete;
+    statement(const statement&) = delete;
+    explicit statement(const database& db, const std::string& query);
+    ~statement();
+
+    statement& operator=(const statement&) = delete;
+
+    void reset();
+    void clear();
+
+    void bind(const int index, const int value);
+    void bind(const int index, const unsigned int value);
+    void bind(const int index, const long value);
+    void bind(const int index, const long long value);
+    void bind(const int index, const double value);
+    void bind(const int index, const std::string& value);
+    void bind(const int index, const void* value, int size);
+    void bind(const int index);
+
+    void bind(const std::string& name, const int value);
+    void bind(const std::string& name, const unsigned int value);
+    void bind(const std::string& name, const long value);
+    void bind(const std::string& name, const long long value);
+    void bind(const std::string& name, const double value);
+    void bind(const std::string& name, const std::string& value);
+    void bind(const std::string& name, const void* value, int size);
+    void bind(const std::string& name);
+
+    bool has_row() const;
+    bool is_done() const;
+    bool is_value_null(const int index) const;
+    bool is_value_null(const std::string& name) const;
+
+  private:
+    void check(const int returnCode);
+    void check_row() const;
+    void check_index() const;
+
+    sqlite3_stmt* pStatement;
+#pragma warning(suppress : 4251) // pLogger is not exportable
+    std::shared_ptr<spdlog::logger> pLogger;
+
+    int mColumnCount;
+    std::string mQuery;
+    bool bHasRow;
+    bool bIsDone;
+};
+} // namespace ccqlite
