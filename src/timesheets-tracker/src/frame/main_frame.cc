@@ -26,8 +26,9 @@ namespace app::frame
 main_frame::main_frame()
     : wxFrame(nullptr, wxID_ANY, "Timesheets Tracker")
 {
-    wxMenu* fileMenu = new wxMenu();
     const int newEntryId = static_cast<int>(MenuIds::NewEntryId);
+
+    wxMenu* fileMenu = new wxMenu();
     fileMenu->Append(newEntryId, "&New Entry...\tCtrl-N",
         "Create new timesheet entry");
     fileMenu->AppendSeparator();
