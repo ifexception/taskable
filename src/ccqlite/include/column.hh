@@ -30,15 +30,15 @@
 
 namespace ccqlite
 {
-class CCQLITE_API value
+class CCQLITE_API column
 {
   public:
-    value() = delete;
-    explicit value(const value& other);
-    explicit value(sqlite3_stmt* handle, const int index);
-    ~value() = default;
+    column() = delete;
+    explicit column(const column& other);
+    explicit column(sqlite3_stmt* handle, const int index);
+    ~column() = default;
 
-    value& operator=(const value& other);
+    column& operator=(const column& other);
 
     const std::string get_name() const noexcept;
 #ifdef SQLITE_ENABLE_COLUMN_METADATA

@@ -19,22 +19,22 @@
 //
 
 
-#include "value.hh"
+#include "column.hh"
 
 namespace ccqlite
 {
-value::value(const value& other)
+column::column(const column& other)
 {
     pHandle = other.pHandle;
     mIndex = other.mIndex;
 }
 
-value::value(sqlite3_stmt* handle, const int index)
+column::column(sqlite3_stmt* handle, const int index)
     : pHandle(handle)
     , mIndex(index)
 {}
 
-value& value::operator=(const value& other)
+column& column::operator=(const column& other)
 {
     if (this != &other) {
         pHandle = nullptr;
@@ -46,14 +46,14 @@ value& value::operator=(const value& other)
 
     return *this;
 }
-const std::string value::get_name() const noexcept
+const std::string column::get_name() const noexcept
 {
     std::string name(sqlite3_column_name(pHandle, mIndex));
     return name;
 }
 
 #ifdef SQLITE_ENABLE_COLUMN_METADATA
-const std::string value::get_origin_name() const noexcept
+const std::string column::get_origin_name() const noexcept
 {
     std::string name(sqlite3_column_origin_name(pHandle, mIndex));
     return name;
@@ -61,46 +61,46 @@ const std::string value::get_origin_name() const noexcept
 #endif // SQLITE_ENABLE_COLUMN_METADATA
 
 
-int value::get_int() const noexcept
+int column::get_int() const noexcept
 {
     return sqlite3_column_int(pHandle, mIndex);
 }
 
-unsigned int value::get_uint() const noexcept
+unsigned int column::get_uint() const noexcept
 {
     return static_cast<unsigned>(get_int64());
 }
 
-long long value::get_int64() const noexcept
+long long column::get_int64() const noexcept
 {
     return sqlite3_column_int64(pHandle, mIndex);
 }
 
-double value::get_double() const noexcept
+double column::get_double() const noexcept
 {
     return sqlite3_column_double(pHandle, mIndex);
 }
 
-std::string value::get_text() const noexcept
+std::string column::get_text() const noexcept
 {
     const unsigned char* text = sqlite3_column_text(pHandle, mIndex);
     const char* ctext = reinterpret_cast<const char*>(text);
     return std::string(ctext);
 }
 
-const void* value::get_blob() const noexcept
+const void* column::get_blob() const noexcept
 {
     return sqlite3_column_blob(pHandle, mIndex);
 }
 
-std::string value::get_string() const noexcept
+std::string column::get_string() const noexcept
 {
     const void* blob = sqlite3_column_blob(pHandle, mIndex);
     const char* data = static_cast<const char*>(blob);
     return std::string(data, sqlite3_column_bytes(pHandle, mIndex));
 }
 
-value_type value::get_type() const noexcept
+value_type column::get_type() const noexcept
 {
     int valueType = sqlite3_column_type(pHandle, mIndex);
     switch (valueType) {

@@ -14,7 +14,8 @@ set (HEADER "include/constants.hh"
     "include/database_exception.hh"
     "include/backup.hh"
     "include/value_type.hh"
-    "include/value.hh"
+    "include/column.hh"
+    "include/copy_semantic.hh"
     "include/statement.hh")
 
 set (SRC "src/constants.cc"
@@ -23,7 +24,8 @@ set (SRC "src/constants.cc"
     "src/database_exception.cc"
     "src/backup.cc"
     "src/value_type.cc"
-    "src/value.cc"
+    "src/column.cc"
+    "src/copy_semantic.cc"
     "src/statement.cc")
 
 set(CMAKE_DEBUG_POSTFIX d)
