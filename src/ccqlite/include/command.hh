@@ -19,3 +19,24 @@
 //
 
 #pragma once
+
+#include "ccqliteapi.hh"
+#include "statement.hh"
+
+namespace ccqlite
+{
+class database;
+
+class command : public statement
+{
+  public:
+    command() = delete;
+    command(const command&) = delete;
+    explicit command(database& db, const std::string& query);
+    virtual ~command() = default;
+
+    command& operator=(const command&) = delete;
+
+  private:
+};
+} // namespace ccqlite

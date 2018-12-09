@@ -19,3 +19,8 @@
 //
 
 #include "command.hh"
+
+namespace ccqlite
+{
+
+}
