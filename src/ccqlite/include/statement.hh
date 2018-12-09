@@ -41,7 +41,7 @@ class statement
     statement() = delete;
     statement(const statement&) = delete;
     explicit statement(const database& db, const std::string& query);
-    ~statement();
+    virtual ~statement();
 
     statement& operator=(const statement&) = delete;
 
