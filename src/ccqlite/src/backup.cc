@@ -40,7 +40,7 @@ backup::backup(database& destination,
         sourceName.c_str());
 
     if (!pBackupHandle) {
-        pLogger->error(Constants::Error::BackupFailedToInit);
+        pLogger->error(Constants::Error::BackupInitialization);
 
         throw database_exception(destination.get_handle());
     }

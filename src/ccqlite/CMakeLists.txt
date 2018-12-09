@@ -16,7 +16,8 @@ set (HEADER "include/constants.hh"
     "include/value_type.hh"
     "include/column.hh"
     "include/copy_semantic.hh"
-    "include/statement.hh")
+    "include/statement.hh"
+    "include/command.hh")
 
 set (SRC "src/constants.cc"
     "src/database.cc"
@@ -26,7 +27,8 @@ set (SRC "src/constants.cc"
     "src/value_type.cc"
     "src/column.cc"
     "src/copy_semantic.cc"
-    "src/statement.cc")
+    "src/statement.cc"
+    "src/command.cc")
 
 set(CMAKE_DEBUG_POSTFIX d)
 
