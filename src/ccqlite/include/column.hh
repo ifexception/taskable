@@ -44,8 +44,11 @@ class CCQLITE_API column
     template <class T>
     T get(int index) const;
 
-    template <class... Args>
-    std::tuple<Args...> get_columns(int indexes) const;
+    template <class ...Types, int N = 0>
+    std::tuple<Types...> get();
+
+    template <class... Types, const int ...Integers>
+    std::tuple<Types...> get_columns(const std::integer_sequence<int, Integers...> ) const;
 
     const std::string get_name(int index) const noexcept;
     column_type get_type(int index) const noexcept;
@@ -66,10 +69,16 @@ T column::get(int index) const
     return get(index, T());
 }
 
-template <class... Args>
-std::tuple<Args...> column::get_columns(int indexes) const
+template <class... Types, int N = 0>
+std::tuple<Types...> column::get()
 {
-    return std::make_tuple(get(indexes++, Args())...);
+    return get_columns(std::make_integer_sequence<int, N>{});
+}
+
+template <class... Types, const int... Integers>
+std::tuple<Types...> column::get_columns(const std::integer_sequence<int, Integers...>) const
+{
+    return std::make_tuple(get(Integers, Types())...);
 }
 
 } // namespace ccqlite
