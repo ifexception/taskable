@@ -22,5 +22,7 @@
 
 namespace ccqlite
 {
-
+command::command(database& db, const std::string& query)
+    : statement(db, query)
+{}
 }

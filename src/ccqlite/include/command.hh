@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "ccqliteapi.hh"
 #include "statement.hh"
 
@@ -37,6 +39,22 @@ class command : public statement
 
     command& operator=(const command&) = delete;
 
-  private:
+    template<class T>
+    void bind(int index, T type);
+
+    template<class T, class... Args>
+    void bind(int index, T type, Args... args);
 };
+
+template<class T>
+void command::bind(int index, T type)
+{
+    bind(index, type);
+}
+
+template <class T, class... Args>
+void command::bind(int index, T type, Args... args)
+{
+    bind(index, type, args...);
+}
 } // namespace ccqlite
