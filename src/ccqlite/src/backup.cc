@@ -21,9 +21,6 @@
 
 #include "backup.hh"
 
-#define FMT_HEADER_ONLY
-#include <spdlog/spdlog.h>
-
 #include "constants.hh"
 #include "database.hh"
 #include "database_exception.hh"

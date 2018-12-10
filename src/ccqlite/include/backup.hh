@@ -20,13 +20,13 @@
 
 #pragma once
 
+#include <string>
+#include <memory>
+
 #include <sqlite3.h>
 
-namespace spdlog
-{
-class spdlog;
-class logger;
-} // namespace spdlog
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
 
 #include "ccqliteapi.hh"
 
