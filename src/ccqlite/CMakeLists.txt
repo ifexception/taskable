@@ -1,10 +1,11 @@
 cmake_minimum_required (VERSION 3.8)
 project (ccqlite
-    VERSION 0.0.1
+    VERSION 0.1.0
     DESCRIPTION "A simple sqlite wrapper in modern C++")
 
 find_package (sqlite3 REQUIRED)
 find_package (spdlog CONFIG REQUIRED)
+
 message (STATUS "sqlite3 found: ${sqlite3_FOUND}")
 message (STATUS "spdlog found: ${spdlog_FOUND}")
 
@@ -17,7 +18,8 @@ set (HEADER "include/constants.hh"
     "include/column.hh"
     "include/copy_options.hh"
     "include/statement.hh"
-    "include/command.hh")
+    "include/command.hh"
+    "include/query.hh")
 
 set (SRC "src/constants.cc"
     "src/database.cc"
@@ -28,7 +30,8 @@ set (SRC "src/constants.cc"
     "src/column.cc"
     "src/copy_options.cc"
     "src/statement.cc"
-    "src/command.cc")
+    "src/command.cc"
+    "src/query.cc")
 
 set(CMAKE_DEBUG_POSTFIX d)
 
