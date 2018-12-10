@@ -74,14 +74,12 @@ class statement
   private:
     void check(const int returnCode);
     void check_row() const;
-    void check_index(const int index) const;
     int step();
 
     sqlite3_stmt* pStatement;
 #pragma warning(suppress : 4251) // pLogger is not exportable
     std::shared_ptr<spdlog::logger> pLogger;
 
-    int mColumnCount;
     std::string mQuery;
     bool bHasRow;
     bool bIsDone;

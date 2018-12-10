@@ -30,7 +30,6 @@ namespace ccqlite
 {
 statement::statement(const database& db, const std::string& query)
     : pStatement(nullptr)
-    , mColumnCount(0)
     , mQuery(query)
     , bHasRow(false)
     , bIsDone(false)
@@ -49,8 +48,6 @@ statement::statement(const database& db, const std::string& query)
 
         throw database_exception(db.get_handle(), ret);
     }
-
-    mColumnCount = sqlite3_column_count(pStatement);
 }
 
 statement::~statement()
@@ -225,14 +222,6 @@ void statement::check_row() const
     if (bHasRow == false)
     {
         throw database_exception("No row to get a column from. run() was not called, or returned false.");
-    }
-}
-
-void statement::check_index(const int index) const
-{
-    if ((index < 0) || (index >= mColumnCount))
-    {
-        throw database_exception("Column index out of range");
     }
 }
 
