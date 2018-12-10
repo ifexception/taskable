@@ -69,7 +69,7 @@ T column::get(int index) const
     return get(index, T());
 }
 
-template <class... Types, int N = 0>
+template <class... Types, int N>
 std::tuple<Types...> column::get()
 {
     return get_columns(std::make_integer_sequence<int, N>{});
