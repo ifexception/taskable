@@ -20,7 +20,26 @@
 
 #include "query.hh"
 
+#include <sqlite3.h>
+
+#include "database.hh"
+
 namespace ccqlite
 {
+query::query(database& db, const std::string& query)
+    : statement(db, query)
+{
+}
 
+int query::column_count() const
+{
+    const int columnCount = sqlite3_column_count(pStatement);
+    return columnCount;
+}
+
+std::string query::column_name(int index) const
+{
+    const char* name = sqlite3_column_name(pStatement, index);
+    return std::string(name);
+}
 }

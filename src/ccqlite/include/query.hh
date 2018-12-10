@@ -24,6 +24,8 @@
 
 namespace ccqlite
 {
+class database;
+
 class query : public statement
 {
   public:
@@ -33,5 +35,8 @@ class query : public statement
     virtual ~query() = default;
 
     query& operator=(const query&) = delete;
+
+    int column_count() const;
+    std::string column_name(int index) const;
 };
 } // namespace ccqlite

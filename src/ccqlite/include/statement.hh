@@ -61,9 +61,9 @@ class statement
     void bind(const std::string& name, const long long value);
     void bind(const std::string& name, const double value);
     void bind(const std::string& name, const std::string& value,
-              copy_options copy);
+        copy_options copy);
     void bind(const std::string& name, const void* value, int size,
-              copy_options copy);
+        copy_options copy);
     void bind(const std::string& name, const void* null);
 
     bool run();
@@ -71,12 +71,14 @@ class statement
     bool has_row() const;
     bool is_done() const;
 
+  protected:
+    sqlite3_stmt* pStatement;
+
   private:
     void check(const int returnCode);
     void check_row() const;
     int step();
 
-    sqlite3_stmt* pStatement;
 #pragma warning(suppress : 4251) // pLogger is not exportable
     std::shared_ptr<spdlog::logger> pLogger;
 
