@@ -18,4 +18,13 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "copy_semantic.hh"
+#pragma once
+
+namespace ccqlite
+{
+enum class copy_options
+{
+    Copy,
+    NoCopy
+};
+}

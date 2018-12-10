@@ -20,13 +20,9 @@
 
 #include "statement.hh"
 
-#define FMT_HEADER_ONLY
-#include <spdlog/spdlog.h>
-
 #include <sqlite3.h>
 
 #include "constants.hh"
-#include "copy_semantic.hh"
 #include "database.hh"
 #include "database_exception.hh"
 
@@ -107,10 +103,10 @@ void statement::bind(const int index, const double value)
 }
 
 void statement::bind(const int index, const std::string& value,
-    copy_semantic copy)
+    copy_options copy)
 {
     int ret;
-    if (copy == copy_semantic::Copy) {
+    if (copy == copy_options::Copy) {
         ret = sqlite3_bind_text(pStatement, index, value.c_str(), value.size(),
             SQLITE_TRANSIENT);
     } else {
@@ -122,10 +118,10 @@ void statement::bind(const int index, const std::string& value,
 }
 
 void statement::bind(const int index, const void* value, int size,
-    copy_semantic copy)
+    copy_options copy)
 {
     int ret;
-    if (copy == copy_semantic::Copy) {
+    if (copy == copy_options::Copy) {
         ret = sqlite3_bind_blob(pStatement, index, value, size,
             SQLITE_TRANSIENT);
     } else {
@@ -173,14 +169,14 @@ void statement::bind(const std::string& name, const double value)
 }
 
 void statement::bind(const std::string& name, const std::string& value,
-    copy_semantic copy)
+    copy_options copy)
 {
     int index = sqlite3_bind_parameter_index(pStatement, name.c_str());
     bind(index, value, copy);
 }
 
 void statement::bind(const std::string& name, const void* value, int size,
-    copy_semantic copy)
+    copy_options copy)
 {
     int index = sqlite3_bind_parameter_index(pStatement, name.c_str());
     bind(index, value, size, copy);

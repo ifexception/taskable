@@ -22,18 +22,16 @@
 
 #include <string>
 
-namespace spdlog
-{
-class spdlog;
-class logger;
-}
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
+
+#include "copy_options.hh"
 
 struct sqlite3_stmt;
 
 namespace ccqlite
 {
 class database;
-enum class copy_semantic;
 
 class statement
 {
@@ -53,8 +51,8 @@ class statement
     void bind(const int index, const long value);
     void bind(const int index, const long long value);
     void bind(const int index, const double value);
-    void bind(const int index, const std::string& value, copy_semantic copy);
-    void bind(const int index, const void* value, int size, copy_semantic copy);
+    void bind(const int index, const std::string& value, copy_options copy);
+    void bind(const int index, const void* value, int size, copy_options copy);
     void bind(const int index, const void* null);
 
     void bind(const std::string& name, const int value);
@@ -63,9 +61,9 @@ class statement
     void bind(const std::string& name, const long long value);
     void bind(const std::string& name, const double value);
     void bind(const std::string& name, const std::string& value,
-        copy_semantic copy);
+              copy_options copy);
     void bind(const std::string& name, const void* value, int size,
-        copy_semantic copy);
+              copy_options copy);
     void bind(const std::string& name, const void* null);
 
     bool run();

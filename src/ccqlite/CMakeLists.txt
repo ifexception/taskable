@@ -15,7 +15,7 @@ set (HEADER "include/constants.hh"
     "include/backup.hh"
     "include/value_type.hh"
     "include/column.hh"
-    "include/copy_semantic.hh"
+    "include/copy_options.hh"
     "include/statement.hh"
     "include/command.hh")
 
@@ -26,7 +26,7 @@ set (SRC "src/constants.cc"
     "src/backup.cc"
     "src/value_type.cc"
     "src/column.cc"
-    "src/copy_semantic.cc"
+    "src/copy_options.cc"
     "src/statement.cc"
     "src/command.cc")
 
@@ -37,7 +37,8 @@ add_library (${PROJECT_NAME} SHARED
 
 message (STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
 
-target_compile_definitions (${PROJECT_NAME} PUBLIC CCQLITE_EXPORTS)
+target_compile_definitions (${PROJECT_NAME} PUBLIC
+    CCQLITE_EXPORTS)
 
 target_compile_options (${PROJECT_NAME} PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W3 /permissive- /TP /MD>
