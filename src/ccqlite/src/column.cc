@@ -30,7 +30,6 @@ column::column(const column& other)
 
 column::column(sqlite3_stmt* handle)
     : pHandle(handle)
-    , mIndex(index)
 {}
 
 column& column::operator=(const column& other)
@@ -49,33 +48,28 @@ const std::string column::get_name(int index) const noexcept
     return name;
 }
 
-value_type column::get_type(int index) const noexcept
+column_type column::get_type(int index) const noexcept
 {
     int valueType = sqlite3_column_type(pHandle, index);
     switch (valueType) {
     case SQLITE_INTEGER:
-        return value_type::Integer;
+        return column_type::Integer;
     case SQLITE_FLOAT:
-        return value_type::Float;
+        return column_type::Float;
     case SQLITE_TEXT:
-        return value_type::Text;
+        return column_type::Text;
     case SQLITE_BLOB:
-        return value_type::Blob;
+        return column_type::Blob;
     case SQLITE_NULL:
-        return value_type::Null;
+        return column_type::Null;
     default:
-        return value_type::Unknown;
+        return column_type::Unknown;
     }
 }
 
 int column::get(int index, int) const noexcept
 {
     return sqlite3_column_int(pHandle, index);
-}
-
-unsigned int column::get(int index, unsigned int) const noexcept
-{
-    return sqlite3_column_int64(pHandle, index);
 }
 
 long long column::get(int index, long long) const noexcept

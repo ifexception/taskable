@@ -19,21 +19,4 @@
 //
 
 
-#pragma once
-
-#include <string>
-
-#include <sqlite3.h>
-
-namespace ccqlite
-{
-enum class value_type : int
-{
-    Integer = SQLITE_INTEGER,
-    Float = SQLITE_FLOAT,
-    Text = SQLITE_TEXT,
-    Blob = SQLITE_BLOB,
-    Null = SQLITE_NULL,
-    Unknown = 6
-};
-}
+#include "column_type.hh"

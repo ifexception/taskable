@@ -27,7 +27,7 @@
 #include <sqlite3.h>
 
 #include "ccqliteapi.hh"
-#include "value_type.hh"
+#include "column_type.hh"
 
 namespace ccqlite
 {
@@ -48,11 +48,10 @@ class CCQLITE_API column
     std::tuple<Args...> get_columns(int indexes) const;
 
     const std::string get_name(int index) const noexcept;
-    value_type get_type(int index) const noexcept;
+    column_type get_type(int index) const noexcept;
 
   private:
     int get(int index, int) const noexcept;
-    unsigned int get(int index, unsigned int) const noexcept;
     long long get(int index, long long) const noexcept;
     double get(int index, double) const noexcept;
     std::string get(int index, std::string) const noexcept;
