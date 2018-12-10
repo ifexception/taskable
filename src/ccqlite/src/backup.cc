@@ -21,7 +21,11 @@
 
 #include "backup.hh"
 
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
+
 #include "constants.hh"
+#include "database.hh"
 #include "database_exception.hh"
 
 namespace ccqlite
@@ -52,7 +56,7 @@ backup::~backup()
     pBackupHandle = nullptr;
 }
 
-int backup::execute_step(const int numberPages = -1)
+void backup::execute_step(const int numberPages = -1)
 {
     const int ret = sqlite3_backup_step(pBackupHandle, numberPages);
     const bool success = ret == SQLITE_OK && ret == SQLITE_DONE &&
@@ -63,13 +67,12 @@ int backup::execute_step(const int numberPages = -1)
 
         throw database_exception(ret);
     }
-
-    return ret;
 }
 
 int backup::get_remaining_page_count()
 {
-    return sqlite3_backup_remaining(pBackupHandle);
+    const int remainingPageCount = sqlite3_backup_remaining(pBackupHandle);
+    return remainingPageCount;
 }
 
 int backup::get_total_page_count()

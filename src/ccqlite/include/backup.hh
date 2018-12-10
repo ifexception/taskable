@@ -18,33 +18,34 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-
 #pragma once
 
 #include <sqlite3.h>
 
-#define FMT_HEADER_ONLY
-#include <spdlog/spdlog.h>
+namespace spdlog
+{
+class spdlog;
+class logger;
+} // namespace spdlog
 
 #include "ccqliteapi.hh"
-#include "database.hh"
 
 namespace ccqlite
 {
+class database;
+
 class CCQLITE_API backup
 {
   public:
     backup() = delete;
     explicit backup(const backup&) = delete;
-    explicit backup(database& destination,
-        const std::string& destinationName,
-        database& source,
-        const std::string& sourceName);
+    explicit backup(database& destination, const std::string& destinationName,
+                    database& source, const std::string& sourceName);
     ~backup();
 
     backup& operator=(const backup&) = delete;
 
-    int execute_step(const int numberPages);
+    void execute_step(const int numberPages);
 
     int get_remaining_page_count();
     int get_total_page_count();
