@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.8)
 project (ccqlite
-    VERSION 0.1.0
+    VERSION 0.4.0
     DESCRIPTION "A simple sqlite wrapper in modern C++")
 
 find_package (sqlite3 REQUIRED)
@@ -19,7 +19,8 @@ set (HEADER "include/constants.hh"
     "include/copy_options.hh"
     "include/statement.hh"
     "include/command.hh"
-    "include/query.hh")
+    "include/query.hh"
+    "include/version.hh")
 
 set (SRC "src/constants.cc"
     "src/database.cc"
