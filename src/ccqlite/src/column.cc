@@ -26,10 +26,9 @@ namespace ccqlite
 column::column(const column& other)
 {
     pHandle = other.pHandle;
-    mIndex = other.mIndex;
 }
 
-column::column(sqlite3_stmt* handle, const int index)
+column::column(sqlite3_stmt* handle)
     : pHandle(handle)
     , mIndex(index)
 {}
@@ -38,71 +37,21 @@ column& column::operator=(const column& other)
 {
     if (this != &other) {
         pHandle = nullptr;
-        mIndex = 0;
 
         pHandle = other.pHandle;
-        mIndex = other.mIndex;
     }
 
     return *this;
 }
-const std::string column::get_name() const noexcept
+const std::string column::get_name(int index) const noexcept
 {
-    std::string name(sqlite3_column_name(pHandle, mIndex));
+    std::string name(sqlite3_column_name(pHandle, index));
     return name;
 }
 
-#ifdef SQLITE_ENABLE_COLUMN_METADATA
-const std::string column::get_origin_name() const noexcept
+value_type column::get_type(int index) const noexcept
 {
-    std::string name(sqlite3_column_origin_name(pHandle, mIndex));
-    return name;
-}
-#endif // SQLITE_ENABLE_COLUMN_METADATA
-
-
-int column::get_int() const noexcept
-{
-    return sqlite3_column_int(pHandle, mIndex);
-}
-
-unsigned int column::get_uint() const noexcept
-{
-    return static_cast<unsigned>(get_int64());
-}
-
-long long column::get_int64() const noexcept
-{
-    return sqlite3_column_int64(pHandle, mIndex);
-}
-
-double column::get_double() const noexcept
-{
-    return sqlite3_column_double(pHandle, mIndex);
-}
-
-std::string column::get_text() const noexcept
-{
-    const unsigned char* text = sqlite3_column_text(pHandle, mIndex);
-    const char* ctext = reinterpret_cast<const char*>(text);
-    return std::string(ctext);
-}
-
-const void* column::get_blob() const noexcept
-{
-    return sqlite3_column_blob(pHandle, mIndex);
-}
-
-std::string column::get_string() const noexcept
-{
-    const void* blob = sqlite3_column_blob(pHandle, mIndex);
-    const char* data = static_cast<const char*>(blob);
-    return std::string(data, sqlite3_column_bytes(pHandle, mIndex));
-}
-
-value_type column::get_type() const noexcept
-{
-    int valueType = sqlite3_column_type(pHandle, mIndex);
+    int valueType = sqlite3_column_type(pHandle, index);
     switch (valueType) {
     case SQLITE_INTEGER:
         return value_type::Integer;
@@ -118,4 +67,37 @@ value_type column::get_type() const noexcept
         return value_type::Unknown;
     }
 }
+
+int column::get(int index, int) const noexcept
+{
+    return sqlite3_column_int(pHandle, index);
+}
+
+unsigned int column::get(int index, unsigned int) const noexcept
+{
+    return sqlite3_column_int64(pHandle, index);
+}
+
+long long column::get(int index, long long) const noexcept
+{
+    return sqlite3_column_int64(pHandle, index);
+}
+
+double column::get(int index, double) const noexcept
+{
+    return sqlite3_column_double(pHandle, index);
+}
+
+std::string column::get(int index, std::string) const noexcept
+{
+    const char* text =
+        reinterpret_cast<const char*>(sqlite3_column_text(pHandle, index));
+    return std::string(text);
+}
+
+const void* column::get(int index, const void*) const noexcept
+{
+    return sqlite3_column_blob(pHandle, index);
+}
+
 }

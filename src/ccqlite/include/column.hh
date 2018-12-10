@@ -22,6 +22,7 @@
 #pragma once
 
 #include <string>
+#include <tuple>
 
 #include <sqlite3.h>
 
@@ -35,28 +36,41 @@ class CCQLITE_API column
   public:
     column() = delete;
     explicit column(const column& other);
-    explicit column(sqlite3_stmt* handle, const int index);
+    explicit column(sqlite3_stmt* handle);
     ~column() = default;
 
     column& operator=(const column& other);
 
-    const std::string get_name() const noexcept;
-#ifdef SQLITE_ENABLE_COLUMN_METADATA
-    const std::string get_origin_name() const noexcept;
-#endif // SQLITE_ENABLE_COLUMN_METADATA
+    template <class T>
+    T get(int index) const;
 
-    int get_int() const noexcept;
-    unsigned int get_uint() const noexcept;
-    long long get_int64() const noexcept;
-    double get_double() const noexcept;
-    std::string get_text() const noexcept;
-    const void* get_blob() const noexcept;
-    std::string get_string() const noexcept;
+    template <class... Args>
+    std::tuple<Args...> get_columns(int indexes) const;
 
-    value_type get_type() const noexcept;
+    const std::string get_name(int index) const noexcept;
+    value_type get_type(int index) const noexcept;
 
   private:
+    int get(int index, int) const noexcept;
+    unsigned int get(int index, unsigned int) const noexcept;
+    long long get(int index, long long) const noexcept;
+    double get(int index, double) const noexcept;
+    std::string get(int index, std::string) const noexcept;
+    const void* get(int index, const void*) const noexcept;
+
     sqlite3_stmt* pHandle;
-    int mIndex;
 };
+
+template <class T>
+T column::get(int index) const
+{
+    return get(index, T());
+}
+
+template <class... Args>
+std::tuple<Args...> column::get_columns(int indexes) const
+{
+    return std::make_tuple(get(indexes++, Args())...);
+}
+
 } // namespace ccqlite
