@@ -47,10 +47,6 @@ class CCQLITE_API column
     template <class ...Types, int N = 0>
     std::tuple<Types...> get();
 
-    template <class... Types, const int ...Integers>
-    std::tuple<Types...> get_columns(
-        const std::integer_sequence<int, Integers...>) const;
-
     const std::string get_name(int index) const noexcept;
     column_type get_type(int index) const noexcept;
 
@@ -60,6 +56,10 @@ class CCQLITE_API column
     double get(int index, double) const noexcept;
     std::string get(int index, std::string) const noexcept;
     const void* get(int index, const void*) const noexcept;
+
+    template <class... Types, const int... Integers>
+    std::tuple<Types...>
+    get_columns(const std::integer_sequence<int, Integers...>) const;
 
     sqlite3_stmt* pHandle;
 };
