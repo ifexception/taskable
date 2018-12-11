@@ -49,7 +49,7 @@ class CCQLITE_API column
 
     template <class... Types, const int ...Integers>
     std::tuple<Types...> get_columns(
-	const std::integer_sequence<int, Integers...>) const;
+        const std::integer_sequence<int, Integers...>) const;
 
     const std::string get_name(int index) const noexcept;
     column_type get_type(int index) const noexcept;
@@ -78,7 +78,7 @@ std::tuple<Types...> column::get()
 
 template <class... Types, const int... Integers>
 std::tuple<Types...> column::get_columns(
-	const std::integer_sequence<int, Integers...>) const
+    const std::integer_sequence<int, Integers...>) const
 {
     return std::make_tuple(get(Integers, Types())...);
 }
