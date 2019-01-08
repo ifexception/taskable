@@ -41,33 +41,12 @@ class command : public statement
 
     template <class T>
     void bind(int index, T type);
-
-    template <class... Types>
-    void bind(int index, Types... types);
-
-  private:
-    template <class... Types, const int... Indices>
-    void bind(const std::integer_sequence<int, Indices...>,
-        Types... types) const;
 };
 
 template <class T>
 void command::bind(int index, T type)
 {
     bind(index, type);
-}
-
-template <class... Types>
-void command::bind(int index, Types... types)
-{
-    bind(std::make_integer_sequence<int, index>{}, types...);
-}
-
-template <class... Types, const int... Indices>
-void command::bind(const std::integer_sequence<int, Indices...>,
-    Types... types) const
-{
-    bind(Indices, types...);
 }
 
 } // namespace ccqlite
