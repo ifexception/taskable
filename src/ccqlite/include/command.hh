@@ -27,6 +27,7 @@
 
 namespace ccqlite
 {
+
 class database;
 
 class command : public statement
