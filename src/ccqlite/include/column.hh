@@ -31,6 +31,7 @@
 
 namespace ccqlite
 {
+
 class CCQLITE_API column
 {
   public:
@@ -44,8 +45,8 @@ class CCQLITE_API column
     template <class T>
     T get(int index) const;
 
-    template <class ...Types, int N = 0>
-    std::tuple<Types...> get();
+    template <class ...Types>
+    std::tuple<Types...> get(int maxIndex);
 
     const std::string get_name(int index) const noexcept;
     column_type get_type(int index) const noexcept;
@@ -70,10 +71,10 @@ T column::get(int index) const
     return get(index, T());
 }
 
-template <class... Types, int N>
-std::tuple<Types...> column::get()
+template <class... Types>
+std::tuple<Types...> column::get(int maxIndex)
 {
-    return get_columns(std::make_integer_sequence<int, N>{});
+    return get_columns(std::make_integer_sequence<int, maxIndex>{});
 }
 
 template <class... Types, const int... Integers>
