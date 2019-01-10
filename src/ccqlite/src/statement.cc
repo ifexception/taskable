@@ -213,6 +213,7 @@ bool statement::is_done() const
 void statement::check(const int returnCode)
 {
     if (returnCode != SQLITE_OK) {
+        pLogger->error(Constants::Error::SqliteError.c_str(), returnCode);
         throw database_exception(returnCode);
     }
 }
@@ -221,6 +222,7 @@ void statement::check_row() const
 {
     if (bHasRow == false)
     {
+        pLogger->error("Now to get a column from. run() was not called, or returned false");
         throw database_exception("No row to get a column from. run() was not called, or returned false.");
     }
 }

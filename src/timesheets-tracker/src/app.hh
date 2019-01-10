@@ -32,6 +32,7 @@ class app : public wxApp
   public:
     app() = default;
     ~app();
+
     bool OnInit() override;
 };
 } // namespace app

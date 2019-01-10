@@ -21,6 +21,8 @@
 
 #include "column.hh"
 
+#include "constants.hh"
+
 namespace ccqlite
 {
 column::column(const column& other)
@@ -30,7 +32,8 @@ column::column(const column& other)
 
 column::column(sqlite3_stmt* handle)
     : pHandle(handle)
-{}
+{
+}
 
 column& column::operator=(const column& other)
 {
