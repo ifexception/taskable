@@ -13,15 +13,22 @@ class about_dialog : public wxDialog
     about_dialog() = default;
     explicit about_dialog(wxWindow* parent,
         const wxString& name = "about_dialog");
+    ~about_dialog();
 
   private:
     bool create(wxWindow* parent,
         wxWindowID windowId,
-        const wxString &caption,
-        const wxPoint &position,
-        const wxSize &size,
+        const wxString& title,
+        const wxPoint& point,
+        const wxSize& size,
         long style,
-        int tabToOpen,
-        const wxString &name);
+        const wxString& name);
+
+    void create_controls();
+
+    void on_ok(wxCommandEvent& event);
+
+    wxString GetText();
+    wxTextCtrl* pTextCtrl;
 };
 } // namespace app::dialog

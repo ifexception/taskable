@@ -9,6 +9,72 @@ wxEND_EVENT_TABLE()
 
 about_dialog::about_dialog(wxWindow* parent, const wxString &name)
 {
+    bool success = create(parent,
+        wxID_ANY,
+        wxT("About Timesheets Tracker"),
+        wxDefaultPosition,
+        wxSize(320, 240),
+        wxCAPTION | wxCLOSE_BOX | wxRESIZE_BORDER,
+        name);
 
+    SetMinClientSize(wxSize(320, 240));
+}
+
+about_dialog::~about_dialog()
+{
+    Destroy();
+}
+
+bool about_dialog::create(wxWindow* parent,
+    wxWindowID windowId,
+    const wxString& title,
+    const wxPoint& point,
+    const wxSize& size,
+    long style,
+    const wxString& name)
+{
+    bool created = wxDialog::Create(parent,
+        windowId,
+        title,
+        point,
+        size,
+        style,
+        name);
+
+    if (created) {
+        create_controls();
+
+        Centre();
+        ShowModal();
+    }
+
+    return created;
+}
+
+void about_dialog::create_controls()
+{
+    wxPanel* panel = new wxPanel(this, -1);
+
+    wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer* hbox = new wxBoxSizer(wxHORIZONTAL);
+
+    wxStaticBox* staticBox =
+        new wxStaticBox(panel,
+            wxID_ANY,
+            wxT("About Timesheets Tracker"),
+            wxPoint(5, 5),
+            wxSize(240, 180));
+
+    wxButton* okButton = new wxButton(this,
+        wxID_OK,
+        wxT("&Ok"));
+
+    okButton->SetDefault();
+    okButton->SetFocus();
+
+    hbox->Add(okButton, 1);
+    vbox->Add(panel, 1);
+    vbox->Add(hbox, 0, wxALIGN_CENTER | wxTOP | wxBOTTOM, 10);
+    SetSizer(vbox);
 }
 }

@@ -20,6 +20,7 @@
 #include "main_frame.hh"
 
 #include "menu_ids.hh"
+#include "../dialogs/about_dialog.hh"
 
 namespace app::frame
 {
@@ -44,9 +45,7 @@ main_frame::main_frame()
     SetMenuBar(menuBar);
 
     Bind(wxEVT_MENU,
-         [=](wxCommandEvent&) {
-             wxMessageBox("About Timesheets Tracker",
-                          "About Timesheets Tracker", wxOK | wxICON_INFORMATION);
+         [=](wxCommandEvent&) { dialog::about_dialog about(nullptr);
          },
          wxID_ABOUT);
     Bind(wxEVT_MENU, [=](wxCommandEvent&) { Close(true); }, wxID_EXIT);
