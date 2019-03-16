@@ -33,7 +33,7 @@ about_dialog::about_dialog(wxWindow* parent, const wxString &name)
         wxT("About Timesheets Tracker"),
         wxDefaultPosition,
         wxSize(320, 240),
-        wxCAPTION | wxCLOSE_BOX | wxRESIZE_BORDER,
+        wxCAPTION | wxCLOSE_BOX,
         name);
 
     SetMinClientSize(wxSize(320, 240));
@@ -82,7 +82,7 @@ void about_dialog::create_controls()
             wxID_ANY,
             wxT("About Timesheets Tracker"),
             wxPoint(5, 5),
-            wxSize(240, 180));
+            wxSize(240, 140));
 
     wxButton* okButton = new wxButton(this,
         wxID_OK,
