@@ -24,6 +24,8 @@
 
 namespace app::dialog
 {
+const int SaveTaskId = wxNewId();
+
 class new_task_dialog : public wxDialog
 {
     wxDECLARE_DYNAMIC_CLASS(new_task_dialog);
@@ -49,6 +51,8 @@ class new_task_dialog : public wxDialog
     void on_save(wxCommandEvent& event);
     void on_cancel(wxCommandEvent& event);
 
+    wxButton* pOkButton;
+    wxButton* pCancelButton;
     wxTimePickerCtrl* pStartTime;
     wxTimePickerCtrl* pEndTime;
 };
