@@ -19,19 +19,19 @@
 
 #include "main_frame.hh"
 
-#include "menu_ids.hh"
+#include "../dialogs//new_task_dialog.hh"
 #include "../dialogs/about_dialog.hh"
+#include "menu_ids.hh"
 
 namespace app::frame
 {
-main_frame::main_frame()
-    : wxFrame(nullptr, wxID_ANY, "Timesheets Tracker")
+main_frame::main_frame() : wxFrame(nullptr, wxID_ANY, "Timesheets Tracker")
 {
-    const int newEntryId = static_cast<int>(MenuIds::NewEntryId);
+    const int newTaskId = static_cast<int>(MenuIds::NewTaskId);
 
     wxMenu* fileMenu = new wxMenu();
-    fileMenu->Append(newEntryId, "&New Entry...\tCtrl-N",
-        "Create new timesheet entry");
+    fileMenu->Append(newTaskId, "&New Task...\tCtrl-N",
+                     "Create new timesheet entry");
     fileMenu->AppendSeparator();
     fileMenu->Append(wxID_EXIT);
 
@@ -45,13 +45,17 @@ main_frame::main_frame()
     SetMenuBar(menuBar);
 
     Bind(wxEVT_MENU,
-         [=](wxCommandEvent&) { dialog::about_dialog about(nullptr);
-         },
+         [=](wxCommandEvent&) { dialog::about_dialog about(nullptr); },
          wxID_ABOUT);
+
     Bind(wxEVT_MENU, [=](wxCommandEvent&) { Close(true); }, wxID_EXIT);
+
+    Bind(wxEVT_MENU,
+         [=](wxCommandEvent&) { dialog::new_task_dialog newTask(nullptr); },
+        newTaskId);
 }
 
 main_frame::~main_frame()
 {
 }
-}
+} // namespace app::frame
