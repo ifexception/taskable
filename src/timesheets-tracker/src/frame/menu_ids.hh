@@ -23,7 +23,7 @@ namespace app::frame
 {
 enum class MenuIds : int
 {
-    NewEntryId = 1,
+    NewTaskId = 1,
     NewCategoryId = 2,
     NewEmployerId = 3
 };
