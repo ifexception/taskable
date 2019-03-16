@@ -18,6 +18,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "new_task_dialog.hh"
+#include <wx/timectrl.h>
 
 namespace app::dialog
 {
@@ -46,7 +47,7 @@ new_task_dialog::~new_task_dialog()
     Destroy();
 }
 
-bool new_task_dialog::create(wxWindow * parent,
+bool new_task_dialog::create(wxWindow* parent,
     wxWindowID windowId,
     const wxString& title,
     const wxPoint& point,
@@ -74,22 +75,65 @@ bool new_task_dialog::create(wxWindow * parent,
 
 void new_task_dialog::create_controls()
 {
-    wxBoxSizer* hbox = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
+    auto mainSizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(mainSizer);
 
-    pOkButton = new wxButton(this,
-        SaveTaskId,
-        wxT("&Save"));
-    hbox->Add(pOkButton, 1);
+    auto buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+    mainSizer->Add(buttonSizer, 0, wxALIGN_RIGHT | wxTOP | wxBOTTOM, 10);
+    auto okButton = new wxButton(this, SaveTaskId, wxT("&Save"));
+    buttonSizer->Add(okButton, 1);
 
-    pCancelButton = new wxButton(this,
-        wxID_CANCEL,
-        wxT("&Cancel"));
-    hbox->Add(pCancelButton, 1);
+    auto cancelButton = new wxButton(this, wxID_CANCEL, wxT("&Cancel"));
+    buttonSizer->Add(cancelButton, 1);
 
-    vbox->Add(hbox, 0, wxALIGN_RIGHT | wxTOP | wxBOTTOM, 10);
-    SetSizer(vbox);
+    auto newTaskSizer = new wxBoxSizer(wxVERTICAL);
+    mainSizer->Add(newTaskSizer, 0);
+
+    auto taskDurationBox = new wxStaticBox(this, wxID_ANY, wxT("Task Duration"));
+    auto taskDurationBoxSizer = new wxStaticBoxSizer(taskDurationBox, wxVERTICAL);
+    newTaskSizer->Add(taskDurationBoxSizer, 0);
+
+    auto taskDurationPanel = new wxPanel(this, wxID_STATIC);
+    taskDurationBoxSizer->Add(taskDurationPanel, 0);
+
+    auto flexGridSizer = new wxFlexGridSizer(0, 2, 0, 0);
+    taskDurationPanel->SetSizer(flexGridSizer);
+
+    auto startTimeText = new wxStaticText(taskDurationPanel, wxID_STATIC, wxT("Start Time"));
+    flexGridSizer->Add(startTimeText, 0);
+
+    pStartTime = new wxTimePickerCtrl();
+    /*pStartTime = new wxTimePickerCtrl(taskDurationPanel, wxID_ANY, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1), wxTP_DEFAULT, wxDefaultValidator, "start_time_ctrl");
+    pStartTime->SetToolTip(wxT("Enter the start time of the task"));
+    flexGridSizer->Add(pStartTime, 0);*/
 }
+
+// void new_task_dialog::create_controls()
+//{
+//    wxBoxSizer* hbox = new wxBoxSizer(wxHORIZONTAL);
+//    wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
+//
+//    wxPanel* panel = new wxPanel(this);
+//    wxStaticBox* boundedTimesBox = new wxStaticBox(panel,
+//        wxID_ANY,
+//        wxT("Task Duration"),
+//        wxPoint(2, 4),
+//        wxSize(300, 200));
+//    vbox->Add(panel, 1);
+//
+//    pOkButton = new wxButton(this,
+//        SaveTaskId,
+//        wxT("&Save"));
+//    hbox->Add(pOkButton, 1);
+//
+//    pCancelButton = new wxButton(this,
+//        wxID_CANCEL,
+//        wxT("&Cancel"));
+//    hbox->Add(pCancelButton, 1);
+//
+//    vbox->Add(hbox, 0, wxALIGN_RIGHT | wxTOP | wxBOTTOM, 10);
+//    SetSizer(vbox);
+//}
 
 void new_task_dialog::on_save(wxCommandEvent& event)
 {
@@ -100,4 +144,4 @@ void new_task_dialog::on_cancel(wxCommandEvent& event)
 {
     int i = 0;
 }
-}
+} // namespace app::dialog

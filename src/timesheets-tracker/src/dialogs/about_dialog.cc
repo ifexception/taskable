@@ -77,8 +77,7 @@ void about_dialog::create_controls()
     wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer* hbox = new wxBoxSizer(wxHORIZONTAL);
 
-    wxStaticBox* staticBox =
-        new wxStaticBox(panel,
+    wxStaticBox* staticBox = new wxStaticBox(panel,
             wxID_ANY,
             wxT("About Timesheets Tracker"),
             wxPoint(5, 5),

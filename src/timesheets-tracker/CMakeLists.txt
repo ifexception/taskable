@@ -1,12 +1,13 @@
 cmake_minimum_required (VERSION 3.8)
 project(wxTimesheetsTracker)
 
-if(MSVC)
-    include (${CMAKE_MODULE_PATH}/FindwxWidgetsVcpkg.cmake)
-else(MSVC)
-    find_package (wxWidgets REQUIRED COMPONENTS core base)
-    include (${wxWidgets_USE_FILE})
-endif()
+#if(MSVC)
+#    include (${CMAKE_MODULE_PATH}/FindwxWidgetsVcpkg.cmake)
+#else(MSVC)
+#    find_package (wxWidgets REQUIRED COMPONENTS base core)
+#    include (${wxWidgets_USE_FILE})
+#endif()
+include (${CMAKE_MODULE_PATH}/FindwxWidgetsVcpkg.cmake)
 
 message(STATUS "CMAKE_CONFIGURATION_TYPES:${CMAKE_CONFIGURATION_TYPES}")
 
@@ -36,6 +37,7 @@ target_compile_definitions (${PROJECT_NAME} PUBLIC
     UNICODE
     WXUSINGDLL
     wxUSE_GUI=1
+    wxUSE_TIMEPICKCTRL=1
     __WXMSW__
     $<$<CONFIG:Debug>:_DEBUG>)
 
