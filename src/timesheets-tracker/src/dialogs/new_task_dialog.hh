@@ -19,7 +19,37 @@
 
 #pragma once
 
+#include <wx/wx.h>
+#include <wx/timectrl.h>
+
 namespace app::dialog
 {
+class new_task_dialog : public wxDialog
+{
+    wxDECLARE_DYNAMIC_CLASS(new_task_dialog);
+    wxDECLARE_EVENT_TABLE();
 
-}
+  public:
+    new_task_dialog() = default;
+    explicit new_task_dialog(wxWindow* parent,
+        const wxString& name = "new_task_dialog");
+    virtual ~new_task_dialog();
+
+  private:
+    bool create(wxWindow* parent,
+        wxWindowID windowId,
+        const wxString& title,
+        const wxPoint& point,
+        const wxSize& size,
+        long style,
+        const wxString& name);
+
+    void create_controls();
+
+    void on_save(wxCommandEvent& event);
+    void on_cancel(wxCommandEvent& event);
+
+    wxTimePickerCtrl* pStartTime;
+    wxTimePickerCtrl* pEndTime;
+};
+} // namespace app::dialog

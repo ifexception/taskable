@@ -18,7 +18,8 @@ message (STATUS "wxWidgets_FOUND: ${wxWidgets_FOUND}")
 set (SRC
     "src/app.cc"
     "src/frame/main_frame.cc"
-    "src/dialogs/about_dialog.cc")
+    "src/dialogs/about_dialog.cc"
+    "src/dialogs/new_task_dialog.cc")
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
 
