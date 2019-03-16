@@ -32,7 +32,7 @@ class about_dialog : public wxDialog
     about_dialog() = default;
     explicit about_dialog(wxWindow* parent,
         const wxString& name = "about_dialog");
-    ~about_dialog();
+    virtual ~about_dialog();
 
   private:
     bool create(wxWindow* parent,
@@ -46,8 +46,5 @@ class about_dialog : public wxDialog
     void create_controls();
 
     void on_ok(wxCommandEvent& event);
-
-    wxString GetText();
-    wxTextCtrl* pTextCtrl;
 };
 } // namespace app::dialog
