@@ -34,12 +34,18 @@ class new_task_dialog : public wxDialog
 
   public:
     new_task_dialog() = default;
-    explicit new_task_dialog(wxWindow* parent, const wxString& name = "new_task_dialog");
+    explicit new_task_dialog(wxWindow* parent,
+        const wxString& name = "new_task_dialog");
     virtual ~new_task_dialog();
 
   private:
-    bool create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point,
-                const wxSize& size, long style, const wxString& name);
+    bool create(wxWindow* parent,
+        wxWindowID windowId,
+        const wxString& title,
+        const wxPoint& point,
+        const wxSize& size,
+        long style,
+        const wxString& name);
 
     void create_controls();
 
