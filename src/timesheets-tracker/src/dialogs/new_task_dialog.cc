@@ -37,7 +37,7 @@ new_task_dialog::new_task_dialog(wxWindow* parent, const wxString& name)
         wxT("Add a New Task"),
         wxDefaultPosition,
         wxSize(400, 300),
-        wxCAPTION | wxCLOSE_BOX,
+        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
         name);
 
     SetMinClientSize(wxSize(320, 240));
@@ -85,10 +85,12 @@ void new_task_dialog::create_controls()
     SetSizer(mainSizer);
 
     // -----
+    auto taskPanelSizer = new wxBoxSizer(wxHORIZONTAL);
+    mainSizer->Add(taskPanelSizer, wxSizerFlags(g_flagsV));
     auto newTaskSizer = new wxBoxSizer(wxVERTICAL);
-    mainSizer->Add(newTaskSizer, wxSizerFlags(g_flagsV));
+    taskPanelSizer->Add(newTaskSizer, 0);
 
-    auto taskDurationBox = new wxStaticBox(this, wxID_ANY, wxT("Task Duration"));
+    auto taskDurationBox = new wxStaticBox(this, wxID_ANY, wxT("New Task Details"));
     auto taskDurationBoxSizer = new wxStaticBoxSizer(taskDurationBox, wxVERTICAL);
     newTaskSizer->Add(taskDurationBoxSizer, g_flagsV);
 
@@ -101,23 +103,23 @@ void new_task_dialog::create_controls()
     auto startTimeText = new wxStaticText(taskDurationPanel, wxID_STATIC, wxT("Start Time"));
     flexGridSizer->Add(startTimeText, g_flagsH);
 
-    /*
-     * wxmsw31u_adv package is required for the timepicker control
-     * wxTimePickerCtrl is actually defined in wxAdv and _not_ in wxCore
-     * as the documentation (incorrectly) states
-     */
-    pStartTime = new wxTimePickerCtrl(taskDurationPanel, wxID_ANY, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1), wxTP_DEFAULT, wxDefaultValidator, "start_time_ctrl");
+    pStartTime =
+        new wxTimePickerCtrl(taskDurationPanel, wxID_ANY, wxDefaultDateTime, wxDefaultPosition,
+                             wxSize(150, -1), wxTP_DEFAULT, wxDefaultValidator, "start_time_ctrl");
     pStartTime->SetToolTip(wxT("Enter the time the task started"));
     flexGridSizer->Add(pStartTime, g_flagsV);
 
     auto endTimeText = new wxStaticText(taskDurationPanel, wxID_STATIC, wxT("End Time"));
     flexGridSizer->Add(endTimeText, g_flagsH);
 
-    pEndTime = new wxTimePickerCtrl(taskDurationPanel, wxID_ANY, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1), wxTP_DEFAULT, wxDefaultValidator, "end_time_ctrl");
+    pEndTime =
+        new wxTimePickerCtrl(taskDurationPanel, wxID_ANY, wxDefaultDateTime, wxDefaultPosition,
+                             wxSize(150, -1), wxTP_DEFAULT, wxDefaultValidator, "end_time_ctrl");
     pEndTime->SetToolTip(wxT("Enter the time the task ended"));
     flexGridSizer->Add(pEndTime, g_flagsV);
 
-    auto lineSeperator = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+    auto lineSeperator =
+        new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
     mainSizer->Add(lineSeperator, 0, wxEXPAND | wxALL, 1);
 
     /*auto buttonPanel = new wxPanel(this, wxID_STATIC);
@@ -126,10 +128,10 @@ void new_task_dialog::create_controls()
     auto cancelButton = new wxButton(this, wxID_CANCEL, wxT("&Cancel"));
     cancelButton->SetFocus();
 
-    buttonSizer->Add(okButton, 1);
-    buttonSizer->Add(cancelButton, 1);
+    mainSizer->Add(buttonPanel, wxSizerFlags(g_flagsV).Center());
     buttonPanel->SetSizer(buttonSizer);
-    mainSizer->Add(buttonPanel, wxSizerFlags(g_flagsV).Center());*/
+    buttonSizer->Add(okButton, g_flagsV);
+    buttonSizer->Add(cancelButton, g_flagsV);*/
 }
 
 // void new_task_dialog::create_controls()
