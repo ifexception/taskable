@@ -84,16 +84,6 @@ void new_task_dialog::create_controls()
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(mainSizer);
 
-/*
-    auto buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-    mainSizer->Add(buttonSizer, 0, wxALIGN_RIGHT | wxTOP | wxBOTTOM, 10);
-    auto okButton = new wxButton(this, SaveTaskId, wxT("&Save"));
-    buttonSizer->Add(okButton, 1);
-
-    auto cancelButton = new wxButton(this, wxID_CANCEL, wxT("&Cancel"));
-    buttonSizer->Add(cancelButton, 1);
-*/
-
     // -----
     auto newTaskSizer = new wxBoxSizer(wxVERTICAL);
     mainSizer->Add(newTaskSizer, wxSizerFlags(g_flagsV));
@@ -117,13 +107,20 @@ void new_task_dialog::create_controls()
      * as the documentation (incorrectly) states
      */
     pStartTime = new wxTimePickerCtrl(taskDurationPanel, wxID_ANY, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1), wxTP_DEFAULT, wxDefaultValidator, "start_time_ctrl");
-    pStartTime->SetToolTip(wxT("Enter the start time of the task"));
+    pStartTime->SetToolTip(wxT("Enter the time the task started"));
     flexGridSizer->Add(pStartTime, g_flagsV);
+
+    auto endTimeText = new wxStaticText(taskDurationPanel, wxID_STATIC, wxT("End Time"));
+    flexGridSizer->Add(endTimeText, g_flagsH);
+
+    pEndTime = new wxTimePickerCtrl(taskDurationPanel, wxID_ANY, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1), wxTP_DEFAULT, wxDefaultValidator, "end_time_ctrl");
+    pEndTime->SetToolTip(wxT("Enter the time the task ended"));
+    flexGridSizer->Add(pEndTime, g_flagsV);
 
     auto lineSeperator = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
     mainSizer->Add(lineSeperator, 0, wxEXPAND | wxALL, 1);
 
-    auto buttonPanel = new wxPanel(this, wxID_STATIC);
+    /*auto buttonPanel = new wxPanel(this, wxID_STATIC);
     auto buttonSizer = new wxBoxSizer(wxHORIZONTAL);
     auto okButton = new wxButton(this, SaveTaskId, wxT("&Save"));
     auto cancelButton = new wxButton(this, wxID_CANCEL, wxT("&Cancel"));
@@ -132,7 +129,7 @@ void new_task_dialog::create_controls()
     buttonSizer->Add(okButton, 1);
     buttonSizer->Add(cancelButton, 1);
     buttonPanel->SetSizer(buttonSizer);
-    mainSizer->Add(buttonPanel, wxSizerFlags(g_flagsV).Center());
+    mainSizer->Add(buttonPanel, wxSizerFlags(g_flagsV).Center());*/
 }
 
 // void new_task_dialog::create_controls()
@@ -169,6 +166,9 @@ void new_task_dialog::on_save(wxCommandEvent& event)
 
 void new_task_dialog::on_cancel(wxCommandEvent& event)
 {
-    int i = 0;
+    int answer = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
+    if (answer == wxYES) {
+        Destroy();
+    }
 }
 } // namespace app::dialog
