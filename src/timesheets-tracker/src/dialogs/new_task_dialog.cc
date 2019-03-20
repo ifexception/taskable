@@ -82,6 +82,7 @@ void new_task_dialog::create_controls()
     const wxSizerFlags g_flagsCenter = wxSizerFlags(g_flagsV).Align(wxALIGN_CENTER);
     const wxSizerFlags g_flagsExpand = wxSizerFlags(g_flagsV).Align(wxEXPAND).Proportion(1);
 
+    /* Window Sizing */
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(mainSizer);
 
@@ -91,6 +92,7 @@ void new_task_dialog::create_controls()
     auto sizer = new wxBoxSizer(wxVERTICAL);
     mainPanelSizer->Add(sizer, 0);
 
+    /* Task Details Box */
     auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Task Details"));
     auto detailsBoxSizer = new wxStaticBoxSizer(detailsBox, wxVERTICAL);
     sizer->Add(detailsBoxSizer, g_flagsExpand);
@@ -101,6 +103,7 @@ void new_task_dialog::create_controls()
     auto taskFlexGridSizer = new wxFlexGridSizer(0, 2, 0, 0);
     taskDetailsPanel->SetSizer(taskFlexGridSizer);
 
+    /* Active Project Dropdown Control */
     auto activeProject = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Project"));
     taskFlexGridSizer->Add(activeProject, wxSizerFlags().Border(wxALL, 5).CenterVertical());
 
@@ -109,65 +112,60 @@ void new_task_dialog::create_controls()
     tmpProjects.Add(wxT("Entelect"));
     tmpProjects.Add(wxT("Social"));
 
-    pActiveProject = new wxComboBox(taskDetailsPanel, wxID_ANY, wxT("Silica"), wxDefaultPosition,
-                                wxDefaultSize, tmpProjects, wxCB_DROPDOWN);
-    taskFlexGridSizer->Add(pActiveProject, wxSizerFlags().Border(wxALL, 5).Align(wxALIGN_RIGHT));
+    pActiveProject = new wxComboBox(taskDetailsPanel, wxID_ANY, wxT("Silica"), wxDefaultPosition, wxDefaultSize, tmpProjects, wxCB_DROPDOWN);
+    pActiveProject->SetToolTip(wxT("Select the project to associate this task with"));
+    taskFlexGridSizer->Add(pActiveProject, wxSizerFlags().Border(wxALL, 5));
 
+    /* Task Start Time Control */
     auto taskStartTime = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Start Time"));
-    taskFlexGridSizer->Add(taskStartTime,
-                           wxSizerFlags().Border(wxALL, 5).Align(wxALIGN_CENTER_VERTICAL));
+    taskFlexGridSizer->Add(taskStartTime, wxSizerFlags().Border(wxALL, 5).CenterVertical());
 
-    pStartTime = new wxTimePickerCtrl(taskDetailsPanel, wxID_ANY, wxDefaultDateTime,
-                                      wxDefaultPosition, wxSize(150, -1));
+    pStartTime = new wxTimePickerCtrl(taskDetailsPanel, wxID_ANY, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1));
     pStartTime->SetToolTip(wxT("Enter the time when the task started"));
-    taskFlexGridSizer->Add(pStartTime, wxSizerFlags().Border(wxALL, 5).Align(wxALIGN_RIGHT));
+    taskFlexGridSizer->Add(pStartTime, wxSizerFlags().Border(wxALL, 5));
 
+    /* Task End Time Control */
     auto taskEndTime = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("End Time"));
     taskFlexGridSizer->Add(taskEndTime, wxSizerFlags().Border(wxALL, 5).CenterVertical());
 
-    pEndTime = new wxTimePickerCtrl(taskDetailsPanel, wxID_ANY, wxDefaultDateTime,
-                                    wxDefaultPosition, wxSize(150, -1));
+    pEndTime = new wxTimePickerCtrl(taskDetailsPanel, wxID_ANY, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1));
     pEndTime->SetToolTip(wxT("Enter the time the task ended"));
-    taskFlexGridSizer->Add(pEndTime, wxSizerFlags().Border(wxALL, 5).Align(wxALIGN_RIGHT));
+    taskFlexGridSizer->Add(pEndTime, wxSizerFlags().Border(wxALL, 5));
 
+    /* Task Description Text Control */
     auto taskDescription = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Description"));
-    taskFlexGridSizer->Add(taskDescription, wxSizerFlags().Border(wxALL, 5).Align(wxALIGN_RIGHT));
+    taskFlexGridSizer->Add(taskDescription, wxSizerFlags().Border(wxALL, 5));
 
-    pDescription = new wxTextCtrl(taskDetailsPanel, wxID_ANY, wxGetEmptyString(), wxDefaultPosition,
-                                  wxSize(260, 200), wxTE_MULTILINE);
+    pDescription = new wxTextCtrl(taskDetailsPanel, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(260, 200), wxTE_MULTILINE);
     pDescription->SetToolTip(wxT("Enter a description for the task"));
     taskFlexGridSizer->Add(pDescription, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 5);
 
+    /* Task Category Dropdown Control */
     auto taskCategory = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Category"));
-    taskFlexGridSizer->Add(taskCategory, wxSizerFlags().Border(wxALL, 5).Align(wxALIGN_RIGHT));
+    taskFlexGridSizer->Add(taskCategory, wxSizerFlags().Border(wxALL, 5).CenterVertical());
 
     wxArrayString tmpCategories;
     tmpCategories.Add(wxT("Programming"));
     tmpCategories.Add(wxT("Meeting"));
     tmpCategories.Add(wxT("Analysis"));
 
-    pCategories = new wxComboBox(taskDetailsPanel, wxID_ANY, wxT("Programming"), wxDefaultPosition,
-                                 wxDefaultSize, tmpCategories, wxCB_DROPDOWN);
-    taskFlexGridSizer->Add(pCategories, wxSizerFlags().Border(wxALL, 5).Align(wxALIGN_RIGHT));
+    pCategories = new wxComboBox(taskDetailsPanel, wxID_ANY, wxT("Programming"), wxDefaultPosition, wxDefaultSize, tmpCategories, wxCB_DROPDOWN);
+    taskFlexGridSizer->Add(pCategories, wxSizerFlags().Border(wxALL, 5));
 
     /* Horizontal Line*/
-    auto separation_line =
-        new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+    auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
     mainSizer->Add(separation_line, 0, wxEXPAND | wxALL, 1);
 
-    /********************************************************************
-    Button Panel
-    *********************************************************************/
-    wxPanel* button_panel = new wxPanel(this, wxID_STATIC);
-    wxBoxSizer* button_panel_sizer = new wxBoxSizer(wxHORIZONTAL);
-    wxButton* ok_button = new wxButton(button_panel, ID_SAVETASK, wxT("&Save "));
-    wxButton* cancel_button = new wxButton(button_panel, wxID_CANCEL, wxT("&Cancel"));
+    /* Button Panel */
+    auto buttonPanel = new wxPanel(this, wxID_STATIC);
+    auto buttonPanelSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto okButton = new wxButton(buttonPanel, ID_SAVETASK, wxT("&Save "));
+    auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
-    mainSizer->Add(button_panel, wxSizerFlags(wxSizerFlags().Border(wxALL, 5)).Center());
-    button_panel->SetSizer(button_panel_sizer);
-    button_panel_sizer->Add(ok_button, wxSizerFlags().Border(wxALL, 5));
-
-    button_panel_sizer->Add(cancel_button, wxSizerFlags().Border(wxALL, 5));
+    mainSizer->Add(buttonPanel, wxSizerFlags(wxSizerFlags().Border(wxALL, 5)).Center());
+    buttonPanel->SetSizer(buttonPanelSizer);
+    buttonPanelSizer->Add(okButton, wxSizerFlags().Border(wxALL, 5));
+    buttonPanelSizer->Add(cancelButton, wxSizerFlags().Border(wxALL, 5));
 }
 
 void new_task_dialog::on_save(wxCommandEvent& event)
