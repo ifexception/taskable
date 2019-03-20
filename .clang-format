@@ -9,5 +9,4 @@ AlwaysBreakTemplateDeclarations: true
 ColumnLimit: 100
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
-AlwaysBreakTemplateDeclarations: true
 SpaceBeforeAssignmentOperators: true
