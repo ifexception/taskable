@@ -52,7 +52,10 @@ class new_task_dialog : public wxDialog
     void on_save(wxCommandEvent& event);
     void on_cancel(wxCommandEvent& event);
 
+    wxComboBox* pActiveProject;
     wxTimePickerCtrl* pStartTime;
     wxTimePickerCtrl* pEndTime;
+    wxTextCtrl* pDescription;
+    wxComboBox* pCategories;
 };
 } // namespace app::dialog
