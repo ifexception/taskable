@@ -18,6 +18,7 @@ message (STATUS "wxWidgets_FOUND: ${wxWidgets_FOUND}")
 
 set (SRC
     "src/common/menu_ids.cc"
+    "src/common/common.cc"
     "src/app.cc"
     "src/frame/main_frame.cc"
     "src/dialogs/about_dialog.cc"
