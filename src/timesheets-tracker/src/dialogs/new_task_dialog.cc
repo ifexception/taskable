@@ -35,9 +35,9 @@ new_task_dialog::new_task_dialog(wxWindow* parent, const wxString& name)
 {
     bool success = create(parent,
         wxID_ANY,
-        wxT("Add a New Task"),
+        wxT("Add New Task"),
         wxDefaultPosition,
-        wxSize(400, 500),
+        wxSize(385, 490),
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
         name);
 
@@ -75,6 +75,7 @@ bool new_task_dialog::create(wxWindow* parent,
     return created;
 }
 
+// TODO Refactor
 void new_task_dialog::create_controls()
 {
     const wxSizerFlags g_flagsV = wxSizerFlags().Border(wxALL, 5);
@@ -132,14 +133,6 @@ void new_task_dialog::create_controls()
     pEndTime->SetToolTip(wxT("Enter the time the task ended"));
     taskFlexGridSizer->Add(pEndTime, wxSizerFlags().Border(wxALL, 5));
 
-    /* Task Description Text Control */
-    auto taskDescription = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Description"));
-    taskFlexGridSizer->Add(taskDescription, wxSizerFlags().Border(wxALL, 5));
-
-    pDescription = new wxTextCtrl(taskDetailsPanel, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(260, 200), wxTE_MULTILINE);
-    pDescription->SetToolTip(wxT("Enter a description for the task"));
-    taskFlexGridSizer->Add(pDescription, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 5);
-
     /* Task Category Dropdown Control */
     auto taskCategory = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Category"));
     taskFlexGridSizer->Add(taskCategory, wxSizerFlags().Border(wxALL, 5).CenterVertical());
@@ -151,6 +144,14 @@ void new_task_dialog::create_controls()
 
     pCategories = new wxComboBox(taskDetailsPanel, wxID_ANY, wxT("Programming"), wxDefaultPosition, wxDefaultSize, tmpCategories, wxCB_DROPDOWN);
     taskFlexGridSizer->Add(pCategories, wxSizerFlags().Border(wxALL, 5));
+
+    /* Task Description Text Control */
+    auto taskDescription = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Description"));
+    taskFlexGridSizer->Add(taskDescription, wxSizerFlags().Border(wxALL, 5));
+
+    pDescription = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(320, 180), wxTE_MULTILINE);
+    pDescription->SetToolTip(wxT("Enter a description for the task"));
+    detailsBoxSizer->Add(pDescription, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
     /* Horizontal Line*/
     auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
