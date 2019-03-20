@@ -17,6 +17,7 @@ message (STATUS "ccqlite_FOUND: ${ccqlite_FOUND}")
 message (STATUS "wxWidgets_FOUND: ${wxWidgets_FOUND}")
 
 set (SRC
+    "src/common/menu_ids.cc"
     "src/app.cc"
     "src/frame/main_frame.cc"
     "src/dialogs/about_dialog.cc"

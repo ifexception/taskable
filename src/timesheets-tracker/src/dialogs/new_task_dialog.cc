@@ -27,7 +27,7 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(new_task_dialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(new_task_dialog, wxDialog)
-    EVT_BUTTON(SaveTaskId, new_task_dialog::on_save)
+    EVT_BUTTON(ID_SAVETASK, new_task_dialog::on_save)
     EVT_BUTTON(wxID_CANCEL, new_task_dialog::on_cancel)
 wxEND_EVENT_TABLE()
 
@@ -41,7 +41,7 @@ new_task_dialog::new_task_dialog(wxWindow* parent, const wxString& name)
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
         name);
 
-    SetMinClientSize(wxSize(400, 380));
+    SetMinClientSize(wxSize(400, 480));
 }
 
 new_task_dialog::~new_task_dialog()
@@ -93,7 +93,7 @@ void new_task_dialog::create_controls()
 
     auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Task Details"));
     auto detailsBoxSizer = new wxStaticBoxSizer(detailsBox, wxVERTICAL);
-    sizer->Add(detailsBoxSizer, wxSizerFlags().Border(wxALL, 5));
+    sizer->Add(detailsBoxSizer, g_flagsExpand);
 
     auto taskDetailsPanel = new wxPanel(this, wxID_STATIC);
     detailsBoxSizer->Add(taskDetailsPanel, wxSizerFlags().Border(wxALL, 5).Expand());
@@ -134,7 +134,7 @@ void new_task_dialog::create_controls()
     taskFlexGridSizer->Add(taskDescription, wxSizerFlags().Border(wxALL, 5).Align(wxALIGN_RIGHT));
 
     pDescription = new wxTextCtrl(taskDetailsPanel, wxID_ANY, wxGetEmptyString(), wxDefaultPosition,
-                                  wxSize(220, 170), wxTE_MULTILINE);
+                                  wxSize(260, 200), wxTE_MULTILINE);
     pDescription->SetToolTip(wxT("Enter a description for the task"));
     taskFlexGridSizer->Add(pDescription, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 5);
 
@@ -160,7 +160,7 @@ void new_task_dialog::create_controls()
     *********************************************************************/
     wxPanel* button_panel = new wxPanel(this, wxID_STATIC);
     wxBoxSizer* button_panel_sizer = new wxBoxSizer(wxHORIZONTAL);
-    wxButton* ok_button = new wxButton(button_panel, SaveTaskId, wxT("&Save "));
+    wxButton* ok_button = new wxButton(button_panel, ID_SAVETASK, wxT("&Save "));
     wxButton* cancel_button = new wxButton(button_panel, wxID_CANCEL, wxT("&Cancel"));
 
     mainSizer->Add(button_panel, wxSizerFlags(wxSizerFlags().Border(wxALL, 5)).Center());
@@ -169,33 +169,6 @@ void new_task_dialog::create_controls()
 
     button_panel_sizer->Add(cancel_button, wxSizerFlags().Border(wxALL, 5));
 }
-
-// void new_task_dialog::create_controls()
-//{
-//    wxBoxSizer* hbox = new wxBoxSizer(wxHORIZONTAL);
-//    wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
-//
-//    wxPanel* panel = new wxPanel(this);
-//    wxStaticBox* boundedTimesBox = new wxStaticBox(panel,
-//        wxID_ANY,
-//        wxT("Task Duration"),
-//        wxPoint(2, 4),
-//        wxSize(300, 200));
-//    vbox->Add(panel, 1);
-//
-//    pOkButton = new wxButton(this,
-//        SaveTaskId,
-//        wxT("&Save"));
-//    hbox->Add(pOkButton, 1);
-//
-//    pCancelButton = new wxButton(this,
-//        wxID_CANCEL,
-//        wxT("&Cancel"));
-//    hbox->Add(pCancelButton, 1);
-//
-//    vbox->Add(hbox, 0, wxALIGN_RIGHT | wxTOP | wxBOTTOM, 10);
-//    SetSizer(vbox);
-//}
 
 void new_task_dialog::on_save(wxCommandEvent& event)
 {

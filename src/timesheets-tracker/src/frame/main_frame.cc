@@ -21,7 +21,7 @@
 
 #include "../dialogs//new_task_dialog.hh"
 #include "../dialogs/about_dialog.hh"
-#include "menu_ids.hh"
+#include "../common/menu_ids.hh"
 
 namespace app::frame
 {
@@ -48,7 +48,9 @@ main_frame::main_frame() : wxFrame(nullptr, wxID_ANY, "Timesheets Tracker")
          [=](wxCommandEvent&) { dialog::about_dialog about(nullptr); },
          wxID_ABOUT);
 
-    Bind(wxEVT_MENU, [=](wxCommandEvent&) { Close(true); }, wxID_EXIT);
+    Bind(wxEVT_MENU,
+        [=](wxCommandEvent&) { Close(true); },
+        wxID_EXIT);
 
     Bind(wxEVT_MENU,
          [=](wxCommandEvent&) { dialog::new_task_dialog newTask(nullptr); },

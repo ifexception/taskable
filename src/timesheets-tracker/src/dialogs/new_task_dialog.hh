@@ -25,7 +25,7 @@ class wxTimePickerCtrl;
 
 namespace app::dialog
 {
-const int SaveTaskId = wxNewId();
+const int ID_SAVETASK = wxNewId();
 
 class new_task_dialog : public wxDialog
 {
