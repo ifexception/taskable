@@ -22,10 +22,12 @@
 #include <wx/wx.h>
 
 class wxTimePickerCtrl;
+class wxDateEvent;
 
 namespace app::dialog
 {
 const int ID_SAVETASK = wxNewId();
+const int IDC_STARTTIME = wxNewId();
 
 class new_task_dialog : public wxDialog
 {
@@ -49,6 +51,8 @@ class new_task_dialog : public wxDialog
 
     void create_controls();
 
+    bool validate();
+
     void on_save(wxCommandEvent& event);
     void on_cancel(wxCommandEvent& event);
 
@@ -57,5 +61,11 @@ class new_task_dialog : public wxDialog
     wxTimePickerCtrl* pEndTime;
     wxTextCtrl* pDescription;
     wxComboBox* pCategories;
+
+    int mSelectedProject;
+    wxDateTime mStartTime;
+    wxDateTime mEndTime;
+    int mSelectedCategory;
+    wxString mDescriptionText;
 };
 } // namespace app::dialog

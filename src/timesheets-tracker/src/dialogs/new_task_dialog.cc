@@ -20,7 +20,7 @@
 #include "new_task_dialog.hh"
 #include <wx/timectrl.h>
 #include <wx/statline.h>
-#include <wx/datectrl.h>
+#include <wx/dateevt.h>
 
 namespace app::dialog
 {
@@ -32,12 +32,13 @@ wxBEGIN_EVENT_TABLE(new_task_dialog, wxDialog)
 wxEND_EVENT_TABLE()
 
 new_task_dialog::new_task_dialog(wxWindow* parent, const wxString& name)
+    : mDescriptionText(wxT(""))
 {
     bool success = create(parent,
         wxID_ANY,
         wxT("Add New Task"),
         wxDefaultPosition,
-        wxSize(385, 490),
+        wxSize(385, 488),
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
         name);
 
@@ -104,6 +105,7 @@ void new_task_dialog::create_controls()
     auto taskFlexGridSizer = new wxFlexGridSizer(0, 2, 0, 0);
     taskDetailsPanel->SetSizer(taskFlexGridSizer);
 
+    /* ---Controls--- */
     /* Active Project Dropdown Control */
     auto activeProject = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Project"));
     taskFlexGridSizer->Add(activeProject, wxSizerFlags().Border(wxALL, 5).CenterVertical());
@@ -121,7 +123,7 @@ void new_task_dialog::create_controls()
     auto taskStartTime = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Start Time"));
     taskFlexGridSizer->Add(taskStartTime, wxSizerFlags().Border(wxALL, 5).CenterVertical());
 
-    pStartTime = new wxTimePickerCtrl(taskDetailsPanel, wxID_ANY, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1));
+    pStartTime = new wxTimePickerCtrl(taskDetailsPanel, IDC_STARTTIME, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1));
     pStartTime->SetToolTip(wxT("Enter the time when the task started"));
     taskFlexGridSizer->Add(pStartTime, wxSizerFlags().Border(wxALL, 5));
 
@@ -149,7 +151,10 @@ void new_task_dialog::create_controls()
     auto taskDescription = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Description"));
     taskFlexGridSizer->Add(taskDescription, wxSizerFlags().Border(wxALL, 5));
 
-    pDescription = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(320, 180), wxTE_MULTILINE);
+    auto filters = wxFILTER_NONE;
+    wxTextValidator descriptionValidator(filters);
+
+    pDescription = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(320, 180), wxTE_MULTILINE, descriptionValidator, wxT("description_text_ctrl"));
     pDescription->SetToolTip(wxT("Enter a description for the task"));
     detailsBoxSizer->Add(pDescription, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
@@ -169,9 +174,51 @@ void new_task_dialog::create_controls()
     buttonPanelSizer->Add(cancelButton, wxSizerFlags().Border(wxALL, 5));
 }
 
+bool new_task_dialog::validate()
+{
+    auto isStartAheadOfEnd = mStartTime.IsLaterThan(mEndTime);
+    if (isStartAheadOfEnd) {
+        wxMessageBox(wxT("A task cannot be started after the time it has ended"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    auto isEndBeforeStart = mEndTime.IsEarlierThan(mStartTime);
+    if (isEndBeforeStart) {
+        wxMessageBox(wxT("A task cannot end before the time it has started"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    auto taskTimeSpan = mEndTime - mStartTime;
+    auto fiveMinuteTimeSpan = wxTimeSpan::Minutes(5);
+    auto isTaskLessThan5Minutes = taskTimeSpan.IsShorterThan(fiveMinuteTimeSpan);
+    if (isTaskLessThan5Minutes) {
+        wxMessageBox(wxT("A task cannot be less than 5 minutes long"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    auto isDescriptionValid = mDescriptionText.length() > 2048 || mDescriptionText.length() < 4 ||
+                              mDescriptionText.empty();
+    if (!isDescriptionValid) {
+        wxMessageBox(wxT("Description is invalid"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    return true;
+}
+
 void new_task_dialog::on_save(wxCommandEvent& event)
 {
-    int i = 0;
+    mSelectedCategory = pActiveProject->GetCurrentSelection();
+    mStartTime = pStartTime->GetValue();
+    mEndTime = pEndTime->GetValue();
+    mSelectedCategory = pCategories->GetCurrentSelection();
+    mDescriptionText = pDescription->GetValue();
+
+    wxLogDebug(mDescriptionText);
+    auto validationSuccess = validate();
+    if (!validationSuccess) {
+        return;
+    }
 }
 
 void new_task_dialog::on_cancel(wxCommandEvent& event)
