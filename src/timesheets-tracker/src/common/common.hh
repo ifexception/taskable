@@ -24,4 +24,6 @@
 namespace app::common
 {
 const wxSizerFlags ControlDefault = wxSizerFlags().Border(wxALL, 5);
-}
+const wxSizerFlags ControlCenterVertical = wxSizerFlags(ControlDefault).CenterVertical();
+const wxSizerFlags ControlRight = wxSizerFlags(ControlDefault).Align(wxALIGN_RIGHT);
+} // namespace app::common
