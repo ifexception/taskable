@@ -159,17 +159,18 @@ void new_task_dialog::create_controls()
     detailsBoxSizer->Add(pDescription, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
     /* Horizontal Line*/
-    auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+    auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("new_task_static_line"));
     mainSizer->Add(separation_line, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
     auto buttonPanel = new wxPanel(this, wxID_STATIC);
     auto buttonPanelSizer = new wxBoxSizer(wxHORIZONTAL);
+    buttonPanel->SetSizer(buttonPanelSizer);
+    mainSizer->Add(buttonPanel, wxSizerFlags(wxSizerFlags().Border(wxALL, 5)).Center());
+
     auto okButton = new wxButton(buttonPanel, ID_SAVETASK, wxT("&Save "));
     auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
-    mainSizer->Add(buttonPanel, wxSizerFlags(wxSizerFlags().Border(wxALL, 5)).Center());
-    buttonPanel->SetSizer(buttonPanelSizer);
     buttonPanelSizer->Add(okButton, wxSizerFlags().Border(wxALL, 5));
     buttonPanelSizer->Add(cancelButton, wxSizerFlags().Border(wxALL, 5));
 }
@@ -214,7 +215,6 @@ void new_task_dialog::on_save(wxCommandEvent& event)
     mSelectedCategory = pCategories->GetCurrentSelection();
     mDescriptionText = pDescription->GetValue();
 
-    wxLogDebug(mDescriptionText);
     auto validationSuccess = validate();
     if (!validationSuccess) {
         return;
