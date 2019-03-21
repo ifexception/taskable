@@ -23,7 +23,10 @@
 
 namespace app::common
 {
+namespace sizers
+{
 const wxSizerFlags ControlDefault = wxSizerFlags().Border(wxALL, 5);
 const wxSizerFlags ControlCenterVertical = wxSizerFlags(ControlDefault).CenterVertical();
 const wxSizerFlags ControlRight = wxSizerFlags(ControlDefault).Align(wxALIGN_RIGHT);
+} // namespace MyNamespace
 } // namespace app::common
