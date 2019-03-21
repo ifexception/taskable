@@ -29,10 +29,15 @@ wxIMPLEMENT_DYNAMIC_CLASS(new_task_dialog, wxDialog);
 wxBEGIN_EVENT_TABLE(new_task_dialog, wxDialog)
     EVT_BUTTON(ID_SAVETASK, new_task_dialog::on_save)
     EVT_BUTTON(wxID_CANCEL, new_task_dialog::on_cancel)
+    EVT_BUTTON(wxID_EXIT, new_task_dialog::on_exit)
 wxEND_EVENT_TABLE()
 
 new_task_dialog::new_task_dialog(wxWindow* parent, const wxString& name)
-    : mDescriptionText(wxT(""))
+    : mSelectedProject(-1)
+    , mStartTime()
+    , mEndTime()
+    , mSelectedCategory(-1)
+    , mDescriptionText(wxT(""))
 {
     bool success = create(parent,
         wxID_ANY,
@@ -42,6 +47,7 @@ new_task_dialog::new_task_dialog(wxWindow* parent, const wxString& name)
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
         name);
 
+    // BUG? All code being generated in constructor, is this correct approach?
     SetMinClientSize(wxSize(400, 480));
 }
 
@@ -197,9 +203,9 @@ bool new_task_dialog::validate()
         return false;
     }
 
-    auto isDescriptionValid = mDescriptionText.length() > 2048 || mDescriptionText.length() < 4 ||
+    auto isDescriptionInvalid = mDescriptionText.length() > 2048 || mDescriptionText.length() < 4 ||
                               mDescriptionText.empty();
-    if (!isDescriptionValid) {
+    if (isDescriptionInvalid) {
         wxMessageBox(wxT("Description is invalid"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
@@ -207,9 +213,19 @@ bool new_task_dialog::validate()
     return true;
 }
 
+bool new_task_dialog::are_controls_empty()
+{
+    bool isEmpty = mSelectedProject == -1 &&
+        mStartTime == wxDefaultDateTime &&
+        mEndTime == wxDefaultDateTime &&
+        mSelectedCategory == -1 &&
+        mDescriptionText.empty();
+    return isEmpty;
+}
+
 void new_task_dialog::on_save(wxCommandEvent& event)
 {
-    mSelectedCategory = pActiveProject->GetCurrentSelection();
+    mSelectedProject = pActiveProject->GetCurrentSelection();
     mStartTime = pStartTime->GetValue();
     mEndTime = pEndTime->GetValue();
     mSelectedCategory = pCategories->GetCurrentSelection();
@@ -223,9 +239,31 @@ void new_task_dialog::on_save(wxCommandEvent& event)
 
 void new_task_dialog::on_cancel(wxCommandEvent& event)
 {
-    int answer = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
-    if (answer == wxYES) {
+    bool areControlsEmpty = are_controls_empty();
+    if (!areControlsEmpty) {
+
+        int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"),
+                                  wxYES_NO | wxICON_QUESTION);
+        if (answer == wxYES) {
+            Destroy();
+        }
+    } else {
         Destroy();
     }
 }
+void new_task_dialog::on_exit(wxCommandEvent& event)
+{
+    bool areControlsEmpty = are_controls_empty();
+    if (!areControlsEmpty) {
+
+        int answer = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Confirm"),
+                                  wxYES_NO | wxICON_QUESTION);
+        if (answer == wxYES) {
+            Destroy();
+        }
+    } else {
+        Destroy();
+    }
+}
+
 } // namespace app::dialog

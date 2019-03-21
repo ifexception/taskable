@@ -52,9 +52,11 @@ class new_task_dialog : public wxDialog
     void create_controls();
 
     bool validate();
+    bool are_controls_empty();
 
     void on_save(wxCommandEvent& event);
     void on_cancel(wxCommandEvent& event);
+    void on_exit(wxCommandEvent& event);
 
     wxComboBox* pActiveProject;
     wxTimePickerCtrl* pStartTime;
