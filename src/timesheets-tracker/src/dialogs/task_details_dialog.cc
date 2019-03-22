@@ -17,21 +17,21 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "new_task_dialog.hh"
+#include "task_details_dialog.hh"
 #include <wx/timectrl.h>
 #include <wx/statline.h>
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(new_task_dialog, wxDialog);
+wxIMPLEMENT_DYNAMIC_CLASS(task_details_dialog, wxDialog);
 
-wxBEGIN_EVENT_TABLE(new_task_dialog, wxDialog)
-    EVT_BUTTON(ID_SAVETASK, new_task_dialog::on_save)
-    EVT_BUTTON(wxID_CANCEL, new_task_dialog::on_cancel)
-    EVT_BUTTON(wxID_EXIT, new_task_dialog::on_exit)
+wxBEGIN_EVENT_TABLE(task_details_dialog, wxDialog)
+    EVT_BUTTON(ID_SAVETASK, task_details_dialog::on_save)
+    EVT_BUTTON(wxID_CANCEL, task_details_dialog::on_cancel)
+    EVT_BUTTON(wxID_EXIT, task_details_dialog::on_exit)
 wxEND_EVENT_TABLE()
 
-new_task_dialog::new_task_dialog(wxWindow* parent, const wxString& name)
+task_details_dialog::task_details_dialog(wxWindow* parent, const wxString& name)
     : mSelectedProject(-1)
     , mStartTime()
     , mEndTime()
@@ -49,17 +49,17 @@ new_task_dialog::new_task_dialog(wxWindow* parent, const wxString& name)
     SetMinClientSize(wxSize(400, 480));
 }
 
-new_task_dialog::~new_task_dialog()
+task_details_dialog::~task_details_dialog()
 {
     Destroy();
 }
 
-void new_task_dialog::create_new_task()
+void task_details_dialog::create_task_details()
 {
     ShowModal();
 }
 
-bool new_task_dialog::create(wxWindow* parent,
+bool task_details_dialog::create(wxWindow* parent,
     wxWindowID windowId,
     const wxString& title,
     const wxPoint& point,
@@ -87,7 +87,7 @@ bool new_task_dialog::create(wxWindow* parent,
 }
 
 // TODO Refactor
-void new_task_dialog::create_controls()
+void task_details_dialog::create_controls()
 {
     const wxSizerFlags g_flagsV = wxSizerFlags().Border(wxALL, 5);
     const wxSizerFlags g_flagsH = wxSizerFlags(g_flagsV).Align(wxALIGN_CENTER_VERTICAL);
@@ -156,7 +156,7 @@ void new_task_dialog::create_controls()
     tmpCategories.Add(wxT("Meeting"));
     tmpCategories.Add(wxT("Analysis"));
 
-    pCategories = new wxComboBox(taskDetailsPanel, wxID_ANY, wxT("Programming"), wxDefaultPosition, wxDefaultSize, tmpCategories, wxCB_DROPDOWN);
+    pCategories = new wxComboBox(taskDetailsPanel, wxID_ANY, wxT("Select a category"), wxDefaultPosition, wxDefaultSize, tmpCategories, wxCB_DROPDOWN);
     taskFlexGridSizer->Add(pCategories, wxSizerFlags().Border(wxALL, 5));
 
     /* Task Description Text Control */
@@ -187,7 +187,7 @@ void new_task_dialog::create_controls()
     buttonPanelSizer->Add(cancelButton, wxSizerFlags().Border(wxALL, 5));
 }
 
-bool new_task_dialog::validate()
+bool task_details_dialog::validate()
 {
     auto isStartAheadOfEnd = mStartTime.IsLaterThan(mEndTime);
     if (isStartAheadOfEnd) {
@@ -219,7 +219,7 @@ bool new_task_dialog::validate()
     return true;
 }
 
-bool new_task_dialog::are_controls_empty()
+bool task_details_dialog::are_controls_empty()
 {
     bool isEmpty = mSelectedProject == -1 &&
         mStartTime == wxDefaultDateTime &&
@@ -229,7 +229,7 @@ bool new_task_dialog::are_controls_empty()
     return isEmpty;
 }
 
-void new_task_dialog::on_save(wxCommandEvent& event)
+void task_details_dialog::on_save(wxCommandEvent& event)
 {
     mSelectedProject = pActiveProject->GetCurrentSelection();
     mStartTime = pStartTime->GetValue();
@@ -243,7 +243,7 @@ void new_task_dialog::on_save(wxCommandEvent& event)
     }
 }
 
-void new_task_dialog::on_cancel(wxCommandEvent& event)
+void task_details_dialog::on_cancel(wxCommandEvent& event)
 {
     bool areControlsEmpty = are_controls_empty();
     if (!areControlsEmpty) {
@@ -257,7 +257,7 @@ void new_task_dialog::on_cancel(wxCommandEvent& event)
         Destroy();
     }
 }
-void new_task_dialog::on_exit(wxCommandEvent& event)
+void task_details_dialog::on_exit(wxCommandEvent& event)
 {
     bool areControlsEmpty = are_controls_empty();
     if (!areControlsEmpty) {

@@ -29,18 +29,18 @@ namespace app::dialog
 const int ID_SAVETASK = wxNewId();
 const int IDC_STARTTIME = wxNewId();
 
-class new_task_dialog : public wxDialog
+class task_details_dialog : public wxDialog
 {
-    wxDECLARE_DYNAMIC_CLASS(new_task_dialog);
+    wxDECLARE_DYNAMIC_CLASS(task_details_dialog);
     wxDECLARE_EVENT_TABLE();
 
   public:
-    new_task_dialog() = default;
-    explicit new_task_dialog(wxWindow* parent,
-        const wxString& name = "new_task_dialog");
-    virtual ~new_task_dialog();
+    task_details_dialog() = default;
+    explicit task_details_dialog(wxWindow* parent,
+        const wxString& name = "task_details_dialog");
+    virtual ~task_details_dialog();
 
-    void create_new_task();
+    void create_task_details();
 
   private:
     bool create(wxWindow* parent,
