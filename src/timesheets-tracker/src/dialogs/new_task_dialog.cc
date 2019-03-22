@@ -20,7 +20,6 @@
 #include "new_task_dialog.hh"
 #include <wx/timectrl.h>
 #include <wx/statline.h>
-#include <wx/dateevt.h>
 
 namespace app::dialog
 {
@@ -47,13 +46,17 @@ new_task_dialog::new_task_dialog(wxWindow* parent, const wxString& name)
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
         name);
 
-    // BUG? All code being generated in constructor, is this correct approach?
     SetMinClientSize(wxSize(400, 480));
 }
 
 new_task_dialog::~new_task_dialog()
 {
     Destroy();
+}
+
+void new_task_dialog::create_new_task()
+{
+    ShowModal();
 }
 
 bool new_task_dialog::create(wxWindow* parent,
@@ -75,8 +78,9 @@ bool new_task_dialog::create(wxWindow* parent,
     if (created) {
         create_controls();
 
+        GetSizer()->Fit(this);
+        //SetIcon();
         Centre();
-        ShowModal();
     }
 
     return created;
@@ -117,11 +121,12 @@ void new_task_dialog::create_controls()
     taskFlexGridSizer->Add(activeProject, wxSizerFlags().Border(wxALL, 5).CenterVertical());
 
     wxArrayString tmpProjects;
+    tmpProjects.Add(wxT("Select a project"));
     tmpProjects.Add(wxT("Silica"));
     tmpProjects.Add(wxT("Entelect"));
     tmpProjects.Add(wxT("Social"));
 
-    pActiveProject = new wxComboBox(taskDetailsPanel, wxID_ANY, wxT("Silica"), wxDefaultPosition, wxDefaultSize, tmpProjects, wxCB_DROPDOWN);
+    pActiveProject = new wxComboBox(taskDetailsPanel, wxID_ANY, wxT("Select a project"), wxDefaultPosition, wxDefaultSize, tmpProjects, wxCB_DROPDOWN);
     pActiveProject->SetToolTip(wxT("Select the project to associate this task with"));
     taskFlexGridSizer->Add(pActiveProject, wxSizerFlags().Border(wxALL, 5));
 
@@ -146,6 +151,7 @@ void new_task_dialog::create_controls()
     taskFlexGridSizer->Add(taskCategory, wxSizerFlags().Border(wxALL, 5).CenterVertical());
 
     wxArrayString tmpCategories;
+    tmpCategories.Add(wxT("Select a category"));
     tmpCategories.Add(wxT("Programming"));
     tmpCategories.Add(wxT("Meeting"));
     tmpCategories.Add(wxT("Analysis"));

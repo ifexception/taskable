@@ -40,6 +40,8 @@ class new_task_dialog : public wxDialog
         const wxString& name = "new_task_dialog");
     virtual ~new_task_dialog();
 
+    void create_new_task();
+
   private:
     bool create(wxWindow* parent,
         wxWindowID windowId,
