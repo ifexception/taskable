@@ -54,7 +54,7 @@ task_details_dialog::~task_details_dialog()
     Destroy();
 }
 
-void task_details_dialog::create_task_details()
+void task_details_dialog::launch_task_details_dialog()
 {
     ShowModal();
 }

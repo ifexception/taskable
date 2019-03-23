@@ -40,7 +40,7 @@ class task_details_dialog : public wxDialog
         const wxString& name = "task_details_dialog");
     virtual ~task_details_dialog();
 
-    void create_task_details();
+    void launch_task_details_dialog();
 
   private:
     bool create(wxWindow* parent,

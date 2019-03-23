@@ -50,7 +50,7 @@ main_frame::main_frame() : wxFrame(nullptr, wxID_ANY, "Timesheets Tracker")
     Bind(wxEVT_MENU,
          [=](wxCommandEvent&) {
              dialog::task_details_dialog newTask(nullptr);
-             newTask.create_task_details();
+             newTask.launch_task_details_dialog();
          },
          newTaskId);
 }
