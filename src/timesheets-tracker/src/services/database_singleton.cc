@@ -18,6 +18,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "database_singleton.hh"
+#include "../common/config.hh"
 
 namespace app::services
 {
@@ -27,13 +28,15 @@ database_singleton& database_singleton::get_instance()
     return instance;
 }
 
-const ccqlite::database& database_singleton::get_database()
+const ccqlite::database* database_singleton::get_database()
 {
-    return mDatabase;
+    return pDatabase;
 }
 
 database_singleton::database_singleton()
     : mPermission(ccqlite::permission::CreateReadWrite)
-    , mDatabase("", mPermission)
-{ }
+{
+    pDatabase =
+        new ccqlite::database(cfg::config::get_instance().get_connection_string(), mPermission);
+}
 }

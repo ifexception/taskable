@@ -31,12 +31,12 @@ class database_singleton
     database_singleton(const database_singleton&) = delete;
     database_singleton& operator=(const database_singleton&) = delete;
 
-    const ccqlite::database& get_database();
+    const ccqlite::database* get_database();
 
   private:
     database_singleton();
 
     ccqlite::permission mPermission;
-    ccqlite::database mDatabase;
+    ccqlite::database* pDatabase;
 };
 } // namespace app::services
