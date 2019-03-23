@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <datasource type="debug">C:\Development\cpp-dev\wx-timesheets-tracker\build\x86-Debug\src\timesheets-tracker\Debug\timesheets-tracker.db</datasource>
+    <datasource type="release">C:\Program Files (x86)\TimesheetsTracker\timesheets-tracker.db</datasource>
+</configuration>
