@@ -20,6 +20,7 @@ message (STATUS "wxWidgets_FOUND: ${wxWidgets_FOUND}")
 set (SRC
     "src/common/menu_ids.cc"
     "src/common/common.cc"
+    "src/common/util.cc"
     "src/common/config.cc"
     "src/services/database_singleton.cc"
     "src/app.cc"
@@ -51,4 +52,5 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC
     rapidxml)
 
-target_link_libraries(${PROJECT_NAME} ccqlite ${wxWidgets_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ccqlite
+    ${wxWidgets_LIBRARIES})
