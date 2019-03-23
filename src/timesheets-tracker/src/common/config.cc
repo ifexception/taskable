@@ -18,3 +18,57 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "config.hh"
+
+#include <fstream>
+#include <sstream>
+
+#include <rapidxml.hpp>
+
+#include "util.hh"
+
+namespace app::cfg
+{
+const std::string CFG_FILE = "timesheets-tracker.cfg.xml";
+
+config& config::get_instance()
+{
+    static config instance;
+    return instance;
+}
+
+std::string config::get_connection_string() const
+{
+    return mConnectionString;
+}
+
+config::config()
+{
+    auto cfgFileContents = util::read_file(CFG_FILE);
+
+    rapidxml::xml_document<> cfgDocument;
+    cfgDocument.parse<0>(&cfgFileContents[0]);
+
+    auto configurationNode = cfgDocument.first_node("configuration");
+
+    for (auto node = configurationNode->first_node(); node; node = node->next_sibling()) {
+#ifdef _DEBUG
+        auto x = node->first_attribute("type")->value();
+        auto y = node->value();
+        if (std::string(node->first_attribute("type")->value()) == "debug") {
+            auto connectionString = node->value();
+            set_connection_string(std::string(connectionString));
+        }
+#else
+        if (node->first_attribute("type")->value() == "release") {
+            auto connectionString = node->value();
+            set_connection_string(std::string(connectionString));
+        }
+#endif
+    }
+}
+
+void config::set_connection_string(const std::string& connectionString)
+{
+    mConnectionString = connectionString;
+}
+} // namespace app::cfg

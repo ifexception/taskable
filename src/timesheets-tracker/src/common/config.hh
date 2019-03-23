@@ -19,18 +19,26 @@
 
 #pragma once
 
-#include <rapidxml.hpp>
+#include <string>
 
 namespace app::cfg
 {
-struct config {
+class config
+{
   public:
     static config& get_instance();
 
     config(const config&) = delete;
     config& operator=(const config&) = delete;
 
+    std::string get_connection_string() const;
+
   private:
-    config() = default;
+    config();
+    ~config() = default;
+
+    void set_connection_string(const std::string& connectionString);
+
+    std::string mConnectionString;
 };
 } // namespace app::cfg
