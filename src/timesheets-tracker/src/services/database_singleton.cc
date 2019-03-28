@@ -28,6 +28,11 @@ database_singleton& database_singleton::get_instance()
     return instance;
 }
 
+database_singleton::~database_singleton()
+{
+    delete pDatabase;
+}
+
 const db::database* database_singleton::get_database()
 {
     return pDatabase;

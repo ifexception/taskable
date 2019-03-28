@@ -28,6 +28,8 @@ class database_singleton
   public:
     static database_singleton& get_instance();
 
+    ~database_singleton();
+
     database_singleton(const database_singleton&) = delete;
     database_singleton& operator=(const database_singleton&) = delete;
 
