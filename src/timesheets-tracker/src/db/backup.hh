@@ -18,22 +18,39 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-
 #pragma once
 
 #include <string>
+#include <memory>
 
 #include <sqlite3.h>
 
-namespace ccqlite
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
+
+namespace app::db
 {
-enum class column_type : int
+class database;
+
+class backup
 {
-    Integer = SQLITE_INTEGER,
-    Float = SQLITE_FLOAT,
-    Text = SQLITE_TEXT,
-    Blob = SQLITE_BLOB,
-    Null = SQLITE_NULL,
-    Unknown = 6
+  public:
+    backup() = delete;
+    explicit backup(const backup&) = delete;
+    explicit backup(database& destination, const std::string& destinationName,
+                    database& source, const std::string& sourceName);
+    ~backup();
+
+    backup& operator=(const backup&) = delete;
+
+    void execute_step(const int numberPages);
+
+    int get_remaining_page_count();
+    int get_total_page_count();
+
+  private:
+    sqlite3_backup* pBackupHandle;
+
+    std::shared_ptr<spdlog::logger> pLogger;
 };
-}
+} // namespace app::db

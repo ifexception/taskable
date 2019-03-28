@@ -21,10 +21,10 @@
 
 #include "database.hh"
 
-#include "constants.hh"
+#include "../common/constants.hh"
 #include "database_exception.hh"
 
-namespace ccqlite
+namespace app::db
 {
 database::database(database&& other)
 {
@@ -35,7 +35,7 @@ database::database(database&& other)
     other.pLogger = nullptr;
 }
 
-database::database(const std::string filePath)
+database::database(const std::string& filePath)
     : pHandle(nullptr)
     , pLogger(nullptr)
 {
@@ -45,7 +45,7 @@ database::database(const std::string filePath)
     init_sqlite_connection(filePath, defaultPermission);
 }
 
-database::database(const std::string filePath, const permission permission)
+database::database(const std::string& filePath, const permission permission)
     : pHandle(nullptr)
     , pLogger(nullptr)
 {
@@ -97,17 +97,18 @@ void database::init_logging()
     spdlog::set_level(spdlog::level::info);
 
     try {
-        pLogger = spdlog::daily_logger_mt(Constants::LoggerName,
-            "logs/ccqlite.log.txt");
+        pLogger = spdlog::daily_logger_st(Constants::LoggerName,
+            "logs/app::db.log.txt");
         pLogger->info(Constants::Info::LoggerInitialized);
 
-        spdlog::register_logger(pLogger);
+        spdlog::flush_every(std::chrono::seconds(3));
+        //spdlog::register_logger(pLogger);
     } catch (const spdlog::spdlog_ex&) {
         exit(EXIT_FAILURE);
     }
 }
 
-void database::init_sqlite_connection(const std::string filePath,
+void database::init_sqlite_connection(const std::string& filePath,
     const permission permission)
 {
     const char* filename = filePath.c_str();
@@ -132,4 +133,4 @@ void database::close_handle()
     sqlite3_close(pHandle);
     pHandle = nullptr;
 }
-} // namespace ccqlite
+} // namespace app::db

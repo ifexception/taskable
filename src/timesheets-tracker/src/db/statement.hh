@@ -29,7 +29,7 @@
 
 struct sqlite3_stmt;
 
-namespace ccqlite
+namespace app::db
 {
 class database;
 
@@ -86,4 +86,4 @@ class statement
     bool bHasRow;
     bool bIsDone;
 };
-} // namespace ccqlite
+} // namespace app::db

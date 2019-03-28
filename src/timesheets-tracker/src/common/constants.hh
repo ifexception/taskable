@@ -21,12 +21,33 @@
 
 #pragma once
 
-#ifdef _WIN32
+#include <string>
 
-#ifdef CCQLITE_EXPORTS
-#define CCQLITE_API __declspec(dllexport)
-#else
-#define CCQLITE_API __declspec(dllimport)
-#endif // CCQLITE_EXPORTS
+namespace app::db::Constants
+{
+static const std::string LoggerName = "app::db_logger";
 
-#endif // _WIN32
+namespace Info
+{
+static std::string LoggerInitialized = "Logger initialized...";
+} // Info
+
+namespace Error
+{
+static std::string SqliteError = "Error sqlite code: {0}";
+
+static std::string SqliteConnection =
+    "Failed to connect to sqlite instance: {0}";
+
+static std::string BackupInitialization =
+    "Error initializing sqlite backup handle";
+
+static std::string UnableToBackupPage = "Error while backing up";
+
+static std::string StatementInitialization =
+    "Error initializing sqlite statement handle";
+
+static std::string StatementExecution =
+    "Error while executing query: {0}";
+} // namespace Error
+} // namespace app::db::Constants

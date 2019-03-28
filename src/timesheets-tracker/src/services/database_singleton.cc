@@ -28,15 +28,15 @@ database_singleton& database_singleton::get_instance()
     return instance;
 }
 
-const ccqlite::database* database_singleton::get_database()
+const db::database* database_singleton::get_database()
 {
     return pDatabase;
 }
 
 database_singleton::database_singleton()
-    : mPermission(ccqlite::permission::CreateReadWrite)
+    : mPermission(db::permission::CreateReadWrite)
 {
-    pDatabase =
-        new ccqlite::database(cfg::config::get_instance().get_connection_string(), mPermission);
+    std::string connectionString = cfg::config::get_instance().get_connection_string();
+    pDatabase = new db::database(connectionString, mPermission);
 }
 }

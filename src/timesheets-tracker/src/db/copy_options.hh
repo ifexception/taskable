@@ -20,9 +20,11 @@
 
 #pragma once
 
-constexpr auto CCQLITE_MAJOR = 0;
-constexpr auto CCQLITE_MINOR = 4;
-constexpr auto CCQLITE_PATCH = 0;
-
-constexpr auto CCQLITE_VERSION =
-    (CCQLITE_MAJOR * 1000 + CCQLITE_MINOR * 100 + CCQLITE_PATCH);
+namespace app::db
+{
+enum class copy_options
+{
+    Copy,
+    NoCopy
+};
+}

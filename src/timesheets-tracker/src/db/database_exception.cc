@@ -21,7 +21,7 @@
 
 #include "database_exception.hh"
 
-namespace ccqlite
+namespace app::db
 {
 database_exception::database_exception(const char* errorMessage)
     : std::runtime_error(errorMessage)

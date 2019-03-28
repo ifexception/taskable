@@ -21,9 +21,9 @@
 
 #include "column.hh"
 
-#include "constants.hh"
+#include "../common/constants.hh"
 
-namespace ccqlite
+namespace app::db
 {
 column::column(const column& other)
 {

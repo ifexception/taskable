@@ -18,30 +18,45 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-
 #pragma once
 
-#include <sqlite3.h>
-#include <stdexcept>
+#include <string>
 
-namespace ccqlite
+#include <sqlite3.h>
+
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/daily_file_sink.h>
+
+#include "permission.hh"
+
+namespace app::db
 {
-class database_exception : std::runtime_error
+class database
 {
   public:
-    database_exception() = delete;
-    explicit database_exception(const char* errorMessage);
-    explicit database_exception(int ret);
-    explicit database_exception(const char* errorMessage, int ret);
-    explicit database_exception(const std::string& errorMessage);
-    explicit database_exception(const std::string& errorMessage, int ret);
-    explicit database_exception(sqlite3* handle);
-    explicit database_exception(sqlite3* handle, int ret);
-    ~database_exception() = default;
+    database() = delete;
+    database(const database& other) = delete;
+    database(database&& other);
+    explicit database(const std::string& filePath);
+    explicit database(const std::string& filePath, const permission permission);
+    ~database();
 
-    int get_error_code() const noexcept;
+    database& operator=(const database& other) = delete;
+    database& operator=(database&& other);
+
+    sqlite3* get_handle() const;
+    const std::string get_lib_version();
+    const int get_lib_version_number();
 
   private:
-    int mErrorCode;
+    void init_logging();
+    void init_sqlite_connection(const std::string& filePath,
+        const permission permission);
+    void close_handle();
+
+    sqlite3* pHandle;
+
+    std::shared_ptr<spdlog::logger> pLogger;
 };
-} // namespace ccqlite
+} // namespace app::db

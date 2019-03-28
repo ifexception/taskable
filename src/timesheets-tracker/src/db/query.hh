@@ -18,36 +18,25 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-
 #pragma once
 
-#include <string>
+#include "statement.hh"
 
-namespace ccqlite::Constants
+namespace app::db
 {
-static const std::string LoggerName = "ccqlite_logger";
+class database;
 
-namespace Info
+class query : public statement
 {
-static std::string LoggerInitialized = "Logger initialized...";
-} // Info
+  public:
+    query() = delete;
+    query(const query&) = delete;
+    explicit query(database& db, const std::string& query);
+    virtual ~query() = default;
 
-namespace Error
-{
-static std::string SqliteError = "Error sqlite code: {0}";
+    query& operator=(const query&) = delete;
 
-static std::string SqliteConnection =
-    "Failed to connect to sqlite instance: {0}";
-
-static std::string BackupInitialization =
-    "Error initializing sqlite backup handle";
-
-static std::string UnableToBackupPage = "Error while backing up";
-
-static std::string StatementInitialization =
-    "Error initializing sqlite statement handle";
-
-static std::string StatementExecution =
-    "Error while executing query: {0}";
-} // namespace Error
-} // namespace ccqlite::Constants
+    int column_count() const;
+    std::string column_name(int index) const;
+};
+} // namespace app::db

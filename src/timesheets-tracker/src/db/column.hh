@@ -26,13 +26,12 @@
 
 #include <sqlite3.h>
 
-#include "ccqliteapi.hh"
 #include "column_type.hh"
 
-namespace ccqlite
+namespace app::db
 {
 
-class CCQLITE_API column
+class column
 {
   public:
     column() = delete;
@@ -84,4 +83,4 @@ std::tuple<Types...> column::get_columns(
     return std::make_tuple(get(Integers, Types())...);
 }
 
-} // namespace ccqlite
+} // namespace app::db

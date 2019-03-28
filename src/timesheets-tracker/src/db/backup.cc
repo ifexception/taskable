@@ -21,11 +21,11 @@
 
 #include "backup.hh"
 
-#include "constants.hh"
+#include "../common/constants.hh"
 #include "database.hh"
 #include "database_exception.hh"
 
-namespace ccqlite
+namespace app::db
 {
 backup::backup(database& destination,
     const std::string& destinationName,
@@ -76,4 +76,4 @@ int backup::get_total_page_count()
 {
     return sqlite3_backup_pagecount(pBackupHandle);
 }
-} // namespace ccqlite
+} // namespace app::db

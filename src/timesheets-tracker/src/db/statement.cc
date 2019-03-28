@@ -22,11 +22,11 @@
 
 #include <sqlite3.h>
 
-#include "constants.hh"
+#include "../common/constants.hh"
 #include "database.hh"
 #include "database_exception.hh"
 
-namespace ccqlite
+namespace app::db
 {
 statement::statement(const database& db, const std::string& query)
     : pStatement(nullptr)
@@ -255,4 +255,4 @@ int statement::step()
     }
 }
 
-} // namespace ccqlite
+} // namespace app::db

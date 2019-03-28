@@ -24,7 +24,7 @@
 
 #include "database.hh"
 
-namespace ccqlite
+namespace app::db
 {
 query::query(database& db, const std::string& query)
     : statement(db, query)

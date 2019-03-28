@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <database.hh>
+#include "../db/database.hh"
 
 namespace app::services
 {
@@ -31,12 +31,12 @@ class database_singleton
     database_singleton(const database_singleton&) = delete;
     database_singleton& operator=(const database_singleton&) = delete;
 
-    const ccqlite::database* get_database();
+    const db::database* get_database();
 
   private:
     database_singleton();
 
-    ccqlite::permission mPermission;
-    ccqlite::database* pDatabase;
+    db::permission mPermission;
+    db::database* pDatabase;
 };
 } // namespace app::services

@@ -1,19 +1,22 @@
 cmake_minimum_required (VERSION 3.8)
-project(wxTimesheetsTracker)
+project (wxTimesheetsTracker)
 
-if(MSVC)
+if (MSVC)
     include (${CMAKE_MODULE_PATH}/FindwxWidgetsVcpkg.cmake)
-else(MSVC)
+else (MSVC)
     find_package (wxWidgets REQUIRED COMPONENTS base core)
     include (${wxWidgets_USE_FILE})
-endif()
+endif ()
 include (${CMAKE_MODULE_PATH}/FindRapidXml.cmake)
 
-message(STATUS "CMAKE_CONFIGURATION_TYPES:${CMAKE_CONFIGURATION_TYPES}")
+message (STATUS "CMAKE_CONFIGURATION_TYPES:${CMAKE_CONFIGURATION_TYPES}")
 
-find_package (ccqlite REQUIRED)
 find_package (rapidxml REQUIRED)
-message (STATUS "ccqlite_FOUND: ${ccqlite_FOUND}")
+find_package (sqlite3 REQUIRED)
+find_package (spdlog CONFIG REQUIRED)
+
+message (STATUS "sqlite3 found: ${sqlite3_FOUND}")
+message (STATUS "spdlog found: ${spdlog_FOUND}")
 message (STATUS "rapidxml_FOUND: ${rapidxml_FOUND}")
 message (STATUS "wxWidgets_FOUND: ${wxWidgets_FOUND}")
 
@@ -22,6 +25,17 @@ set (SRC
     "src/common/common.cc"
     "src/common/util.cc"
     "src/common/config.cc"
+    "src/common/constants.cc"
+    "src/db/database.cc"
+    "src/db/permission.cc"
+    "src/db/database_exception.cc"
+    "src/db/backup.cc"
+    "src/db/column_type.cc"
+    "src/db/column.cc"
+    "src/db/copy_options.cc"
+    "src/db/statement.cc"
+    "src/db/command.cc"
+    "src/db/query.cc"
     "src/services/database_singleton.cc"
     "src/app.cc"
     "src/frame/main_frame.cc"
@@ -48,9 +62,10 @@ target_compile_definitions (${PROJECT_NAME} PUBLIC
     __WXMSW__
     $<$<CONFIG:Debug>:_DEBUG>)
 
-target_include_directories(${PROJECT_NAME}
-    PUBLIC
+target_include_directories(${PROJECT_NAME} PUBLIC
     rapidxml)
 
-target_link_libraries(${PROJECT_NAME} ccqlite
-    ${wxWidgets_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}
+    ${wxWidgets_LIBRARIES}
+    sqlite3
+    spdlog::spdlog)

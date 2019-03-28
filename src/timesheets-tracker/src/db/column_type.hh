@@ -18,13 +18,22 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+
 #pragma once
 
-namespace ccqlite
+#include <string>
+
+#include <sqlite3.h>
+
+namespace app::db
 {
-enum class copy_options
+enum class column_type : int
 {
-    Copy,
-    NoCopy
+    Integer = SQLITE_INTEGER,
+    Float = SQLITE_FLOAT,
+    Text = SQLITE_TEXT,
+    Blob = SQLITE_BLOB,
+    Null = SQLITE_NULL,
+    Unknown = 6
 };
 }

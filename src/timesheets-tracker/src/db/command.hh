@@ -20,23 +20,33 @@
 
 #pragma once
 
+#include <string>
+
 #include "statement.hh"
 
-namespace ccqlite
+namespace app::db
 {
+
 class database;
 
-class query : public statement
+class command : public statement
 {
   public:
-    query() = delete;
-    query(const query&) = delete;
-    explicit query(database& db, const std::string& query);
-    virtual ~query() = default;
+    command() = delete;
+    command(const command&) = delete;
+    explicit command(database& db, const std::string& query);
+    virtual ~command() = default;
 
-    query& operator=(const query&) = delete;
+    command& operator=(const command&) = delete;
 
-    int column_count() const;
-    std::string column_name(int index) const;
+    template <class T>
+    void bind(int index, T type);
 };
-} // namespace ccqlite
+
+template <class T>
+void command::bind(int index, T type)
+{
+    bind(index, type);
+}
+
+} // namespace app::db

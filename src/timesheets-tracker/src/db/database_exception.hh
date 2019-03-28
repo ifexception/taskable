@@ -21,4 +21,27 @@
 
 #pragma once
 
-#include "database.hh"
+#include <sqlite3.h>
+#include <stdexcept>
+
+namespace app::db
+{
+class database_exception : std::runtime_error
+{
+  public:
+    database_exception() = delete;
+    explicit database_exception(const char* errorMessage);
+    explicit database_exception(int ret);
+    explicit database_exception(const char* errorMessage, int ret);
+    explicit database_exception(const std::string& errorMessage);
+    explicit database_exception(const std::string& errorMessage, int ret);
+    explicit database_exception(sqlite3* handle);
+    explicit database_exception(sqlite3* handle, int ret);
+    ~database_exception() = default;
+
+    int get_error_code() const noexcept;
+
+  private:
+    int mErrorCode;
+};
+} // namespace app::db

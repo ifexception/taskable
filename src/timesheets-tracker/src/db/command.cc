@@ -18,23 +18,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "command.hh"
 
-#pragma once
-
-#include <sqlite3.h>
-
-namespace ccqlite
+namespace app::db
 {
-enum class permission
-{
-    ReadOnly = SQLITE_OPEN_READONLY,
-    ReadWrite = SQLITE_OPEN_READWRITE,
-    Create = SQLITE_OPEN_CREATE,
-    CreateReadWrite = ReadWrite | Create,
-    NoMutex = SQLITE_OPEN_NOMUTEX,
-    FullMutex = SQLITE_OPEN_FULLMUTEX,
-    SharedCache = SQLITE_OPEN_SHAREDCACHE,
-    PrivateCache = SQLITE_OPEN_PRIVATECACHE,
-    Uri = SQLITE_OPEN_URI
-};
+command::command(database& db, const std::string& query)
+    : statement(db, query)
+{}
 }

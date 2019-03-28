@@ -18,42 +18,23 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#pragma once
 
-#include <string>
-#include <memory>
+#pragma once
 
 #include <sqlite3.h>
 
-#define FMT_HEADER_ONLY
-#include <spdlog/spdlog.h>
-
-#include "ccqliteapi.hh"
-
-namespace ccqlite
+namespace app::db
 {
-class database;
-
-class CCQLITE_API backup
+enum class permission
 {
-  public:
-    backup() = delete;
-    explicit backup(const backup&) = delete;
-    explicit backup(database& destination, const std::string& destinationName,
-                    database& source, const std::string& sourceName);
-    ~backup();
-
-    backup& operator=(const backup&) = delete;
-
-    void execute_step(const int numberPages);
-
-    int get_remaining_page_count();
-    int get_total_page_count();
-
-  private:
-    sqlite3_backup* pBackupHandle;
-
-#pragma warning(suppress : 4251) // pLogger is not exportable
-    std::shared_ptr<spdlog::logger> pLogger;
+    ReadOnly = SQLITE_OPEN_READONLY,
+    ReadWrite = SQLITE_OPEN_READWRITE,
+    Create = SQLITE_OPEN_CREATE,
+    CreateReadWrite = ReadWrite | Create,
+    NoMutex = SQLITE_OPEN_NOMUTEX,
+    FullMutex = SQLITE_OPEN_FULLMUTEX,
+    SharedCache = SQLITE_OPEN_SHAREDCACHE,
+    PrivateCache = SQLITE_OPEN_PRIVATECACHE,
+    Uri = SQLITE_OPEN_URI
 };
-} // namespace ccqlite
+}
