@@ -97,13 +97,11 @@ void database::init_logging()
     spdlog::set_level(spdlog::level::info);
 
     try {
-        pLogger = spdlog::daily_logger_st(Constants::LoggerName,
-            "logs/app::db.log.txt");
+        pLogger = spdlog::daily_logger_st(Constants::LoggerName, "logs/db.log.txt");
         pLogger->info(Constants::Info::LoggerInitialized);
 
         spdlog::flush_every(std::chrono::seconds(3));
-        //spdlog::register_logger(pLogger);
-    } catch (const spdlog::spdlog_ex&) {
+    } catch (const spdlog::spdlog_ex& e) {
         exit(EXIT_FAILURE);
     }
 }
@@ -119,10 +117,8 @@ void database::init_sqlite_connection(const std::string& filePath,
         const database_exception exception(pHandle, ret);
         close_handle();
 
-        pLogger->error(Constants::Error::SqliteConnection.c_str(),
-            filePath);
-        pLogger->error(Constants::Error::SqliteError.c_str(),
-            exception.get_error_code());
+        pLogger->error(Constants::Error::SqliteConnection.c_str(), filePath);
+        pLogger->error(Constants::Error::SqliteError.c_str(), exception.get_error_code());
 
         throw exception;
     }

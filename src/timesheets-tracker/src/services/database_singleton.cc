@@ -41,7 +41,7 @@ const db::database* database_singleton::get_database()
 database_singleton::database_singleton()
     : mPermission(db::permission::CreateReadWrite)
 {
-    std::string connectionString = cfg::config::get_instance().get_connection_string();
+    auto connectionString = cfg::config::get_instance().get_connection_string();
     pDatabase = new db::database(connectionString, mPermission);
 }
 }
