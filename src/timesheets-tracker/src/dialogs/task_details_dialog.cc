@@ -21,8 +21,6 @@
 #include <wx/timectrl.h>
 #include <wx/statline.h>
 
-#include "../services/database_singleton.hh"
-
 namespace app::dialog
 {
 wxIMPLEMENT_DYNAMIC_CLASS(task_details_dialog, wxDialog);
@@ -47,8 +45,6 @@ task_details_dialog::task_details_dialog(wxWindow* parent, const wxString& name)
         wxSize(385, 488),
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
         name);
-
-    auto x = services::database_singleton::get_instance().get_database();
 
     SetMinClientSize(wxSize(400, 480));
 }
