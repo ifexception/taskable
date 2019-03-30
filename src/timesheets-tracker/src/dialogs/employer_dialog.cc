@@ -113,7 +113,9 @@ void employer_dialog::create_controls()
     /* Employer Is Active warning */
     wxString activeEmployerString(wxT("Adding a employer will automatically make it the active one"));
     auto employerActiveText = new wxStaticText(this, wxID_ANY, activeEmployerString, wxDefaultPosition, wxSize(316, -1));
-    employerActiveText->GetFont().MakeItalic();
+    auto font = employerActiveText->GetFont();
+    font.MakeItalic();
+    employerActiveText->SetFont(font);
     detailsBoxSizer->Add(employerActiveText, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
     /* Horizontal Line*/
