@@ -30,6 +30,7 @@ wxIMPLEMENT_DYNAMIC_CLASS(employer_dialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(employer_dialog, wxDialog)
     EVT_BUTTON(ids::ID_SAVE, employer_dialog::on_save)
+    EVT_BUTTON(wxID_CANCEL, employer_dialog::on_cancel)
 wxEND_EVENT_TABLE()
 
 employer_dialog::employer_dialog(wxWindow* parent, bool isEdit, const wxString& name)
@@ -39,9 +40,9 @@ employer_dialog::employer_dialog(wxWindow* parent, bool isEdit, const wxString& 
     wxSize employerSize(WIDTH, HEIGHT);
     wxString title;
     if (isEdit) {
-        title = wxT("Add Employer");
-    } else {
         title = wxT("Edit Employer");
+    } else {
+        title = wxT("Add Employer");
     }
     bool success = create(parent, wxID_ANY, title, wxDefaultPosition, employerSize, style, name);
 
@@ -110,10 +111,10 @@ void employer_dialog::create_controls()
     taskFlexGridSizer->Add(pEmployerCtrl, common::sizers::ControlDefault);
 
     /* Employer Is Active warning */
-    wxString activeEmployerText(wxT("Adding a employer will automatically make it the active one"));
-    auto employerActiveSetting = new wxStaticText(employerDetailsPanel, wxID_STATIC, wxT(""));
-    employerActiveSetting->GetFont().MakeItalic();
-    taskFlexGridSizer->Add(employerActiveSetting, common::sizers::ControlExpand);
+    wxString activeEmployerString(wxT("Adding a employer will automatically make it the active one"));
+    auto employerActiveText = new wxStaticText(this, wxID_ANY, activeEmployerString, wxDefaultPosition, wxSize(316, -1));
+    employerActiveText->GetFont().MakeItalic();
+    detailsBoxSizer->Add(employerActiveText, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
     /* Horizontal Line*/
     auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("new_task_static_line"));
@@ -134,23 +135,46 @@ void employer_dialog::create_controls()
 
 bool employer_dialog::validate()
 {
-    return false;
+    bool isInvalid = mEmployerText.length() > 255 || mEmployerText.length() < 2 ||
+                   mEmployerText.empty();
+    if (isInvalid) {
+        wxMessageBox(wxT("Employer name is invalid"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+    return true;
 }
 
 bool employer_dialog::are_controls_empty()
 {
-    return false;
+    bool isEmpty = mEmployerText.empty();
+    if (!isEmpty) {
+        return false;
+    }
+    return true;
 }
 
 void employer_dialog::on_save(wxCommandEvent& event)
 {
+    mEmployerText = pEmployerCtrl->GetValue();
+
+    bool validationSuccess = validate();
+    if (!validationSuccess) {
+        return;
+    }
 }
 
 void employer_dialog::on_cancel(wxCommandEvent& event)
 {
-}
+    bool areControlsEmpty = are_controls_empty();
+    if (!areControlsEmpty) {
 
-void employer_dialog::on_exit(wxCommandEvent& event)
-{
+        int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"),
+                                  wxYES_NO | wxICON_QUESTION);
+        if (answer == wxYES) {
+            Destroy();
+        }
+    } else {
+        Destroy();
+    }
 }
 }

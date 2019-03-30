@@ -47,7 +47,6 @@ class employer_dialog : public wxDialog
 
     void on_save(wxCommandEvent& event);
     void on_cancel(wxCommandEvent& event);
-    void on_exit(wxCommandEvent& event);
 
     wxTextCtrl* pEmployerCtrl;
 
@@ -55,8 +54,8 @@ class employer_dialog : public wxDialog
 
     enum
     {
-        WIDTH = 320,
-        HEIGHT = 240,
+        WIDTH = 330,
+        HEIGHT = 300,
         MIN_WIDTH = 320,
         MIN_HEIGHT = 240
     };

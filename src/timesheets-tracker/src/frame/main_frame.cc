@@ -33,7 +33,7 @@ main_frame::main_frame() : wxFrame(nullptr, wxID_ANY, "Timesheets Tracker")
 
     wxMenu* fileMenu = new wxMenu();
     fileMenu->Append(newTaskId, "&New Task...\tCtrl-N", "Create new timesheet entry");
-    fileMenu->Append(newTaskId, "&New Employer...\tCtrl-N", "Create new employer");
+    fileMenu->Append(newEmployerId, "&New Employer...\tCtrl-E", "Create new employer");
     fileMenu->AppendSeparator();
     fileMenu->Append(wxID_EXIT);
 
