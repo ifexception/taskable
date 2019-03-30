@@ -15,12 +15,13 @@ CREATE TABLE projects
 (
     project_id INTEGER PRIMARY KEY NOT NULL,
     name TEXT NOT NULL UNIQUE,
+    display_name TEXT NOT NULL,
     date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     is_active INTEGER NOT NULL,
-    
+
     employer_id INTEGER NOT NULL,
-    
+
     FOREIGN KEY (employer_id) REFERENCES employers(employer_id)
 );
 
@@ -32,9 +33,9 @@ CREATE TABLE tasks
     date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     is_active INTEGER NOT NULL,
-    
+
     project_id INTEGER NOT NULL,
-    
+
     FOREIGN KEY (project_id) REFERENCES projects(project_id)
 );
 
@@ -47,9 +48,9 @@ CREATE TABLE categories
     date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     is_active INTEGER NOT NULL,
-    
+
     project_id INTEGER NOT NULL,
-    
+
     FOREIGN KEY project_id REFERENCES projects(project_id)
 );
 
@@ -59,15 +60,16 @@ CREATE TABLE task_details
     task_detail_id INTEGER PRIMARY KEY NOT NULL,
     start_time TEXT NOT NULL,
     end_time TEXT NOT NULL,
+    duration TEXT NOT NULL,
     description TEXT NOT NULL,
     date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     is_active INTEGER NOT NULL,
-    
+
     project_id INTEGER NOT NULL,
     task_id INTEGER NOT NULL,
     category_id INTEGER NOT NULL,
-    
+
     FOREIGN KEY project_id REFERENCES projects(project_id),
     FOREIGN KEY task_id REFERENCES tasks(task_id),
     FOREIGN KEY category_id REFERENCES categories(category_id)
