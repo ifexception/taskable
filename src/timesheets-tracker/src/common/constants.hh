@@ -26,6 +26,8 @@
 namespace app::Constants
 {
 static const std::string LoggerName = "TimesheetsTracker_Daily";
+static const char* LogsDirectory = "logs";
+static const char* LogsFilename = "TimesheetsTracker.log.txt";
 
 namespace Info
 {

@@ -41,6 +41,7 @@ class app : public wxApp
     bool OnInit() override;
 
   private:
+    bool create_logs_directory();
     bool init_logging();
 
     std::shared_ptr<spdlog::logger> pLogger;

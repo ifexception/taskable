@@ -34,13 +34,29 @@ app::~app()
 
 bool app::OnInit()
 {
-    bool loggingInitialize = init_logging();
-    if (!loggingInitialize) {
+    bool logDirectoryCreated = create_logs_directory();
+    if (!logDirectoryCreated) {
+        return false;
+    }
+
+    bool loggingInitialized = init_logging();
+    if (!loggingInitialized) {
         return false;
     }
 
     frame::main_frame* mf = new frame::main_frame();
     mf->Show(true);
+    return true;
+}
+
+bool app::create_logs_directory()
+{
+    wxString logDirectory(wxT("logs"));
+    bool logDirectoryExists = wxDirExists(logDirectory);
+    if (!logDirectoryExists) {
+        bool success = wxMkDir(logDirectory);
+        return success;
+    }
     return true;
 }
 
@@ -52,9 +68,11 @@ bool app::init_logging()
     spdlog::set_level(spdlog::level::warn);
 #endif
 
+    std::string logDirectory = std::string(Constants::LogsDirectory) + std::string("/") +
+                               std::string(Constants::LogsFilename);
     spdlog::flush_every(std::chrono::seconds(3));
     try {
-        pLogger = spdlog::daily_logger_st(Constants::LoggerName, "logs/TimesheetsTracker.log.txt");
+        pLogger = spdlog::daily_logger_st(Constants::LoggerName, logDirectory);
         pLogger->info(Constants::Info::LoggerInitialized);
     } catch (const spdlog::spdlog_ex& e) {
         wxString error;
