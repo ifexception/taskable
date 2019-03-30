@@ -26,7 +26,6 @@ class wxDateEvent;
 
 namespace app::dialog
 {
-const int ID_SAVETASK = wxNewId();
 const int IDC_STARTTIME = wxNewId();
 
 class task_details_dialog : public wxDialog

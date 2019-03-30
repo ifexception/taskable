@@ -21,12 +21,14 @@
 #include <wx/timectrl.h>
 #include <wx/statline.h>
 
+#include "../common/ids.hh"
+
 namespace app::dialog
 {
 wxIMPLEMENT_DYNAMIC_CLASS(task_details_dialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(task_details_dialog, wxDialog)
-    EVT_BUTTON(ID_SAVETASK, task_details_dialog::on_save)
+    EVT_BUTTON(ids::ID_SAVE, task_details_dialog::on_save)
     EVT_BUTTON(wxID_CANCEL, task_details_dialog::on_cancel)
     EVT_BUTTON(wxID_EXIT, task_details_dialog::on_exit)
 wxEND_EVENT_TABLE()
@@ -180,7 +182,7 @@ void task_details_dialog::create_controls()
     buttonPanel->SetSizer(buttonPanelSizer);
     mainSizer->Add(buttonPanel, wxSizerFlags(wxSizerFlags().Border(wxALL, 5)).Center());
 
-    auto okButton = new wxButton(buttonPanel, ID_SAVETASK, wxT("&Save "));
+    auto okButton = new wxButton(buttonPanel, ids::ID_SAVE, wxT("&Save"));
     auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
     buttonPanelSizer->Add(okButton, wxSizerFlags().Border(wxALL, 5));
