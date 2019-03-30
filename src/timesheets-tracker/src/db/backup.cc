@@ -60,7 +60,7 @@ void backup::execute_step(const int numberPages = -1)
                          ret == SQLITE_BUSY && ret == SQLITE_LOCKED;
     if (!success) {
         pLogger->error(Constants::Error::UnableToBackupPage);
-        pLogger->error(Constants::Error::SqliteError.c_str(), ret);
+        pLogger->error(Constants::Error::SqliteError, ret);
 
         throw database_exception(ret);
     }

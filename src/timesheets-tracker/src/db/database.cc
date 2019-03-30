@@ -101,8 +101,8 @@ void database::init_sqlite_connection(const std::string& filePath,
         const database_exception exception(pHandle, ret);
         close_handle();
 
-        pLogger->error(Constants::Error::SqliteConnection.c_str(), filePath);
-        pLogger->error(Constants::Error::SqliteError.c_str(), exception.get_error_code());
+        pLogger->error(Constants::Error::SqliteConnection, filePath);
+        pLogger->error(Constants::Error::SqliteError, exception.get_error_code());
 
         throw exception;
     }

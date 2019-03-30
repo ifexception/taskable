@@ -44,7 +44,7 @@ statement::statement(const database& db, const std::string& query)
 
     if (ret != SQLITE_OK) {
         pLogger->error(Constants::Error::StatementInitialization);
-        pLogger->error(Constants::Error::SqliteError.c_str(), ret);
+        pLogger->error(Constants::Error::SqliteError, ret);
 
         throw database_exception(db.get_handle(), ret);
     }
@@ -104,11 +104,9 @@ void statement::bind(const int index, const std::string& value,
 {
     int ret;
     if (copy == copy_options::Copy) {
-        ret = sqlite3_bind_text(pStatement, index, value.c_str(), value.size(),
-            SQLITE_TRANSIENT);
+        ret = sqlite3_bind_text(pStatement, index, value.c_str(), value.size(), SQLITE_TRANSIENT);
     } else {
-        ret = sqlite3_bind_text(pStatement, index, value.c_str(), value.size(),
-            SQLITE_STATIC);
+        ret = sqlite3_bind_text(pStatement, index, value.c_str(), value.size(), SQLITE_STATIC);
     }
 
     check(ret);
@@ -119,11 +117,9 @@ void statement::bind(const int index, const void* value, int size,
 {
     int ret;
     if (copy == copy_options::Copy) {
-        ret = sqlite3_bind_blob(pStatement, index, value, size,
-            SQLITE_TRANSIENT);
+        ret = sqlite3_bind_blob(pStatement, index, value, size, SQLITE_TRANSIENT);
     } else {
-        ret = sqlite3_bind_blob(pStatement, index, value, size,
-            SQLITE_STATIC);
+        ret = sqlite3_bind_blob(pStatement, index, value, size, SQLITE_STATIC);
     }
 
     check(ret);
@@ -191,8 +187,8 @@ bool statement::run()
 
     if ((ret != SQLITE_ROW) && (ret != SQLITE_DONE))
     {
-        pLogger->error(Constants::Error::StatementExecution.c_str(), mQuery);
-        pLogger->error(Constants::Error::SqliteError.c_str(), ret);
+        pLogger->error(Constants::Error::StatementExecution, mQuery);
+        pLogger->error(Constants::Error::SqliteError, ret);
 
         throw database_exception(ret);
     }
@@ -213,7 +209,7 @@ bool statement::is_done() const
 void statement::check(const int returnCode)
 {
     if (returnCode != SQLITE_OK) {
-        pLogger->error(Constants::Error::SqliteError.c_str(), returnCode);
+        pLogger->error(Constants::Error::SqliteError, returnCode);
         throw database_exception(returnCode);
     }
 }
@@ -222,8 +218,8 @@ void statement::check_row() const
 {
     if (bHasRow == false)
     {
-        pLogger->error("Now to get a column from. run() was not called, or returned false");
-        throw database_exception("No row to get a column from. run() was not called, or returned false.");
+        pLogger->error(Constants::Error::NoRowToGet);
+        throw database_exception(Constants::Error::NoRowToGet);
     }
 }
 
