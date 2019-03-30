@@ -39,8 +39,7 @@ database::database(const std::string& filePath)
     : pHandle(nullptr)
     , pLogger(nullptr)
 {
-    init_logging();
-
+    pLogger = spdlog::get(Constants::LoggerName);
     const permission defaultPermission = permission::ReadOnly;
     init_sqlite_connection(filePath, defaultPermission);
 }
@@ -49,8 +48,7 @@ database::database(const std::string& filePath, const permission permission)
     : pHandle(nullptr)
     , pLogger(nullptr)
 {
-    init_logging();
-
+    pLogger = spdlog::get(Constants::LoggerName);
     init_sqlite_connection(filePath, permission);
 }
 
@@ -90,20 +88,6 @@ const int database::get_lib_version_number()
 {
     const int versionNumber = sqlite3_libversion_number();
     return versionNumber;
-}
-
-void database::init_logging()
-{
-    spdlog::set_level(spdlog::level::info);
-
-    try {
-        pLogger = spdlog::daily_logger_st(Constants::LoggerName, "logs/db.log.txt");
-        pLogger->info(Constants::Info::LoggerInitialized);
-
-        spdlog::flush_every(std::chrono::seconds(3));
-    } catch (const spdlog::spdlog_ex& e) {
-        exit(EXIT_FAILURE);
-    }
 }
 
 void database::init_sqlite_connection(const std::string& filePath,

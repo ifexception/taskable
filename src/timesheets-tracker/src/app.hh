@@ -23,7 +23,12 @@
 
 #pragma once
 
+#include <memory>
 #include <wx/wx.h>
+
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/daily_file_sink.h>
 
 namespace app
 {
@@ -34,5 +39,10 @@ class app : public wxApp
     ~app();
 
     bool OnInit() override;
+
+  private:
+    bool init_logging();
+
+    std::shared_ptr<spdlog::logger> pLogger;
 };
 } // namespace app

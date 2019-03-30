@@ -22,6 +22,8 @@
 //    szymonwelgus at gmail dot com
 
 #include "app.hh"
+
+#include "common/constants.hh"
 #include "frame/main_frame.hh"
 
 namespace app
@@ -32,8 +34,35 @@ app::~app()
 
 bool app::OnInit()
 {
+    bool loggingInitialize = init_logging();
+    if (!loggingInitialize) {
+        return false;
+    }
+
     frame::main_frame* mf = new frame::main_frame();
     mf->Show(true);
+    return true;
+}
+
+bool app::init_logging()
+{
+#ifdef _DEBUG
+    spdlog::set_level(spdlog::level::info);
+#else
+    spdlog::set_level(spdlog::level::warn);
+#endif
+
+    spdlog::flush_every(std::chrono::seconds(3));
+    try {
+        pLogger = spdlog::daily_logger_st(Constants::LoggerName, "logs/TimesheetsTracker.log.txt");
+        pLogger->info(Constants::Info::LoggerInitialized);
+    } catch (const spdlog::spdlog_ex& e) {
+        wxString error;
+        error.Printf(wxT("Error initializing logger: %s"), e.what());
+        wxMessageBox(error, wxT("Error"), wxOK_DEFAULT | wxICON_EXCLAMATION);
+        return false;
+    }
+
     return true;
 }
 } // namespace app

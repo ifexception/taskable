@@ -26,7 +26,6 @@
 
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/daily_file_sink.h>
 
 #include "permission.hh"
 
@@ -50,7 +49,6 @@ class database
     const int get_lib_version_number();
 
   private:
-    void init_logging();
     void init_sqlite_connection(const std::string& filePath,
         const permission permission);
     void close_handle();

@@ -23,13 +23,13 @@
 
 #include <string>
 
-namespace app::db::Constants
+namespace app::Constants
 {
-static const std::string LoggerName = "app::db_logger";
+static const std::string LoggerName = "TimesheetsTracker_Daily";
 
 namespace Info
 {
-static std::string LoggerInitialized = "Logger initialized...";
+static std::string LoggerInitialized = "Logger initialized.";
 } // Info
 
 namespace Error
