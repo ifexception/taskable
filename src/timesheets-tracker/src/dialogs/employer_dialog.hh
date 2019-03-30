@@ -30,7 +30,7 @@ class employer_dialog : public wxDialog
 
   public:
     employer_dialog() = default;
-    explicit employer_dialog(wxWindow* parent, const wxString& name = "employer_dialog");
+    explicit employer_dialog(wxWindow* parent, bool isEdit = false, const wxString& name = "employer_dialog");
 
     virtual ~employer_dialog();
 
@@ -48,5 +48,17 @@ class employer_dialog : public wxDialog
     void on_save(wxCommandEvent& event);
     void on_cancel(wxCommandEvent& event);
     void on_exit(wxCommandEvent& event);
+
+    wxTextCtrl* pEmployerCtrl;
+
+    wxString mEmployerText;
+
+    enum
+    {
+        WIDTH = 320,
+        HEIGHT = 240,
+        MIN_WIDTH = 320,
+        MIN_HEIGHT = 240
+    };
 };
 } // namespace app::dialog

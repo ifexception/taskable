@@ -18,3 +18,139 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "employer_dialog.hh"
+
+#include <wx/statline.h>
+
+#include "../common/common.hh"
+#include "../common/ids.hh"
+
+namespace app::dialog
+{
+wxIMPLEMENT_DYNAMIC_CLASS(employer_dialog, wxDialog);
+
+wxBEGIN_EVENT_TABLE(employer_dialog, wxDialog)
+    EVT_BUTTON(ids::ID_SAVE, employer_dialog::on_save)
+wxEND_EVENT_TABLE()
+
+employer_dialog::employer_dialog(wxWindow* parent, bool isEdit, const wxString& name)
+    : mEmployerText(wxT(""))
+{
+    long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
+    wxSize employerSize(WIDTH, HEIGHT);
+    wxString title;
+    if (isEdit) {
+        title = wxT("Add Employer");
+    } else {
+        title = wxT("Edit Employer");
+    }
+    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, employerSize, style, name);
+
+    SetMinClientSize(wxSize(MIN_WIDTH, MIN_HEIGHT));
+}
+
+employer_dialog::~employer_dialog()
+{
+    Destroy();
+}
+
+void employer_dialog::launch_employer_dialog()
+{
+    ShowModal();
+}
+
+bool employer_dialog::create(wxWindow* parent,
+    wxWindowID windowId,
+    const wxString& title,
+    const wxPoint& point,
+    const wxSize& size,
+    long style,
+    const wxString& name)
+{
+    bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
+    if (created) {
+        create_controls();
+
+        GetSizer()->Fit(this);
+        //SetIcon
+        Centre();
+    }
+
+    return created;
+}
+
+void employer_dialog::create_controls()
+{
+    /* Window Sizing */
+    auto mainSizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(mainSizer);
+
+    auto mainPanelSizer = new wxBoxSizer(wxHORIZONTAL);
+    mainSizer->Add(mainPanelSizer, wxSizerFlags().Border(wxALL, 5));
+
+    auto sizer = new wxBoxSizer(wxVERTICAL);
+    mainPanelSizer->Add(sizer, 0);
+
+    /* Employer Details Box */
+    auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Employer Details"));
+    auto detailsBoxSizer = new wxStaticBoxSizer(detailsBox, wxVERTICAL);
+    sizer->Add(detailsBoxSizer, common::sizers::ControlExpandProp);
+
+    auto employerDetailsPanel = new wxPanel(this, wxID_STATIC);
+    detailsBoxSizer->Add(employerDetailsPanel, common::sizers::ControlExpand);
+
+    auto taskFlexGridSizer = new wxFlexGridSizer(0, 2, 0, 0);
+    employerDetailsPanel->SetSizer(taskFlexGridSizer);
+
+    /* --- Controls --- */
+    /* Employer Name Control */
+    auto employerName = new wxStaticText(employerDetailsPanel, wxID_STATIC, wxT("Name"));
+    taskFlexGridSizer->Add(employerName, common::sizers::ControlCenterVertical);
+
+    pEmployerCtrl = new wxTextCtrl(employerDetailsPanel, wxID_STATIC, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT, wxDefaultValidator, wxT("employer_name_ctrl"));
+    taskFlexGridSizer->Add(pEmployerCtrl, common::sizers::ControlDefault);
+
+    /* Employer Is Active warning */
+    wxString activeEmployerText(wxT("Adding a employer will automatically make it the active one"));
+    auto employerActiveSetting = new wxStaticText(employerDetailsPanel, wxID_STATIC, wxT(""));
+    employerActiveSetting->GetFont().MakeItalic();
+    taskFlexGridSizer->Add(employerActiveSetting, common::sizers::ControlExpand);
+
+    /* Horizontal Line*/
+    auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("new_task_static_line"));
+    mainSizer->Add(separation_line, 0, wxEXPAND | wxALL, 1);
+
+    /* Button Panel */
+    auto buttonPanel = new wxPanel(this, wxID_STATIC);
+    auto buttonPanelSizer = new wxBoxSizer(wxHORIZONTAL);
+    buttonPanel->SetSizer(buttonPanelSizer);
+    mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
+
+    auto okButton = new wxButton(buttonPanel, ids::ID_SAVE, wxT("&Save"));
+    auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
+
+    buttonPanelSizer->Add(okButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
+}
+
+bool employer_dialog::validate()
+{
+    return false;
+}
+
+bool employer_dialog::are_controls_empty()
+{
+    return false;
+}
+
+void employer_dialog::on_save(wxCommandEvent& event)
+{
+}
+
+void employer_dialog::on_cancel(wxCommandEvent& event)
+{
+}
+
+void employer_dialog::on_exit(wxCommandEvent& event)
+{
+}
+}

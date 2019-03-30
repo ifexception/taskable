@@ -21,7 +21,7 @@ message (STATUS "rapidxml_FOUND: ${rapidxml_FOUND}")
 message (STATUS "wxWidgets_FOUND: ${wxWidgets_FOUND}")
 
 set (SRC
-    "src/common/menu_ids.cc"
+    "src/common/ids.cc"
     "src/common/common.cc"
     "src/common/util.cc"
     "src/common/config.cc"

@@ -19,18 +19,21 @@
 
 #include "main_frame.hh"
 
-#include "../common/menu_ids.hh"
-#include "../dialogs/task_details_dialog.hh"
+#include "../common/ids.hh"
 #include "../dialogs/about_dialog.hh"
+#include "../dialogs/task_details_dialog.hh"
+#include "../dialogs/employer_dialog.hh"
 
 namespace app::frame
 {
 main_frame::main_frame() : wxFrame(nullptr, wxID_ANY, "Timesheets Tracker")
 {
-    const int newTaskId = static_cast<int>(MenuIds::NewTaskId);
+    const int newTaskId = static_cast<int>(ids::MenuIds::NewTaskId);
+    const int newEmployerId = static_cast<int>(ids::MenuIds::NewEmployerId);
 
     wxMenu* fileMenu = new wxMenu();
     fileMenu->Append(newTaskId, "&New Task...\tCtrl-N", "Create new timesheet entry");
+    fileMenu->Append(newTaskId, "&New Employer...\tCtrl-N", "Create new employer");
     fileMenu->AppendSeparator();
     fileMenu->Append(wxID_EXIT);
 
@@ -53,9 +56,17 @@ main_frame::main_frame() : wxFrame(nullptr, wxID_ANY, "Timesheets Tracker")
              newTask.launch_task_details_dialog();
          },
          newTaskId);
+
+    Bind(wxEVT_MENU,
+         [=](wxCommandEvent&) {
+             dialog::employer_dialog newEmployer(nullptr);
+             newEmployer.launch_employer_dialog();
+         },
+         newEmployerId);
 }
 
 main_frame::~main_frame()
 {
+    Destroy();
 }
 } // namespace app::frame
