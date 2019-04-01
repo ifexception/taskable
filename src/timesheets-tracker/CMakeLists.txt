@@ -42,7 +42,8 @@ set (SRC
     "src/frame/main_frame.cc"
     "src/dialogs/about_dialog.cc"
     "src/dialogs/task_details_dialog.cc"
-    "src/dialogs/employer_dialog.cc")
+    "src/dialogs/employer_dialog.cc"
+    "src/dialogs/project_dialog.cc")
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
 
