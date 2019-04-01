@@ -35,6 +35,7 @@ wxEND_EVENT_TABLE()
 
 employer_dialog::employer_dialog(wxWindow* parent, bool isEdit, const wxString& name)
     : mEmployerText(wxT(""))
+    , svcEmployer()
 {
     long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
     wxSize employerSize(WIDTH, HEIGHT);
@@ -163,6 +164,16 @@ void employer_dialog::on_save(wxCommandEvent& event)
     if (!validationSuccess) {
         return;
     }
+
+    // try...catch
+    try {
+        svcEmployer.create_new_employer(std::string(mEmployerText));
+    } catch (const std::exception& e) {
+        wxMessageBox(wxT("An error occured"), wxT("Error"), wxOK_DEFAULT | wxICON_ERROR);
+        return;
+    }
+
+    Destroy();
 }
 
 void employer_dialog::on_cancel(wxCommandEvent& event)
