@@ -32,6 +32,24 @@ class database;
 class command : public statement
 {
   public:
+    class command_stream
+    {
+      public:
+        command_stream() = delete;
+        explicit command_stream(command& command, int index);
+        command_stream(const command_stream&) = delete;
+
+        command_stream& operator=(const command_stream&) = delete;
+
+        template <class T>
+        command_stream& operator<<(T value);
+        command_stream& operator<<(const std::string& value);
+
+      private:
+        command& rCommand;
+        int mIndex;
+    };
+
     command() = delete;
     command(const command&) = delete;
     explicit command(database& db, const std::string& query);
@@ -39,14 +57,15 @@ class command : public statement
 
     command& operator=(const command&) = delete;
 
-    template <class T>
-    void bind(int index, T type);
+    command_stream binder(int index = 1);
+    void execute();
 };
 
 template <class T>
-void command::bind(int index, T type)
+command::command_stream& command::command_stream::operator << (T value)
 {
-    bind(index, type);
+    rCommand.bind(mIndex, value);
+    ++mIndex++;
+    return *this;
 }
-
 } // namespace app::db

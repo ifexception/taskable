@@ -22,7 +22,32 @@
 
 namespace app::db
 {
+
+command::command_stream::command_stream(command& command, int index)
+    : rCommand(command)
+    , mIndex(index)
+{
+}
+
+command::command_stream& command::command_stream::operator<<(const std::string& value)
+{
+    rCommand.bind(mIndex, value, copy_options::Copy);
+    ++mIndex;
+    return *this;
+}
+
 command::command(database& db, const std::string& query)
     : statement(db, query)
-{}
+{
+}
+
+command::command_stream command::binder(int index)
+{
+    return command_stream(*this, index);
+}
+
+void command::execute()
+{
+    statement::run();
+}
 }
