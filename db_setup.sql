@@ -51,7 +51,7 @@ CREATE TABLE categories
 
     project_id INTEGER NOT NULL,
 
-    FOREIGN KEY project_id REFERENCES projects(project_id)
+    FOREIGN KEY (project_id) REFERENCES projects(project_id)
 );
 
 -- task details table
@@ -70,7 +70,7 @@ CREATE TABLE task_details
     task_id INTEGER NOT NULL,
     category_id INTEGER NOT NULL,
 
-    FOREIGN KEY project_id REFERENCES projects(project_id),
-    FOREIGN KEY task_id REFERENCES tasks(task_id),
-    FOREIGN KEY category_id REFERENCES categories(category_id)
+    FOREIGN KEY (project_id) REFERENCES projects(project_id),
+    FOREIGN KEY (task_id) REFERENCES tasks(task_id),
+    FOREIGN KEY (category_id) REFERENCES categories(category_id)
 );
