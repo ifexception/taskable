@@ -17,31 +17,28 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "database_singleton.hh"
-#include "../common/config.hh"
+#pragma once
+
+#include "../db/database.hh"
 
 namespace app::services
 {
-database_singleton& database_singleton::get_instance()
+class db_connection
 {
-    static database_singleton instance;
-    return instance;
-}
+  public:
+    static db_connection& get_instance();
 
-database_singleton::~database_singleton()
-{
-    delete pDatabase;
-}
+    ~db_connection();
 
-const db::database* database_singleton::get_database()
-{
-    return pDatabase;
-}
+    db_connection(const db_connection&) = delete;
+    db_connection& operator=(const db_connection&) = delete;
 
-database_singleton::database_singleton()
-    : mPermission(db::permission::CreateReadWrite)
-{
-    auto connectionString = cfg::config::get_instance().get_connection_string();
-    pDatabase = new db::database(connectionString, mPermission);
-}
-}
+    db::database* get_database();
+
+  private:
+    db_connection();
+
+    db::permission mPermission;
+    db::database* pDatabase;
+};
+} // namespace app::services
