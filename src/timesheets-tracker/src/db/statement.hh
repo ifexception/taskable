@@ -46,24 +46,22 @@ class statement
     void reset();
     void clear();
 
-    void bind(const int index, const int value);
-    void bind(const int index, const unsigned int value);
-    void bind(const int index, const long value);
-    void bind(const int index, const long long value);
-    void bind(const int index, const double value);
-    void bind(const int index, const std::string& value, copy_options copy);
-    void bind(const int index, const void* value, int size, copy_options copy);
-    void bind(const int index, const void* null);
+    void bind(int index, const int value);
+    void bind(int index, const unsigned int value);
+    void bind(int index, const long value);
+    void bind(int index, const long long value);
+    void bind(int index, const double value);
+    void bind(int index, const std::string& value, copy_options copy);
+    void bind(int index, const void* value, int size, copy_options copy);
+    void bind(int index, const void* null);
 
     void bind(const std::string& name, const int value);
     void bind(const std::string& name, const unsigned int value);
     void bind(const std::string& name, const long value);
     void bind(const std::string& name, const long long value);
     void bind(const std::string& name, const double value);
-    void bind(const std::string& name, const std::string& value,
-        copy_options copy);
-    void bind(const std::string& name, const void* value, int size,
-        copy_options copy);
+    void bind(const std::string& name, const std::string& value, copy_options copy);
+    void bind(const std::string& name, const void* value, int size, copy_options copy);
     void bind(const std::string& name, const void* null);
 
     bool run();
@@ -71,7 +69,7 @@ class statement
     bool has_row() const;
     bool is_done() const;
 
-  protected:
+
     sqlite3_stmt* pStatement;
 
   private:
@@ -79,7 +77,6 @@ class statement
     void check_row() const;
     int step();
 
-#pragma warning(suppress : 4251) // pLogger is not exportable
     std::shared_ptr<spdlog::logger> pLogger;
 
     std::string mQuery;
