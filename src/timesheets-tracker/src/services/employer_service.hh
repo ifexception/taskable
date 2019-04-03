@@ -24,19 +24,15 @@
 namespace app::db
 {
 class command;
-//class query;
-}
+// class query;
+} // namespace app::db
 
 namespace app::services
 {
-class employer_service
-{
-  public:
+struct employer_service {
     employer_service() = default;
     ~employer_service() = default;
 
     void create_new_employer(const std::string& employerName);
-
-  private:
 };
 } // namespace app::services

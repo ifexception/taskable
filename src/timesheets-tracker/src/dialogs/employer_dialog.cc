@@ -169,7 +169,7 @@ void employer_dialog::on_save(wxCommandEvent& event)
     try {
         svcEmployer.create_new_employer(std::string(mEmployerText));
     } catch (const std::exception& e) {
-        wxMessageBox(wxT("An error occured"), wxT("Error"), wxOK_DEFAULT | wxICON_ERROR);
+        wxMessageBox(wxT("An error occured\n"), wxT("Error"), wxOK_DEFAULT | wxICON_ERROR);
         return;
     }
 
