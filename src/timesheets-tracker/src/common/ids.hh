@@ -25,9 +25,10 @@ namespace app::ids
 {
 enum class MenuIds : int
 {
-    NewTaskId = 1,
-    NewEmployerId = 2,
-    NewCategoryId = 3
+    EmployerMenuId = 1,
+    ProjectMenuId = 2,
+    TaskDetailMenuId = 3,
+    CategoryMenuId = 4
 };
 
 enum class Events : int
