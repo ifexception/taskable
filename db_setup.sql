@@ -10,6 +10,20 @@ CREATE TABLE employers
     is_active INTEGER NOT NULL
 );
 
+-- clients table
+CREATE TABLE clients
+(
+    client_id INTEGER PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+    is_active INTEGER NOT NULL,
+    
+    employer_id INTEGER NOT NULL,
+    
+    FOREIGN KEY (employer_id) REFERENCES employers(employer_id)
+);
+
 -- projects table
 CREATE TABLE projects
 (
@@ -21,8 +35,10 @@ CREATE TABLE projects
     is_active INTEGER NOT NULL,
 
     employer_id INTEGER NOT NULL,
+    client_id INTEGER NULL,
 
-    FOREIGN KEY (employer_id) REFERENCES employers(employer_id)
+    FOREIGN KEY (employer_id) REFERENCES employers(employer_id),
+    FOREIGN KEY (client_id) REFERENCES clients(client_id)
 );
 
 -- tasks table
