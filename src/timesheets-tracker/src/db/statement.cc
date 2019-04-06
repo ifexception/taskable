@@ -206,6 +206,11 @@ bool statement::is_done() const
     return bIsDone;
 }
 
+sqlite3_stmt* statement::get_handle() const
+{
+    return pStatement;
+}
+
 void statement::check(const int returnCode)
 {
     if (returnCode != SQLITE_OK) {

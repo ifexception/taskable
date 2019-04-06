@@ -69,7 +69,7 @@ class statement
     bool has_row() const;
     bool is_done() const;
 
-
+    sqlite3_stmt* get_handle() const;
     sqlite3_stmt* pStatement;
 
   private:
