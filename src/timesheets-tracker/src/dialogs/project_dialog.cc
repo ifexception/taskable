@@ -165,11 +165,11 @@ void project_dialog::on_cancel(wxCommandEvent& event)
         int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"),
             wxYES_NO | wxICON_QUESTION);
         if (answer == wxYES) {
-            Destroy();
+            EndModal(wxID_CANCEL);
         }
     }
     else {
-        Destroy();
+        EndModal(wxID_CANCEL);
     }
 }
 }
