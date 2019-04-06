@@ -25,6 +25,9 @@ namespace app::models
 {
 struct employer
 {
+    employer() = default;
+    ~employer() = default;
+
     int employer_id;
     std::string employer_name;
     int date_created_utc;
