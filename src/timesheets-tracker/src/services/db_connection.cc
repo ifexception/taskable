@@ -39,7 +39,7 @@ db::database* db_connection::get_database()
 }
 
 db_connection::db_connection()
-    : mPermission(db::permission::CreateReadWrite)
+    : mPermission(db::permission::ReadWrite)
 {
     auto connectionString = cfg::config::get_instance().get_connection_string();
     pDatabase = new db::database(connectionString, mPermission);
