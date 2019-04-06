@@ -19,24 +19,15 @@
 
 #pragma once
 
-#include <wx/wx.h>
+#include <string>
 
-namespace app::ids
+namespace app::services
 {
-enum class MenuIds : int
+struct client_service
 {
-    EmployerMenuId = 1,
-    ProjectMenuId = 2,
-    ClientMenuId = 3,
-    TaskDetailMenuId = 4,
-    CategoryMenuId
+    client_service() = default;
+    ~client_service() = default;
+
+    void create_new_client(const std::string& name, const int employerId);
 };
-
-enum class Events : int
-{
-    ID_OFFSET = 1,
-    ID_SAVE = wxID_HIGHEST + ID_OFFSET
-};
-
-static const int ID_SAVE = static_cast<int>(Events::ID_SAVE);
 }

@@ -17,26 +17,18 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
+#include "client_service.hh"
 
-#include <wx/wx.h>
+#include "db_connection.hh"
+#include "../db/command.hh"
 
-namespace app::ids
+namespace app::services
 {
-enum class MenuIds : int
+void client_service::create_new_client(const std::string& name, const int employerId)
 {
-    EmployerMenuId = 1,
-    ProjectMenuId = 2,
-    ClientMenuId = 3,
-    TaskDetailMenuId = 4,
-    CategoryMenuId
-};
-
-enum class Events : int
-{
-    ID_OFFSET = 1,
-    ID_SAVE = wxID_HIGHEST + ID_OFFSET
-};
-
-static const int ID_SAVE = static_cast<int>(Events::ID_SAVE);
+    std::string cmd("INSERT INTO clients (name, is_active, employer_id) VALUES (?, 1, ?)");
+    db::command command(*db_connection::get_instance().get_database(), cmd);
+    command.binder() << name << employerId;
+    command.execute();
+}
 }

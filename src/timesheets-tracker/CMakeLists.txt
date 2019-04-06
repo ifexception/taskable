@@ -36,13 +36,16 @@ set (SRC
     "src/db/command.cc"
     "src/db/statement.cc"
     "src/db/query.cc"
+    "src/services/models/employer.cc"
     "src/services/db_connection.cc"
     "src/services/employer_service.cc"
+    "src/services/client_service.cc"
     "src/app.cc"
     "src/frame/main_frame.cc"
     "src/dialogs/about_dialog.cc"
     "src/dialogs/task_details_dialog.cc"
     "src/dialogs/employer_dialog.cc"
+    "src/dialogs/client_dialog.cc"
     "src/dialogs/project_dialog.cc")
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})

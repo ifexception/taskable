@@ -23,19 +23,23 @@
 #include "../dialogs/about_dialog.hh"
 #include "../dialogs/task_details_dialog.hh"
 #include "../dialogs/employer_dialog.hh"
+#include "../dialogs/client_dialog.hh"
 #include "../dialogs/project_dialog.hh"
 
 namespace app::frame
 {
-main_frame::main_frame() : wxFrame(nullptr, wxID_ANY, "Timesheets Tracker")
+main_frame::main_frame()
+    : wxFrame(nullptr, wxID_ANY, "Timesheets Tracker")
 {
     const int TaskId = static_cast<int>(ids::MenuIds::TaskDetailMenuId);
     const int EmployerId = static_cast<int>(ids::MenuIds::EmployerMenuId);
     const int ProjectId = static_cast<int>(ids::MenuIds::ProjectMenuId);
+    const int ClientId = static_cast<int>(ids::MenuIds::ClientMenuId);
 
     wxMenu* fileMenu = new wxMenu();
     fileMenu->Append(TaskId, "&New Task...\tCtrl-N", "Create new timesheet entry");
     fileMenu->Append(EmployerId, "&New Employer...\tCtrl-E", "Create new employer");
+    fileMenu->Append(ClientId, "&New Client...\tCtrl-L", "Create new client");
     fileMenu->Append(ProjectId, "&New Project...\tCtrl-R", "Create new project");
     fileMenu->AppendSeparator();
     fileMenu->Append(wxID_EXIT);
@@ -69,6 +73,13 @@ main_frame::main_frame() : wxFrame(nullptr, wxID_ANY, "Timesheets Tracker")
              newEmployer.launch_employer_dialog();
          },
          EmployerId);
+
+    Bind(wxEVT_MENU,
+         [=](wxCommandEvent&) {
+             dialog::client_dialog newClient(nullptr);
+             newClient.launch_client_dialog();
+         },
+         ClientId);
 
     Bind(wxEVT_MENU,
         [=](wxCommandEvent&) {
