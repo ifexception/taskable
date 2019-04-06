@@ -65,7 +65,7 @@ template <class T>
 command::command_stream& command::command_stream::operator << (T value)
 {
     rCommand.bind(mIndex, value);
-    ++mIndex++;
+    ++mIndex;
     return *this;
 }
 } // namespace app::db
