@@ -20,19 +20,24 @@
 #pragma once
 
 #include <string>
+#include <vector>
+
+#include "models/employer.hh"
 
 namespace app::db
 {
 class command;
-// class query;
+class query;
 } // namespace app::db
 
 namespace app::services
 {
-struct employer_service {
+struct employer_service
+{
     employer_service() = default;
     ~employer_service() = default;
 
     void create_new_employer(const std::string& employerName);
+    std::vector<models::employer> get_active_employers();
 };
 } // namespace app::services
