@@ -25,6 +25,11 @@
 
 namespace app::db
 {
+column::column_stream::column_stream(column& column, int index)
+    : rColumn(column)
+    , mIndex(index)
+{}
+
 column::column(const column& other)
 {
     pHandle = other.pHandle;
@@ -45,6 +50,19 @@ column& column::operator=(const column& other)
 
     return *this;
 }
+
+int column::data_count() const noexcept
+{
+    int count = sqlite3_data_count(pHandle);
+    return count;
+}
+
+int column::column_bytes(int index) const noexcept
+{
+    int bytes = sqlite3_column_bytes(pHandle, index);
+    return bytes;
+}
+
 const std::string column::get_name(int index) const noexcept
 {
     std::string name(sqlite3_column_name(pHandle, index));
@@ -68,6 +86,11 @@ column_type column::get_type(int index) const noexcept
     default:
         return column_type::Unknown;
     }
+}
+
+column::column_stream column::getter(int index)
+{
+    return column_stream(*this, index);
 }
 
 int column::get(int index, int) const noexcept

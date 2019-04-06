@@ -28,8 +28,7 @@ namespace app::db
 {
 query::query(database& db, const std::string& query)
     : statement(db, query)
-{
-}
+{}
 
 int query::column_count() const
 {
@@ -41,5 +40,11 @@ std::string query::column_name(int index) const
 {
     const char* name = sqlite3_column_name(pStatement, index);
     return std::string(name);
+}
+
+std::string query::column_decltype(int index) const
+{
+    const char* type = sqlite3_column_decltype(pStatement, index);
+    return std::string(type);
 }
 }

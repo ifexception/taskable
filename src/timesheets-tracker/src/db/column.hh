@@ -33,7 +33,19 @@ namespace app::db
 
 class column
 {
-  public:
+public:
+    class column_stream
+    {
+    public:
+        explicit column_stream(column& column, int index);
+
+        template <class T>
+        column_stream& operator >> (T& value);
+
+    private:
+        column& rColumn;
+        int mIndex;
+    };
     column() = delete;
     explicit column(const column& other);
     explicit column(sqlite3_stmt* handle);
@@ -42,45 +54,50 @@ class column
     column& operator=(const column& other);
 
     template <class T>
-    T get(int index) const;
+    T get(int index) const noexcept;
 
-    template <class ...Types>
-    std::tuple<Types...> get(int maxIndex);
-
+    int data_count() const noexcept;
+    int column_bytes(int index) const noexcept;
     const std::string get_name(int index) const noexcept;
     column_type get_type(int index) const noexcept;
 
-  private:
+    column_stream getter(int index = 0);
+
+private:
     int get(int index, int) const noexcept;
     long long get(int index, long long) const noexcept;
     double get(int index, double) const noexcept;
     std::string get(int index, std::string) const noexcept;
     const void* get(int index, const void*) const noexcept;
 
-    template <class... Types, const int... Integers>
-    std::tuple<Types...> get_columns(
-        const std::integer_sequence<int, Integers...>) const;
-
     sqlite3_stmt* pHandle;
 };
 
 template <class T>
-T column::get(int index) const
+column::column_stream& column::column_stream::operator>>(T& value)
+{
+    value = rColumn.get(mIndex);
+    ++mIndex;
+    return *this;
+}
+
+template <class T>
+T column::get(int index) const noexcept
 {
     return get(index, T());
 }
 
-template <class... Types>
-std::tuple<Types...> column::get(int maxIndex)
-{
-    return get_columns(std::make_integer_sequence<int, maxIndex>{});
-}
+// template <class... Types>
+// std::tuple<Types...> column::get(int maxIndex)
+// {
+//     return get_columns(std::make_integer_sequence<int, maxIndex>{});
+// }
 
-template <class... Types, const int... Integers>
-std::tuple<Types...> column::get_columns(
-    const std::integer_sequence<int, Integers...>) const
-{
-    return std::make_tuple(get(Integers, Types())...);
-}
+// template <class... Types, const int... Integers>
+// std::tuple<Types...> column::get_columns(
+//     const std::integer_sequence<int, Integers...>) const
+// {
+//     return std::make_tuple(get(Integers, Types())...);
+// }
 
 } // namespace app::db

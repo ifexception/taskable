@@ -22,13 +22,16 @@
 
 #include "statement.hh"
 
+#include "column.hh"
+
 namespace app::db
 {
 class database;
 
 class query : public statement
 {
-  public:
+public:
+
     query() = delete;
     query(const query&) = delete;
     explicit query(database& db, const std::string& query);
@@ -38,5 +41,6 @@ class query : public statement
 
     int column_count() const;
     std::string column_name(int index) const;
+    std::string column_decltype(int index) const;
 };
 } // namespace app::db
