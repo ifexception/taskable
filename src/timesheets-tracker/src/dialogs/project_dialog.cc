@@ -23,12 +23,17 @@
 
 #include "../common/common.hh"
 #include "../common/ids.hh"
+#include "../services/employer_service.hh"
+#include "../services/client_service.hh"
 
 namespace app::dialog
 {
 wxIMPLEMENT_DYNAMIC_CLASS(project_dialog, wxDialog)
 
 wxBEGIN_EVENT_TABLE(project_dialog, wxDialog)
+    EVT_BUTTON(ids::ID_SAVE, project_dialog::on_save)
+    EVT_BUTTON(wxID_CANCEL, project_dialog::on_cancel)
+    EVT_CHOICE(project_dialog::IDC_EMPLOYER_CHOICE, project_dialog::on_employer_select)
 wxEND_EVENT_TABLE()
 
 project_dialog::project_dialog(wxWindow* parent, bool isEdit, const wxString& name)
@@ -60,6 +65,7 @@ bool project_dialog::create(wxWindow* parent, wxWindowID windowId, const wxStrin
 
     if (created) {
         create_controls();
+        post_create_controls();
 
         GetSizer()->Fit(this);
         //SetIcon();
@@ -108,6 +114,27 @@ void project_dialog::create_controls()
     pDisplayNameCtrl->SetToolTip(wxT("Enter a shortened, convenient display name for the project"));
     taskFlexGridSizer->Add(pDisplayNameCtrl, common::sizers::ControlDefault);
 
+    /* Employer Choice Ctrl */
+    auto employerText = new wxStaticText(projectDetailsPanel, wxID_STATIC, wxT("Employer"));
+    taskFlexGridSizer->Add(employerText, common::sizers::ControlCenterVertical);
+
+    pEmployerChoiceCtrl = new wxChoice(projectDetailsPanel, IDC_EMPLOYER_CHOICE, wxDefaultPosition, wxSize(150, -1));
+    pEmployerChoiceCtrl->AppendString(wxT("Select a employer"));
+    pEmployerChoiceCtrl->SetSelection(0);
+    pEmployerChoiceCtrl->SetToolTip(wxT("Select a employer to associate the project with"));
+    taskFlexGridSizer->Add(pEmployerChoiceCtrl, common::sizers::ControlDefault);
+
+    /* Client Choice Ctrl */
+    auto clientText = new wxStaticText(projectDetailsPanel, wxID_STATIC, wxT("Client"));
+    taskFlexGridSizer->Add(clientText, common::sizers::ControlCenterVertical);
+
+    pClientChoiceCtrl = new wxChoice(projectDetailsPanel, IDC_CLIENT_CHOICE, wxDefaultPosition, wxSize(150, -1));
+    pClientChoiceCtrl->AppendString(wxT("Select a client"));
+    pClientChoiceCtrl->SetSelection(0);
+    pClientChoiceCtrl->SetToolTip(wxT("Please select a employer first"));
+    pClientChoiceCtrl->Disable();
+    taskFlexGridSizer->Add(pClientChoiceCtrl, common::sizers::ControlDefault);
+
     /* Horizontal Line*/
     auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("new_task_static_line"));
     mainSizer->Add(separation_line, 0, wxEXPAND | wxALL, 1);
@@ -123,6 +150,21 @@ void project_dialog::create_controls()
 
     buttonPanelSizer->Add(okButton, common::sizers::ControlDefault);
     buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
+}
+
+void project_dialog::post_create_controls()
+{
+    std::vector<models::employer> employers;
+    try {
+        services::employer_service employerService;
+        employers = employerService.get_active_employers();
+    } catch (const std::exception& e) {
+        wxLogDebug(e.what());
+    }
+
+    for (auto employer : employers) {
+        pEmployerChoiceCtrl->Append(employer.employer_name, (void*)employer.employer_id);
+    }
 }
 
 bool project_dialog::validate()
@@ -146,10 +188,35 @@ bool project_dialog::are_controls_empty()
     return isEmpty;
 }
 
+void project_dialog::on_employer_select(wxCommandEvent& event)
+{
+    // TODO - clear contents of previous employer's clients (if applicable)
+    int employerId = (int) event.GetClientData();
+    std::vector<models::client> clients;
+    try {
+        services::client_service clientService;
+        clients = clientService.get_clients_by_employer_id(employerId);
+    } catch (const std::exception& e) {
+        wxLogDebug(e.what());
+    }
+
+    for (auto client : clients) {
+        pClientChoiceCtrl->Append(client.name, (void*)client.client_id);
+    }
+
+    if (!pClientChoiceCtrl->IsEnabled()) {
+        pClientChoiceCtrl->Enable();
+        pClientChoiceCtrl->SetToolTip(wxT("Please select a client to associate this project with"));
+    }
+}
+
 void project_dialog::on_save(wxCommandEvent& event)
 {
     mNameText = pNameCtrl->GetValue();
     mDisplayNameText = pDisplayNameCtrl->GetValue();
+
+    mEmployerChoice = (int)pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection());
+    mClientChoice = (int)pClientChoiceCtrl->GetClientData(pClientChoiceCtrl->GetSelection());
 
     bool isValid = validate();
     if (!isValid) {
@@ -162,13 +229,11 @@ void project_dialog::on_cancel(wxCommandEvent& event)
     bool areControlsEmpty = are_controls_empty();
     if (!areControlsEmpty) {
 
-        int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"),
-            wxYES_NO | wxICON_QUESTION);
+        int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
         if (answer == wxYES) {
             EndModal(wxID_CANCEL);
         }
-    }
-    else {
+    } else {
         EndModal(wxID_CANCEL);
     }
 }

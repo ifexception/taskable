@@ -25,31 +25,45 @@ namespace app::dialog
 {
 class project_dialog : public wxDialog
 {
-    wxDECLARE_DYNAMIC_CLASS(project_dialog);
-    wxDECLARE_EVENT_TABLE();
-
-  public:
+public:
     project_dialog() = default;
     explicit project_dialog(wxWindow* parent, bool isEdit = false, const wxString& name = "project_dialog");
     virtual ~project_dialog();
 
     void launch_project_dialog();
 
-  private:
+private:
+    wxDECLARE_DYNAMIC_CLASS(project_dialog);
+    wxDECLARE_EVENT_TABLE();
+
     bool create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
 
     void create_controls();
+    void post_create_controls();
 
     bool validate();
     bool are_controls_empty();
 
+    void on_employer_select(wxCommandEvent& event);
     void on_save(wxCommandEvent& event);
     void on_cancel(wxCommandEvent& event);
 
     wxTextCtrl* pNameCtrl;
     wxTextCtrl* pDisplayNameCtrl;
+    wxChoice* pEmployerChoiceCtrl;
+    wxChoice* pClientChoiceCtrl;
 
     wxString mNameText;
     wxString mDisplayNameText;
+    int mEmployerChoice;
+    int mClientChoice;
+
+    enum
+    {
+        IDC_NAME,
+        IDC_DISPLAY_NAME,
+        IDC_EMPLOYER_CHOICE,
+        IDC_CLIENT_CHOICE
+    };
 };
 } // namespace app::dialog
