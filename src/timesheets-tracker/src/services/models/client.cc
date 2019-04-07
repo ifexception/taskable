@@ -17,22 +17,4 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
-
-#include <string>
-#include <vector>
-
-#include "models/client.hh"
-
-namespace app::services
-{
-struct client_service
-{
-    client_service() = default;
-    ~client_service() = default;
-
-    void create_new_client(const std::string& name, const int employerId);
-
-    std::vector<models::client> get_clients_by_employer_id(const int employerId);
-};
-}
+#include "client.hh"

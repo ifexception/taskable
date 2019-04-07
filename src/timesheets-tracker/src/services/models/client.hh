@@ -20,19 +20,19 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
-#include "models/client.hh"
-
-namespace app::services
+namespace app::models
 {
-struct client_service
+struct client
 {
-    client_service() = default;
-    ~client_service() = default;
+    client() = default;
+    ~client() = default;
 
-    void create_new_client(const std::string& name, const int employerId);
-
-    std::vector<models::client> get_clients_by_employer_id(const int employerId);
+    int client_id;
+    std::string name;
+    int date_created_utc;
+    int date_updated_utc;
+    int is_active;
+    int employer_id;
 };
 }

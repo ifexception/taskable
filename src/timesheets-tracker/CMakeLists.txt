@@ -37,6 +37,7 @@ set (SRC
     "src/db/statement.cc"
     "src/db/query.cc"
     "src/services/models/employer.cc"
+    "src/services/models/client.cc"
     "src/services/db_connection.cc"
     "src/services/employer_service.cc"
     "src/services/client_service.cc"
