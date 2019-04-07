@@ -131,12 +131,12 @@ void project_dialog::create_controls()
     pClientChoiceCtrl = new wxChoice(projectDetailsPanel, IDC_CLIENT_CHOICE, wxDefaultPosition, wxSize(150, -1));
     pClientChoiceCtrl->AppendString(wxT("Select a client"));
     pClientChoiceCtrl->SetSelection(0);
-    pClientChoiceCtrl->SetToolTip(wxT("Please select a employer first"));
+    pClientChoiceCtrl->SetToolTip(wxT("Please select a client to associate this project with"));
     pClientChoiceCtrl->Disable();
     taskFlexGridSizer->Add(pClientChoiceCtrl, common::sizers::ControlDefault);
 
     /* Horizontal Line*/
-    auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("new_task_static_line"));
+    auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("project_details_static_line"));
     mainSizer->Add(separation_line, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
@@ -190,7 +190,8 @@ bool project_dialog::are_controls_empty()
 
 void project_dialog::on_employer_select(wxCommandEvent& event)
 {
-    // TODO - clear contents of previous employer's clients (if applicable)
+    pClientChoiceCtrl->Clear();
+    pClientChoiceCtrl->AppendString(wxT("Select a client"));
     int employerId = (int) event.GetClientData();
     std::vector<models::client> clients;
     try {
@@ -204,9 +205,9 @@ void project_dialog::on_employer_select(wxCommandEvent& event)
         pClientChoiceCtrl->Append(client.name, (void*)client.client_id);
     }
 
+    pClientChoiceCtrl->SetSelection(0);
     if (!pClientChoiceCtrl->IsEnabled()) {
         pClientChoiceCtrl->Enable();
-        pClientChoiceCtrl->SetToolTip(wxT("Please select a client to associate this project with"));
     }
 }
 
