@@ -87,4 +87,18 @@ std::vector<models::client> db_service::get_clients_by_employer_id(const int emp
 
     return clients;
 }
+
+void db_service::create_new_project(const std::string& name, const std::string& displayName, const int employerId, const int* clientId)
+{
+    std::string cmd("INSERT INTO projects (name, display_name, is_active, employer_id, client_id) VALUES (?, ?, 1, ?, ?)");
+    db::command command(*db_connection::get_instance().get_database(), cmd);
+    if (clientId == nullptr) {
+        command.binder() << name << displayName << employerId << (void*)0;
+    } else {
+        command.binder() << name << displayName << employerId << *clientId;
+    }
+
+    command.execute();
+}
+
 } // namespace app::services

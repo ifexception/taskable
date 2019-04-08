@@ -30,14 +30,16 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(project_dialog, wxDialog)
 
 wxBEGIN_EVENT_TABLE(project_dialog, wxDialog)
-    EVT_BUTTON(ids::ID_SAVE, project_dialog::on_save)
-    EVT_BUTTON(wxID_CANCEL, project_dialog::on_cancel)
-    EVT_CHOICE(project_dialog::IDC_EMPLOYER_CHOICE, project_dialog::on_employer_select)
+EVT_BUTTON(ids::ID_SAVE, project_dialog::on_save)
+EVT_BUTTON(wxID_CANCEL, project_dialog::on_cancel)
+EVT_CHOICE(project_dialog::IDC_EMPLOYER_CHOICE, project_dialog::on_employer_select)
 wxEND_EVENT_TABLE()
 
 project_dialog::project_dialog(wxWindow* parent, bool isEdit, const wxString& name)
     : mNameText(wxT(""))
     , mDisplayNameText(wxT(""))
+    , mEmployerChoice(-1)
+    , mClientChoice(-1)
 {
     wxString title;
     if (isEdit) {
@@ -178,6 +180,12 @@ bool project_dialog::validate()
         return false;
     }
 
+    if (mEmployerChoice == -1) {
+        wxMessageBox(wxT("An employer is required"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+    // TODO: A client is optional, should check for it?
+
     return true;
 }
 
@@ -191,7 +199,7 @@ void project_dialog::on_employer_select(wxCommandEvent& event)
 {
     pClientChoiceCtrl->Clear();
     pClientChoiceCtrl->AppendString(wxT("Select a client"));
-    int employerId = (int) event.GetClientData();
+    int employerId = (int)event.GetClientData();
     std::vector<models::client> clients;
     try {
         services::db_service clientService;
@@ -221,6 +229,16 @@ void project_dialog::on_save(wxCommandEvent& event)
     bool isValid = validate();
     if (!isValid) {
         return;
+    }
+
+    try {
+        services::db_service projectService;
+        if (mClientChoice == -1) {
+            projectService.create_new_project(std::string(mNameText), std::string(mDisplayNameText), mEmployerChoice, nullptr);
+        } else {
+            projectService.create_new_project(std::string(mNameText), std::string(mDisplayNameText), mEmployerChoice, &mClientChoice);
+        }
+    } catch (const std::exception&) {
     }
 }
 
