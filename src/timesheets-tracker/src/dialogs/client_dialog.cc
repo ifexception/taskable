@@ -23,9 +23,7 @@
 
 #include "../common/common.hh"
 #include "../common/ids.hh"
-
-#include "../services/employer_service.hh"
-#include "../services/client_service.hh"
+#include "../services/db_service.hh"
 
 namespace app::dialog
 {
@@ -134,7 +132,7 @@ void client_dialog::create_controls()
 
 void client_dialog::init_post_create()
 {
-    services::employer_service employerService;
+    services::db_service employerService;
     std::vector<models::employer> employers;
     try {
         employers = employerService.get_active_employers();
@@ -186,7 +184,7 @@ void client_dialog::on_save(wxCommandEvent & event)
         return;
     }
 
-    services::client_service clientService;
+    services::db_service clientService;
     try {
         clientService.create_new_client(std::string(mNameText), mSelectedEmployerId);
     } catch (const std::exception&) {

@@ -23,8 +23,7 @@
 
 #include "../common/common.hh"
 #include "../common/ids.hh"
-#include "../services/employer_service.hh"
-#include "../services/client_service.hh"
+#include "../services/db_service.hh"
 
 namespace app::dialog
 {
@@ -156,7 +155,7 @@ void project_dialog::post_create_controls()
 {
     std::vector<models::employer> employers;
     try {
-        services::employer_service employerService;
+        services::db_service employerService;
         employers = employerService.get_active_employers();
     } catch (const std::exception& e) {
         wxLogDebug(e.what());
@@ -195,7 +194,7 @@ void project_dialog::on_employer_select(wxCommandEvent& event)
     int employerId = (int) event.GetClientData();
     std::vector<models::client> clients;
     try {
-        services::client_service clientService;
+        services::db_service clientService;
         clients = clientService.get_clients_by_employer_id(employerId);
     } catch (const std::exception& e) {
         wxLogDebug(e.what());

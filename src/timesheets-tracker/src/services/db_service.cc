@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "employer_service.hh"
+#include "db_service.hh"
 
 #include "db_connection.hh"
 #include "../db/command.hh"
@@ -26,7 +26,7 @@
 
 namespace app::services
 {
-void employer_service::create_new_employer(const std::string& employerName)
+void db_service::create_new_employer(const std::string& employerName)
 {
     std::string cmd("INSERT INTO employers (name, is_active) VALUES (?, 1);");
     auto instance = db_connection::get_instance().get_database();
@@ -35,7 +35,7 @@ void employer_service::create_new_employer(const std::string& employerName)
     command.execute();
 }
 
-std::vector<models::employer> employer_service::get_active_employers()
+std::vector<models::employer> db_service::get_active_employers()
 {
     std::string qry("SELECT * FROM employers WHERE is_active = 1;");
     auto instance = db_connection::get_instance().get_database();
@@ -55,5 +55,36 @@ std::vector<models::employer> employer_service::get_active_employers()
     }
 
     return employers;
+}
+
+void db_service::create_new_client(const std::string& name, const int employerId)
+{
+    std::string cmd("INSERT INTO clients (name, is_active, employer_id) VALUES (?, 1, ?)");
+    db::command command(*db_connection::get_instance().get_database(), cmd);
+    command.binder() << name << employerId;
+    command.execute();
+}
+
+std::vector<models::client> db_service::get_clients_by_employer_id(const int employerId)
+{
+    std::string cmd("SELECT * FROM clients WHERE employer_id = ?");
+    db::query query(*db_connection::get_instance().get_database(), cmd);
+    query.bind(1, employerId);
+
+    std::vector<models::client> clients;
+    while (query.run()) {
+        db::column column(query.get_handle());
+        models::client client;
+
+        client.client_id = column.get<int>(0);
+        client.name = column.get<std::string>(1);
+        client.date_created_utc = column.get<int>(2);
+        client.date_updated_utc = column.get<int>(3);
+        client.is_active = column.get<int>(4);
+        client.employer_id = column.get<int>(5);
+        clients.push_back(client);
+    }
+
+    return clients;
 }
 } // namespace app::services

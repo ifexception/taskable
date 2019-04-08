@@ -22,14 +22,19 @@
 #include <string>
 #include <vector>
 
+#include "models/employer.hh"
 #include "models/client.hh"
 
 namespace app::services
 {
-struct client_service
+struct db_service
 {
-    client_service() = default;
-    ~client_service() = default;
+    db_service() = default;
+    ~db_service() = default;
+
+    void create_new_employer(const std::string& employerName);
+
+    std::vector<models::employer> get_active_employers();
 
     void create_new_client(const std::string& name, const int employerId);
 

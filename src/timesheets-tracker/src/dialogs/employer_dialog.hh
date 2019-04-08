@@ -21,8 +21,6 @@
 
 #include <wx/wx.h>
 
-#include "../services/employer_service.hh"
-
 namespace app::dialog
 {
 class employer_dialog : public wxDialog
@@ -53,7 +51,6 @@ class employer_dialog : public wxDialog
     wxTextCtrl* pEmployerCtrl;
 
     wxString mEmployerText;
-    services::employer_service svcEmployer;
 
     enum
     {

@@ -23,6 +23,7 @@
 
 #include "../common/common.hh"
 #include "../common/ids.hh"
+#include "../services/db_service.hh"
 
 namespace app::dialog
 {
@@ -35,7 +36,6 @@ wxEND_EVENT_TABLE()
 
 employer_dialog::employer_dialog(wxWindow* parent, bool isEdit, const wxString& name)
     : mEmployerText(wxT(""))
-    , svcEmployer()
 {
     long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
     wxSize employerSize(WIDTH, HEIGHT);
@@ -165,9 +165,9 @@ void employer_dialog::on_save(wxCommandEvent& event)
         return;
     }
 
-    // try...catch
+    services::db_service employerService;
     try {
-        svcEmployer.create_new_employer(std::string(mEmployerText));
+        employerService.create_new_employer(std::string(mEmployerText));
     } catch (const std::exception& e) {
         wxMessageBox(wxT("An error occured\n"), wxT("Error"), wxOK_DEFAULT | wxICON_ERROR);
         return;
