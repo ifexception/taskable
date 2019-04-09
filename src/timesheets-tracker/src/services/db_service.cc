@@ -23,6 +23,7 @@
 #include "../db/command.hh"
 #include "../db/query.hh"
 #include "../db/copy_options.hh"
+#include "../db/column_type.hh"
 
 namespace app::services
 {
@@ -98,6 +99,43 @@ void db_service::create_new_project(const std::string& name, const std::string& 
         command.binder() << name << displayName << employerId << *clientId;
     }
 
+    command.execute();
+}
+
+std::vector<models::project> db_service::get_projects()
+{
+    std::string cmd("SELECT * FROM projects where is_active = 1;");
+    db::query query(*db_connection::get_instance().get_database(), cmd);
+
+    std::vector<models::project> projects;
+    while (query.run()) {
+        db::column column(query.get_handle());
+        models::project project;
+
+        project.project_id = column.get<int>(0);
+        project.name = column.get<std::string>(1);
+        project.display_name = column.get<std::string>(2);
+        project.date_created_utc = column.get<int>(3);
+        project.date_updated_utc = column.get<int>(4);
+        project.is_active = column.get<int>(5);
+        project.employer_id = column.get<int>(6);
+        if (column.get_type(7) == db::column_type::Null) {
+            project.client_id = 0;
+        } else {
+            project.client_id = column.get<int>(7);
+        }
+
+        projects.push_back(project);
+    }
+
+    return projects;
+}
+
+void db_service::create_new_category(const int projectId, const std::string& name, const std::string& description)
+{
+    std::string cmd("INSERT INTO categories (name, description, is_active, project_id) VALUES (?, ?, 1, ?)");
+    db::command command(*db_connection::get_instance().get_database(), cmd);
+    command.binder() << name << description << projectId;
     command.execute();
 }
 

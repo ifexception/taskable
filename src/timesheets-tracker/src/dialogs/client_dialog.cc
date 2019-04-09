@@ -86,7 +86,7 @@ void client_dialog::create_controls()
     mainPanelSizer->Add(sizer, 0);
 
     /* Task Details Box */
-    auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Task Details"));
+    auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Client Details"));
     auto detailsBoxSizer = new wxStaticBoxSizer(detailsBox, wxVERTICAL);
     sizer->Add(detailsBoxSizer, common::sizers::ControlExpandProp);
 

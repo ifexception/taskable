@@ -25,6 +25,7 @@
 #include "../dialogs/employer_dialog.hh"
 #include "../dialogs/client_dialog.hh"
 #include "../dialogs/project_dialog.hh"
+#include "../dialogs/category_dialog.hh"
 
 namespace app::frame
 {
@@ -35,12 +36,14 @@ main_frame::main_frame()
     const int EmployerId = static_cast<int>(ids::MenuIds::EmployerMenuId);
     const int ProjectId = static_cast<int>(ids::MenuIds::ProjectMenuId);
     const int ClientId = static_cast<int>(ids::MenuIds::ClientMenuId);
+    const int CategoryId = static_cast<int>(ids::MenuIds::CategoryMenuId);
 
     wxMenu* fileMenu = new wxMenu();
-    fileMenu->Append(TaskId, "&New Task...\tCtrl-N", "Create new timesheet entry");
+    fileMenu->Append(TaskId, "&New Task...\tCtrl-N", "Create new task");
     fileMenu->Append(EmployerId, "&New Employer...\tCtrl-E", "Create new employer");
     fileMenu->Append(ClientId, "&New Client...\tCtrl-L", "Create new client");
     fileMenu->Append(ProjectId, "&New Project...\tCtrl-R", "Create new project");
+    fileMenu->Append(CategoryId, wxT("&New Category...\tCtrl-A"), wxT("Create new category"));
     fileMenu->AppendSeparator();
     fileMenu->Append(wxID_EXIT);
 
@@ -87,6 +90,13 @@ main_frame::main_frame()
             newProject.launch_project_dialog();
         },
         ProjectId);
+
+    Bind(wxEVT_MENU,
+        [=](wxCommandEvent&) {
+            dialog::category_dialog categoryDialog(this);
+            categoryDialog.launch_dialog();
+        },
+        CategoryId);
 }
 
 main_frame::~main_frame()

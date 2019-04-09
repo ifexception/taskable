@@ -38,6 +38,7 @@ set (SRC
     "src/db/query.cc"
     "src/services/models/employer.cc"
     "src/services/models/client.cc"
+    "src/services/models/project.cc"
     "src/services/db_connection.cc"
     "src/services/db_service.cc"
     "src/app.cc"
@@ -46,7 +47,8 @@ set (SRC
     "src/dialogs/task_details_dialog.cc"
     "src/dialogs/employer_dialog.cc"
     "src/dialogs/client_dialog.cc"
-    "src/dialogs/project_dialog.cc")
+    "src/dialogs/project_dialog.cc"
+    "src/dialogs/category_dialog.cc")
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
 

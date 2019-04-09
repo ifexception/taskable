@@ -17,34 +17,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
+#include "project.hh"
 
-#include <string>
-#include <vector>
-
-#include "models/employer.hh"
-#include "models/client.hh"
-#include "models/project.hh"
-
-namespace app::services
+namespace app::models
 {
-struct db_service
-{
-    db_service() = default;
-    ~db_service() = default;
 
-    void create_new_employer(const std::string& employerName);
-
-    std::vector<models::employer> get_active_employers();
-
-    void create_new_client(const std::string& name, const int employerId);
-
-    std::vector<models::client> get_clients_by_employer_id(const int employerId);
-
-    void create_new_project(const std::string& name, const std::string& displayName, const int employerId, const int* clientId);
-
-    std::vector<models::project> get_projects();
-
-    void create_new_category(const int projectId, const std::string& name, const std::string& description);
-};
 }

@@ -20,31 +20,21 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
-#include "models/employer.hh"
-#include "models/client.hh"
-#include "models/project.hh"
-
-namespace app::services
+namespace app::models
 {
-struct db_service
+struct project
 {
-    db_service() = default;
-    ~db_service() = default;
+    project() = default;
+    ~project() = default;
 
-    void create_new_employer(const std::string& employerName);
-
-    std::vector<models::employer> get_active_employers();
-
-    void create_new_client(const std::string& name, const int employerId);
-
-    std::vector<models::client> get_clients_by_employer_id(const int employerId);
-
-    void create_new_project(const std::string& name, const std::string& displayName, const int employerId, const int* clientId);
-
-    std::vector<models::project> get_projects();
-
-    void create_new_category(const int projectId, const std::string& name, const std::string& description);
+    int project_id;
+    std::string name;
+    std::string display_name;
+    int date_created_utc;
+    int date_updated_utc;
+    int is_active;
+    int employer_id;
+    int client_id;
 };
 }

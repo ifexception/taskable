@@ -199,7 +199,7 @@ void project_dialog::on_employer_select(wxCommandEvent& event)
 {
     pClientChoiceCtrl->Clear();
     pClientChoiceCtrl->AppendString(wxT("Select a client"));
-    int employerId = (int)event.GetClientData();
+    int employerId = (int)event.GetClientData(); // FIXME: loss of precision
     std::vector<models::client> clients;
     try {
         services::db_service clientService;

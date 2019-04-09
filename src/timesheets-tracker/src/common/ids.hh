@@ -29,7 +29,7 @@ enum class MenuIds : int
     ProjectMenuId = 2,
     ClientMenuId = 3,
     TaskDetailMenuId = 4,
-    CategoryMenuId
+    CategoryMenuId = 5
 };
 
 enum class Events : int
