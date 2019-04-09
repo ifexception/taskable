@@ -17,8 +17,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "db_connection.hh"
-#include "../common/config.hh"
+#include "db_connection.h"
+#include "../common/config.h"
 
 namespace app::services
 {

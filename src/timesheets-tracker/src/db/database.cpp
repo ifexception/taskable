@@ -19,10 +19,10 @@
 //
 
 
-#include "database.hh"
+#include "database.h"
 
-#include "../common/constants.hh"
-#include "database_exception.hh"
+#include "../common/constants.h"
+#include "database_exception.h"
 
 namespace app::db
 {

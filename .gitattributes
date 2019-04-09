@@ -6,7 +6,7 @@
 *.hpp text diff=cpp
 *.h text diff=c
 *.h++ text diff=cpp
-*.hh text diff=cpp
+*.h text diff=cpp
 *.hxx text diff=cpp
 
 # Compiled Object files

@@ -22,9 +22,9 @@
 #include <string>
 #include <vector>
 
-#include "models/employer.hh"
-#include "models/client.hh"
-#include "models/project.hh"
+#include "models/employer.h"
+#include "models/client.h"
+#include "models/project.h"
 
 namespace app::services
 {

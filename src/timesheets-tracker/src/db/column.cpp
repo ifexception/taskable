@@ -19,9 +19,9 @@
 //
 
 
-#include "column.hh"
+#include "column.h"
 
-#include "../common/constants.hh"
+#include "../common/constants.h"
 
 namespace app::db
 {

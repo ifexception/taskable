@@ -25,7 +25,7 @@
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
-#include "copy_options.hh"
+#include "copy_options.h"
 
 struct sqlite3_stmt;
 

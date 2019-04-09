@@ -21,10 +21,10 @@
 //  Contact:
 //    szymonwelgus at gmail dot com
 
-#include "app.hh"
+#include "app.h"
 
-#include "common/constants.hh"
-#include "frame/main_frame.hh"
+#include "common/constants.h"
+#include "frame/main_frame.h"
 
 namespace app
 {

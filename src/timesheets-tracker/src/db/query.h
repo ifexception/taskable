@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include "statement.hh"
+#include "statement.h"
 
-#include "column.hh"
+#include "column.h"
 
 namespace app::db
 {

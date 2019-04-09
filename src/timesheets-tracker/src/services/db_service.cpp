@@ -17,13 +17,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "db_service.hh"
+#include "db_service.h"
 
-#include "db_connection.hh"
-#include "../db/command.hh"
-#include "../db/query.hh"
-#include "../db/copy_options.hh"
-#include "../db/column_type.hh"
+#include "db_connection.h"
+#include "../db/command.h"
+#include "../db/query.h"
+#include "../db/copy_options.h"
+#include "../db/column_type.h"
 
 namespace app::services
 {

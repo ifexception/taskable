@@ -17,13 +17,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "project_dialog.hh"
+#include "project_dialog.h"
 
 #include <wx/statline.h>
 
-#include "../common/common.hh"
-#include "../common/ids.hh"
-#include "../services/db_service.hh"
+#include "../common/common.h"
+#include "../common/ids.h"
+#include "../services/db_service.h"
 
 namespace app::dialog
 {

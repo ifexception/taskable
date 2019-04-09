@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "../db/database.hh"
+#include "../db/database.h"
 
 namespace app::services
 {

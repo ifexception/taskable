@@ -27,7 +27,7 @@
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
-#include "permission.hh"
+#include "permission.h"
 
 namespace app::db
 {

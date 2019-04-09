@@ -19,7 +19,7 @@
 //
 
 
-#include "database_exception.hh"
+#include "database_exception.h"
 
 namespace app::db
 {

@@ -18,13 +18,13 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "statement.hh"
+#include "statement.h"
 
 #include <sqlite3.h>
 
-#include "../common/constants.hh"
-#include "database.hh"
-#include "database_exception.hh"
+#include "../common/constants.h"
+#include "database.h"
+#include "database_exception.h"
 
 namespace app::db
 {

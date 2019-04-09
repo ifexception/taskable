@@ -18,7 +18,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "command.hh"
+#include "command.h"
 
 namespace app::db
 {

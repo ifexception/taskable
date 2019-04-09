@@ -17,11 +17,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "task_details_dialog.hh"
+#include "task_details_dialog.h"
 #include <wx/timectrl.h>
 #include <wx/statline.h>
 
-#include "../common/ids.hh"
+#include "../common/ids.h"
 
 namespace app::dialog
 {

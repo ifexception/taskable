@@ -22,7 +22,7 @@
 
 #include <string>
 
-#include "statement.hh"
+#include "statement.h"
 
 namespace app::db
 {

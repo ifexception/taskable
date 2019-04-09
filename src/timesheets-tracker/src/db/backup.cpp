@@ -19,11 +19,11 @@
 //
 
 
-#include "backup.hh"
+#include "backup.h"
 
-#include "../common/constants.hh"
-#include "database.hh"
-#include "database_exception.hh"
+#include "../common/constants.h"
+#include "database.h"
+#include "database_exception.h"
 
 namespace app::db
 {

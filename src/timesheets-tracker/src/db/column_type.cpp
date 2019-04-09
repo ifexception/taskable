@@ -19,4 +19,4 @@
 //
 
 
-#include "column_type.hh"
+#include "column_type.h"

@@ -17,15 +17,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "main_frame.hh"
+#include "main_frame.h"
 
-#include "../common/ids.hh"
-#include "../dialogs/about_dialog.hh"
-#include "../dialogs/task_details_dialog.hh"
-#include "../dialogs/employer_dialog.hh"
-#include "../dialogs/client_dialog.hh"
-#include "../dialogs/project_dialog.hh"
-#include "../dialogs/category_dialog.hh"
+#include "../common/ids.h"
+#include "../dialogs/about_dialog.h"
+#include "../dialogs/task_details_dialog.h"
+#include "../dialogs/employer_dialog.h"
+#include "../dialogs/client_dialog.h"
+#include "../dialogs/project_dialog.h"
+#include "../dialogs/category_dialog.h"
 
 namespace app::frame
 {

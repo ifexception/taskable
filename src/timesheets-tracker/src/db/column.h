@@ -26,7 +26,7 @@
 
 #include <sqlite3.h>
 
-#include "column_type.hh"
+#include "column_type.h"
 
 namespace app::db
 {

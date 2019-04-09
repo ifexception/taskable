@@ -18,4 +18,4 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "copy_options.hh"
+#include "copy_options.h"

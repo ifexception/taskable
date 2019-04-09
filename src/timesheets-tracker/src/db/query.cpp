@@ -18,11 +18,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "query.hh"
+#include "query.h"
 
 #include <sqlite3.h>
 
-#include "database.hh"
+#include "database.h"
 
 namespace app::db
 {
