@@ -312,10 +312,12 @@ void task_details_dialog::on_save(wxCommandEvent& event)
     try {
         wxString startTime = mStartTime.FormatISOTime();
         wxString endTime = mEndTime.FormatISOTime();
-        dbService.create_new_task(mProjectId, taskId, std::string(startTime), std::string(endTime), std::string(mDurationText), mCategoryId, mDescriptionText);
+        dbService.create_new_task(mProjectId, taskId, std::string(startTime), std::string(endTime), std::string(mDurationText), mCategoryId, std::string(mDescriptionText));
     } catch (const std::exception& e) {
         wxLogDebug(e.what());
     }
+
+    EndModal(ids::ID_SAVE);
 }
 
 void task_details_dialog::on_cancel(wxCommandEvent& event)
