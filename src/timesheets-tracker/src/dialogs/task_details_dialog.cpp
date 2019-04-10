@@ -252,7 +252,7 @@ bool task_details_dialog::are_controls_empty()
 void task_details_dialog::on_project_choice(wxCommandEvent & event)
 {
     pCategoryChoiceCtrl->Clear();
-    pCategoryChoiceCtrl->AppendString(wxT("Select a client"));
+    pCategoryChoiceCtrl->AppendString(wxT("Select a category"));
     pCategoryChoiceCtrl->SetSelection(0);
     int projectId = (int)event.GetClientData(); // FIXME: loss of precision
 
