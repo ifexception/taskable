@@ -44,6 +44,7 @@ class database
     database& operator=(const database& other) = delete;
     database& operator=(database&& other);
 
+    long long get_last_rowid();
     sqlite3* get_handle() const;
     const std::string get_lib_version();
     const int get_lib_version_number();

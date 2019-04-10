@@ -73,6 +73,12 @@ database& database::operator=(database&& other)
     return *this;
 }
 
+long long database::get_last_rowid()
+{
+    long long rowid = sqlite3_last_insert_rowid(pHandle);
+    return rowid;
+}
+
 sqlite3* database::get_handle() const
 {
     return pHandle;
