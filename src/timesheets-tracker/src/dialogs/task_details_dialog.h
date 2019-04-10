@@ -26,49 +26,50 @@ class wxDateEvent;
 
 namespace app::dialog
 {
-const int IDC_STARTTIME = wxNewId();
-
 class task_details_dialog : public wxDialog
 {
     wxDECLARE_DYNAMIC_CLASS(task_details_dialog);
     wxDECLARE_EVENT_TABLE();
 
-  public:
+public:
     task_details_dialog() = default;
-    explicit task_details_dialog(wxWindow* parent,
-        const wxString& name = "task_details_dialog");
+    explicit task_details_dialog(wxWindow* parent, bool isEdit = false, const wxString& name = "task_details_dialog");
     virtual ~task_details_dialog();
 
     void launch_task_details_dialog();
 
-  private:
-    bool create(wxWindow* parent,
-        wxWindowID windowId,
-        const wxString& title,
-        const wxPoint& point,
-        const wxSize& size,
-        long style,
-        const wxString& name);
+private:
+    bool create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name);
 
     void create_controls();
+    void fill_controls();
+    //void data_to_controls(); // placeholder for when editing functionality gets implemented
 
     bool validate();
     bool are_controls_empty();
 
     void on_save(wxCommandEvent& event);
     void on_cancel(wxCommandEvent& event);
-    void on_exit(wxCommandEvent& event);
 
-    wxComboBox* pActiveProject;
-    wxTimePickerCtrl* pStartTime;
-    wxTimePickerCtrl* pEndTime;
-    wxTextCtrl* pDescription;
-    wxComboBox* pCategories;
+    wxChoice* pProjectChoiceCtrl;
+    wxTimePickerCtrl* pStartTimeCtrl;
+    wxTimePickerCtrl* pEndTimeCtrl;
+    wxTextCtrl* pDescriptionCtrl;
+    wxChoice* pCategoryChoiceCtrl;
 
-    int mSelectedProject;
+    int mProjectId;
     wxDateTime mStartTime;
     wxDateTime mEndTime;
-    int mSelectedCategory;
+    int mCategoryId;
     wxString mDescriptionText;
+
+    enum
+    {
+        IDC_PROJECTCHOICE,
+        IDC_STARTTIME,
+        IDC_ENDTIME,
+        IDC_CATEGORYCHOICE,
+        IDC_DESCRIPTION
+    };
 };
 } // namespace app::dialog
