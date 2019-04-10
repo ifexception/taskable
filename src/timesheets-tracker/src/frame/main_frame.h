@@ -26,8 +26,8 @@ namespace app::frame
 class main_frame : public wxFrame
 {
   public:
-    main_frame();
-    main_frame(const main_frame&) = delete;
+    main_frame(wxWindow* parent, const wxString& name = wxT("main_frame"));
+    //main_frame(const main_frame&) = delete;
     ~main_frame();
 
     main_frame& operator=(const main_frame&) = delete;

@@ -29,8 +29,8 @@
 
 namespace app::frame
 {
-main_frame::main_frame()
-    : wxFrame(nullptr, wxID_ANY, "Timesheets Tracker")
+main_frame::main_frame(wxWindow* parent, const wxString& name)
+    : wxFrame(parent, wxID_ANY, "Tasks Tracker", wxDefaultPosition, wxSize(320, 240), wxDEFAULT_FRAME_STYLE, name)
 {
     const int TaskId = static_cast<int>(ids::MenuIds::TaskDetailMenuId);
     const int EmployerId = static_cast<int>(ids::MenuIds::EmployerMenuId);
