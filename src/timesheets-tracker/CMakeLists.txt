@@ -39,6 +39,7 @@ set (SRC
     "src/services/models/employer.cpp"
     "src/services/models/client.cpp"
     "src/services/models/project.cpp"
+    "src/services/models/category.cpp"
     "src/services/db_connection.cpp"
     "src/services/db_service.cpp"
     "src/app.cpp"

@@ -45,21 +45,32 @@ private:
     void fill_controls();
     //void data_to_controls(); // placeholder for when editing functionality gets implemented
 
+    int get_task_id();
+
     bool validate();
     bool are_controls_empty();
 
+    void on_project_choice(wxCommandEvent& event);
+    void on_start_time_changed(wxDateEvent& event);
+    void on_end_time_changed(wxDateEvent& event);
     void on_save(wxCommandEvent& event);
     void on_cancel(wxCommandEvent& event);
+
+    void calculate_time_diff(wxDateTime start, wxDateTime end);
+
+    wxString mTaskDate;
 
     wxChoice* pProjectChoiceCtrl;
     wxTimePickerCtrl* pStartTimeCtrl;
     wxTimePickerCtrl* pEndTimeCtrl;
+    wxStaticText* pDurationCtrl;
     wxTextCtrl* pDescriptionCtrl;
     wxChoice* pCategoryChoiceCtrl;
 
     int mProjectId;
     wxDateTime mStartTime;
     wxDateTime mEndTime;
+    wxString mDurationText;
     int mCategoryId;
     wxString mDescriptionText;
 
@@ -68,6 +79,7 @@ private:
         IDC_PROJECTCHOICE,
         IDC_STARTTIME,
         IDC_ENDTIME,
+        IDC_DURATION,
         IDC_CATEGORYCHOICE,
         IDC_DESCRIPTION
     };

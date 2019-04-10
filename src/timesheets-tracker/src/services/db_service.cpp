@@ -104,7 +104,7 @@ void db_service::create_new_project(const std::string& name, const std::string& 
 
 std::vector<models::project> db_service::get_projects()
 {
-    std::string cmd("SELECT * FROM projects where is_active = 1;");
+    std::string cmd("SELECT * FROM projects WHERE is_active = 1;");
     db::query query(*db_connection::get_instance().get_database(), cmd);
 
     std::vector<models::project> projects;
@@ -136,6 +136,60 @@ void db_service::create_new_category(const int projectId, const std::string& nam
     std::string cmd("INSERT INTO categories (name, description, is_active, project_id) VALUES (?, ?, 1, ?)");
     db::command command(*db_connection::get_instance().get_database(), cmd);
     command.binder() << name << description << projectId;
+    command.execute();
+}
+
+std::vector<models::category> db_service::get_categories_by_project_id(const int projectId)
+{
+    std::string qry("SELECT * FROM categories WHERE project_id = ?");
+    db::query query(*db_connection::get_instance().get_database(), qry);
+    query.bind(1, projectId);
+
+    std::vector<models::category> categories;
+    while (query.run()) {
+        db::column column(query.get_handle());
+        models::category category;
+
+        category.category_id = column.get<int>(0);
+        category.name = column.get<std::string>(1);
+        category.description = column.get<std::string>(2);
+        category.date_created_utc = column.get<int>(3);
+        category.date_updated_utc = column.get<int>(4);
+        category.is_active = column.get<int>(5);
+        category.project_id = column.get<int>(6);
+
+        categories.push_back(category);
+    }
+
+    return categories;
+}
+
+int db_service::create_or_get_task_id(const std::string& date, const int projectId)
+{
+    std::string cmd("SELECT task_id FROM tasks WHERE task_date = ?");
+    db::query query(*db_connection::get_instance().get_database(), cmd);
+    query.bind(1, date, db::copy_options::NoCopy);
+    int taskId = 0;
+    query.run();
+    db::column column(query.get_handle());
+    if (column.get_type(0) == db::column_type::Null) {
+        std::string cmd2("INSERT INTO tasks (task_date, is_active, project_id) VALUES (?, 1, ?)");
+        db::command command(*db_connection::get_instance().get_database(), cmd);
+        command.binder() << date << projectId;
+        command.execute();
+        taskId = (int) db_connection::get_instance().get_database()->get_last_rowid();
+    } else {
+        taskId = column.get<int>(0);
+    }
+
+    return taskId;
+}
+
+void db_service::create_new_task(const int projectId, const int taskId, const std::string& startTime, const std::string& endTime, const std::string& duration, const int categoryId, const std::string& description)
+{
+    std::string cmd("INSERT INTO task_details (start_time, end_time, duration, description, is_active, project_id, task_id, category_id) VALUES (?, ?, ?, ?, 1, ?, ?, ?");
+    db::command command(*db_connection::get_instance().get_database(), cmd);
+    command.binder() << startTime << endTime << duration << description << projectId << taskId << categoryId;
     command.execute();
 }
 

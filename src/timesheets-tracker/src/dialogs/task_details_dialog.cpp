@@ -19,6 +19,7 @@
 
 #include "task_details_dialog.h"
 #include <wx/timectrl.h>
+#include <wx/dateevt.h>
 #include <wx/statline.h>
 
 #include "../common/common.h"
@@ -31,8 +32,11 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(task_details_dialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(task_details_dialog, wxDialog)
-EVT_BUTTON(ids::ID_SAVE, task_details_dialog::on_save)
-EVT_BUTTON(wxID_CANCEL, task_details_dialog::on_cancel)
+    EVT_BUTTON(ids::ID_SAVE, task_details_dialog::on_save)
+    EVT_BUTTON(wxID_CANCEL, task_details_dialog::on_cancel)
+    EVT_CHOICE(task_details_dialog::IDC_PROJECTCHOICE, task_details_dialog::on_project_choice)
+    EVT_TIME_CHANGED(task_details_dialog::IDC_STARTTIME, task_details_dialog::on_start_time_changed)
+    EVT_TIME_CHANGED(task_details_dialog::IDC_ENDTIME, task_details_dialog::on_end_time_changed)
 wxEND_EVENT_TABLE()
 
 task_details_dialog::task_details_dialog(wxWindow* parent, bool isEdit, const wxString& name)
@@ -48,7 +52,7 @@ task_details_dialog::task_details_dialog(wxWindow* parent, bool isEdit, const wx
     } else {
         title = wxT("Add Task");
     }
-    bool success = create(parent, wxID_ANY, wxT("Add New Task"), wxDefaultPosition, wxSize(385, 488), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    bool success = create(parent, wxID_ANY, wxT("Add New Task"), wxDefaultPosition, wxSize(395, 488), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 
     SetMinClientSize(wxSize(400, 480));
 }
@@ -69,6 +73,7 @@ bool task_details_dialog::create(wxWindow* parent, wxWindowID windowId, const wx
 
     if (created) {
         create_controls();
+        fill_controls();
 
         GetSizer()->Fit(this);
         //SetIcon();
@@ -78,7 +83,6 @@ bool task_details_dialog::create(wxWindow* parent, wxWindowID windowId, const wx
     return created;
 }
 
-// TODO Refactor
 void task_details_dialog::create_controls()
 {
     /* Window Sizing */
@@ -129,6 +133,14 @@ void task_details_dialog::create_controls()
     pEndTimeCtrl->SetToolTip(wxT("Enter the time the task ended"));
     taskFlexGridSizer->Add(pEndTimeCtrl, common::sizers::ControlDefault);
 
+    /* Task Duration Text Control */
+    auto durationText = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Duration"));
+    taskFlexGridSizer->Add(durationText, common::sizers::ControlCenterVertical);
+
+    pDurationCtrl = new wxStaticText(taskDetailsPanel, IDC_DURATION, wxT("00:00:00"));
+    pDurationCtrl->SetToolTip(wxT("Elasped time for the task"));
+    taskFlexGridSizer->Add(pDurationCtrl, common::sizers::ControlDefault);
+
     /* Task Category Dropdown Control */
     auto taskCategory = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Category"));
     taskFlexGridSizer->Add(taskCategory, common::sizers::ControlCenterVertical);
@@ -136,6 +148,7 @@ void task_details_dialog::create_controls()
     pCategoryChoiceCtrl = new wxChoice(taskDetailsPanel, IDC_CATEGORYCHOICE, wxDefaultPosition, wxSize(150, -1));
     pCategoryChoiceCtrl->AppendString(wxT("Select a category"));
     pCategoryChoiceCtrl->SetSelection(0);
+    pCategoryChoiceCtrl->Disable();
     taskFlexGridSizer->Add(pCategoryChoiceCtrl, common::sizers::ControlDefault);
 
     /* Task Description Text Control */
@@ -164,7 +177,35 @@ void task_details_dialog::create_controls()
 }
 
 void task_details_dialog::fill_controls()
-{}
+{
+    std::vector<models::project> projects;
+
+    services::db_service dbService;
+    try {
+        projects = dbService.get_projects();
+    } catch (const std::exception& e) {
+        wxLogDebug(e.what());
+    }
+
+    for (auto project : projects) {
+        pProjectChoiceCtrl->Append(project.display_name, (void*)project.project_id);
+    }
+}
+
+int task_details_dialog::get_task_id()
+{
+    wxDateTime date = wxDateTime::Now();
+    mTaskDate = date.FormatISODate();
+    services::db_service dbService;
+    int taskId = 0;
+    try {
+        taskId = dbService.create_or_get_task_id(mTaskDate, mProjectId);
+    } catch (const std::exception& e) {
+        wxLogDebug(e.what());
+    }
+
+    return taskId;
+}
 
 bool task_details_dialog::validate()
 {
@@ -208,17 +249,72 @@ bool task_details_dialog::are_controls_empty()
     return isEmpty;
 }
 
+void task_details_dialog::on_project_choice(wxCommandEvent & event)
+{
+    pCategoryChoiceCtrl->Clear();
+    pCategoryChoiceCtrl->AppendString(wxT("Select a client"));
+    pCategoryChoiceCtrl->SetSelection(0);
+    int projectId = (int)event.GetClientData(); // FIXME: loss of precision
+
+    std::vector<models::category> categories;
+    try {
+        services::db_service dbService;
+        categories = dbService.get_categories_by_project_id(projectId);
+    } catch (const std::exception& e) {
+        wxLogDebug(e.what());
+    }
+
+    for (auto category : categories) {
+        pCategoryChoiceCtrl->Append(category.name, (void*)category.category_id);
+    }
+
+    if (!pCategoryChoiceCtrl->IsEnabled()) {
+        pCategoryChoiceCtrl->Enable();
+    }
+}
+
+void task_details_dialog::on_start_time_changed(wxDateEvent& event)
+{
+    auto start = event.GetDate();
+    auto end = pEndTimeCtrl->GetValue();
+    if (end != wxDefaultDateTime) {
+        calculate_time_diff(start, end);
+    }
+}
+
+void task_details_dialog::on_end_time_changed(wxDateEvent& event)
+{
+    auto end = event.GetDate();
+    auto start = pStartTimeCtrl->GetValue();
+
+    if (start != wxDefaultDateTime) {
+        calculate_time_diff(start, end);
+    }
+}
+
 void task_details_dialog::on_save(wxCommandEvent& event)
 {
-    mProjectId = pProjectChoiceCtrl->GetCurrentSelection();
+    mProjectId = (int)pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection());
     mStartTime = pStartTimeCtrl->GetValue();
     mEndTime = pEndTimeCtrl->GetValue();
-    mCategoryId = pCategoryChoiceCtrl->GetCurrentSelection();
+    mDurationText = pDurationCtrl->GetLabelText();
+    mCategoryId = (int)pCategoryChoiceCtrl->GetClientData(pCategoryChoiceCtrl->GetSelection());
     mDescriptionText = pDescriptionCtrl->GetValue();
 
     auto validationSuccess = validate();
     if (!validationSuccess) {
         return;
+    }
+
+    int taskId = get_task_id();
+
+    services::db_service dbService;
+    try {
+        wxString startTime = mStartTime.FormatISOTime();
+        wxString endTime = mEndTime.FormatISOTime();
+        dbService.create_new_task(mProjectId, taskId, std::string(startTime), std::string(endTime), std::string(mDurationText), mCategoryId, mDescriptionText);
+    } catch (const std::exception& e) {
+        wxLogDebug(e.what());
     }
 }
 
@@ -234,6 +330,13 @@ void task_details_dialog::on_cancel(wxCommandEvent& event)
     } else {
         EndModal(wxID_CANCEL);
     }
+}
+
+void task_details_dialog::calculate_time_diff(wxDateTime start, wxDateTime end)
+{
+    auto diff = end.Subtract(start);
+    auto formated = diff.Format(wxT("%H:%M:%S"));
+    pDurationCtrl->SetLabelText(formated);
 }
 
 } // namespace app::dialog
