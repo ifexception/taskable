@@ -52,7 +52,7 @@ task_details_dialog::task_details_dialog(wxWindow* parent, bool isEdit, const wx
     } else {
         title = wxT("Add Task");
     }
-    bool success = create(parent, wxID_ANY, wxT("Add New Task"), wxDefaultPosition, wxSize(395, 488), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, wxSize(395, 488), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 
     SetMinClientSize(wxSize(400, 480));
 }
