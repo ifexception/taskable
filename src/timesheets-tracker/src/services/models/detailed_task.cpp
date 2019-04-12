@@ -17,29 +17,4 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
-
-#include <wx/wx.h>
-#include <wx/listctrl.h>
-
-namespace app::frame
-{
-class main_frame : public wxFrame
-{
-public:
-    main_frame(wxWindow* parent, const wxString& name = wxT("main_frame"));
-    main_frame(const main_frame&) = delete;
-    virtual ~main_frame();
-
-    main_frame& operator=(const main_frame&) = delete;
-
-private:
-    bool create(/*wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name*/);
-
-    void create_controls();
-    void data_to_controls();
-
-    wxListCtrl* pListCtrl;
-
-};
-} // namespace app::frame
+#include "detailed_task.h"

@@ -19,27 +19,21 @@
 
 #pragma once
 
-#include <wx/wx.h>
-#include <wx/listctrl.h>
+#include <string>
 
-namespace app::frame
+namespace app::models
 {
-class main_frame : public wxFrame
+struct detailed_task
 {
-public:
-    main_frame(wxWindow* parent, const wxString& name = wxT("main_frame"));
-    main_frame(const main_frame&) = delete;
-    virtual ~main_frame();
+    detailed_task() = default;
+    ~detailed_task() = default;
 
-    main_frame& operator=(const main_frame&) = delete;
-
-private:
-    bool create(/*wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name*/);
-
-    void create_controls();
-    void data_to_controls();
-
-    wxListCtrl* pListCtrl;
-
+    std::string project_name;
+    std::string task_date;
+    std::string start_time;
+    std::string end_time;
+    std::string duration;
+    std::string category_name;
+    std::string description;
 };
-} // namespace app::frame
+}

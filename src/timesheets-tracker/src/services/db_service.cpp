@@ -193,4 +193,41 @@ void db_service::create_new_task(const int projectId, const int taskId, const st
     command.execute();
 }
 
+std::vector<models::detailed_task> db_service::get_all_tasks_by_date(const std::string& date)
+{
+    std::string select("SELECT tasks.task_date, ");
+    std::string startTime("task_details.start_time, ");
+    std::string endTime("task_details.end_time, ");
+    std::string duration("task_details.duration, ");
+    std::string description("task_details.description as description, ");
+    std::string category("categories.name as category_name, ");
+    std::string project("projects.display_name as project_name ");
+    std::string from("FROM task_details ");
+    std::string innerJoinTasks("INNER JOIN tasks ON task_details.task_id = tasks.task_id ");
+    std::string innerJoinCategories("INNER JOIN categories ON task_details.category_id = categories.category_id ");
+    std::string innerJoinProjects("INNER JOIN projects ON task_details.project_id = projects.project_id ");
+    std::string where("WHERE task_date = ?");
+    std::string qry = select + startTime + endTime + duration + description + category + project + from + innerJoinTasks + innerJoinCategories + innerJoinProjects + where;
+    db::query query(*db_connection::get_instance().get_database(), qry);
+    query.bind(1, date, db::copy_options::NoCopy);
+
+    std::vector<models::detailed_task> detailedTasks;
+    while (query.run()) {
+        db::column column(query.get_handle());
+        models::detailed_task detailedTask;
+
+        detailedTask.task_date = column.get<std::string>(0);
+        detailedTask.start_time = column.get<std::string>(1);
+        detailedTask.end_time = column.get<std::string>(2);
+        detailedTask.duration = column.get<std::string>(3);
+        detailedTask.description = column.get<std::string>(4);
+        detailedTask.category_name = column.get<std::string>(5);
+        detailedTask.project_name = column.get<std::string>(6);
+
+        detailedTasks.push_back(detailedTask);
+    }
+
+    return detailedTasks;
+}
+
 } // namespace app::services
