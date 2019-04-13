@@ -30,6 +30,21 @@
 
 namespace app::frame
 {
+const int TaskId = static_cast<int>(ids::MenuIds::TaskDetailMenuId);
+const int EmployerId = static_cast<int>(ids::MenuIds::EmployerMenuId);
+const int ProjectId = static_cast<int>(ids::MenuIds::ProjectMenuId);
+const int ClientId = static_cast<int>(ids::MenuIds::ClientMenuId);
+const int CategoryId = static_cast<int>(ids::MenuIds::CategoryMenuId);
+
+wxBEGIN_EVENT_TABLE(main_frame, wxFrame)
+    EVT_MENU(wxID_ABOUT, main_frame::on_about)
+    EVT_MENU(TaskId, main_frame::on_new_task)
+    EVT_MENU(EmployerId, main_frame::on_new_employer)
+    EVT_MENU(ProjectId, main_frame::on_new_project)
+    EVT_MENU(ClientId, main_frame::on_new_client)
+    EVT_MENU(CategoryId, main_frame::on_new_category)
+wxEND_EVENT_TABLE()
+
 main_frame::main_frame(wxWindow* parent, const wxString& name)
     : wxFrame(parent, wxID_ANY, "Tasks Tracker", wxDefaultPosition, wxSize(640, 480), wxDEFAULT_FRAME_STYLE, name)
 {
@@ -55,12 +70,6 @@ bool main_frame::create(/*wxWindow * parent, wxWindowID windowId, const wxString
 
 void main_frame::create_controls()
 {
-    const int TaskId = static_cast<int>(ids::MenuIds::TaskDetailMenuId);
-    const int EmployerId = static_cast<int>(ids::MenuIds::EmployerMenuId);
-    const int ProjectId = static_cast<int>(ids::MenuIds::ProjectMenuId);
-    const int ClientId = static_cast<int>(ids::MenuIds::ClientMenuId);
-    const int CategoryId = static_cast<int>(ids::MenuIds::CategoryMenuId);
-
     /* File Menu Control */
     wxMenu* fileMenu = new wxMenu();
     fileMenu->Append(TaskId, "New &Task...\tCtrl-N", "Create new task");
@@ -85,45 +94,6 @@ void main_frame::create_controls()
     menuBar->Append(helpMenu, "&Help");
 
     SetMenuBar(menuBar);
-
-    Bind(wxEVT_MENU, [=](wxCommandEvent&) { dialog::about_dialog about(nullptr); }, wxID_ABOUT);
-
-    Bind(wxEVT_MENU, [=](wxCommandEvent&) { Close(true); }, wxID_EXIT);
-
-    Bind(wxEVT_MENU,
-        [=](wxCommandEvent&) {
-            dialog::task_details_dialog newTask(this);
-            newTask.launch_task_details_dialog();
-        },
-        TaskId);
-
-    Bind(wxEVT_MENU,
-        [=](wxCommandEvent&) {
-            dialog::employer_dialog newEmployer(this);
-            newEmployer.launch_employer_dialog();
-        },
-        EmployerId);
-
-    Bind(wxEVT_MENU,
-        [=](wxCommandEvent&) {
-            dialog::client_dialog newClient(this);
-            newClient.launch_client_dialog();
-        },
-        ClientId);
-
-    Bind(wxEVT_MENU,
-        [=](wxCommandEvent&) {
-            dialog::project_dialog newProject(this);
-            newProject.launch_project_dialog();
-        },
-        ProjectId);
-
-    Bind(wxEVT_MENU,
-        [=](wxCommandEvent&) {
-            dialog::category_dialog categoryDialog(this);
-            categoryDialog.launch_dialog();
-        },
-        CategoryId);
 
     auto panel = new wxPanel(this);
     auto sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -189,25 +159,45 @@ void main_frame::data_to_controls()
         pListCtrl->SetItem(listIndex, columnIndex++, task.description);
         columnIndex = 0;
     }
+}
 
-    int index = pListCtrl->InsertItem(0, "Silica");
-    pListCtrl->SetItem(index, 1, "2019-04-12");
-    pListCtrl->SetItem(index, 2, "20:00:00");
-    pListCtrl->SetItem(index, 3, "21:00:00");
-    pListCtrl->SetItem(index, 4, "1:00:00");
-    pListCtrl->SetItem(index, 5, "Programming");
-    pListCtrl->SetItem(index, 6, "Silica");
+void main_frame::on_about(wxCommandEvent& event)
+{
+    dialog::about_dialog about(nullptr);
+}
 
-    index = pListCtrl->InsertItem(1, "Silica");
-    pListCtrl->SetItem(index, 1, "2019-04-12");
-    pListCtrl->SetItem(index, 2, "20:00:00");
-    pListCtrl->SetItem(index, 3, "21:00:00");
-    pListCtrl->SetItem(index, 4, "1:00:00");
-    pListCtrl->SetItem(index, 5, "Programming");
-    pListCtrl->SetItem(index, 6, "Silica");
-    /*for (size_t i = 0; i < pListCtrl->GetColumnCount(); i++) {
+void main_frame::on_close(wxCommandEvent& event)
+{
+    Close(true);
+}
 
+void main_frame::on_new_task(wxCommandEvent& event)
+{
+    dialog::task_details_dialog newTask(this);
+    newTask.launch_task_details_dialog();
+}
 
-    }*/
+void main_frame::on_new_employer(wxCommandEvent& event)
+{
+    dialog::employer_dialog newEmployer(this);
+    newEmployer.launch_employer_dialog();
+}
+
+void main_frame::on_new_client(wxCommandEvent& event)
+{
+    dialog::client_dialog newClient(this);
+    newClient.launch_client_dialog();
+}
+
+void main_frame::on_new_project(wxCommandEvent& event)
+{
+    dialog::project_dialog newProject(this);
+    newProject.launch_project_dialog();
+}
+
+void main_frame::on_new_category(wxCommandEvent& event)
+{
+    dialog::category_dialog categoryDialog(this);
+    categoryDialog.launch_dialog();
 }
 } // namespace app::frame

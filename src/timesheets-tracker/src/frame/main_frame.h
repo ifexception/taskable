@@ -34,10 +34,19 @@ public:
     main_frame& operator=(const main_frame&) = delete;
 
 private:
+    wxDECLARE_EVENT_TABLE();
     bool create(/*wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name*/);
 
     void create_controls();
     void data_to_controls();
+
+    void on_about(wxCommandEvent& event);
+    void on_close(wxCommandEvent& event);
+    void on_new_task(wxCommandEvent& event);
+    void on_new_employer(wxCommandEvent& event);
+    void on_new_client(wxCommandEvent& event);
+    void on_new_project(wxCommandEvent& event);
+    void on_new_category(wxCommandEvent& event);
 
     wxListCtrl* pListCtrl;
 
