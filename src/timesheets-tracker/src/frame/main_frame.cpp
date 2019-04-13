@@ -46,7 +46,7 @@ wxBEGIN_EVENT_TABLE(main_frame, wxFrame)
 wxEND_EVENT_TABLE()
 
 main_frame::main_frame(wxWindow* parent, const wxString& name)
-    : wxFrame(parent, wxID_ANY, "Tasks Tracker", wxDefaultPosition, wxSize(640, 480), wxDEFAULT_FRAME_STYLE, name)
+    : wxFrame(parent, wxID_ANY, "Tasks Tracker", wxDefaultPosition, wxSize(700, 500), wxDEFAULT_FRAME_STYLE, name)
 {
     bool success = create(/*parent, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(640, 480), wxDEFAULT_FRAME_STYLE, name*/);
     SetMinClientSize(wxSize(640, 480));
@@ -105,6 +105,7 @@ void main_frame::create_controls()
     wxListItem projectColumn;
     projectColumn.SetId(0);
     projectColumn.SetText(wxT("Project"));
+    projectColumn.SetWidth(90);
     pListCtrl->InsertColumn(0, projectColumn);
 
     wxListItem dateColumn;
@@ -115,11 +116,13 @@ void main_frame::create_controls()
     wxListItem startTimeColumn;
     startTimeColumn.SetId(2);
     startTimeColumn.SetText(wxT("Started"));
+    startTimeColumn.SetWidth(56);
     pListCtrl->InsertColumn(2, startTimeColumn);
 
     wxListItem endTimeColumn;
     endTimeColumn.SetId(3);
     endTimeColumn.SetText(wxT("Ended"));
+    endTimeColumn.SetWidth(56);
     pListCtrl->InsertColumn(3, endTimeColumn);
 
     wxListItem durationColumn;
@@ -130,11 +133,13 @@ void main_frame::create_controls()
     wxListItem categoryColumn;
     categoryColumn.SetId(5);
     categoryColumn.SetText(wxT("Category"));
+    categoryColumn.SetWidth(96);
     pListCtrl->InsertColumn(5, categoryColumn);
 
     wxListItem descriptionColumn;
     descriptionColumn.SetId(6);
     descriptionColumn.SetText(wxT("Description"));
+    descriptionColumn.SetWidth(205);
     pListCtrl->InsertColumn(6, descriptionColumn);
 }
 
