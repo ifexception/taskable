@@ -33,7 +33,7 @@ class task_details_dialog : public wxDialog
 
 public:
     task_details_dialog() = default;
-    explicit task_details_dialog(wxWindow* parent, bool isEdit = false, const wxString& name = "task_details_dialog");
+    explicit task_details_dialog(wxWindow* parent, bool isEdit = false, int taskDetailId = 0, const wxString& name = wxT("task_details_dialog"));
     virtual ~task_details_dialog();
 
     void launch_task_details_dialog();
@@ -43,7 +43,7 @@ private:
 
     void create_controls();
     void fill_controls();
-    //void data_to_controls(); // placeholder for when editing functionality gets implemented
+    void data_to_controls(); // placeholder for when editing functionality gets implemented
 
     int get_task_id();
 
@@ -53,12 +53,15 @@ private:
     void on_project_choice(wxCommandEvent& event);
     void on_start_time_changed(wxDateEvent& event);
     void on_end_time_changed(wxDateEvent& event);
+    void on_is_active_check(wxCommandEvent& event);
     void on_save(wxCommandEvent& event);
     void on_cancel(wxCommandEvent& event);
 
     void calculate_time_diff(wxDateTime start, wxDateTime end);
 
     wxString mTaskDate;
+    bool bIsEdit;
+    int mTaskDetailId;
 
     wxChoice* pProjectChoiceCtrl;
     wxTimePickerCtrl* pStartTimeCtrl;
@@ -66,6 +69,9 @@ private:
     wxStaticText* pDurationCtrl;
     wxTextCtrl* pDescriptionCtrl;
     wxChoice* pCategoryChoiceCtrl;
+    wxStaticText* pDateCreatedTextCtrl;
+    wxStaticText* pDateUpdatedTextCtrl;
+    wxCheckBox* pIsActiveCtrl;
 
     int mProjectId;
     wxDateTime mStartTime;
@@ -81,7 +87,10 @@ private:
         IDC_ENDTIME,
         IDC_DURATION,
         IDC_CATEGORYCHOICE,
-        IDC_DESCRIPTION
+        IDC_DESCRIPTION,
+        IDC_DATECREATED,
+        IDC_DATEUPDATED,
+        IDC_ISACTIVE
     };
 };
 } // namespace app::dialog

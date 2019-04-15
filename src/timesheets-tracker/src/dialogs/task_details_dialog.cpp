@@ -37,24 +37,29 @@ wxBEGIN_EVENT_TABLE(task_details_dialog, wxDialog)
     EVT_CHOICE(task_details_dialog::IDC_PROJECTCHOICE, task_details_dialog::on_project_choice)
     EVT_TIME_CHANGED(task_details_dialog::IDC_STARTTIME, task_details_dialog::on_start_time_changed)
     EVT_TIME_CHANGED(task_details_dialog::IDC_ENDTIME, task_details_dialog::on_end_time_changed)
+    EVT_CHECKBOX(task_details_dialog::IDC_ISACTIVE, task_details_dialog::on_is_active_check)
 wxEND_EVENT_TABLE()
 
-task_details_dialog::task_details_dialog(wxWindow* parent, bool isEdit, const wxString& name)
-    : mProjectId(-1)
+task_details_dialog::task_details_dialog(wxWindow* parent, bool isEdit, int taskDetailId, const wxString& name)
+    : mTaskDate(wxT(""))
+    , bIsEdit(isEdit)
+    , mTaskDetailId(taskDetailId)
+    , mProjectId(-1)
     , mStartTime()
     , mEndTime()
     , mCategoryId(-1)
     , mDescriptionText(wxT(""))
 {
     wxString title;
-    if (isEdit) {
+    wxSize size;
+    if (bIsEdit) {
         title = wxT("Edit Task");
+        size.Set(395, 620);
     } else {
         title = wxT("Add Task");
+        size.Set(395, 488);
     }
-    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, wxSize(395, 488), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
-
-    SetMinClientSize(wxSize(400, 480));
+    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
 task_details_dialog::~task_details_dialog()
@@ -75,9 +80,14 @@ bool task_details_dialog::create(wxWindow* parent, wxWindowID windowId, const wx
         create_controls();
         fill_controls();
 
+        if (bIsEdit) {
+            data_to_controls();
+        }
+
         GetSizer()->Fit(this);
         //SetIcon();
-        Centre();
+        GetSizer()->SetSizeHints(this);
+        Center();
     }
 
     return created;
@@ -151,17 +161,42 @@ void task_details_dialog::create_controls()
     pCategoryChoiceCtrl->Disable();
     taskFlexGridSizer->Add(pCategoryChoiceCtrl, common::sizers::ControlDefault);
 
+    if (bIsEdit) {
+        auto isActiveFiller = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT(""));
+        taskFlexGridSizer->Add(isActiveFiller, common::sizers::ControlDefault);
+
+        /* Is Active Checkbox Control */
+        pIsActiveCtrl = new wxCheckBox(taskDetailsPanel, IDC_ISACTIVE, wxT("Is Active"));
+        taskFlexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
+    }
+
     /* Task Description Text Control */
     auto taskDescription = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Description"));
     taskFlexGridSizer->Add(taskDescription, common::sizers::ControlDefault);
 
-    pDescriptionCtrl = new wxTextCtrl(this, IDC_DESCRIPTION, wxGetEmptyString(), wxDefaultPosition, wxSize(320, 180), wxTE_MULTILINE, wxDefaultValidator, wxT("description_text_ctrl"));
+    auto descriptionFiller = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT(""));
+    taskFlexGridSizer->Add(descriptionFiller, common::sizers::ControlDefault);
+
+    pDescriptionCtrl = new wxTextCtrl(this, IDC_DESCRIPTION, wxGetEmptyString(), wxDefaultPosition, wxSize(320, 180), wxTE_MULTILINE);
     pDescriptionCtrl->SetToolTip(wxT("Enter a description for the task"));
     detailsBoxSizer->Add(pDescriptionCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
+    if (bIsEdit) {
+        /* Date Created Text Control */
+        auto dateCreatedText = new wxStaticText(this, wxID_STATIC, wxT("Created on: YYYY-MM-DD HH:MM:SS"));
+        auto font = dateCreatedText->GetFont();
+        font.MakeItalic();
+        dateCreatedText->SetFont(font);
+        detailsBoxSizer->Add(dateCreatedText, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+
+        /* Date Updated Text Control */
+        auto dateUpdatedText = new wxStaticText(this, wxID_STATIC, wxT("Updated on: YYYY-MM-DD HH:MM:SS"));
+        detailsBoxSizer->Add(dateUpdatedText, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+    }
+
     /* Horizontal Line*/
-    auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("task_static_line"));
-    mainSizer->Add(separation_line, 0, wxEXPAND | wxALL, 1);
+    auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+    mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
     auto buttonPanel = new wxPanel(this, wxID_STATIC);
@@ -191,6 +226,9 @@ void task_details_dialog::fill_controls()
         pProjectChoiceCtrl->Append(project.display_name, (void*)project.project_id);
     }
 }
+
+void task_details_dialog::data_to_controls()
+{}
 
 int task_details_dialog::get_task_id()
 {
@@ -289,6 +327,25 @@ void task_details_dialog::on_end_time_changed(wxDateEvent& event)
 
     if (start != wxDefaultDateTime) {
         calculate_time_diff(start, end);
+    }
+}
+
+void task_details_dialog::on_is_active_check(wxCommandEvent& event)
+{
+    if (event.IsChecked()) {
+        pProjectChoiceCtrl->Disable();
+        pStartTimeCtrl->Disable();
+        pEndTimeCtrl->Disable();
+        pDurationCtrl->Disable();
+        pDescriptionCtrl->Disable();
+        pCategoryChoiceCtrl->Disable();
+    } else {
+        pProjectChoiceCtrl->Enable();
+        pStartTimeCtrl->Enable();
+        pEndTimeCtrl->Enable();
+        pDurationCtrl->Enable();
+        pDescriptionCtrl->Enable();
+        pCategoryChoiceCtrl->Enable();
     }
 }
 

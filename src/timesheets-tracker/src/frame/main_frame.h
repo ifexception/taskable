@@ -48,7 +48,13 @@ private:
     void on_new_project(wxCommandEvent& event);
     void on_new_category(wxCommandEvent& event);
 
+    void on_list_item_activation(wxListEvent& event);
+
     wxListCtrl* pListCtrl;
 
+    enum
+    {
+        IDC_LIST
+    };
 };
 } // namespace app::frame

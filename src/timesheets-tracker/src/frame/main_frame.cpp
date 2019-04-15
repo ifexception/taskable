@@ -43,6 +43,7 @@ wxBEGIN_EVENT_TABLE(main_frame, wxFrame)
     EVT_MENU(ProjectId, main_frame::on_new_project)
     EVT_MENU(ClientId, main_frame::on_new_client)
     EVT_MENU(CategoryId, main_frame::on_new_category)
+    EVT_LIST_ITEM_ACTIVATED(main_frame::IDC_LIST, main_frame::on_list_item_activation)
 wxEND_EVENT_TABLE()
 
 main_frame::main_frame(wxWindow* parent, const wxString& name)
@@ -70,12 +71,16 @@ bool main_frame::create(/*wxWindow * parent, wxWindowID windowId, const wxString
 
 void main_frame::create_controls()
 {
+    /* Status Bar Control */
+    CreateStatusBar(1);
+    SetStatusText(wxT("Ready"));
+
     /* File Menu Control */
     wxMenu* fileMenu = new wxMenu();
-    fileMenu->Append(TaskId, "New &Task...\tCtrl-N", "Create new task");
-    fileMenu->Append(EmployerId, "New &Employer...\tCtrl-E", "Create new employer");
-    fileMenu->Append(ClientId, "New &Client...\tCtrl-L", "Create new client");
-    fileMenu->Append(ProjectId, "New &Project...\tCtrl-R", "Create new project");
+    fileMenu->Append(TaskId, wxT("New &Task...\tCtrl-N"), wxT("Create new task"));
+    fileMenu->Append(EmployerId, wxT("New &Employer...\tCtrl-E"), wxT("Create new employer"));
+    fileMenu->Append(ClientId, wxT("New &Client...\tCtrl-L"), wxT("Create new client"));
+    fileMenu->Append(ProjectId, wxT("New &Project...\tCtrl-R"), wxT("Create new project"));
     fileMenu->Append(CategoryId, wxT("New C&ategory...\tCtrl-A"), wxT("Create new category"));
     fileMenu->AppendSeparator();
     fileMenu->Append(wxID_EXIT);
@@ -98,7 +103,7 @@ void main_frame::create_controls()
     auto panel = new wxPanel(this);
     auto sizer = new wxBoxSizer(wxHORIZONTAL);
 
-    pListCtrl = new wxListCtrl(panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
+    pListCtrl = new wxListCtrl(panel, IDC_LIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
     sizer->Add(pListCtrl, 1, wxEXPAND | wxALL, 5);
     panel->SetSizer(sizer);
 
@@ -128,6 +133,7 @@ void main_frame::create_controls()
     wxListItem durationColumn;
     durationColumn.SetId(4);
     durationColumn.SetText(wxT("Duration"));
+    durationColumn.SetWidth(60);
     pListCtrl->InsertColumn(4, durationColumn);
 
     wxListItem categoryColumn;
@@ -139,7 +145,7 @@ void main_frame::create_controls()
     wxListItem descriptionColumn;
     descriptionColumn.SetId(6);
     descriptionColumn.SetText(wxT("Description"));
-    descriptionColumn.SetWidth(205);
+    descriptionColumn.SetWidth(214);
     pListCtrl->InsertColumn(6, descriptionColumn);
 }
 
@@ -152,6 +158,7 @@ void main_frame::data_to_controls()
     } catch (const std::exception&) {
 
     }
+
     int listIndex = 0;
     int columnIndex = 0;
     for (auto task : detailedTasks) {
@@ -162,6 +169,7 @@ void main_frame::data_to_controls()
         pListCtrl->SetItem(listIndex, columnIndex++, task.duration);
         pListCtrl->SetItem(listIndex, columnIndex++, task.category_name);
         pListCtrl->SetItem(listIndex, columnIndex++, task.description);
+        pListCtrl->SetItemPtrData(listIndex, task.task_detail_id);
         columnIndex = 0;
     }
 }
@@ -204,5 +212,14 @@ void main_frame::on_new_category(wxCommandEvent& event)
 {
     dialog::category_dialog categoryDialog(this);
     categoryDialog.launch_dialog();
+}
+
+void main_frame::on_list_item_activation(wxListEvent& event)
+{
+    wxLogDebug("Got list event");
+    int taskDetailId = event.GetData();
+    // launch dialog to edit task details
+    dialog::task_details_dialog editTask(this, true, taskDetailId);
+    editTask.launch_task_details_dialog();
 }
 } // namespace app::frame

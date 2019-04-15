@@ -195,7 +195,7 @@ void db_service::create_new_task(const int projectId, const int taskId, const st
 
 std::vector<models::detailed_task> db_service::get_all_tasks_by_date(const std::string& date)
 {
-    std::string select("SELECT tasks.task_date, ");
+    std::string select("SELECT task_details.task_detail_id, tasks.task_date, ");
     std::string startTime("task_details.start_time, ");
     std::string endTime("task_details.end_time, ");
     std::string duration("task_details.duration, ");
@@ -216,13 +216,14 @@ std::vector<models::detailed_task> db_service::get_all_tasks_by_date(const std::
         db::column column(query.get_handle());
         models::detailed_task detailedTask;
 
-        detailedTask.task_date = column.get<std::string>(0);
-        detailedTask.start_time = column.get<std::string>(1);
-        detailedTask.end_time = column.get<std::string>(2);
-        detailedTask.duration = column.get<std::string>(3);
-        detailedTask.description = column.get<std::string>(4);
-        detailedTask.category_name = column.get<std::string>(5);
-        detailedTask.project_name = column.get<std::string>(6);
+        detailedTask.task_detail_id = column.get<int>(0);
+        detailedTask.task_date = column.get<std::string>(1);
+        detailedTask.start_time = column.get<std::string>(2);
+        detailedTask.end_time = column.get<std::string>(3);
+        detailedTask.duration = column.get<std::string>(4);
+        detailedTask.description = column.get<std::string>(5);
+        detailedTask.category_name = column.get<std::string>(6);
+        detailedTask.project_name = column.get<std::string>(7);
 
         detailedTasks.push_back(detailedTask);
     }
