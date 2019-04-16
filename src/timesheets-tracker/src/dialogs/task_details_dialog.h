@@ -43,7 +43,7 @@ private:
 
     void create_controls();
     void fill_controls();
-    void data_to_controls(); // placeholder for when editing functionality gets implemented
+    void data_to_controls();
 
     int get_task_id();
 
@@ -58,6 +58,7 @@ private:
     void on_cancel(wxCommandEvent& event);
 
     void calculate_time_diff(wxDateTime start, wxDateTime end);
+    void fill_category_control(int projectId);
 
     wxString mTaskDate;
     bool bIsEdit;

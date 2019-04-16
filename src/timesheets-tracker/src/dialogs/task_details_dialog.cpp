@@ -249,7 +249,7 @@ void task_details_dialog::data_to_controls()
 
     pDurationCtrl->SetLabel(taskDetail.duration);
 
-    pCategoryChoiceCtrl->Enable(); // FIXME extract how category is populated into separate function
+    fill_category_control(taskDetail.project_id);
     pCategoryChoiceCtrl->SetStringSelection(taskDetail.category_name);
 
     pDescriptionCtrl->SetValue(taskDetail.description);
@@ -326,28 +326,14 @@ bool task_details_dialog::are_controls_empty()
     return isEmpty;
 }
 
-void task_details_dialog::on_project_choice(wxCommandEvent & event)
+void task_details_dialog::on_project_choice(wxCommandEvent& event)
 {
     pCategoryChoiceCtrl->Clear();
     pCategoryChoiceCtrl->AppendString(wxT("Select a category"));
     pCategoryChoiceCtrl->SetSelection(0);
     int projectId = (int)event.GetClientData(); // FIXME: loss of precision
 
-    std::vector<models::category> categories;
-    try {
-        services::db_service dbService;
-        categories = dbService.get_categories_by_project_id(projectId);
-    } catch (const std::exception& e) {
-        wxLogDebug(e.what());
-    }
-
-    for (auto category : categories) {
-        pCategoryChoiceCtrl->Append(category.name, (void*)category.category_id);
-    }
-
-    if (!pCategoryChoiceCtrl->IsEnabled()) {
-        pCategoryChoiceCtrl->Enable();
-    }
+    fill_category_control(projectId);
 }
 
 void task_details_dialog::on_start_time_changed(wxDateEvent& event)
@@ -435,6 +421,25 @@ void task_details_dialog::calculate_time_diff(wxDateTime start, wxDateTime end)
     auto diff = end.Subtract(start);
     auto formated = diff.Format(wxT("%H:%M:%S"));
     pDurationCtrl->SetLabelText(formated);
+}
+
+void task_details_dialog::fill_category_control(int projectId)
+{
+    std::vector<models::category> categories;
+    try {
+        services::db_service dbService;
+        categories = dbService.get_categories_by_project_id(projectId);
+    } catch (const std::exception& e) {
+        wxLogDebug(e.what());
+    }
+
+    for (auto category : categories) {
+        pCategoryChoiceCtrl->Append(category.name, (void*)category.category_id);
+    }
+
+    if (!pCategoryChoiceCtrl->IsEnabled()) {
+        pCategoryChoiceCtrl->Enable();
+    }
 }
 
 } // namespace app::dialog
