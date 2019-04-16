@@ -19,16 +19,13 @@
 
 #include "config.h"
 
-#include <fstream>
-#include <sstream>
-
 #include <rapidxml.hpp>
 
 #include "util.h"
 
 namespace app::cfg
 {
-const std::string CFG_FILE = "timesheets-tracker.cfg.xml";
+const std::string CFG_FILE = "tasks-tracker.cfg.xml";
 
 config& config::get_instance()
 {
@@ -49,11 +46,9 @@ config::config()
     cfgDocument.parse<0>(&cfgFileContents[0]);
 
     auto configurationNode = cfgDocument.first_node("configuration");
-
+    // FIXME Better way of reading configuration
     for (auto node = configurationNode->first_node(); node; node = node->next_sibling()) {
 #ifdef _DEBUG
-        auto x = node->first_attribute("type")->value();
-        auto y = node->value();
         if (std::string(node->first_attribute("type")->value()) == "debug") {
             auto connectionString = node->value();
             set_connection_string(std::string(connectionString));
