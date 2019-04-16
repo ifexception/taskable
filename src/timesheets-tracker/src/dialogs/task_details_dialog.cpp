@@ -183,15 +183,15 @@ void task_details_dialog::create_controls()
 
     if (bIsEdit) {
         /* Date Created Text Control */
-        auto dateCreatedText = new wxStaticText(this, wxID_STATIC, wxT("Created on: YYYY-MM-DD HH:MM:SS"));
-        auto font = dateCreatedText->GetFont();
+        pDateCreatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
+        auto font = pDateCreatedTextCtrl->GetFont();
         font.MakeItalic();
-        dateCreatedText->SetFont(font);
-        detailsBoxSizer->Add(dateCreatedText, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+        pDateCreatedTextCtrl->SetFont(font);
+        detailsBoxSizer->Add(pDateCreatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
         /* Date Updated Text Control */
-        auto dateUpdatedText = new wxStaticText(this, wxID_STATIC, wxT("Updated on: YYYY-MM-DD HH:MM:SS"));
-        detailsBoxSizer->Add(dateUpdatedText, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+        pDateUpdatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Updated on: %s"));
+        detailsBoxSizer->Add(pDateUpdatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
     }
 
     /* Horizontal Line*/
@@ -228,7 +228,46 @@ void task_details_dialog::fill_controls()
 }
 
 void task_details_dialog::data_to_controls()
-{}
+{
+    // FIXME dropdowns still need to be populated with values from the database correctly and set to currently active value
+    services::db_service dbService;
+    models::task_detail taskDetail;
+    try {
+        taskDetail = dbService.get_task_by_id(mTaskDetailId);
+    } catch (const std::exception&) {
+
+    }
+
+    pProjectChoiceCtrl->SetStringSelection(taskDetail.project_name);
+    wxDateTime startTime;
+    startTime.ParseISOTime(taskDetail.start_time);
+    pStartTimeCtrl->SetValue(startTime);
+
+    wxDateTime endTime;
+    endTime.ParseISOTime(taskDetail.end_time);
+    pEndTimeCtrl->SetValue(endTime);
+
+    pDurationCtrl->SetLabel(taskDetail.duration);
+
+    pCategoryChoiceCtrl->Enable(); // FIXME extract how category is populated into separate function
+    pCategoryChoiceCtrl->SetStringSelection(taskDetail.category_name);
+
+    pDescriptionCtrl->SetValue(taskDetail.description);
+
+    time_t dateCreatedTimeT = static_cast<time_t>(taskDetail.date_created_utc);
+    wxDateTime dateCreatedUtc(dateCreatedTimeT);
+    wxString dateCreatedString = dateCreatedUtc.FormatISOCombined();
+    wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
+    pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
+
+    time_t dateUpdatedTimeStamp = static_cast<time_t>(taskDetail.date_modified_utc);
+    wxDateTime dateModifiedUtc(dateUpdatedTimeStamp);
+    wxString dateUpdatedString = dateModifiedUtc.FormatISOCombined();
+    wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
+    pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
+
+    pIsActiveCtrl->SetValue(taskDetail.is_active);
+}
 
 int task_details_dialog::get_task_id()
 {
@@ -333,19 +372,19 @@ void task_details_dialog::on_end_time_changed(wxDateEvent& event)
 void task_details_dialog::on_is_active_check(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
-        pProjectChoiceCtrl->Disable();
-        pStartTimeCtrl->Disable();
-        pEndTimeCtrl->Disable();
-        pDurationCtrl->Disable();
-        pDescriptionCtrl->Disable();
-        pCategoryChoiceCtrl->Disable();
-    } else {
         pProjectChoiceCtrl->Enable();
         pStartTimeCtrl->Enable();
         pEndTimeCtrl->Enable();
         pDurationCtrl->Enable();
         pDescriptionCtrl->Enable();
         pCategoryChoiceCtrl->Enable();
+    } else {
+        pProjectChoiceCtrl->Disable();
+        pStartTimeCtrl->Disable();
+        pEndTimeCtrl->Disable();
+        pDurationCtrl->Disable();
+        pDescriptionCtrl->Disable();
+        pCategoryChoiceCtrl->Disable();
     }
 }
 

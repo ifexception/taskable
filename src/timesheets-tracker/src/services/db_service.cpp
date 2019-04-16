@@ -177,7 +177,7 @@ int db_service::create_or_get_task_id(const std::string& date, const int project
         db::command command(*db_connection::get_instance().get_database(), cmd2);
         command.binder() << date << projectId;
         command.execute();
-        taskId = (int) db_connection::get_instance().get_database()->get_last_rowid();
+        taskId = (int)db_connection::get_instance().get_database()->get_last_rowid();
     } else {
         taskId = column.get<int>(0);
     }
@@ -229,6 +229,51 @@ std::vector<models::detailed_task> db_service::get_all_tasks_by_date(const std::
     }
 
     return detailedTasks;
+}
+
+models::task_detail db_service::get_task_by_id(const int taskDetailId)
+{
+    std::string select("SELECT task_details.task_detail_id, ");
+    std::string projectId("projects.project_id,");
+    std::string project("projects.display_name as project_name, ");
+    std::string startTime("task_details.start_time, ");
+    std::string endTime("task_details.end_time, ");
+    std::string duration("task_details.duration, ");
+    std::string categoryId("categories.category_id, ");
+    std::string category("categories.name as category_name, ");
+    std::string description("task_details.description as description, ");
+    std::string dateCreatedUtc("task_details.date_created_utc, ");
+    std::string dateModifiedUtc("task_details.date_modified_utc, ");
+    std::string isActive("task_details.is_active ");
+    std::string from("FROM task_details ");
+    std::string innerJoinTasks("INNER JOIN tasks ON task_details.task_id = tasks.task_id ");
+    std::string innerJoinCategories("INNER JOIN categories ON task_details.category_id = categories.category_id ");
+    std::string innerJoinProjects("INNER JOIN projects ON task_details.project_id = projects.project_id ");
+    std::string where("WHERE task_detail_id = ?");
+
+    std::string qry = select + projectId + project + startTime + endTime + duration + categoryId + category + description + dateCreatedUtc + dateModifiedUtc + isActive + from + innerJoinTasks + innerJoinCategories + innerJoinProjects + where;
+    db::query query(*db_connection::get_instance().get_database(), qry);
+    query.bind(1, taskDetailId);
+
+    query.run();
+
+    db::column column(query.get_handle());
+    models::task_detail taskDetail;
+
+    taskDetail.task_detail_id = column.get<int>(0);
+    taskDetail.project_id = column.get<int>(1);
+    taskDetail.project_name = column.get<std::string>(2);
+    taskDetail.start_time = column.get<std::string>(3);
+    taskDetail.end_time = column.get<std::string>(4);
+    taskDetail.duration = column.get<std::string>(5);
+    taskDetail.category_id = column.get<int>(6);
+    taskDetail.category_name = column.get<std::string>(7);
+    taskDetail.description = column.get<std::string>(8);
+    taskDetail.date_created_utc = column.get<int>(9);
+    taskDetail.date_modified_utc = column.get<int>(10);
+    taskDetail.is_active = column.get<int>(10);
+
+    return taskDetail;
 }
 
 } // namespace app::services

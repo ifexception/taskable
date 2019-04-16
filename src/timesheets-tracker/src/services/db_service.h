@@ -27,6 +27,7 @@
 #include "models/project.h"
 #include "models/category.h"
 #include "models/detailed_task.h"
+#include "models/task_detail.h"
 
 namespace app::services
 {
@@ -56,5 +57,7 @@ struct db_service
     void create_new_task(const int projectId, const int taskId, const std::string& startTime, const std::string& endTime, const std::string& duration, const int categoryId, const std::string& description);
 
     std::vector<models::detailed_task> get_all_tasks_by_date(const std::string& date);
+
+    models::task_detail get_task_by_id(const int taskDetailId);
 };
 }
