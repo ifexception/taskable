@@ -271,7 +271,7 @@ models::task_detail db_service::get_task_by_id(const int taskDetailId)
     taskDetail.description = column.get<std::string>(8);
     taskDetail.date_created_utc = column.get<int>(9);
     taskDetail.date_modified_utc = column.get<int>(10);
-    taskDetail.is_active = column.get<int>(10);
+    taskDetail.is_active = column.get<int>(11);
 
     return taskDetail;
 }

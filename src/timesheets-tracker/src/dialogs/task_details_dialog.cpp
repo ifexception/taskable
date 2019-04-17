@@ -229,7 +229,6 @@ void task_details_dialog::fill_controls()
 
 void task_details_dialog::data_to_controls()
 {
-    // FIXME dropdowns still need to be populated with values from the database correctly and set to currently active value
     services::db_service dbService;
     models::task_detail taskDetail;
     try {
