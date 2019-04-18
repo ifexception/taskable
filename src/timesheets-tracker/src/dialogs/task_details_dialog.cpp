@@ -24,8 +24,8 @@
 
 #include "../common/common.h"
 #include "../common/ids.h"
-
 #include "../services/db_service.h"
+#include "../common/util.h"
 
 namespace app::dialog
 {
@@ -202,7 +202,7 @@ void task_details_dialog::create_controls()
     auto buttonPanel = new wxPanel(this, wxID_STATIC);
     auto buttonPanelSizer = new wxBoxSizer(wxHORIZONTAL);
     buttonPanel->SetSizer(buttonPanelSizer);
-    mainSizer->Add(buttonPanel, wxSizerFlags(wxSizerFlags().Border(wxALL, 5)).Center());
+    mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
     auto okButton = new wxButton(buttonPanel, ids::ID_SAVE, wxT("&Save"));
     auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
@@ -253,15 +253,11 @@ void task_details_dialog::data_to_controls()
 
     pDescriptionCtrl->SetValue(taskDetail.description);
 
-    time_t dateCreatedTimeT = static_cast<time_t>(taskDetail.date_created_utc);
-    wxDateTime dateCreatedUtc(dateCreatedTimeT);
-    wxString dateCreatedString = dateCreatedUtc.FormatISOCombined();
+    wxString dateCreatedString = util::convert_unix_timestamp_to_wxdatetime(taskDetail.date_created_utc);
     wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
     pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
 
-    time_t dateUpdatedTimeStamp = static_cast<time_t>(taskDetail.date_modified_utc);
-    wxDateTime dateModifiedUtc(dateUpdatedTimeStamp);
-    wxString dateUpdatedString = dateModifiedUtc.FormatISOCombined();
+    wxString dateUpdatedString = util::convert_unix_timestamp_to_wxdatetime(taskDetail.date_modified_utc);
     wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
     pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
 
