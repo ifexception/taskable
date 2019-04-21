@@ -12,10 +12,10 @@ set (VCPKG_TARGET_TRIPLET "x86-windows")
 find_path (RAPIDXML_DIR rapidxml.hpp rapidxml_iterators.hpp rapidxml_print.hpp rapidxml_utils.hpp
     PATH_SUFFIXES include
     PATHS
-    "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}")
+    "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
 
 if (NOT RAPIDXML_DIR)
-    if (RapidXML_FIND_REQUIRED) #prefix is filename, case matters
+    if (RapidXML_FIND_REQUIRED)
         message (FATAL_ERROR "Could not find RapidXML!")
     elseif (NOT RapidXML_FIND_QUIETLY)
         message ("Could not find RapidXML!")

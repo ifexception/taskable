@@ -19,7 +19,7 @@
 
 #include "config.h"
 
-#include <rapidxml.hpp>
+#include <rapidxml/rapidxml.hpp>
 
 #include "util.h"
 
