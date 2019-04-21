@@ -20,6 +20,8 @@
 #include "util.h"
 
 #include <fstream>
+#include <wx/datetime.h>
+#include <wx/string.h>
 
 namespace app::util
 {
@@ -30,5 +32,13 @@ std::vector<char> read_file(const std::string& file)
     buffer.push_back('\0');
 
     return buffer;
+}
+
+wxString convert_unix_timestamp_to_wxdatetime(int timestamp)
+{
+    time_t time = static_cast<time_t>(timestamp);
+    wxDateTime asDate(time);
+    wxString dateString = asDate.FormatISOCombined();
+    return dateString;
 }
 } // namespace app::util

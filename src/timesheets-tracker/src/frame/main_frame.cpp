@@ -154,7 +154,7 @@ void main_frame::data_to_controls()
     std::vector<models::detailed_task> detailedTasks;
     try {
         services::db_service dbService;
-        detailedTasks = dbService.get_all_tasks_by_date("2019-04-10");
+        detailedTasks = dbService.get_all_tasks_by_date("2019-04-10"); //FIXME
     } catch (const std::exception&) {
 
     }

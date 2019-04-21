@@ -22,7 +22,11 @@
 #include <string>
 #include <vector>
 
+class wxString;
+
 namespace app::util
 {
 std::vector<char> read_file(const std::string& file);
+
+wxString convert_unix_timestamp_to_wxdatetime(int timestamp);
 }
