@@ -36,7 +36,7 @@ class app : public wxApp
 {
   public:
     app() = default;
-    ~app();
+    virtual ~app();
 
     bool OnInit() override;
 

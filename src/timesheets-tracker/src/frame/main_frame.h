@@ -47,6 +47,7 @@ private:
     void on_new_client(wxCommandEvent& event);
     void on_new_project(wxCommandEvent& event);
     void on_new_category(wxCommandEvent& event);
+    void on_task_inserted(wxCommandEvent& event);
 
     void on_list_item_activation(wxListEvent& event);
 

@@ -44,6 +44,7 @@ wxBEGIN_EVENT_TABLE(main_frame, wxFrame)
     EVT_MENU(ClientId, main_frame::on_new_client)
     EVT_MENU(CategoryId, main_frame::on_new_category)
     EVT_LIST_ITEM_ACTIVATED(main_frame::IDC_LIST, main_frame::on_list_item_activation)
+    EVT_COMMAND(main_frame::IDC_LIST, ids::ID_TASK_INSERTED, main_frame::on_task_inserted)
 wxEND_EVENT_TABLE()
 
 main_frame::main_frame(wxWindow* parent, const wxString& name)
@@ -151,10 +152,12 @@ void main_frame::create_controls()
 
 void main_frame::data_to_controls()
 {
+    wxDateTime date = wxDateTime::Now();
+    wxString dateString = date.FormatISODate();
     std::vector<models::detailed_task> detailedTasks;
     try {
         services::db_service dbService;
-        detailedTasks = dbService.get_all_tasks_by_date("2019-04-10"); //FIXME
+        detailedTasks = dbService.get_all_tasks_by_date(std::string(dateString.ToUTF8())); //FIXME
     } catch (const std::exception&) {
 
     }
@@ -214,11 +217,14 @@ void main_frame::on_new_category(wxCommandEvent& event)
     categoryDialog.launch_dialog();
 }
 
+void main_frame::on_task_inserted(wxCommandEvent& event)
+{
+    wxLogDebug(wxT("task inserted!"));
+}
+
 void main_frame::on_list_item_activation(wxListEvent& event)
 {
-    wxLogDebug("Got list event");
     int taskDetailId = event.GetData();
-    // launch dialog to edit task details
     dialog::task_details_dialog editTask(this, true, taskDetailId);
     editTask.launch_task_details_dialog();
 }

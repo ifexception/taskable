@@ -30,9 +30,10 @@ class task_details_dialog : public wxDialog
 {
     wxDECLARE_DYNAMIC_CLASS(task_details_dialog);
     wxDECLARE_EVENT_TABLE();
+    //wxDECLARE_EVENT(TASK_INSERTED_EVENT, wxCommandEvent);
 
 public:
-    task_details_dialog() = default;
+    task_details_dialog();
     explicit task_details_dialog(wxWindow* parent, bool isEdit = false, int taskDetailId = 0, const wxString& name = wxT("task_details_dialog"));
     virtual ~task_details_dialog();
 
@@ -56,6 +57,7 @@ private:
     void on_is_active_check(wxCommandEvent& event);
     void on_save(wxCommandEvent& event);
     void on_cancel(wxCommandEvent& event);
+    void on_task_saved(wxCommandEvent& event);
 
     void calculate_time_diff(wxDateTime start, wxDateTime end);
     void fill_category_control(int projectId);
@@ -63,6 +65,8 @@ private:
     wxString mTaskDate;
     bool bIsEdit;
     int mTaskDetailId;
+
+    wxWindow* pParent;
 
     wxChoice* pProjectChoiceCtrl;
     wxTimePickerCtrl* pStartTimeCtrl;

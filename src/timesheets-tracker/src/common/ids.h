@@ -35,8 +35,10 @@ enum class MenuIds : int
 enum class Events : int
 {
     ID_OFFSET = 1,
-    ID_SAVE = wxID_HIGHEST + ID_OFFSET
+    ID_SAVE = wxID_HIGHEST + ID_OFFSET,
+    ID_TASK_INSERTED = ID_SAVE + ID_OFFSET
 };
 
 static const int ID_SAVE = static_cast<int>(Events::ID_SAVE);
+static const int ID_TASK_INSERTED = static_cast<int>(Events::ID_TASK_INSERTED);
 }

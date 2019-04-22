@@ -30,7 +30,6 @@ namespace app
 {
 app::~app()
 {
-    wxLogDebug(wxT("Destry APP"));
 }
 
 bool app::OnInit()

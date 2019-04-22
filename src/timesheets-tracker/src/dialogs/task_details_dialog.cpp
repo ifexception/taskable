@@ -31,6 +31,8 @@ namespace app::dialog
 {
 wxIMPLEMENT_DYNAMIC_CLASS(task_details_dialog, wxDialog);
 
+//wxDEFINE_EVENT(TASK_INSERTED_EVENT, wxCommandEvent);
+
 wxBEGIN_EVENT_TABLE(task_details_dialog, wxDialog)
     EVT_BUTTON(ids::ID_SAVE, task_details_dialog::on_save)
     EVT_BUTTON(wxID_CANCEL, task_details_dialog::on_cancel)
@@ -49,6 +51,7 @@ task_details_dialog::task_details_dialog(wxWindow* parent, bool isEdit, int task
     , mEndTime()
     , mCategoryId(-1)
     , mDescriptionText(wxT(""))
+    , pParent(parent)
 {
     wxString title;
     wxSize size;
@@ -61,6 +64,9 @@ task_details_dialog::task_details_dialog(wxWindow* parent, bool isEdit, int task
     }
     bool success = create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
+
+task_details_dialog::task_details_dialog()
+{}
 
 task_details_dialog::~task_details_dialog()
 {
@@ -186,6 +192,7 @@ void task_details_dialog::create_controls()
         pDateCreatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
         auto font = pDateCreatedTextCtrl->GetFont();
         font.MakeItalic();
+        font.SetPointSize(10);
         pDateCreatedTextCtrl->SetFont(font);
         detailsBoxSizer->Add(pDateCreatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
@@ -394,6 +401,8 @@ void task_details_dialog::on_save(wxCommandEvent& event)
         wxLogDebug(e.what());
     }
 
+    on_task_saved(event);
+
     EndModal(ids::ID_SAVE);
 }
 
@@ -409,6 +418,13 @@ void task_details_dialog::on_cancel(wxCommandEvent& event)
     } else {
         EndModal(wxID_CANCEL);
     }
+}
+
+void task_details_dialog::on_task_saved(wxCommandEvent& event)
+{
+    wxCommandEvent eventForParent(ids::ID_TASK_INSERTED);
+    eventForParent.SetEventObject(this);
+    pParent->ProcessWindowEvent(eventForParent);
 }
 
 void task_details_dialog::calculate_time_diff(wxDateTime start, wxDateTime end)
