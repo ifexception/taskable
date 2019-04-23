@@ -52,6 +52,7 @@ config::config()
         if (std::string(node->first_attribute("type")->value()) == "debug") {
             auto connectionString = node->value();
             set_connection_string(std::string(connectionString));
+            break;
         }
 #else
         if (node->first_attribute("type")->value() == "release") {
