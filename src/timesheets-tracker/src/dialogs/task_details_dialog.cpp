@@ -300,9 +300,15 @@ bool task_details_dialog::validate()
         return false;
     }
 
+    auto isEndTimeInTheFuture = mEndTime.IsLaterThan(wxDateTime::Now());
+    if (isEndTimeInTheFuture)
+    {
+        wxMessageBox(wxT("A task cannot end in the future"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
     auto taskTimeSpan = mEndTime - mStartTime;
-    auto fiveMinuteTimeSpan = wxTimeSpan::Minutes(5);
-    auto isTaskLessThan5Minutes = taskTimeSpan.IsShorterThan(fiveMinuteTimeSpan);
+    auto isTaskLessThan5Minutes = taskTimeSpan.IsShorterThan(wxTimeSpan::Minutes(5));
     if (isTaskLessThan5Minutes) {
         wxMessageBox(wxT("A task cannot be less than 5 minutes long"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
@@ -312,6 +318,20 @@ bool task_details_dialog::validate()
         mDescriptionText.empty();
     if (isDescriptionInvalid) {
         wxMessageBox(wxT("Description is invalid"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    auto isProjectChoiceValid = mProjectId != 0 || mProjectId != -1;
+    if (!isProjectChoiceValid)
+    {
+        wxMessageBox(wxT("A project is required"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    auto isCategoryChoiceValid = mCategoryId != 0 || mCategoryId != -1;
+    if (!isCategoryChoiceValid)
+    {
+        wxMessageBox(wxT("A category is required"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
 
@@ -333,7 +353,7 @@ void task_details_dialog::on_project_choice(wxCommandEvent& event)
     pCategoryChoiceCtrl->Clear();
     pCategoryChoiceCtrl->AppendString(wxT("Select a category"));
     pCategoryChoiceCtrl->SetSelection(0);
-    int projectId = (int)event.GetClientData(); // FIXME: loss of precision
+    int projectId = (int)event.GetClientData(); // FIXME: loss of precision -> convert to intptr_t and then to int
 
     fill_category_control(projectId);
 }

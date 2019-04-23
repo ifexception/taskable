@@ -48,8 +48,9 @@ private:
     void on_new_project(wxCommandEvent& event);
     void on_new_category(wxCommandEvent& event);
     void on_task_inserted(wxCommandEvent& event);
+    void on_item_double_click(wxListEvent& event);
 
-    void on_list_item_activation(wxListEvent& event);
+    void refresh_items();
 
     wxListCtrl* pListCtrl;
 
