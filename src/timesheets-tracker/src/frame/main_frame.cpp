@@ -48,16 +48,14 @@ wxBEGIN_EVENT_TABLE(main_frame, wxFrame)
 wxEND_EVENT_TABLE()
 
 main_frame::main_frame(wxWindow* parent, const wxString& name)
-    : wxFrame(parent, wxID_ANY, "Tasks Tracker", wxDefaultPosition, wxSize(700, 500), wxDEFAULT_FRAME_STYLE, name)
+    : wxFrame(parent, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(700, 500), wxDEFAULT_FRAME_STYLE, name)
 {
     bool success = create(/*parent, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(640, 480), wxDEFAULT_FRAME_STYLE, name*/);
     SetMinClientSize(wxSize(640, 480));
 }
 
 main_frame::~main_frame()
-{
-    wxLogDebug(wxT("Destroy FRAME"));
-}
+{}
 
 bool main_frame::create(/*wxWindow * parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name*/)
 {
