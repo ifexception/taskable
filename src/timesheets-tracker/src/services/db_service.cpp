@@ -276,12 +276,21 @@ models::task_detail db_service::get_task_by_id(const int taskDetailId)
     return taskDetail;
 }
 
-void db_service::update_task(models::task_detail taskDetail)
+void db_service::update_task_detail(models::task_detail taskDetail)
 {
     std::string cmd("UPDATE task_details SET start_time = ?, end_time = ?, duration = ?, description = ?, date_modified_utc = ?, project_id = ?, category_id = ? WHERE task_detail_id = ?");
     db::command command(*db_connection::get_instance().get_database(), cmd);
 
     command.binder() << taskDetail.start_time << taskDetail.end_time << taskDetail.duration << taskDetail.description << taskDetail.date_modified_utc << taskDetail.project_id << taskDetail.category_id << taskDetail.task_detail_id;
+    command.execute();
+}
+
+void db_service::delete_task_detail(const int taskDetailId)
+{
+    std::string cmd("UPDATE task_details SET is_active = 0 WHERE task_detail_id = ?");
+    db::command command(*db_connection::get_instance().get_database(), cmd);
+
+    command.binder() << taskDetailId;
     command.execute();
 }
 

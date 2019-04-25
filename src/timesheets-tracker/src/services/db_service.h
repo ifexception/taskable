@@ -60,6 +60,8 @@ struct db_service
 
     models::task_detail get_task_by_id(const int taskDetailId);
 
-    void update_task(models::task_detail taskDetail);
+    void update_task_detail(models::task_detail taskDetail);
+
+    void delete_task_detail(const int taskDetailId);
 };
 }
