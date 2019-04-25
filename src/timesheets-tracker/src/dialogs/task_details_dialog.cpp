@@ -427,6 +427,7 @@ void task_details_dialog::on_save(wxCommandEvent& event)
             taskDetail.task_detail_id = mTaskDetailId;
             taskDetail.start_time = startTime;
             taskDetail.end_time = endTime;
+            taskDetail.duration = mDurationText;
             taskDetail.description = std::string(mDescriptionText.ToUTF8());
             taskDetail.date_modified_utc = seconds;
             taskDetail.project_id = mProjectId;
