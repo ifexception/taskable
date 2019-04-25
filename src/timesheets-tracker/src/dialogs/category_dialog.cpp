@@ -184,7 +184,7 @@ bool category_dialog::are_controls_empty()
 
 void category_dialog::on_save(wxCommandEvent& event)
 {
-    mProjectChoiceId = (int)pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection());
+    mProjectChoiceId = (int)pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
     mNameText = pNameCtrl->GetValue();
     mDescriptionText = pDescriptionCtrl->GetValue();
 

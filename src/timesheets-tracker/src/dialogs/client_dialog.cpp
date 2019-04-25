@@ -36,7 +36,7 @@ wxEND_EVENT_TABLE()
 
 client_dialog::client_dialog(wxWindow* parent, bool isEdit, const wxString& name)
     : mNameText(wxT(""))
-    , mSelectedEmployerId(-1)
+    , mEmployerId(-1)
 {
     wxString title;
     if (isEdit) {
@@ -109,9 +109,9 @@ void client_dialog::create_controls()
     auto employerNameText = new wxStaticText(clientDetailsPanel, wxID_STATIC, wxT("Employer"));
     taskFlexGridSizer->Add(employerNameText, common::sizers::ControlCenterVertical);
 
-    pEmployerSelectCtrl = new wxComboBox(clientDetailsPanel, IDC_EMPLOYER, wxT("Select a employer"), wxDefaultPosition, wxDefaultSize);
-    pEmployerSelectCtrl->SetToolTip(wxT("Select a employer to associate the client with"));
-    taskFlexGridSizer->Add(pEmployerSelectCtrl, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    pEmployerChoiceCtrl = new wxComboBox(clientDetailsPanel, IDC_EMPLOYER, wxT("Select a employer"), wxDefaultPosition, wxDefaultSize);
+    pEmployerChoiceCtrl->SetToolTip(wxT("Select a employer to associate the client with"));
+    taskFlexGridSizer->Add(pEmployerChoiceCtrl, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
     /* Horizontal Line*/
     auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("new_task_static_line"));
@@ -141,14 +141,8 @@ void client_dialog::init_post_create()
         wxLogDebug(e.what());
     }
 
-    if (employers.size() == 1) {
-        pEmployerSelectCtrl->AppendString(employers[0].employer_name);
-        pEmployerSelectCtrl->SetSelection(0);
-        pEmployerSelectCtrl->Disable();
-    } else {
-        for (auto employer : employers) {
-            pEmployerSelectCtrl->AppendString(employer.employer_name);
-        }
+    for (auto employer : employers) {
+        pEmployerChoiceCtrl->Append(employer.employer_name, (void*) employer.employer_id);
     }
 }
 
@@ -159,7 +153,7 @@ bool client_dialog::validate()
         return false;
     }
 
-    if (mSelectedEmployerId == -1) {
+    if (mEmployerId == -1 || mEmployerId == 0) {
         wxMessageBox(wxT("A employer is required"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
@@ -168,16 +162,14 @@ bool client_dialog::validate()
 
 bool client_dialog::are_controls_empty()
 {
-    if (mNameText.empty() && mSelectedEmployerId == -1) {
-        return true;
-    }
-    return false;
+    bool isEmpty = mNameText.empty() && (mEmployerId == -1 || mEmployerId == 0);
+    return isEmpty;
 }
 
 void client_dialog::on_save(wxCommandEvent & event)
 {
     mNameText = pNameCtrl->GetValue();
-    mSelectedEmployerId = pEmployerSelectCtrl->GetSelection() + 1;
+    mEmployerId = (int)pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
 
     bool isValid = validate();
     if (!isValid) {
@@ -186,7 +178,7 @@ void client_dialog::on_save(wxCommandEvent & event)
 
     services::db_service clientService;
     try {
-        clientService.create_new_client(std::string(mNameText.ToUTF8()), mSelectedEmployerId);
+        clientService.create_new_client(std::string(mNameText.ToUTF8()), mEmployerId);
     } catch (const std::exception&) {
 
     }

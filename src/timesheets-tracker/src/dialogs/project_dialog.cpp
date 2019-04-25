@@ -33,14 +33,14 @@ wxIMPLEMENT_DYNAMIC_CLASS(project_dialog, wxDialog)
 wxBEGIN_EVENT_TABLE(project_dialog, wxDialog)
 EVT_BUTTON(ids::ID_SAVE, project_dialog::on_save)
 EVT_BUTTON(wxID_CANCEL, project_dialog::on_cancel)
-EVT_CHOICE(project_dialog::IDC_EMPLOYER_CHOICE, project_dialog::on_employer_select)
+EVT_CHOICE(project_dialog::IDC_EMPLOYERCHOICE, project_dialog::on_employer_select)
 wxEND_EVENT_TABLE()
 
 project_dialog::project_dialog(wxWindow* parent, bool isEdit, const wxString& name)
     : mNameText(wxT(""))
     , mDisplayNameText(wxT(""))
-    , mEmployerChoice(-1)
-    , mClientChoice(-1)
+    , mEmployerId(-1)
+    , mClientId(-1)
 {
     wxString title;
     if (isEdit) {
@@ -120,7 +120,7 @@ void project_dialog::create_controls()
     auto employerText = new wxStaticText(projectDetailsPanel, wxID_STATIC, wxT("Employer"));
     taskFlexGridSizer->Add(employerText, common::sizers::ControlCenterVertical);
 
-    pEmployerChoiceCtrl = new wxChoice(projectDetailsPanel, IDC_EMPLOYER_CHOICE, wxDefaultPosition, wxSize(150, -1));
+    pEmployerChoiceCtrl = new wxChoice(projectDetailsPanel, IDC_EMPLOYERCHOICE, wxDefaultPosition, wxSize(150, -1));
     pEmployerChoiceCtrl->AppendString(wxT("Select a employer"));
     pEmployerChoiceCtrl->SetSelection(0);
     pEmployerChoiceCtrl->SetToolTip(wxT("Select a employer to associate the project with"));
@@ -130,7 +130,7 @@ void project_dialog::create_controls()
     auto clientText = new wxStaticText(projectDetailsPanel, wxID_STATIC, wxT("Client"));
     taskFlexGridSizer->Add(clientText, common::sizers::ControlCenterVertical);
 
-    pClientChoiceCtrl = new wxChoice(projectDetailsPanel, IDC_CLIENT_CHOICE, wxDefaultPosition, wxSize(150, -1));
+    pClientChoiceCtrl = new wxChoice(projectDetailsPanel, IDC_CLIENTCHOICE, wxDefaultPosition, wxSize(150, -1));
     pClientChoiceCtrl->AppendString(wxT("Select a client"));
     pClientChoiceCtrl->SetSelection(0);
     pClientChoiceCtrl->SetToolTip(wxT("Please select a client to associate this project with"));
@@ -181,7 +181,7 @@ bool project_dialog::validate()
         return false;
     }
 
-    if (mEmployerChoice == -1) {
+    if (mEmployerId == -1) {
         wxMessageBox(wxT("An employer is required"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
@@ -200,7 +200,7 @@ void project_dialog::on_employer_select(wxCommandEvent& event)
 {
     pClientChoiceCtrl->Clear();
     pClientChoiceCtrl->AppendString(wxT("Select a client"));
-    int employerId = (int)event.GetClientData(); // FIXME: loss of precision
+    int employerId = (int)event.GetClientData(); // FIXME: loss of precision -> convert to intptr_t and then to int
     std::vector<models::client> clients;
     try {
         services::db_service clientService;
@@ -224,8 +224,8 @@ void project_dialog::on_save(wxCommandEvent& event)
     mNameText = pNameCtrl->GetValue();
     mDisplayNameText = pDisplayNameCtrl->GetValue();
 
-    mEmployerChoice = (int)pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection());
-    mClientChoice = (int)pClientChoiceCtrl->GetClientData(pClientChoiceCtrl->GetSelection());
+    mEmployerId = (int)pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
+    mClientId = (int)pClientChoiceCtrl->GetClientData(pClientChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
 
     bool isValid = validate();
     if (!isValid) {
@@ -234,10 +234,10 @@ void project_dialog::on_save(wxCommandEvent& event)
 
     try {
         services::db_service projectService;
-        if (mClientChoice == -1 || mClientChoice == 0) {
-            projectService.create_new_project(std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerChoice, nullptr);
+        if (mClientId == -1 || mClientId == 0) {
+            projectService.create_new_project(std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerId, nullptr);
         } else {
-            projectService.create_new_project(std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerChoice, &mClientChoice);
+            projectService.create_new_project(std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerId, &mClientId);
         }
     } catch (const db::database_exception& e) {
     }

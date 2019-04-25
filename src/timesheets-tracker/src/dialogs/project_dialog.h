@@ -55,15 +55,15 @@ private:
 
     wxString mNameText;
     wxString mDisplayNameText;
-    int mEmployerChoice;
-    int mClientChoice;
+    int mEmployerId;
+    int mClientId;
 
     enum
     {
         IDC_NAME,
-        IDC_DISPLAY_NAME,
-        IDC_EMPLOYER_CHOICE,
-        IDC_CLIENT_CHOICE
+        IDC_DISPLAYNAME,
+        IDC_EMPLOYERCHOICE,
+        IDC_CLIENTCHOICE
     };
 };
 } // namespace app::dialog

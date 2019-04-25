@@ -47,10 +47,10 @@ private:
     void on_cancel(wxCommandEvent &event);
 
     wxTextCtrl *pNameCtrl;
-    wxComboBox *pEmployerSelectCtrl;
+    wxComboBox *pEmployerChoiceCtrl;
 
     wxString mNameText;
-    int mSelectedEmployerId;
+    int mEmployerId;
 
     enum
     {
