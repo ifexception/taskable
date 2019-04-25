@@ -18,6 +18,9 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "task_details_dialog.h"
+
+#include <chrono>
+
 #include <wx/timectrl.h>
 #include <wx/dateevt.h>
 #include <wx/statline.h>
@@ -416,7 +419,21 @@ void task_details_dialog::on_save(wxCommandEvent& event)
     try {
         wxString startTime = mStartTime.FormatISOTime();
         wxString endTime = mEndTime.FormatISOTime();
-        dbService.create_new_task(mProjectId, taskId, std::string(startTime), std::string(endTime), std::string(mDurationText), mCategoryId, std::string(mDescriptionText));
+        if (bIsEdit) {
+            auto tp = std::chrono::system_clock::now();
+            auto dur = tp.time_since_epoch();
+            auto seconds = std::chrono::duration_cast<std::chrono::seconds>(dur).count();
+            models::task_detail taskDetail;
+            taskDetail.task_detail_id = mTaskDetailId;
+            taskDetail.start_time = startTime;
+            taskDetail.end_time = endTime;
+            taskDetail.description = std::string(mDescriptionText.ToUTF8());
+            taskDetail.date_modified_utc = seconds;
+            taskDetail.project_id = mProjectId;
+            taskDetail.category_id = mCategoryId;
+            dbService.update_task(taskDetail);
+        } else
+            dbService.create_new_task(mProjectId, taskId, std::string(startTime.ToUTF8()), std::string(endTime.ToUTF8()), std::string(mDurationText.ToUTF8()), mCategoryId, std::string(mDescriptionText.ToUTF8()));
     } catch (const std::exception& e) {
         wxLogDebug(e.what());
     }

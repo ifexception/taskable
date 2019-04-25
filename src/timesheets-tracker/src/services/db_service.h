@@ -59,5 +59,7 @@ struct db_service
     std::vector<models::detailed_task> get_all_tasks_by_date(const std::string& date);
 
     models::task_detail get_task_by_id(const int taskDetailId);
+
+    void update_task(models::task_detail taskDetail);
 };
 }
