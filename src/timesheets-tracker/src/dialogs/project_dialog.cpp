@@ -23,6 +23,7 @@
 
 #include "../common/common.h"
 #include "../common/ids.h"
+#include "../db/database_exception.h"
 #include "../services/db_service.h"
 
 namespace app::dialog
@@ -233,12 +234,12 @@ void project_dialog::on_save(wxCommandEvent& event)
 
     try {
         services::db_service projectService;
-        if (mClientChoice == -1) {
-            projectService.create_new_project(std::string(mNameText), std::string(mDisplayNameText), mEmployerChoice, nullptr);
+        if (mClientChoice == -1 || mClientChoice == 0) {
+            projectService.create_new_project(std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerChoice, nullptr);
         } else {
-            projectService.create_new_project(std::string(mNameText), std::string(mDisplayNameText), mEmployerChoice, &mClientChoice);
+            projectService.create_new_project(std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerChoice, &mClientChoice);
         }
-    } catch (const std::exception&) {
+    } catch (const db::database_exception& e) {
     }
 }
 

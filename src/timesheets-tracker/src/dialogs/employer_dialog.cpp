@@ -142,10 +142,7 @@ bool employer_dialog::validate()
 bool employer_dialog::are_controls_empty()
 {
     bool isEmpty = mEmployerText.empty();
-    if (!isEmpty) {
-        return false;
-    }
-    return true;
+    return isEmpty;
 }
 
 void employer_dialog::on_save(wxCommandEvent& event)
@@ -159,13 +156,13 @@ void employer_dialog::on_save(wxCommandEvent& event)
 
     services::db_service employerService;
     try {
-        employerService.create_new_employer(std::string(mEmployerText));
+        employerService.create_new_employer(std::string(mEmployerText.ToUTF8()));
     } catch (const std::exception& e) {
         wxMessageBox(wxT("An error occured\n"), wxT("Error"), wxOK_DEFAULT | wxICON_ERROR);
         return;
     }
 
-    Destroy();
+    EndModal(ids::ID_SAVE);
 }
 
 void employer_dialog::on_cancel(wxCommandEvent& event)
@@ -176,10 +173,10 @@ void employer_dialog::on_cancel(wxCommandEvent& event)
         int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"),
                                   wxYES_NO | wxICON_QUESTION);
         if (answer == wxYES) {
-            Destroy();
+            EndModal(wxID_CANCEL);
         }
     } else {
-        Destroy();
+        EndModal(wxID_CANCEL);
     }
 }
 }

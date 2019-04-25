@@ -23,7 +23,7 @@
 
 namespace app::dialog
 {
-class employer_dialog : public wxDialog
+class employer_dialog final : public wxDialog
 {
     wxDECLARE_DYNAMIC_CLASS(employer_dialog);
     wxDECLARE_EVENT_TABLE();

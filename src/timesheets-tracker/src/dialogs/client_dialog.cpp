@@ -186,7 +186,7 @@ void client_dialog::on_save(wxCommandEvent & event)
 
     services::db_service clientService;
     try {
-        clientService.create_new_client(std::string(mNameText), mSelectedEmployerId);
+        clientService.create_new_client(std::string(mNameText.ToUTF8()), mSelectedEmployerId);
     } catch (const std::exception&) {
 
     }

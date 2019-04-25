@@ -195,7 +195,7 @@ void category_dialog::on_save(wxCommandEvent& event)
 
     try {
         services::db_service dbService;
-        dbService.create_new_category(mProjectChoiceId, std::string(mNameText), std::string(mDescriptionText));
+        dbService.create_new_category(mProjectChoiceId, std::string(mNameText.ToUTF8()), std::string(mDescriptionText.ToUTF8()));
     } catch (const std::exception& e) {
         wxLogDebug(e.what());
     }
