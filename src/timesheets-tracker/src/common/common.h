@@ -31,5 +31,5 @@ const wxSizerFlags ControlCenterVertical = wxSizerFlags(ControlDefault).CenterVe
 const wxSizerFlags ControlRight = wxSizerFlags(ControlDefault).Align(wxALIGN_RIGHT);
 const wxSizerFlags ControlExpand = wxSizerFlags(ControlDefault).Expand();
 const wxSizerFlags ControlExpandProp = wxSizerFlags(ControlDefault).Align(wxEXPAND).Proportion(1);
-} // namespace MyNamespace
+} // namespace sizers
 } // namespace app::common
