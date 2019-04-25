@@ -19,6 +19,7 @@
 
 #include "util.h"
 
+#include <chrono>
 #include <fstream>
 #include <wx/datetime.h>
 #include <wx/string.h>
@@ -40,5 +41,13 @@ wxString convert_unix_timestamp_to_wxdatetime(int timestamp)
     wxDateTime asDate(time);
     wxString dateString = asDate.FormatISOCombined();
     return dateString;
+}
+
+int unix_timestamp()
+{
+    auto tp = std::chrono::system_clock::now();
+    auto dur = tp.time_since_epoch();
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(dur).count();
+    return seconds;
 }
 } // namespace app::util

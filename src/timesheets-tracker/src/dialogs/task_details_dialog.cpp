@@ -19,8 +19,6 @@
 
 #include "task_details_dialog.h"
 
-#include <chrono>
-
 #include <wx/timectrl.h>
 #include <wx/dateevt.h>
 #include <wx/statline.h>
@@ -420,16 +418,13 @@ void task_details_dialog::on_save(wxCommandEvent& event)
         wxString startTime = mStartTime.FormatISOTime();
         wxString endTime = mEndTime.FormatISOTime();
         if (bIsEdit) {
-            auto tp = std::chrono::system_clock::now();
-            auto dur = tp.time_since_epoch();
-            auto seconds = std::chrono::duration_cast<std::chrono::seconds>(dur).count();
             models::task_detail taskDetail;
             taskDetail.task_detail_id = mTaskDetailId;
             taskDetail.start_time = startTime;
             taskDetail.end_time = endTime;
             taskDetail.duration = mDurationText;
             taskDetail.description = std::string(mDescriptionText.ToUTF8());
-            taskDetail.date_modified_utc = seconds;
+            taskDetail.date_modified_utc = util::unix_timestamp();
             taskDetail.project_id = mProjectId;
             taskDetail.category_id = mCategoryId;
             dbService.update_task(taskDetail);
