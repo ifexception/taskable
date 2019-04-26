@@ -26,6 +26,7 @@
 #include "../dialogs/client_dialog.h"
 #include "../dialogs/project_dialog.h"
 #include "../dialogs/category_dialog.h"
+#include "../dialogs/employer_list_dialog.h"
 #include "../services/db_service.h"
 
 namespace app::frame
@@ -35,6 +36,7 @@ const int EmployerId = static_cast<int>(ids::MenuIds::EmployerMenuId);
 const int ProjectId = static_cast<int>(ids::MenuIds::ProjectMenuId);
 const int ClientId = static_cast<int>(ids::MenuIds::ClientMenuId);
 const int CategoryId = static_cast<int>(ids::MenuIds::CategoryMenuId);
+const int EmployerEditId = static_cast<int>(ids::MenuIds::EmployerEditId);
 
 wxBEGIN_EVENT_TABLE(main_frame, wxFrame)
     EVT_MENU(wxID_ABOUT, main_frame::on_about)
@@ -43,6 +45,7 @@ wxBEGIN_EVENT_TABLE(main_frame, wxFrame)
     EVT_MENU(ProjectId, main_frame::on_new_project)
     EVT_MENU(ClientId, main_frame::on_new_client)
     EVT_MENU(CategoryId, main_frame::on_new_category)
+    EVT_MENU(EmployerEditId, main_frame::on_edit_employer)
     EVT_LIST_ITEM_ACTIVATED(main_frame::IDC_LIST, main_frame::on_item_double_click)
     EVT_COMMAND(main_frame::IDC_LIST, ids::ID_TASK_INSERTED, main_frame::on_task_inserted)
 wxEND_EVENT_TABLE()
@@ -86,6 +89,7 @@ void main_frame::create_controls()
 
     /* Edit Menu Control */
     auto editMenu = new wxMenu();
+    editMenu->Append(EmployerEditId, wxT("Edit &Employers"), wxT("Select a employer to edit"));
 
     /* Help Menu Control */
     wxMenu* helpMenu = new wxMenu();
@@ -191,6 +195,12 @@ void main_frame::on_new_category(wxCommandEvent& event)
 {
     dialog::category_dialog categoryDialog(this);
     categoryDialog.launch_dialog();
+}
+
+void main_frame::on_edit_employer(wxCommandEvent& event)
+{
+    dialog::employer_list_dialog employerListDialog(this);
+    employerListDialog.launch_dialog();
 }
 
 void main_frame::on_task_inserted(wxCommandEvent& event)

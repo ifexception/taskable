@@ -22,36 +22,27 @@
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 
-namespace app::frame
+namespace app::dialog
 {
-class main_frame : public wxFrame
+class employer_list_dialog final : public wxDialog
 {
 public:
-    main_frame(wxWindow* parent, const wxString& name = wxT("main_frame"));
-    main_frame(const main_frame&) = delete;
-    virtual ~main_frame();
+    employer_list_dialog() = default;
+    explicit employer_list_dialog(wxWindow* parent, const wxString& name = wxT("employer_list_dialog"));
+    virtual ~employer_list_dialog() = default;
 
-    main_frame& operator=(const main_frame&) = delete;
+    void launch_dialog();
 
 private:
+    wxDECLARE_DYNAMIC_CLASS(employer_list_dialog);
     wxDECLARE_EVENT_TABLE();
-    bool create(/*wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name*/);
+
+    bool create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
 
     void create_controls();
     void data_to_controls();
 
-    void on_about(wxCommandEvent& event);
-    void on_close(wxCommandEvent& event);
-    void on_new_task(wxCommandEvent& event);
-    void on_new_employer(wxCommandEvent& event);
-    void on_new_client(wxCommandEvent& event);
-    void on_new_project(wxCommandEvent& event);
-    void on_new_category(wxCommandEvent& event);
-    void on_edit_employer(wxCommandEvent& event);
-    void on_task_inserted(wxCommandEvent& event);
     void on_item_double_click(wxListEvent& event);
-
-    void refresh_items();
 
     wxListCtrl* pListCtrl;
 
@@ -60,4 +51,4 @@ private:
         IDC_LIST
     };
 };
-} // namespace app::frame
+}

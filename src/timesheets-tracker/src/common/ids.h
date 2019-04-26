@@ -29,7 +29,8 @@ enum class MenuIds : int
     ProjectMenuId = 2,
     ClientMenuId = 3,
     TaskDetailMenuId = 4,
-    CategoryMenuId = 5
+    CategoryMenuId = 5,
+    EmployerEditId = 6,
 };
 
 enum class Events : int
