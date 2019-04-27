@@ -215,9 +215,11 @@ void employer_dialog::on_save(wxCommandEvent& event)
             employer.employer_name = std::string(mEmployerText.ToUTF8());
             employer.date_modified_utc = util::unix_timestamp();
             dbService.update_employer(employer);
-        } else if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
+        }
+        if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
             dbService.delete_employer(mEmployerId); // need to add date_modified
-        } else {
+        }
+        if (!bIsEdit) {
             dbService.create_new_employer(std::string(mEmployerText.ToUTF8()));
         }
     } catch (const db::database_exception& e) {

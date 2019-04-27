@@ -79,7 +79,7 @@ models::employer db_service::get_employer(const int employerId)
 
 void db_service::update_employer(models::employer employer)
 {
-    std::string cmd("UPDATE employers SET employer_name = ?, date_modified_utc = ? WHERE employer_id = ?");
+    std::string cmd("UPDATE employers SET name = ?, date_modified_utc = ? WHERE employer_id = ?");
     db::command command(*db_connection::get_instance().get_database(), cmd);
     command.binder() << employer.employer_name << employer.date_modified_utc << employer.employer_id;
     command.execute();
