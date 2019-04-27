@@ -241,6 +241,8 @@ void project_dialog::on_save(wxCommandEvent& event)
         }
     } catch (const db::database_exception& e) {
     }
+
+    EndModal(ids::ID_SAVE);
 }
 
 void project_dialog::on_cancel(wxCommandEvent& event)
