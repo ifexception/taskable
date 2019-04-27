@@ -58,6 +58,41 @@ std::vector<models::employer> db_service::get_employers()
     return employers;
 }
 
+models::employer db_service::get_employer(const int employerId)
+{
+    std::string qry("SELECT * FROM employers WHERE employer_id = ?");
+    auto instance = db_connection::get_instance().get_database();
+    db::query query(*instance, qry);
+    query.bind(1, employerId);
+    query.run();
+    db::column column(query.get_handle());
+    models::employer employer;
+
+    employer.employer_id = column.get<int>(0);
+    employer.employer_name = column.get<std::string>(1);
+    employer.date_created_utc = column.get<int>(2);
+    employer.date_modified_utc = column.get<int>(3);
+    employer.is_active = column.get<int>(4);
+
+    return employer;
+}
+
+void db_service::update_employer(models::employer employer)
+{
+    std::string cmd("UPDATE employers SET employer_name = ?, date_modified_utc = ? WHERE employer_id = ?");
+    db::command command(*db_connection::get_instance().get_database(), cmd);
+    command.binder() << employer.employer_name << employer.date_modified_utc << employer.employer_id;
+    command.execute();
+}
+
+void db_service::delete_employer(const int employerId)
+{
+    std::string cmd("UPDATE employers SET is_active = 1 WHERE employer_id = ?");
+    db::command command(*db_connection::get_instance().get_database(), cmd);
+    command.binder() << employerId;
+    command.execute();
+}
+
 void db_service::create_new_client(const std::string& name, const int employerId)
 {
     std::string cmd("INSERT INTO clients (name, is_active, employer_id) VALUES (?, 1, ?)");

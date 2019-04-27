@@ -417,7 +417,7 @@ void task_details_dialog::on_save(wxCommandEvent& event)
     try {
         wxString startTime = mStartTime.FormatISOTime();
         wxString endTime = mEndTime.FormatISOTime();
-        if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
+        if (bIsEdit && pIsActiveCtrl->IsChecked()) {
             models::task_detail taskDetail;
             taskDetail.task_detail_id = mTaskDetailId;
             taskDetail.start_time = startTime;
@@ -428,7 +428,7 @@ void task_details_dialog::on_save(wxCommandEvent& event)
             taskDetail.project_id = mProjectId;
             taskDetail.category_id = mCategoryId;
             dbService.update_task_detail(taskDetail);
-        } else if (bIsEdit && pIsActiveCtrl->IsChecked()) {
+        } else if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
             dbService.delete_task_detail(mTaskDetailId);
         } else {
             dbService.create_new_task(mProjectId, taskId, std::string(startTime.ToUTF8()), std::string(endTime.ToUTF8()), std::string(mDurationText.ToUTF8()), mCategoryId, std::string(mDescriptionText.ToUTF8()));

@@ -40,6 +40,12 @@ struct db_service
 
     std::vector<models::employer> get_employers();
 
+    models::employer get_employer(const int employerId);
+
+    void update_employer(models::employer employer);
+
+    void delete_employer(const int employerId);
+
     void create_new_client(const std::string& name, const int employerId);
 
     std::vector<models::client> get_clients_by_employer_id(const int employerId);

@@ -40,14 +40,19 @@ class employer_dialog final : public wxDialog
                 const wxSize& size, long style, const wxString& name);
 
     void create_controls();
+    void data_to_controls();
 
     bool validate();
     bool are_controls_empty();
 
     void on_save(wxCommandEvent& event);
     void on_cancel(wxCommandEvent& event);
+    void on_is_active_check(wxCommandEvent& event);
 
     wxTextCtrl* pEmployerCtrl;
+    wxCheckBox* pIsActiveCtrl;
+    wxStaticText* pDateCreatedTextCtrl;
+    wxStaticText* pDateUpdatedTextCtrl;
 
     wxString mEmployerText;
     bool bIsEdit;
@@ -55,6 +60,7 @@ class employer_dialog final : public wxDialog
 
     enum
     {
+        IDC_ISACTIVE,
         WIDTH = 330,
         HEIGHT = 300,
         MIN_WIDTH = 320,

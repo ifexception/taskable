@@ -23,6 +23,8 @@
 
 #include "../common/common.h"
 #include "../common/ids.h"
+#include "../common/util.h"
+#include "../db/database_exception.h"
 #include "../services/db_service.h"
 
 namespace app::dialog
@@ -32,6 +34,7 @@ wxIMPLEMENT_DYNAMIC_CLASS(employer_dialog, wxDialog);
 wxBEGIN_EVENT_TABLE(employer_dialog, wxDialog)
     EVT_BUTTON(ids::ID_SAVE, employer_dialog::on_save)
     EVT_BUTTON(wxID_CANCEL, employer_dialog::on_cancel)
+    EVT_CHECKBOX(employer_dialog::IDC_ISACTIVE, employer_dialog::on_is_active_check)
 wxEND_EVENT_TABLE()
 
 employer_dialog::employer_dialog(wxWindow* parent, bool isEdit, int employerId, const wxString& name)
@@ -40,14 +43,16 @@ employer_dialog::employer_dialog(wxWindow* parent, bool isEdit, int employerId, 
     , mEmployerId(employerId)
 {
     long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
-    wxSize employerSize(WIDTH, HEIGHT);
+    wxSize size;
     wxString title;
     if (bIsEdit) {
         title = wxT("Edit Employer");
+        size.Set(330, 400);
     } else {
         title = wxT("Add Employer");
+        size.Set(WIDTH, HEIGHT);
     }
-    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, employerSize, style, name);
+    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, size, style, name);
 
     SetMinClientSize(wxSize(MIN_WIDTH, MIN_HEIGHT));
 }
@@ -73,6 +78,9 @@ bool employer_dialog::create(wxWindow* parent,
     bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
     if (created) {
         create_controls();
+        if (bIsEdit) {
+            data_to_controls();
+        }
 
         GetSizer()->Fit(this);
         //SetIcon
@@ -113,6 +121,27 @@ void employer_dialog::create_controls()
     pEmployerCtrl = new wxTextCtrl(employerDetailsPanel, wxID_STATIC, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT, wxDefaultValidator, wxT("employer_name_ctrl"));
     taskFlexGridSizer->Add(pEmployerCtrl, common::sizers::ControlDefault);
 
+    if (bIsEdit) {
+        auto isActiveFiller = new wxStaticText(employerDetailsPanel, wxID_STATIC, wxT(""));
+        taskFlexGridSizer->Add(isActiveFiller, common::sizers::ControlDefault);
+
+        /* Is Active Checkbox Control */
+        pIsActiveCtrl = new wxCheckBox(employerDetailsPanel, IDC_ISACTIVE, wxT("Is Active"));
+        taskFlexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
+
+        /* Date Created Text Control */
+        pDateCreatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
+        auto font = pDateCreatedTextCtrl->GetFont();
+        font.MakeItalic();
+        font.SetPointSize(8);
+        pDateCreatedTextCtrl->SetFont(font);
+        detailsBoxSizer->Add(pDateCreatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+
+        /* Date Updated Text Control */
+        pDateUpdatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Updated on: %s"));
+        detailsBoxSizer->Add(pDateUpdatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+    }
+
     /* Horizontal Line*/
     auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("new_task_static_line"));
     mainSizer->Add(separation_line, 0, wxEXPAND | wxALL, 1);
@@ -128,6 +157,29 @@ void employer_dialog::create_controls()
 
     buttonPanelSizer->Add(okButton, common::sizers::ControlDefault);
     buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
+}
+
+void employer_dialog::data_to_controls()
+{
+    services::db_service dbService;
+    models::employer employer;
+    try {
+        employer = dbService.get_employer(mEmployerId);
+    } catch (const db::database_exception&) {
+
+    }
+
+    pEmployerCtrl->SetValue(employer.employer_name);
+
+    wxString dateCreatedString = util::convert_unix_timestamp_to_wxdatetime(employer.date_created_utc);
+    wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
+    pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
+
+    wxString dateUpdatedString = util::convert_unix_timestamp_to_wxdatetime(employer.date_modified_utc);
+    wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
+    pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
+
+    pIsActiveCtrl->SetValue(employer.is_active);
 }
 
 bool employer_dialog::validate()
@@ -156,10 +208,19 @@ void employer_dialog::on_save(wxCommandEvent& event)
         return;
     }
 
-    services::db_service employerService;
+    services::db_service dbService;
     try {
-        employerService.create_new_employer(std::string(mEmployerText.ToUTF8()));
-    } catch (const std::exception& e) {
+        if (bIsEdit && pIsActiveCtrl->IsChecked()) {
+            models::employer employer;
+            employer.employer_name = std::string(mEmployerText.ToUTF8());
+            employer.date_modified_utc = util::unix_timestamp();
+            dbService.update_employer(employer);
+        } else if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
+            dbService.delete_employer(mEmployerId); // need to add date_modified
+        } else {
+            dbService.create_new_employer(std::string(mEmployerText.ToUTF8()));
+        }
+    } catch (const db::database_exception& e) {
         wxMessageBox(wxT("An error occured\n"), wxT("Error"), wxOK_DEFAULT | wxICON_ERROR);
         return;
     }
@@ -179,6 +240,15 @@ void employer_dialog::on_cancel(wxCommandEvent& event)
         }
     } else {
         EndModal(wxID_CANCEL);
+    }
+}
+
+void employer_dialog::on_is_active_check(wxCommandEvent& event)
+{
+    if (event.IsChecked()) {
+        pEmployerCtrl->Enable();
+    } else {
+        pEmployerCtrl->Disable();
     }
 }
 }
