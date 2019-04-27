@@ -30,8 +30,7 @@ class employer_dialog final : public wxDialog
 
   public:
     employer_dialog() = default;
-    explicit employer_dialog(wxWindow* parent, bool isEdit = false, const wxString& name = "employer_dialog");
-
+    explicit employer_dialog(wxWindow* parent, bool isEdit = false, int employerId = 0, const wxString& name = "employer_dialog");
     virtual ~employer_dialog();
 
     void launch_employer_dialog();
@@ -51,6 +50,8 @@ class employer_dialog final : public wxDialog
     wxTextCtrl* pEmployerCtrl;
 
     wxString mEmployerText;
+    bool bIsEdit;
+    int mEmployerId;
 
     enum
     {

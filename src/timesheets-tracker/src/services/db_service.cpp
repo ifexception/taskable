@@ -36,7 +36,7 @@ void db_service::create_new_employer(const std::string& employerName)
     command.execute();
 }
 
-std::vector<models::employer> db_service::get_active_employers()
+std::vector<models::employer> db_service::get_employers()
 {
     std::string qry("SELECT * FROM employers WHERE is_active = 1;");
     auto instance = db_connection::get_instance().get_database();

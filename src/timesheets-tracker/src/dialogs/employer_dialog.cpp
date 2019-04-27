@@ -34,13 +34,15 @@ wxBEGIN_EVENT_TABLE(employer_dialog, wxDialog)
     EVT_BUTTON(wxID_CANCEL, employer_dialog::on_cancel)
 wxEND_EVENT_TABLE()
 
-employer_dialog::employer_dialog(wxWindow* parent, bool isEdit, const wxString& name)
+employer_dialog::employer_dialog(wxWindow* parent, bool isEdit, int employerId, const wxString& name)
     : mEmployerText(wxT(""))
+    , bIsEdit(isEdit)
+    , mEmployerId(employerId)
 {
     long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
     wxSize employerSize(WIDTH, HEIGHT);
     wxString title;
-    if (isEdit) {
+    if (bIsEdit) {
         title = wxT("Edit Employer");
     } else {
         title = wxT("Add Employer");

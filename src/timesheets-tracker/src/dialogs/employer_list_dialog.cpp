@@ -19,6 +19,12 @@
 
 #include "employer_list_dialog.h"
 
+#include "../common/common.h"
+#include "../common/util.h"
+#include "../db/database_exception.h"
+#include "../services/db_service.h"
+#include "employer_dialog.h"
+
 namespace app::dialog
 {
 wxIMPLEMENT_DYNAMIC_CLASS(employer_list_dialog, wxDialog);
@@ -32,7 +38,7 @@ employer_list_dialog::employer_list_dialog(wxWindow* parent, const wxString& nam
 {
     long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
     wxString title = wxT("Select a Employer");
-    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, wxSize(320, 240), style, name);
+    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, wxSize(320, 260), style, name);
     SetMinClientSize(wxSize(320, 240));
 }
 
@@ -58,12 +64,20 @@ bool employer_list_dialog::create(wxWindow* parent, wxWindowID windowId, const w
 
 void employer_list_dialog::create_controls()
 {
-    auto panel = new wxPanel(this);
+    auto mainSizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(mainSizer);
+
+    auto panelSizer = new wxBoxSizer(wxHORIZONTAL);
+    mainSizer->Add(panelSizer, wxSizerFlags().Border(wxALL, 5));
+
+    auto panel = new wxPanel(this, wxID_STATIC);
+    panelSizer->Add(panel, wxSizerFlags().Border(wxALL, 5).Expand());
+
     auto sizer = new wxBoxSizer(wxHORIZONTAL);
+    panel->SetSizer(sizer);
 
     pListCtrl = new wxListCtrl(panel, IDC_LIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
     sizer->Add(pListCtrl, 1, wxEXPAND | wxALL, 5);
-    panel->SetSizer(sizer);
 
     wxListItem nameColumn;
     nameColumn.SetId(0);
@@ -75,11 +89,38 @@ void employer_list_dialog::create_controls()
     dateCreatedColumn.SetId(1);
     dateCreatedColumn.SetText(wxT("Date Created"));
     pListCtrl->InsertColumn(1, dateCreatedColumn);
+
+    wxListItem dateModifiedColumn;
+    dateModifiedColumn.SetId(2);
+    dateModifiedColumn.SetText(wxT("Date Modified"));
+    pListCtrl->InsertColumn(2, dateModifiedColumn);
 }
 
 void employer_list_dialog::data_to_controls()
-{}
+{
+    std::vector<models::employer> employers;
+    services::db_service dbServie;
+    try {
+        employers = dbServie.get_employers();
+    } catch (const db::database_exception&) {
 
-void employer_list_dialog::on_item_double_click(wxListEvent & event)
-{}
+    }
+
+    int listIndex = 0;
+    int columnIndex = 0;
+    for (auto employer : employers) {
+        listIndex = pListCtrl->InsertItem(columnIndex++, employer.employer_name);
+        pListCtrl->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(employer.date_created_utc));
+        pListCtrl->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(employer.date_modified_utc));
+        pListCtrl->SetItemPtrData(listIndex, employer.employer_id);
+        columnIndex = 0;
+    }
+}
+
+void employer_list_dialog::on_item_double_click(wxListEvent& event)
+{
+    int employerId = event.GetData();
+    employer_dialog editEmployer(this, true, employerId);
+    editEmployer.launch_employer_dialog();
+}
 }

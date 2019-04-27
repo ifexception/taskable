@@ -135,7 +135,7 @@ void client_dialog::init_post_create()
     services::db_service employerService;
     std::vector<models::employer> employers;
     try {
-        employers = employerService.get_active_employers();
+        employers = employerService.get_employers();
     } catch (const std::exception& e) {
         wxLogDebug(wxT("Exception occured when getting employers"));
         wxLogDebug(e.what());

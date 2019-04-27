@@ -29,7 +29,7 @@ class employer_list_dialog final : public wxDialog
 public:
     employer_list_dialog() = default;
     explicit employer_list_dialog(wxWindow* parent, const wxString& name = wxT("employer_list_dialog"));
-    virtual ~employer_list_dialog() = default;
+    virtual ~employer_list_dialog()= default;
 
     void launch_dialog();
 

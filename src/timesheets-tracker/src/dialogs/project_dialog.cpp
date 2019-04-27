@@ -159,7 +159,7 @@ void project_dialog::post_create_controls()
     std::vector<models::employer> employers;
     try {
         services::db_service employerService;
-        employers = employerService.get_active_employers();
+        employers = employerService.get_employers();
     } catch (const std::exception& e) {
         wxLogDebug(e.what());
     }

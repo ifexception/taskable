@@ -38,7 +38,7 @@ struct db_service
 
     void create_new_employer(const std::string& employerName);
 
-    std::vector<models::employer> get_active_employers();
+    std::vector<models::employer> get_employers();
 
     void create_new_client(const std::string& name, const int employerId);
 
