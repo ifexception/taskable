@@ -83,6 +83,11 @@ bool app::init_logging()
 
     return true;
 }
+bool app::database_file_exists()
+{
+    bool dbFileExists = wxFileExists(wxT("tasks-tracker.db"));
+    return dbFileExists;
+}
 } // namespace app
 
 wxIMPLEMENT_APP(app::app);

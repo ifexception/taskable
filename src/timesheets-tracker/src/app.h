@@ -43,6 +43,7 @@ class app : public wxApp
   private:
     bool create_logs_directory();
     bool init_logging();
+    bool database_file_exists();
 
     std::shared_ptr<spdlog::logger> pLogger;
 };
