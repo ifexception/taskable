@@ -46,5 +46,6 @@ class app : public wxApp
     bool database_file_exists();
 
     std::shared_ptr<spdlog::logger> pLogger;
+    // std::shared_ptr<configuration> pConfiguration;
 };
 } // namespace app

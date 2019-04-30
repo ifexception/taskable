@@ -44,6 +44,12 @@ bool app::OnInit()
         return false;
     }
 
+    bool dbFileExists = database_file_exists();
+    if (!dbFileExists)
+    {
+        return false;
+    }
+
     frame::main_frame* mf = new frame::main_frame(nullptr);
     mf->Show(true);
     return true;
