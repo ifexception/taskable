@@ -87,7 +87,7 @@ void db_service::update_employer(models::employer employer)
 
 void db_service::delete_employer(const int employerId)
 {
-    std::string cmd("UPDATE employers SET is_active = 1 WHERE employer_id = ?");
+    std::string cmd("UPDATE employers SET is_active = 0 WHERE employer_id = ?");
     db::command command(*db_connection::get_instance().get_database(), cmd);
     command.binder() << employerId;
     command.execute();
