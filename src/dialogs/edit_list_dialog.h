@@ -45,18 +45,21 @@ private:
     wxDECLARE_DYNAMIC_CLASS(edit_list_dialog);
     wxDECLARE_EVENT_TABLE(edit_list_dialog);
 
-    void create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
+    bool create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
 
     void create_controls();
     void data_to_controls();
 
     void on_item_double_click(wxListEvent& event);
-    wxListCtrl* make_employer_list_control(wxPanel* panel);
+
+    wxListCtrl* make_list_control(wxPanel* panel);
+    void make_employer_list_control(wxListCtrl* listCtrl);
     wxListCtrl* make_client_list_control(wxPanel* panel);
     wxListCtrl* make_project_list_control(wxPanel* panel);
     wxListCtrl* make_project_list_control(wxPanel* panel);
 
     wxListCtrl* pListCtrl;
+    dialog_type mType;
 
     enum
     {

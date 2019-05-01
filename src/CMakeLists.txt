@@ -74,10 +74,10 @@ target_compile_definitions (${PROJECT_NAME} PUBLIC
     __WXMSW__
     $<$<CONFIG:Debug>:_DEBUG>)
 
-target_include_directories(${PROJECT_NAME} PUBLIC
+target_include_directories (${PROJECT_NAME} PUBLIC
     rapidxml)
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries (${PROJECT_NAME}
     ${wxWidgets_LIBRARIES}
     sqlite3
     spdlog::spdlog)
