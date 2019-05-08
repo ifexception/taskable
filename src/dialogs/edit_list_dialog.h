@@ -32,18 +32,73 @@ enum class dialog_type
     Category
 };
 
+struct strategy
+{
+public:
+    strategy() = default;
+    virtual ~strategy() = default;
+
+    virtual void create_control(wxListCtrl* control) = 0;
+    virtual void data_to_control(wxListCtrl* control) = 0;
+    virtual wxSize get_size() = 0;
+};
+
+struct employer_strategy final : public strategy
+{
+public:
+    employer_strategy() = default;
+    virtual ~employer_strategy() = default;;
+
+    void create_control(wxListCtrl* control) override;
+    void data_to_control(wxListCtrl* control) override;
+    wxSize get_size() override;
+};
+
+struct client_strategy final : public strategy
+{
+public:
+    client_strategy() = default;
+    virtual ~client_strategy() = default;;
+
+    void create_control(wxListCtrl* control) override;
+    void data_to_control(wxListCtrl* control) override;
+    wxSize get_size() override;
+};
+
+struct project_strategy final : public strategy
+{
+public:
+    project_strategy() = default;
+    virtual ~project_strategy() = default;;
+
+    void create_control(wxListCtrl* control) override;
+    void data_to_control(wxListCtrl* control) override;
+    wxSize get_size() override;
+};
+
+struct category_strategy final : public strategy
+{
+public:
+    category_strategy() = default;
+    virtual ~category_strategy() = default;;
+
+    void create_control(wxListCtrl* control) override;
+    void data_to_control(wxListCtrl* control) override;
+    wxSize get_size() override;
+};
+
 class edit_list_dialog final : public wxDialog
 {
 public:
     edit_list_dialog() = default;
     explicit edit_list_dialog(wxWindow* parent, dialog_type dialogType, const wxString& name = wxT("edit_list_dialog"));
-    virtual ~edit_list_dialog() = default;
+    virtual ~edit_list_dialog();
 
     void launch_dialog();
 
 private:
     wxDECLARE_DYNAMIC_CLASS(edit_list_dialog);
-    wxDECLARE_EVENT_TABLE(edit_list_dialog);
+    wxDECLARE_EVENT_TABLE();
 
     bool create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
 
@@ -52,13 +107,10 @@ private:
 
     void on_item_double_click(wxListEvent& event);
 
-    wxListCtrl* make_list_control(wxPanel* panel);
-    void make_employer_list_control(wxListCtrl* listCtrl);
-    wxListCtrl* make_client_list_control(wxPanel* panel);
-    wxListCtrl* make_project_list_control(wxPanel* panel);
-    wxListCtrl* make_project_list_control(wxPanel* panel);
+    void set_strategy();
 
     wxListCtrl* pListCtrl;
+    strategy* mStrategy;
     dialog_type mType;
 
     enum

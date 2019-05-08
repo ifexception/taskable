@@ -30,7 +30,7 @@ class client_dialog : public wxDialog
 
 public:
     client_dialog() = default;
-    explicit client_dialog(wxWindow *parent, bool isEdit = false, const wxString &name = "client_dialog");
+    explicit client_dialog(wxWindow *parent, bool isEdit = false, int clientId, const wxString &name = "client_dialog");
     virtual ~client_dialog();
 
     void launch_client_dialog();
@@ -38,7 +38,7 @@ public:
 private:
     bool create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
     void create_controls();
-    void init_post_create();
+    void data_to_controls();
 
     bool validate();
     bool are_controls_empty();
@@ -51,6 +51,8 @@ private:
 
     wxString mNameText;
     int mEmployerId;
+    bool bIsEdit;
+    int mClientId;
 
     enum
     {

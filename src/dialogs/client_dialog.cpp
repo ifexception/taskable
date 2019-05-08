@@ -34,9 +34,11 @@ wxBEGIN_EVENT_TABLE(client_dialog, wxDialog)
     EVT_BUTTON(wxID_CANCEL, client_dialog::on_cancel)
 wxEND_EVENT_TABLE()
 
-client_dialog::client_dialog(wxWindow* parent, bool isEdit, const wxString& name)
+client_dialog::client_dialog(wxWindow* parent, bool isEdit, int clientId, const wxString& name)
     : mNameText(wxT(""))
     , mEmployerId(-1)
+    , bIsEdit(isEdit)
+    , mClientId(clientId)
 {
     wxString title;
     if (isEdit) {
@@ -64,7 +66,7 @@ bool client_dialog::create(wxWindow* parent, wxWindowID windowId, const wxString
 
     if (created) {
         create_controls();
-        init_post_create();
+        data_to_controls();
         GetSizer()->Fit(this);
         //SetIcon();
         Centre();
@@ -130,7 +132,7 @@ void client_dialog::create_controls()
     buttonPanelSizer->Add(cancelButton, wxSizerFlags().Border(wxALL, 5));
 }
 
-void client_dialog::init_post_create()
+void client_dialog::data_to_controls()
 {
     services::db_service employerService;
     std::vector<models::employer> employers;

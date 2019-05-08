@@ -18,9 +18,9 @@ CREATE TABLE clients
     date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     is_active INTEGER NOT NULL,
-    
+
     employer_id INTEGER NOT NULL,
-    
+
     FOREIGN KEY (employer_id) REFERENCES employers(employer_id)
 );
 

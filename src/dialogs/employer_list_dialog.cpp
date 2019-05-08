@@ -120,6 +120,7 @@ void employer_list_dialog::data_to_controls()
 void employer_list_dialog::on_item_double_click(wxListEvent& event)
 {
     int employerId = event.GetData();
+    // need switch
     employer_dialog editEmployer(this, true, employerId);
     editEmployer.launch_employer_dialog();
 }
