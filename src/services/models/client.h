@@ -29,10 +29,11 @@ struct client
     ~client() = default;
 
     int client_id;
-    std::string name;
+    std::string client_name;
     int date_created_utc;
-    int date_updated_utc;
+    int date_modified_utc;
     int is_active;
     int employer_id;
+    std::string employer_name;
 };
 }

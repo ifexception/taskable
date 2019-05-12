@@ -50,6 +50,8 @@ struct db_service
 
     std::vector<models::client> get_clients_by_employer_id(const int employerId);
 
+    models::client get_client_by_id(const int clientId);
+
     void create_new_project(const std::string& name, const std::string& displayName, const int employerId, const int* clientId);
 
     std::vector<models::project> get_projects();

@@ -113,15 +113,45 @@ std::vector<models::client> db_service::get_clients_by_employer_id(const int emp
         models::client client;
 
         client.client_id = column.get<int>(0);
-        client.name = column.get<std::string>(1);
+        client.client_name = column.get<std::string>(1);
         client.date_created_utc = column.get<int>(2);
-        client.date_updated_utc = column.get<int>(3);
+        client.date_modified_utc = column.get<int>(3);
         client.is_active = column.get<int>(4);
         client.employer_id = column.get<int>(5);
         clients.push_back(client);
     }
 
     return clients;
+}
+
+models::client db_service::get_client_by_id(const int clientId)
+{
+
+    std::string select("SELECT clients.client_id,");
+    std::string clientName("clients.name AS client_name,");
+    std::string dateCreated("clients.date_created_utc,");
+    std::string dateModified("clients.date_modified_utc,");
+    std::string isActive("clients.is_active,");
+    std::string employerName("employers.name AS employer_name");
+    std::string from("FROM clients,");
+    std::string innerJoin("INNER JOIN employers ON clients.employer_id = employers.employer_id");
+    std::string where("WHERE clients.client_id = ?");
+
+    std::string qry = select + clientName + dateCreated + dateModified + isActive + employerName + from + innerJoin + where;
+    db::query query(*db_connection::get_instance().get_database(), qry);
+    query.bind(1, clientId);
+    query.run();
+    db::column column(query.get_handle());
+    models::client client;
+
+    client.client_id = column.get<int>(0);
+    client.client_name = column.get<std::string>(1);
+    client.date_created_utc = column.get<int>(2);
+    client.date_modified_utc = column.get<int>(3);
+    client.is_active = column.get<int>(4);
+    client.employer_name = column.get<int>(5);
+
+    return client;
 }
 
 void db_service::create_new_project(const std::string& name, const std::string& displayName, const int employerId, const int* clientId)
