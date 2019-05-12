@@ -38,6 +38,7 @@ public:
 private:
     bool create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
     void create_controls();
+    void fill_controls();
     void data_to_controls();
 
     bool validate();
@@ -45,9 +46,13 @@ private:
 
     void on_save(wxCommandEvent &event);
     void on_cancel(wxCommandEvent &event);
+    void on_is_active_check(wxCommandEvent& event);
 
     wxTextCtrl *pNameCtrl;
     wxComboBox *pEmployerChoiceCtrl;
+    wxCheckBox* pIsActiveCtrl;
+    wxStaticText* pDateCreatedTextCtrl;
+    wxStaticText* pDateUpdatedTextCtrl;
 
     wxString mNameText;
     int mEmployerId;
@@ -57,7 +62,8 @@ private:
     enum
     {
         IDC_NAME,
-        IDC_EMPLOYER
+        IDC_EMPLOYER,
+        IDC_ISACTIVE
     };
 };
 } // namespace app::dialog

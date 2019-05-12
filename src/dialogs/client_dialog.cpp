@@ -23,6 +23,8 @@
 
 #include "../common/common.h"
 #include "../common/ids.h"
+#include "../common/util.h"
+#include "../db/database_exception.h"
 #include "../services/db_service.h"
 
 namespace app::dialog
@@ -30,8 +32,8 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(client_dialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(client_dialog, wxDialog)
-    EVT_BUTTON(ids::ID_SAVE, client_dialog::on_save)
-    EVT_BUTTON(wxID_CANCEL, client_dialog::on_cancel)
+EVT_BUTTON(ids::ID_SAVE, client_dialog::on_save)
+EVT_BUTTON(wxID_CANCEL, client_dialog::on_cancel)
 wxEND_EVENT_TABLE()
 
 client_dialog::client_dialog(wxWindow* parent, bool isEdit, int clientId, const wxString& name)
@@ -40,14 +42,18 @@ client_dialog::client_dialog(wxWindow* parent, bool isEdit, int clientId, const 
     , bIsEdit(isEdit)
     , mClientId(clientId)
 {
+    long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
     wxString title;
+    wxSize size;
     if (isEdit) {
         title = wxT("Edit Client");
+        size.Set(320, 320);
     } else {
         title = wxT("Add Client");
+        size.Set(320, 240);
     }
 
-    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, wxSize(320, 240), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, size, style, name);
 }
 
 client_dialog::~client_dialog()
@@ -66,7 +72,11 @@ bool client_dialog::create(wxWindow* parent, wxWindowID windowId, const wxString
 
     if (created) {
         create_controls();
-        data_to_controls();
+        fill_controls();
+        if (bIsEdit) {
+            data_to_controls();
+        }
+
         GetSizer()->Fit(this);
         //SetIcon();
         Centre();
@@ -115,6 +125,27 @@ void client_dialog::create_controls()
     pEmployerChoiceCtrl->SetToolTip(wxT("Select a employer to associate the client with"));
     taskFlexGridSizer->Add(pEmployerChoiceCtrl, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
+    if (bIsEdit) {
+        auto isActiveFiller = new wxStaticText(clientDetailsPanel, wxID_STATIC, wxT(""));
+        taskFlexGridSizer->Add(isActiveFiller, common::sizers::ControlDefault);
+
+        /* Is Active Checkbox Control */
+        pIsActiveCtrl = new wxCheckBox(clientDetailsPanel, IDC_ISACTIVE, wxT("Is Active"));
+        taskFlexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
+
+        /* Date Created Text Control */
+        pDateCreatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
+        auto font = pDateCreatedTextCtrl->GetFont();
+        font.MakeItalic();
+        font.SetPointSize(8);
+        pDateCreatedTextCtrl->SetFont(font);
+        detailsBoxSizer->Add(pDateCreatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+
+        /* Date Updated Text Control */
+        pDateUpdatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Updated on: %s"));
+        detailsBoxSizer->Add(pDateUpdatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+    }
+
     /* Horizontal Line*/
     auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("new_task_static_line"));
     mainSizer->Add(separation_line, 0, wxEXPAND | wxALL, 1);
@@ -132,12 +163,12 @@ void client_dialog::create_controls()
     buttonPanelSizer->Add(cancelButton, wxSizerFlags().Border(wxALL, 5));
 }
 
-void client_dialog::data_to_controls()
+void client_dialog::fill_controls()
 {
-    services::db_service employerService;
+    services::db_service dbService;
     std::vector<models::employer> employers;
     try {
-        employers = employerService.get_employers();
+        employers = dbService.get_employers();
     } catch (const std::exception& e) {
         wxLogDebug(wxT("Exception occured when getting employers"));
         wxLogDebug(e.what());
@@ -146,6 +177,29 @@ void client_dialog::data_to_controls()
     for (auto employer : employers) {
         pEmployerChoiceCtrl->Append(employer.employer_name, (void*) employer.employer_id);
     }
+}
+
+void client_dialog::data_to_controls()
+{
+    services::db_service dbService;
+    models::client client;
+    try {
+        client = dbService.get_client_by_id(mClientId);
+    } catch (const db::database_exception& e) {
+    }
+
+    pNameCtrl->SetValue(client.client_name);
+    pEmployerChoiceCtrl->SetStringSelection(client.employer_name);
+
+    wxString dateCreatedString = util::convert_unix_timestamp_to_wxdatetime(client.date_created_utc);
+    wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
+    pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
+
+    wxString dateUpdatedString = util::convert_unix_timestamp_to_wxdatetime(client.date_modified_utc);
+    wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
+    pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
+
+    pIsActiveCtrl->SetValue(client.is_active);
 }
 
 bool client_dialog::validate()
@@ -171,7 +225,7 @@ bool client_dialog::are_controls_empty()
 void client_dialog::on_save(wxCommandEvent & event)
 {
     mNameText = pNameCtrl->GetValue();
-    mEmployerId = (int)pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
+    mEmployerId = (int) pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
 
     bool isValid = validate();
     if (!isValid) {
@@ -199,6 +253,17 @@ void client_dialog::on_cancel(wxCommandEvent & event)
         }
     } else {
         EndModal(wxID_CANCEL);
+    }
+}
+
+void client_dialog::on_is_active_check(wxCommandEvent& event)
+{
+    if (event.IsChecked()) {
+        pNameCtrl->Enable();
+        pEmployerChoiceCtrl->Enable();
+    } else {
+        pNameCtrl->Disable();
+        pEmployerChoiceCtrl->Disable();
     }
 }
 
