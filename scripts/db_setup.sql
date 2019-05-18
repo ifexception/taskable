@@ -48,11 +48,7 @@ CREATE TABLE tasks
     task_date TEXT NOT NULL UNIQUE,
     date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
-    is_active INTEGER NOT NULL,
-
-    project_id INTEGER NOT NULL,
-
-    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+    is_active INTEGER NOT NULL
 );
 
 -- categories table
