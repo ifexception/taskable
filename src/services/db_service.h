@@ -50,15 +50,23 @@ struct db_service
 
     std::vector<models::client> get_clients_by_employer_id(const int employerId);
 
+    std::vector<models::client> get_clients();
+
     models::client get_client_by_id(const int clientId);
 
     void create_new_project(const std::string& name, const std::string& displayName, const int employerId, const int* clientId);
 
     std::vector<models::project> get_projects();
 
+    models::project get_project_by_id(const int projectId);
+
     void create_new_category(const int projectId, const std::string& name, const std::string& description);
 
     std::vector<models::category> get_categories_by_project_id(const int projectId);
+
+    models::category get_category_by_id(const int categoryId);
+
+    std::vector<models::category> get_categories();
 
     int create_or_get_task_id(const std::string& date, const int projectId);
 

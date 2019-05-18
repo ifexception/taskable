@@ -169,9 +169,8 @@ void client_dialog::fill_controls()
     std::vector<models::employer> employers;
     try {
         employers = dbService.get_employers();
-    } catch (const std::exception& e) {
-        wxLogDebug(wxT("Exception occured when getting employers"));
-        wxLogDebug(e.what());
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
     }
 
     for (auto employer : employers) {
@@ -235,8 +234,8 @@ void client_dialog::on_save(wxCommandEvent & event)
     services::db_service clientService;
     try {
         clientService.create_new_client(std::string(mNameText.ToUTF8()), mEmployerId);
-    } catch (const std::exception&) {
-
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
     }
     EndModal(ids::ID_SAVE);
 }

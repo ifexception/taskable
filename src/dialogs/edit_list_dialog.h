@@ -22,6 +22,8 @@
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 
+#include "../services/db_service.h"
+
 namespace app::dialog
 {
 enum class dialog_type
@@ -35,12 +37,15 @@ enum class dialog_type
 struct strategy
 {
 public:
-    strategy() = default;
+    strategy();
     virtual ~strategy() = default;
 
     virtual void create_control(wxListCtrl* control) = 0;
     virtual void data_to_control(wxListCtrl* control) = 0;
     virtual wxSize get_size() = 0;
+
+protected:
+    services::db_service dbService;
 };
 
 struct employer_strategy final : public strategy

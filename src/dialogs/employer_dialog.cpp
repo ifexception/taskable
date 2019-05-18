@@ -165,8 +165,8 @@ void employer_dialog::data_to_controls()
     models::employer employer;
     try {
         employer = dbService.get_employer(mEmployerId);
-    } catch (const db::database_exception&) {
-
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
     }
 
     pEmployerCtrl->SetValue(employer.employer_name);

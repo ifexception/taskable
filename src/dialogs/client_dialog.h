@@ -30,7 +30,7 @@ class client_dialog : public wxDialog
 
 public:
     client_dialog() = default;
-    explicit client_dialog(wxWindow *parent, bool isEdit = false, int clientId, const wxString &name = "client_dialog");
+    explicit client_dialog(wxWindow *parent, bool isEdit = false, int clientId = 0, const wxString &name = "client_dialog");
     virtual ~client_dialog();
 
     void launch_client_dialog();

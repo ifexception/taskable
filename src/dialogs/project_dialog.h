@@ -27,7 +27,7 @@ class project_dialog : public wxDialog
 {
 public:
     project_dialog() = default;
-    explicit project_dialog(wxWindow* parent, bool isEdit = false, const wxString& name = "project_dialog");
+    explicit project_dialog(wxWindow* parent, bool isEdit = false, int projectId = 0, const wxString& name = "project_dialog");
     virtual ~project_dialog();
 
     void launch_project_dialog();
@@ -39,7 +39,8 @@ private:
     bool create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
 
     void create_controls();
-    void post_create_controls();
+    void fill_controls();
+    void data_to_controls();
 
     bool validate();
     bool are_controls_empty();
@@ -52,18 +53,24 @@ private:
     wxTextCtrl* pDisplayNameCtrl;
     wxChoice* pEmployerChoiceCtrl;
     wxChoice* pClientChoiceCtrl;
+    wxCheckBox* pIsActiveCtrl;
+    wxStaticText* pDateCreatedTextCtrl;
+    wxStaticText* pDateUpdatedTextCtrl;
 
     wxString mNameText;
     wxString mDisplayNameText;
     int mEmployerId;
     int mClientId;
+    int mProjectId;
+    bool bIsEdit;
 
     enum
     {
         IDC_NAME,
         IDC_DISPLAYNAME,
         IDC_EMPLOYERCHOICE,
-        IDC_CLIENTCHOICE
+        IDC_CLIENTCHOICE,
+        IDC_ISACTIVE
     };
 };
 } // namespace app::dialog

@@ -24,7 +24,9 @@
 #include "project_dialog.h"
 #include "category_dialog.h"
 
+#include "../common/util.h"
 #include "../magic_enum/magic_enum.h"
+#include "../db/database_exception.h"
 
 namespace app::dialog
 {
@@ -37,8 +39,8 @@ edit_list_dialog::edit_list_dialog(wxWindow* parent, dialog_type dialogType, con
     : mType(dialogType)
 {
     set_strategy();
-    auto name = magic_enum::enum_name(mType);
-    std::string nameStr = name;
+    auto enumName = magic_enum::enum_name(mType);
+    std::string nameStr = std::string(enumName);
     long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
     bool success = create(parent, wxID_ANY, wxString(nameStr), wxDefaultPosition, mStrategy->get_size(), style, name);
 }
@@ -60,6 +62,7 @@ bool edit_list_dialog::create(wxWindow* parent, wxWindowID windowId, const wxStr
     bool created = Create(parent, windowId, title, position, size, style, name);
     if (created) {
         create_controls();
+        data_to_controls();
 
         GetSizer()->Fit(this);
         // SetIcon();
@@ -152,6 +155,10 @@ void edit_list_dialog::set_strategy()
     }
 }
 
+strategy::strategy()
+    : dbService()
+{ }
+
 void employer_strategy::create_control(wxListCtrl* control)
 {
     wxListItem nameColumn;
@@ -169,6 +176,26 @@ void employer_strategy::create_control(wxListCtrl* control)
     dateModifiedColumn.SetId(2);
     dateModifiedColumn.SetText(wxT("Date Modified"));
     control->InsertColumn(2, dateModifiedColumn);
+}
+
+void employer_strategy::data_to_control(wxListCtrl* control)
+{
+    std::vector<models::employer> employers;
+    try {
+        employers = dbService.get_employers();
+    } catch (const db::database_exception&) {
+        // TODO Log error
+    }
+
+    int listIndex = 0;
+    int columnIndex = 0;
+    for (auto employer : employers) {
+        listIndex = control->InsertItem(columnIndex++, employer.employer_name);
+        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(employer.date_created_utc));
+        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(employer.date_modified_utc));
+        control->SetItemPtrData(listIndex, employer.employer_id);
+        columnIndex = 0;
+    }
 }
 
 wxSize employer_strategy::get_size()
@@ -201,6 +228,27 @@ void client_strategy::create_control(wxListCtrl* control)
     control->InsertColumn(3, dateModifiedColumn);
 }
 
+void client_strategy::data_to_control(wxListCtrl* control)
+{
+    std::vector<models::client> clients;
+    try {
+        clients = dbService.get_clients();
+    } catch (const db::database_exception&) {
+        // TODO Log error
+    }
+
+    int listIndex = 0;
+    int columnIndex = 0;
+    for (auto client : clients) {
+        listIndex = control->InsertItem(columnIndex++, client.employer_name);
+        control->SetItem(listIndex, columnIndex++, client.client_name);
+        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(client.date_created_utc));
+        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(client.date_modified_utc));
+        control->SetItemPtrData(listIndex, client.client_id);
+        columnIndex = 0;
+    }
+}
+
 wxSize client_strategy::get_size()
 {
     return wxSize(360, 260);
@@ -222,7 +270,7 @@ void project_strategy::create_control(wxListCtrl* control)
 
     wxListItem nameColumn;
     clientColumn.SetId(2);
-    clientColumn.SetText(wxT("Name"));
+    clientColumn.SetText(wxT("Project"));
     clientColumn.SetWidth(100);
     control->InsertColumn(2, clientColumn);
 
@@ -235,6 +283,28 @@ void project_strategy::create_control(wxListCtrl* control)
     dateModifiedColumn.SetId(4);
     dateModifiedColumn.SetText(wxT("Date Modified"));
     control->InsertColumn(4, dateModifiedColumn);
+}
+
+void project_strategy::data_to_control(wxListCtrl* control)
+{
+    std::vector<models::project> projects;
+    try {
+        projects = dbService.get_projects();
+    } catch (const db::database_exception&) {
+        // TODO Log error
+    }
+
+    int listIndex = 0;
+    int columnIndex = 0;
+    for (auto project : projects) {
+        listIndex = control->InsertItem(columnIndex++, project.employer_name);
+        control->SetItem(listIndex, columnIndex++, project.client_name);
+        control->SetItem(listIndex, columnIndex++, project.project_name);
+        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(project.date_created_utc));
+        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(project.date_modified_utc));
+        control->SetItemPtrData(listIndex, project.project_id);
+        columnIndex = 0;
+    }
 }
 
 wxSize project_strategy::get_size()
@@ -265,6 +335,27 @@ void category_strategy::create_control(wxListCtrl* control)
     dateModifiedColumn.SetId(3);
     dateModifiedColumn.SetText(wxT("Date Modified"));
     control->InsertColumn(3, dateModifiedColumn);
+}
+
+void category_strategy::data_to_control(wxListCtrl * control)
+{
+    std::vector<models::category> categories;
+    try {
+        categories = dbService.get_categories();
+    } catch (const db::database_exception&) {
+        // TODO Log error
+    }
+
+    int listIndex = 0;
+    int columnIndex = 0;
+    for (auto category : categories) {
+        listIndex = control->InsertItem(columnIndex++, category.project_name);
+        control->SetItem(listIndex, columnIndex, category.category_name);
+        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(category.date_created_utc));
+        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(category.date_modified_utc));
+        control->SetItemPtrData(listIndex, category.category_id);
+        columnIndex = 0;
+    }
 }
 
 wxSize category_strategy::get_size()

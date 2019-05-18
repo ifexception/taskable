@@ -124,6 +124,39 @@ std::vector<models::client> db_service::get_clients_by_employer_id(const int emp
     return clients;
 }
 
+std::vector<models::client> db_service::get_clients()
+{
+    std::string select("SELECT clients.client_id,");
+    std::string clientName("clients.name AS client_name,");
+    std::string dateCreated("clients.date_created_utc,");
+    std::string dateModified("clients.date_modified_utc,");
+    std::string isActive("clients.is_active,");
+    std::string employerName("employers.name AS employer_name");
+    std::string from("FROM clients,");
+    std::string innerJoin("INNER JOIN employers ON clients.employer_id = employers.employer_id");
+    std::string where("WHERE clients.is_active = 1");
+
+    std::string qry = select + clientName + dateCreated + dateModified + isActive + employerName + from + innerJoin + where;
+    auto instance = db_connection::get_instance().get_database();
+    db::query query(*instance, qry);
+
+    std::vector<models::client> clients;
+    while (query.run()) {
+        db::column column(query.get_handle());
+        models::client client;
+
+        client.client_id = column.get<int>(0);
+        client.client_name = column.get<std::string>(1);
+        client.date_created_utc = column.get<int>(2);
+        client.date_modified_utc = column.get<int>(3);
+        client.is_active = column.get<int>(4);
+        client.employer_name = column.get<std::string>(5);
+        clients.push_back(client);
+    }
+
+    return clients;
+}
+
 models::client db_service::get_client_by_id(const int clientId)
 {
 
@@ -169,8 +202,21 @@ void db_service::create_new_project(const std::string& name, const std::string& 
 
 std::vector<models::project> db_service::get_projects()
 {
-    std::string cmd("SELECT * FROM projects WHERE is_active = 1;");
-    db::query query(*db_connection::get_instance().get_database(), cmd);
+    std::string select("SELECT projects.project_id,");
+    std::string projectName("projects.name AS project_name,");
+    std::string displayName("projects.display_name,");
+    std::string dateCreated("projects.date_created_utc,");
+    std::string dateModified("projects.date_modified_utc,");
+    std::string isActive("projects.is_active,");
+    std::string employerName("employers.name AS employer_name,");
+    std::string clientName("clients.name AS client_name");
+    std::string from("FROM projects");
+    std::string innerJoinEmployers("INNER JOIN employers ON projects.employer_id = employers.employer_id");
+    std::string innerJoinClients("INNER JOIN clients ON projects.client_id = clients.client_id");
+    std::string where("WHERE projects.is_active = 1");
+    std::string qry = select + projectName + displayName + dateCreated + dateModified + isActive + employerName + clientName + from + innerJoinEmployers + innerJoinClients + where;
+
+    db::query query(*db_connection::get_instance().get_database(), qry);
 
     std::vector<models::project> projects;
     while (query.run()) {
@@ -178,22 +224,60 @@ std::vector<models::project> db_service::get_projects()
         models::project project;
 
         project.project_id = column.get<int>(0);
-        project.name = column.get<std::string>(1);
+        project.project_name = column.get<std::string>(1);
         project.display_name = column.get<std::string>(2);
         project.date_created_utc = column.get<int>(3);
-        project.date_updated_utc = column.get<int>(4);
+        project.date_modified_utc = column.get<int>(4);
         project.is_active = column.get<int>(5);
-        project.employer_id = column.get<int>(6);
+        project.employer_name = column.get<int>(6);
         if (column.get_type(7) == db::column_type::Null) {
-            project.client_id = 0;
+            project.client_name = "";
         } else {
-            project.client_id = column.get<int>(7);
+            project.client_name = column.get<std::string>(7);
         }
 
         projects.push_back(project);
     }
 
     return projects;
+}
+
+models::project db_service::get_project_by_id(const int projectId)
+{
+    std::string select("SELECT projects.project_id,");
+    std::string projectName("projects.name AS project_name,");
+    std::string displayName("projects.display_name,");
+    std::string dateCreated("projects.date_created_utc,");
+    std::string dateModified("projects.date_modified_utc,");
+    std::string isActive("projects.is_active,");
+    std::string employerName("employers.name AS employer_name,");
+    std::string clientName("clients.name AS client_name");
+    std::string from("FROM projects");
+    std::string innerJoinEmployers("INNER JOIN employers ON projects.employer_id = employers.employer_id");
+    std::string innerJoinClients("INNER JOIN clients ON projects.client_id = clients.client_id");
+    std::string where("WHERE projects.project_id = ?");
+    std::string qry = select + projectName + displayName + dateCreated + dateModified + isActive + employerName + clientName + from + innerJoinEmployers + innerJoinClients + where;
+
+    db::query query(*db_connection::get_instance().get_database(), qry);
+    query.bind(1, projectId);
+    query.run();
+    db::column column(query.get_handle());
+    models::project project;
+
+    project.project_id = column.get<int>(0);
+    project.project_name = column.get<std::string>(1);
+    project.display_name = column.get<std::string>(2);
+    project.date_created_utc = column.get<int>(3);
+    project.date_modified_utc = column.get<int>(4);
+    project.is_active = column.get<int>(5);
+    project.employer_name = column.get<std::string>(6);
+    if (column.get_type(7) == db::column_type::Null) {
+        project.client_name = "";
+    } else {
+        project.client_name = column.get<std::string>(7);
+    }
+
+    return project;
 }
 
 void db_service::create_new_category(const int projectId, const std::string& name, const std::string& description)
@@ -216,12 +300,79 @@ std::vector<models::category> db_service::get_categories_by_project_id(const int
         models::category category;
 
         category.category_id = column.get<int>(0);
-        category.name = column.get<std::string>(1);
+        category.category_name = column.get<std::string>(1);
         category.description = column.get<std::string>(2);
         category.date_created_utc = column.get<int>(3);
-        category.date_updated_utc = column.get<int>(4);
+        category.date_modified_utc = column.get<int>(4);
         category.is_active = column.get<int>(5);
         category.project_id = column.get<int>(6);
+
+        categories.push_back(category);
+    }
+
+    return categories;
+}
+
+models::category db_service::get_category_by_id(const int categoryId)
+{
+    std::string select("SELECT categories.category_id,");
+    std::string categoryName("categories.name AS category_name,");
+    std::string description("categories.description,");
+    std::string dateCreated("categories.date_created_utc,");
+    std::string dateModified("categories.date_modified_utc,");
+    std::string isActive("categories.is_active,");
+    std::string projectName("projects.name AS project_name");
+    std::string from("FROM categories");
+    std::string innerJoin("INNER JOIN projects ON categories.project_id = projects.project_id");
+    std::string where("WHERE categories.category_id = ?");
+    std::string qry = select + categoryName + description + dateCreated + dateModified + isActive + projectName + from + innerJoin + where;
+
+    db::query query(*db_connection::get_instance().get_database(), qry);
+    query.bind(1, categoryId);
+    query.run();
+    db::column column(query.get_handle());
+    models::category category;
+
+    category.category_id = column.get<int>(0);
+    category.category_name = column.get<std::string>(1);
+    category.description = column.get<std::string>(2);
+    category.date_created_utc = column.get<int>(3);
+    category.date_modified_utc = column.get<int>(4);
+    category.is_active = column.get<int>(5);
+    category.project_name = column.get<int>(6);
+
+    return category;
+}
+
+std::vector<models::category> db_service::get_categories()
+{
+    std::string select("SELECT categories.category_id,");
+    std::string categoryName("categories.name AS category_name,");
+    std::string description("categories.description,");
+    std::string dateCreated("categories.date_created_utc,");
+    std::string dateModified("categories.date_modified_utc,");
+    std::string isActive("categories.is_active,");
+    std::string projectName("projects.name AS project_name");
+    std::string from("FROM categories");
+    std::string innerJoin("INNER JOIN projects ON categories.project_id = projects.project_id");
+    std::string where("WHERE categories.is_active = 1");
+    std::string qry = select + categoryName + description + dateCreated + dateModified + isActive + projectName + from + innerJoin + where;
+
+    auto instance = db_connection::get_instance().get_database();
+    db::query query(*instance, qry);
+
+    std::vector<models::category> categories;
+    while (query.run()) {
+        db::column column(query.get_handle());
+        models::category category;
+
+        category.category_id = column.get<int>(0);
+        category.category_name = column.get<std::string>(1);
+        category.description = column.get<std::string>(2);
+        category.date_created_utc = column.get<int>(3);
+        category.date_modified_utc = column.get<int>(4);
+        category.is_active = column.get<int>(5);
+        category.project_name = column.get<std::string>(6);
 
         categories.push_back(category);
     }

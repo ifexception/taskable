@@ -27,7 +27,7 @@ class category_dialog : public wxDialog
 {
 public:
     category_dialog() = default;
-    explicit category_dialog(wxWindow* parent, bool isEdit = false, const wxString& name = "category_dialog");
+    explicit category_dialog(wxWindow* parent, bool isEdit = false, int categoryId = 0, const wxString& name = "category_dialog");
     virtual ~category_dialog();
 
     void launch_dialog();
@@ -38,7 +38,8 @@ private:
 
     bool create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
     void create_controls();
-    void fill_post_create();
+    void fill_controls();
+    void data_to_controls();
 
     bool validate();
     bool are_controls_empty();
@@ -49,16 +50,22 @@ private:
     wxChoice* pProjectChoiceCtrl;
     wxTextCtrl* pNameCtrl;
     wxTextCtrl* pDescriptionCtrl;
+    wxCheckBox* pIsActiveCtrl;
+    wxStaticText* pDateCreatedTextCtrl;
+    wxStaticText* pDateUpdatedTextCtrl;
 
     int mProjectChoiceId;
     wxString mNameText;
     wxString mDescriptionText;
+    bool bIsEdit;
+    int mCategoryId;
 
     enum
     {
         IDC_PROJECTCHOICE,
         IDC_NAME,
-        IDC_DESCRIPTION
+        IDC_DESCRIPTION,
+        IDC_ISACTIVE
     };
 };
 } // app::dialog

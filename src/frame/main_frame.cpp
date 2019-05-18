@@ -26,7 +26,7 @@
 #include "../dialogs/client_dialog.h"
 #include "../dialogs/project_dialog.h"
 #include "../dialogs/category_dialog.h"
-#include "../dialogs/employer_list_dialog.h"
+#include "../dialogs/edit_list_dialog.h"
 #include "../services/db_service.h"
 
 namespace app::frame
@@ -199,8 +199,26 @@ void main_frame::on_new_category(wxCommandEvent& event)
 
 void main_frame::on_edit_employer(wxCommandEvent& event)
 {
-    dialog::employer_list_dialog employerListDialog(this);
-    employerListDialog.launch_dialog();
+    dialog::edit_list_dialog employerEdit(this, dialog::dialog_type::Employer);
+    employerEdit.launch_dialog();
+}
+
+void main_frame::on_edit_client(wxCommandEvent & event)
+{
+    dialog::edit_list_dialog clientEdit(this, dialog::dialog_type::Client);
+    clientEdit.launch_dialog();
+}
+
+void main_frame::on_edit_project(wxCommandEvent & event)
+{
+    dialog::edit_list_dialog projectEdit(this, dialog::dialog_type::Project);
+    projectEdit.launch_dialog();
+}
+
+void main_frame::on_edit_category(wxCommandEvent & event)
+{
+    dialog::edit_list_dialog categoryEdit(this, dialog::dialog_type::Category);
+    categoryEdit.launch_dialog();
 }
 
 void main_frame::on_task_inserted(wxCommandEvent& event)

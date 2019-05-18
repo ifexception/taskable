@@ -29,11 +29,12 @@ struct category
     ~category() = default;
 
     int category_id;
-    std::string name;
+    std::string category_name;
     std::string description;
     int date_created_utc;
-    int date_updated_utc;
+    int date_modified_utc;
     int is_active;
     int project_id;
+    std::string project_name;
 };
 }

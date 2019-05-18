@@ -24,6 +24,8 @@
 
 #include "../common/common.h"
 #include "../common/ids.h"
+#include "../common/util.h"
+#include "../db/database_exception.h"
 #include "../services/db_service.h"
 
 namespace app::dialog
@@ -35,19 +37,24 @@ wxBEGIN_EVENT_TABLE(category_dialog, wxDialog)
     EVT_BUTTON(wxID_CANCEL, category_dialog::on_cancel)
 wxEND_EVENT_TABLE()
 
-category_dialog::category_dialog(wxWindow* parent, bool isEdit, const wxString& name)
+category_dialog::category_dialog(wxWindow* parent, bool isEdit, int categoryId, const wxString& name)
     : mProjectChoiceId(-1)
     , mNameText(wxGetEmptyString())
     , mDescriptionText(wxGetEmptyString())
+    , bIsEdit(isEdit)
+    , mCategoryId(categoryId)
 {
     wxString title;
+    wxSize size;
     if (isEdit) {
         title = wxT("Edit Category");
+        size.Set(320, 320);
     } else {
         title = wxT("Add Category");
+        size.Set(320, 240);
     }
 
-    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, wxSize(320, 240), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
 category_dialog::~category_dialog()
@@ -65,7 +72,10 @@ bool category_dialog::create(wxWindow* parent, wxWindowID windowId, const wxStri
     bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
     if (created) {
         create_controls();
-        fill_post_create();
+        fill_controls();
+        if (bIsEdit) {
+            data_to_controls();
+        }
 
         GetSizer()->Fit(this);
         //SetIcon();
@@ -117,6 +127,15 @@ void category_dialog::create_controls()
     pNameCtrl->SetToolTip(wxT("Enter a name for this category"));
     flexGridSizer->Add(pNameCtrl, common::sizers::ControlDefault);
 
+    if (bIsEdit) {
+        auto isActiveFiller = new wxStaticText(categoryDetailsPanel, wxID_STATIC, wxT(""));
+        flexGridSizer->Add(isActiveFiller, common::sizers::ControlDefault);
+
+        /* Is Active Checkbox Control */
+        pIsActiveCtrl = new wxCheckBox(categoryDetailsPanel, IDC_ISACTIVE, wxT("Is Active"));
+        flexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
+    }
+
     /* Category Description Text Control */
     auto descriptionText = new wxStaticText(categoryDetailsPanel, wxID_STATIC, wxT("Description"));
     flexGridSizer->Add(descriptionText, common::sizers::ControlCenterVertical);
@@ -124,6 +143,20 @@ void category_dialog::create_controls()
     pDescriptionCtrl = new wxTextCtrl(this, IDC_DESCRIPTION, wxGetEmptyString(), wxDefaultPosition, wxSize(240, 160), wxTE_MULTILINE, wxDefaultValidator, wxT("category_description_ctrl"));
     pDescriptionCtrl->SetToolTip(wxT("Enter a detailed description of a task category"));
     detailsBoxSizer->Add(pDescriptionCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+
+    if (bIsEdit) {
+        /* Date Created Text Control */
+        pDateCreatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
+        auto font = pDateCreatedTextCtrl->GetFont();
+        font.MakeItalic();
+        font.SetPointSize(8);
+        pDateCreatedTextCtrl->SetFont(font);
+        detailsBoxSizer->Add(pDateCreatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+
+        /* Date Updated Text Control */
+        pDateUpdatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Updated on: %s"));
+        detailsBoxSizer->Add(pDateUpdatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+    }
 
     /* Horizontal Line*/
     auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("category_static_line"));
@@ -142,14 +175,14 @@ void category_dialog::create_controls()
     buttonPanelSizer->Add(cancelButton, wxSizerFlags().Border(wxALL, 5));
 }
 
-void category_dialog::fill_post_create()
+void category_dialog::fill_controls()
 {
     std::vector<models::project> projects;
     try {
         services::db_service dbService;
         projects = dbService.get_projects();
-    } catch (const std::exception& e) {
-        wxLogDebug(e.what());
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
     }
 
     for (auto p : projects) {
@@ -157,9 +190,34 @@ void category_dialog::fill_post_create()
     }
 }
 
+void category_dialog::data_to_controls()
+{
+    services::db_service dbService;
+    models::category category;
+    try {
+        category = dbService.get_category_by_id(mCategoryId);
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
+    }
+
+    pProjectChoiceCtrl->SetStringSelection(category.project_name);
+    pNameCtrl->SetValue(category.category_name);
+    pDescriptionCtrl->SetValue(category.description);
+
+    wxString dateCreatedString = util::convert_unix_timestamp_to_wxdatetime(category.date_created_utc);
+    wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
+    pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
+
+    wxString dateUpdatedString = util::convert_unix_timestamp_to_wxdatetime(category.date_modified_utc);
+    wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
+    pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
+
+    pIsActiveCtrl->SetValue(category.is_active);
+}
+
 bool category_dialog::validate()
 {
-    if (mProjectChoiceId == -1) {
+    if (mProjectChoiceId == -1 || mProjectChoiceId == 0) {
         wxMessageBox(wxT("Project is required"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
@@ -196,8 +254,8 @@ void category_dialog::on_save(wxCommandEvent& event)
     try {
         services::db_service dbService;
         dbService.create_new_category(mProjectChoiceId, std::string(mNameText.ToUTF8()), std::string(mDescriptionText.ToUTF8()));
-    } catch (const std::exception& e) {
-        wxLogDebug(e.what());
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
     }
 
     EndModal(ids::ID_SAVE);

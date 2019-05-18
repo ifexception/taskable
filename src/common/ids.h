@@ -31,7 +31,15 @@ enum class MenuIds : int
     TaskDetailMenuId = 4,
     CategoryMenuId = 5,
     EmployerEditId = 6,
+    ClientEditId = 7,
+    ProjectEditId = 8,
+    CategoryEditId = 9,
 };
+
+static const int ID_EDIT_EMPLOYER = static_cast<int>(MenuIds::EmployerEditId);
+static const int ID_EDIT_CLIENT = static_cast<int>(MenuIds::ClientEditId);
+static const int ID_EDIT_PROJECT = static_cast<int>(MenuIds::ProjectEditId);
+static const int ID_EDIT_CATEGORY = static_cast<int>(MenuIds::CategoryEditId);
 
 enum class Events : int
 {

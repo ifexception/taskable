@@ -52,7 +52,6 @@ set (SRC
     "dialogs/client_dialog.cpp"
     "dialogs/project_dialog.cpp"
     "dialogs/category_dialog.cpp"
-    "dialogs/employer_list_dialog.cpp"
     "dialogs/edit_list_dialog.cpp")
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})

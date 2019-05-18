@@ -25,8 +25,9 @@
 
 #include "../common/common.h"
 #include "../common/ids.h"
-#include "../services/db_service.h"
 #include "../common/util.h"
+#include "../services/db_service.h"
+#include "../db/database_exception.h"
 
 namespace app::dialog
 {
@@ -226,8 +227,8 @@ void task_details_dialog::fill_controls()
     services::db_service dbService;
     try {
         projects = dbService.get_projects();
-    } catch (const std::exception& e) {
-        wxLogDebug(e.what());
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
     }
 
     for (auto project : projects) {
@@ -241,8 +242,8 @@ void task_details_dialog::data_to_controls()
     models::task_detail taskDetail;
     try {
         taskDetail = dbService.get_task_by_id(mTaskDetailId);
-    } catch (const std::exception&) {
-
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
     }
 
     pProjectChoiceCtrl->SetStringSelection(taskDetail.project_name);
@@ -280,8 +281,8 @@ int task_details_dialog::get_task_id()
     int taskId = 0;
     try {
         taskId = dbService.create_or_get_task_id(mTaskDate, mProjectId);
-    } catch (const std::exception& e) {
-        wxLogDebug(e.what());
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
     }
 
     return taskId;
@@ -433,8 +434,8 @@ void task_details_dialog::on_save(wxCommandEvent& event)
         } else {
             dbService.create_new_task(mProjectId, taskId, std::string(startTime.ToUTF8()), std::string(endTime.ToUTF8()), std::string(mDurationText.ToUTF8()), mCategoryId, std::string(mDescriptionText.ToUTF8()));
         }
-    } catch (const std::exception& e) {
-        wxLogDebug(e.what());
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
     }
 
     on_task_saved(event);
@@ -476,12 +477,12 @@ void task_details_dialog::fill_category_control(int projectId)
     try {
         services::db_service dbService;
         categories = dbService.get_categories_by_project_id(projectId);
-    } catch (const std::exception& e) {
-        wxLogDebug(e.what());
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
     }
 
     for (auto category : categories) {
-        pCategoryChoiceCtrl->Append(category.name, (void*)category.category_id);
+        pCategoryChoiceCtrl->Append(category.category_name, (void*)category.category_id);
     }
 
     if (!pCategoryChoiceCtrl->IsEnabled()) {

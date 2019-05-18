@@ -29,12 +29,14 @@ struct project
     ~project() = default;
 
     int project_id;
-    std::string name;
+    std::string project_name;
     std::string display_name;
     int date_created_utc;
-    int date_updated_utc;
+    int date_modified_utc;
     int is_active;
     int employer_id;
     int client_id;
+    std::string employer_name;
+    std::string client_name;
 };
 }

@@ -23,6 +23,7 @@
 
 #include "../common/common.h"
 #include "../common/ids.h"
+#include "../common/util.h"
 #include "../db/database_exception.h"
 #include "../services/db_service.h"
 
@@ -36,17 +37,22 @@ EVT_BUTTON(wxID_CANCEL, project_dialog::on_cancel)
 EVT_CHOICE(project_dialog::IDC_EMPLOYERCHOICE, project_dialog::on_employer_select)
 wxEND_EVENT_TABLE()
 
-project_dialog::project_dialog(wxWindow* parent, bool isEdit, const wxString& name)
+project_dialog::project_dialog(wxWindow* parent, bool isEdit, int projectId, const wxString& name)
     : mNameText(wxT(""))
     , mDisplayNameText(wxT(""))
     , mEmployerId(-1)
     , mClientId(-1)
+    , mProjectId(projectId)
+    , bIsEdit(isEdit)
 {
     wxString title;
+    wxSize size;
     if (isEdit) {
         title = wxT("Edit Project");
+        size.Set(420, 380);
     } else {
         title = wxT("Add Project");
+        size.Set(420, 440);
     }
     bool success = create(parent, wxID_ANY, title, wxDefaultPosition, wxSize(420, 380), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
@@ -67,7 +73,10 @@ bool project_dialog::create(wxWindow* parent, wxWindowID windowId, const wxStrin
 
     if (created) {
         create_controls();
-        post_create_controls();
+        fill_controls();
+        if (bIsEdit) {
+            data_to_controls();
+        }
 
         GetSizer()->Fit(this);
         //SetIcon();
@@ -121,9 +130,9 @@ void project_dialog::create_controls()
     taskFlexGridSizer->Add(employerText, common::sizers::ControlCenterVertical);
 
     pEmployerChoiceCtrl = new wxChoice(projectDetailsPanel, IDC_EMPLOYERCHOICE, wxDefaultPosition, wxSize(150, -1));
+    pEmployerChoiceCtrl->SetToolTip(wxT("Select a employer to associate the project with"));
     pEmployerChoiceCtrl->AppendString(wxT("Select a employer"));
     pEmployerChoiceCtrl->SetSelection(0);
-    pEmployerChoiceCtrl->SetToolTip(wxT("Select a employer to associate the project with"));
     taskFlexGridSizer->Add(pEmployerChoiceCtrl, common::sizers::ControlDefault);
 
     /* Client Choice Ctrl */
@@ -131,11 +140,32 @@ void project_dialog::create_controls()
     taskFlexGridSizer->Add(clientText, common::sizers::ControlCenterVertical);
 
     pClientChoiceCtrl = new wxChoice(projectDetailsPanel, IDC_CLIENTCHOICE, wxDefaultPosition, wxSize(150, -1));
+    pClientChoiceCtrl->SetToolTip(wxT("Select a client to associate this project with"));
     pClientChoiceCtrl->AppendString(wxT("Select a client"));
     pClientChoiceCtrl->SetSelection(0);
-    pClientChoiceCtrl->SetToolTip(wxT("Please select a client to associate this project with"));
     pClientChoiceCtrl->Disable();
     taskFlexGridSizer->Add(pClientChoiceCtrl, common::sizers::ControlDefault);
+
+    if (bIsEdit) {
+        auto isActiveFiller = new wxStaticText(projectDetailsPanel, wxID_STATIC, wxT(""));
+        taskFlexGridSizer->Add(isActiveFiller, common::sizers::ControlDefault);
+
+        /* Is Active Checkbox Control */
+        pIsActiveCtrl = new wxCheckBox(projectDetailsPanel, IDC_ISACTIVE, wxT("Is Active"));
+        taskFlexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
+
+        /* Date Created Text Control */
+        pDateCreatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
+        auto font = pDateCreatedTextCtrl->GetFont();
+        font.MakeItalic();
+        font.SetPointSize(8);
+        pDateCreatedTextCtrl->SetFont(font);
+        detailsBoxSizer->Add(pDateCreatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+
+        /* Date Updated Text Control */
+        pDateUpdatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Updated on: %s"));
+        detailsBoxSizer->Add(pDateUpdatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+    }
 
     /* Horizontal Line*/
     auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("project_details_static_line"));
@@ -154,19 +184,49 @@ void project_dialog::create_controls()
     buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
 }
 
-void project_dialog::post_create_controls()
+void project_dialog::fill_controls()
 {
     std::vector<models::employer> employers;
     try {
         services::db_service employerService;
         employers = employerService.get_employers();
-    } catch (const std::exception& e) {
-        wxLogDebug(e.what());
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
     }
 
     for (auto employer : employers) {
         pEmployerChoiceCtrl->Append(employer.employer_name, (void*)employer.employer_id);
     }
+}
+
+void project_dialog::data_to_controls()
+{
+    services::db_service dbService;
+    models::project project;
+
+    try {
+        project = dbService.get_project_by_id(mProjectId);
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
+    }
+
+    pNameCtrl->SetValue(project.project_name);
+    pDisplayNameCtrl->SetValue(project.display_name);
+    pEmployerChoiceCtrl->SetStringSelection(project.employer_name);
+
+    if (!project.client_name.empty()) {
+        pClientChoiceCtrl->SetStringSelection(project.client_name);
+    }
+
+    wxString dateCreatedString = util::convert_unix_timestamp_to_wxdatetime(project.date_created_utc);
+    wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
+    pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
+
+    wxString dateUpdatedString = util::convert_unix_timestamp_to_wxdatetime(project.date_modified_utc);
+    wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
+    pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
+
+    pIsActiveCtrl->SetValue(project.is_active);
 }
 
 bool project_dialog::validate()
@@ -185,7 +245,7 @@ bool project_dialog::validate()
         wxMessageBox(wxT("An employer is required"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
-    // TODO: A client is optional, should check for it?
+    // VERIFY: A client is optional, should check for it?
 
     return true;
 }
@@ -205,12 +265,12 @@ void project_dialog::on_employer_select(wxCommandEvent& event)
     try {
         services::db_service clientService;
         clients = clientService.get_clients_by_employer_id(employerId);
-    } catch (const std::exception& e) {
-        wxLogDebug(e.what());
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
     }
 
     for (auto client : clients) {
-        pClientChoiceCtrl->Append(client.name, (void*)client.client_id);
+        pClientChoiceCtrl->Append(client.client_name, (void*)client.client_id);
     }
 
     pClientChoiceCtrl->SetSelection(0);
@@ -240,6 +300,7 @@ void project_dialog::on_save(wxCommandEvent& event)
             projectService.create_new_project(std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerId, &mClientId);
         }
     } catch (const db::database_exception& e) {
+        // TODO Log exception
     }
 
     EndModal(ids::ID_SAVE);

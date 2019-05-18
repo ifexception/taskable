@@ -48,6 +48,9 @@ private:
     void on_new_project(wxCommandEvent& event);
     void on_new_category(wxCommandEvent& event);
     void on_edit_employer(wxCommandEvent& event);
+    void on_edit_client(wxCommandEvent& event);
+    void on_edit_project(wxCommandEvent& event);
+    void on_edit_category(wxCommandEvent& event);
     void on_task_inserted(wxCommandEvent& event);
     void on_item_double_click(wxListEvent& event);
 
