@@ -296,6 +296,27 @@ models::project db_service::get_project_by_id(const int projectId)
     return project;
 }
 
+void db_service::update_project(models::project project)
+{
+    std::string cmd("UPDATE projects SET name = ?, display_name = ?, date_modified_utc = ?, employer_id = ?, client_id = ?");
+    db::command command(*db_connection::get_instance().get_database(), cmd);
+    if (project.client_id == 0) {
+        command.binder() << project.project_name << project.display_name << project.employer_id << (void*) 0;
+    } else {
+        command.binder() << project.project_name << project.display_name << project.employer_id << project.client_id;
+    }
+
+    command.execute();
+}
+
+void db_service::delete_project(const int projectId, const int dateModified)
+{
+    std::string cmd("UPDATE projects SET is_active = 0, date_modified_utc = ? WHERE project_id = ?");
+    db::command command(*db_connection::get_instance().get_database(), cmd);
+    command.binder() << dateModified << projectId;
+    command.execute();
+}
+
 void db_service::create_new_category(const int projectId, const std::string& name, const std::string& description)
 {
     std::string cmd("INSERT INTO categories (name, description, is_active, project_id) VALUES (?, ?, 1, ?)");

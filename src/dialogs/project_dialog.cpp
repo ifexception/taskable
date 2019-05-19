@@ -293,11 +293,28 @@ void project_dialog::on_save(wxCommandEvent& event)
     }
 
     try {
-        services::db_service projectService;
-        if (mClientId == -1 || mClientId == 0) {
-            projectService.create_new_project(std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerId, nullptr);
-        } else {
-            projectService.create_new_project(std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerId, &mClientId);
+        services::db_service dbService;
+        if (bIsEdit && pIsActiveCtrl->IsChecked()) {
+            models::project project;
+            project.project_name = std::string(mNameText.ToUTF8());
+            project.display_name = std::string(mDisplayNameText.ToUTF8());
+            project.employer_id = mEmployerId;
+            if (mClientId == -1 || mClientId == 0) {
+                project.client_id = 0;
+            } else {
+                project.client_id = mClientId;
+            }
+            dbService.update_project(project);
+        }
+        if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
+            dbService.delete_project(mProjectId, util::unix_timestamp());
+        }
+        if (!bIsEdit) {
+            if (mClientId == -1 || mClientId == 0) {
+                dbService.create_new_project(std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerId, nullptr);
+            } else {
+                dbService.create_new_project(std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerId, &mClientId);
+            }
         }
     } catch (const db::database_exception& e) {
         // TODO Log exception
@@ -317,6 +334,20 @@ void project_dialog::on_cancel(wxCommandEvent& event)
         }
     } else {
         EndModal(wxID_CANCEL);
+    }
+}
+void project_dialog::on_is_active_check(wxCommandEvent& event)
+{
+    if (event.IsChecked()) {
+        pNameCtrl->Enable();
+        pDisplayNameCtrl->Enable();
+        pEmployerChoiceCtrl->Enable();
+        pClientChoiceCtrl->Enable();
+    } else {
+        pNameCtrl->Disable();
+        pDisplayNameCtrl->Disable();
+        pEmployerChoiceCtrl->Disable();
+        pClientChoiceCtrl->Disable();
     }
 }
 }

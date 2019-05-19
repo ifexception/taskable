@@ -48,6 +48,7 @@ private:
     void on_employer_select(wxCommandEvent& event);
     void on_save(wxCommandEvent& event);
     void on_cancel(wxCommandEvent& event);
+    void on_is_active_check(wxCommandEvent& event);
 
     wxTextCtrl* pNameCtrl;
     wxTextCtrl* pDisplayNameCtrl;
