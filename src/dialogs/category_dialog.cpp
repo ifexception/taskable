@@ -33,8 +33,8 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(category_dialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(category_dialog, wxDialog)
-    EVT_BUTTON(ids::ID_SAVE, category_dialog::on_save)
-    EVT_BUTTON(wxID_CANCEL, category_dialog::on_cancel)
+EVT_BUTTON(ids::ID_SAVE, category_dialog::on_save)
+EVT_BUTTON(wxID_CANCEL, category_dialog::on_cancel)
 wxEND_EVENT_TABLE()
 
 category_dialog::category_dialog(wxWindow* parent, bool isEdit, int categoryId, const wxString& name)
@@ -186,7 +186,7 @@ void category_dialog::fill_controls()
     }
 
     for (auto p : projects) {
-        pProjectChoiceCtrl->Append(p.display_name, (void*)p.project_id);
+        pProjectChoiceCtrl->Append(p.display_name, (void*) p.project_id);
     }
 }
 
@@ -242,7 +242,7 @@ bool category_dialog::are_controls_empty()
 
 void category_dialog::on_save(wxCommandEvent& event)
 {
-    mProjectChoiceId = (int)pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
+    mProjectChoiceId = (int) pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
     mNameText = pNameCtrl->GetValue();
     mDescriptionText = pDescriptionCtrl->GetValue();
 
@@ -251,9 +251,23 @@ void category_dialog::on_save(wxCommandEvent& event)
         return;
     }
 
+    services::db_service dbService;
     try {
-        services::db_service dbService;
-        dbService.create_new_category(mProjectChoiceId, std::string(mNameText.ToUTF8()), std::string(mDescriptionText.ToUTF8()));
+        if (bIsEdit && pIsActiveCtrl->IsChecked()) {
+            models::category category;
+            category.category_id = mCategoryId;
+            category.category_name = std::string(mNameText.ToUTF8());
+            category.description = std::string(mNameText.ToUTF8());
+            category.project_id = mProjectChoiceId;
+            category.date_modified_utc = util::unix_timestamp();
+            dbService.update_category(category);
+        }
+        if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
+            dbService.delete_category(mCategoryId, util::unix_timestamp());
+        }
+        if (!bIsEdit) {
+            dbService.create_new_category(mProjectChoiceId, std::string(mNameText.ToUTF8()), std::string(mDescriptionText.ToUTF8()));
+        }
     } catch (const db::database_exception& e) {
         // TODO Log exception
     }
@@ -273,6 +287,19 @@ void category_dialog::on_cancel(wxCommandEvent& event)
         }
     } else {
         EndModal(wxID_CANCEL);
+    }
+}
+
+void category_dialog::on_is_active_check(wxCommandEvent& event)
+{
+    if (event.IsChecked()) {
+        pProjectChoiceCtrl->Enable();
+        pNameCtrl->Enable();
+        pDescriptionCtrl->Enable();
+    } else {
+        pProjectChoiceCtrl->Disable();
+        pNameCtrl->Disable();
+        pDescriptionCtrl->Disable();
     }
 }
 

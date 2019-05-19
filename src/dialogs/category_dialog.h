@@ -46,6 +46,7 @@ private:
 
     void on_save(wxCommandEvent &event);
     void on_cancel(wxCommandEvent &event);
+    void on_is_active_check(wxCommandEvent& event);
 
     wxChoice* pProjectChoiceCtrl;
     wxTextCtrl* pNameCtrl;

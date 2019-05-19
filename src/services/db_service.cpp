@@ -380,6 +380,22 @@ std::vector<models::category> db_service::get_categories()
     return categories;
 }
 
+void db_service::update_category(models::category category)
+{
+    std::string cmd("UPDATE categories SET name = ?, description = ?, project_id = ?, date_modified_utc = ? WHERE category_id = ?");
+    db::command command(*db_connection::get_instance().get_database(), cmd);
+    command.binder() << category.category_name << category.description << category.project_id << category.date_modified_utc;
+    command.execute();
+}
+
+void db_service::delete_category(const int categoryId, const int dateModified)
+{
+    std::string cmd("UPDATE categories SET is_active = 0, date_modified_utc = ? WHERE category_id = ?");
+    db::command command(*db_connection::get_instance().get_database(), cmd);
+    command.binder() << dateModified;
+    command.execute();
+}
+
 int db_service::create_or_get_task_id(const std::string& date, const int projectId)
 {
     std::string cmd("SELECT task_id FROM tasks WHERE task_date = ?");
