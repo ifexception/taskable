@@ -187,6 +187,22 @@ models::client db_service::get_client_by_id(const int clientId)
     return client;
 }
 
+void db_service::update_client(models::client client)
+{
+    std::string cmd("UPDATE clients SET name = ?, date_modified_utc = ?, employer_id = ? WHERE client_id = ?");
+    db::command command(*db_connection::get_instance().get_database(), cmd);
+    command.binder() << client.client_name << client.date_modified_utc << client.employer_id << client.client_id;
+    command.execute();
+}
+
+void db_service::delete_client(const int clientId, const int dateModified)
+{
+    std::string cmd("UPDATE clients SET is_active = 0, date_modified_utc = ? WHERE client_id = ?");
+    db::command command(*db_connection::get_instance().get_database(), cmd);
+    command.binder() << dateModified << clientId;
+    command.execute();
+}
+
 void db_service::create_new_project(const std::string& name, const std::string& displayName, const int employerId, const int* clientId)
 {
     std::string cmd("INSERT INTO projects (name, display_name, is_active, employer_id, client_id) VALUES (?, ?, 1, ?, ?)");

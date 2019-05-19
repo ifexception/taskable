@@ -233,7 +233,20 @@ void client_dialog::on_save(wxCommandEvent & event)
 
     services::db_service clientService;
     try {
-        clientService.create_new_client(std::string(mNameText.ToUTF8()), mEmployerId);
+        if (bIsEdit && pIsActiveCtrl->IsChecked()) {
+            models::client client;
+            client.client_id = mClientId;
+            client.client_name = std::string(mNameText.ToUTF8());
+            client.date_modified_utc = util::unix_timestamp();
+            client.employer_id = mEmployerId;
+            clientService.update_client(client);
+        }
+        if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
+            clientService.delete_client(mClientId, util::unix_timestamp());
+        }
+        if (!bIsEdit) {
+            clientService.create_new_client(std::string(mNameText.ToUTF8()), mEmployerId);
+        }
     } catch (const db::database_exception& e) {
         // TODO Log exception
     }

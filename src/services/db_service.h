@@ -54,6 +54,10 @@ struct db_service
 
     models::client get_client_by_id(const int clientId);
 
+    void update_client(models::client client);
+
+    void delete_client(const int clientId, const int dateModified);
+
     void create_new_project(const std::string& name, const std::string& displayName, const int employerId, const int* clientId);
 
     std::vector<models::project> get_projects();
