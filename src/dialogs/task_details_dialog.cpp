@@ -400,11 +400,11 @@ void task_details_dialog::on_is_active_check(wxCommandEvent& event)
 
 void task_details_dialog::on_save(wxCommandEvent& event)
 {
-    mProjectId = (int)pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection());
+    mProjectId = (int)pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
     mStartTime = pStartTimeCtrl->GetValue();
     mEndTime = pEndTimeCtrl->GetValue();
     mDurationText = pDurationCtrl->GetLabelText();
-    mCategoryId = (int)pCategoryChoiceCtrl->GetClientData(pCategoryChoiceCtrl->GetSelection());
+    mCategoryId = (int)pCategoryChoiceCtrl->GetClientData(pCategoryChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
     mDescriptionText = pDescriptionCtrl->GetValue();
 
     auto validationSuccess = validate();
