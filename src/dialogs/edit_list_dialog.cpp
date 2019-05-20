@@ -33,10 +33,12 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(edit_list_dialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(edit_list_dialog, wxDialog)
+EVT_LIST_ITEM_ACTIVATED(edit_list_dialog::IDC_LIST, edit_list_dialog::on_item_double_click)
 wxEND_EVENT_TABLE()
 
 edit_list_dialog::edit_list_dialog(wxWindow* parent, dialog_type dialogType, const wxString& name)
     : mType(dialogType)
+    , mStrategy(nullptr)
 {
     set_strategy();
     auto enumName = magic_enum::enum_name(mType);
@@ -129,6 +131,7 @@ void edit_list_dialog::on_item_double_click(wxListEvent& event)
     default:
         break;
     }
+    EndDialog(wxID_OK);
 }
 
 void edit_list_dialog::set_strategy()
