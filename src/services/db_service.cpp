@@ -126,14 +126,14 @@ std::vector<models::client> db_service::get_clients_by_employer_id(const int emp
 
 std::vector<models::client> db_service::get_clients()
 {
-    std::string select("SELECT clients.client_id,");
-    std::string clientName("clients.name AS client_name,");
-    std::string dateCreated("clients.date_created_utc,");
-    std::string dateModified("clients.date_modified_utc,");
-    std::string isActive("clients.is_active,");
-    std::string employerName("employers.name AS employer_name");
-    std::string from("FROM clients,");
-    std::string innerJoin("INNER JOIN employers ON clients.employer_id = employers.employer_id");
+    std::string select("SELECT clients.client_id, ");
+    std::string clientName("clients.name AS client_name, ");
+    std::string dateCreated("clients.date_created_utc, ");
+    std::string dateModified("clients.date_modified_utc, ");
+    std::string isActive("clients.is_active, ");
+    std::string employerName("employers.name AS employer_name ");
+    std::string from("FROM clients ");
+    std::string innerJoin("INNER JOIN employers ON clients.employer_id = employers.employer_id ");
     std::string where("WHERE clients.is_active = 1");
 
     std::string qry = select + clientName + dateCreated + dateModified + isActive + employerName + from + innerJoin + where;
@@ -160,14 +160,14 @@ std::vector<models::client> db_service::get_clients()
 models::client db_service::get_client_by_id(const int clientId)
 {
 
-    std::string select("SELECT clients.client_id,");
-    std::string clientName("clients.name AS client_name,");
-    std::string dateCreated("clients.date_created_utc,");
-    std::string dateModified("clients.date_modified_utc,");
-    std::string isActive("clients.is_active,");
-    std::string employerName("employers.name AS employer_name");
-    std::string from("FROM clients,");
-    std::string innerJoin("INNER JOIN employers ON clients.employer_id = employers.employer_id");
+    std::string select("SELECT clients.client_id, ");
+    std::string clientName("clients.name AS client_name, ");
+    std::string dateCreated("clients.date_created_utc, ");
+    std::string dateModified("clients.date_modified_utc, ");
+    std::string isActive("clients.is_active, ");
+    std::string employerName("employers.name AS employer_name ");
+    std::string from("FROM clients ");
+    std::string innerJoin("INNER JOIN employers ON clients.employer_id = employers.employer_id ");
     std::string where("WHERE clients.client_id = ?");
 
     std::string qry = select + clientName + dateCreated + dateModified + isActive + employerName + from + innerJoin + where;
@@ -218,17 +218,17 @@ void db_service::create_new_project(const std::string& name, const std::string& 
 
 std::vector<models::project> db_service::get_projects()
 {
-    std::string select("SELECT projects.project_id,");
-    std::string projectName("projects.name AS project_name,");
-    std::string displayName("projects.display_name,");
-    std::string dateCreated("projects.date_created_utc,");
-    std::string dateModified("projects.date_modified_utc,");
-    std::string isActive("projects.is_active,");
-    std::string employerName("employers.name AS employer_name,");
-    std::string clientName("clients.name AS client_name");
-    std::string from("FROM projects");
-    std::string innerJoinEmployers("INNER JOIN employers ON projects.employer_id = employers.employer_id");
-    std::string innerJoinClients("INNER JOIN clients ON projects.client_id = clients.client_id");
+    std::string select("SELECT projects.project_id, ");
+    std::string projectName("projects.name AS project_name, ");
+    std::string displayName("projects.display_name, ");
+    std::string dateCreated("projects.date_created_utc, ");
+    std::string dateModified("projects.date_modified_utc, ");
+    std::string isActive("projects.is_active, ");
+    std::string employerName("employers.name AS employer_name, ");
+    std::string clientName("clients.name AS client_name ");
+    std::string from("FROM projects ");
+    std::string innerJoinEmployers("INNER JOIN employers ON projects.employer_id = employers.employer_id ");
+    std::string innerJoinClients("INNER JOIN clients ON projects.client_id = clients.client_id ");
     std::string where("WHERE projects.is_active = 1");
     std::string qry = select + projectName + displayName + dateCreated + dateModified + isActive + employerName + clientName + from + innerJoinEmployers + innerJoinClients + where;
 
@@ -260,17 +260,17 @@ std::vector<models::project> db_service::get_projects()
 
 models::project db_service::get_project_by_id(const int projectId)
 {
-    std::string select("SELECT projects.project_id,");
-    std::string projectName("projects.name AS project_name,");
-    std::string displayName("projects.display_name,");
-    std::string dateCreated("projects.date_created_utc,");
-    std::string dateModified("projects.date_modified_utc,");
-    std::string isActive("projects.is_active,");
-    std::string employerName("employers.name AS employer_name,");
-    std::string clientName("clients.name AS client_name");
-    std::string from("FROM projects");
-    std::string innerJoinEmployers("INNER JOIN employers ON projects.employer_id = employers.employer_id");
-    std::string innerJoinClients("INNER JOIN clients ON projects.client_id = clients.client_id");
+    std::string select("SELECT projects.project_id, ");
+    std::string projectName("projects.name AS project_name, ");
+    std::string displayName("projects.display_name, ");
+    std::string dateCreated("projects.date_created_utc, ");
+    std::string dateModified("projects.date_modified_utc, ");
+    std::string isActive("projects.is_active, ");
+    std::string employerName("employers.name AS employer_name, ");
+    std::string clientName("clients.name AS client_name ");
+    std::string from("FROM projects ");
+    std::string innerJoinEmployers("INNER JOIN employers ON projects.employer_id = employers.employer_id ");
+    std::string innerJoinClients("INNER JOIN clients ON projects.client_id = clients.client_id ");
     std::string where("WHERE projects.project_id = ?");
     std::string qry = select + projectName + displayName + dateCreated + dateModified + isActive + employerName + clientName + from + innerJoinEmployers + innerJoinClients + where;
 
@@ -352,15 +352,15 @@ std::vector<models::category> db_service::get_categories_by_project_id(const int
 
 models::category db_service::get_category_by_id(const int categoryId)
 {
-    std::string select("SELECT categories.category_id,");
-    std::string categoryName("categories.name AS category_name,");
-    std::string description("categories.description,");
-    std::string dateCreated("categories.date_created_utc,");
-    std::string dateModified("categories.date_modified_utc,");
-    std::string isActive("categories.is_active,");
-    std::string projectName("projects.name AS project_name");
-    std::string from("FROM categories");
-    std::string innerJoin("INNER JOIN projects ON categories.project_id = projects.project_id");
+    std::string select("SELECT categories.category_id, ");
+    std::string categoryName("categories.name AS category_name, ");
+    std::string description("categories.description, ");
+    std::string dateCreated("categories.date_created_utc, ");
+    std::string dateModified("categories.date_modified_utc, ");
+    std::string isActive("categories.is_active, ");
+    std::string projectName("projects.name AS project_name ");
+    std::string from("FROM categories ");
+    std::string innerJoin("INNER JOIN projects ON categories.project_id = projects.project_id ");
     std::string where("WHERE categories.category_id = ?");
     std::string qry = select + categoryName + description + dateCreated + dateModified + isActive + projectName + from + innerJoin + where;
 
@@ -383,15 +383,15 @@ models::category db_service::get_category_by_id(const int categoryId)
 
 std::vector<models::category> db_service::get_categories()
 {
-    std::string select("SELECT categories.category_id,");
-    std::string categoryName("categories.name AS category_name,");
-    std::string description("categories.description,");
-    std::string dateCreated("categories.date_created_utc,");
-    std::string dateModified("categories.date_modified_utc,");
-    std::string isActive("categories.is_active,");
-    std::string projectName("projects.name AS project_name");
-    std::string from("FROM categories");
-    std::string innerJoin("INNER JOIN projects ON categories.project_id = projects.project_id");
+    std::string select("SELECT categories.category_id, ");
+    std::string categoryName("categories.name AS category_name, ");
+    std::string description("categories.description, ");
+    std::string dateCreated("categories.date_created_utc, ");
+    std::string dateModified("categories.date_modified_utc, ");
+    std::string isActive("categories.is_active, ");
+    std::string projectName("projects.name AS project_name ");
+    std::string from("FROM categories ");
+    std::string innerJoin("INNER JOIN projects ON categories.project_id = projects.project_id ");
     std::string where("WHERE categories.is_active = 1");
     std::string qry = select + categoryName + description + dateCreated + dateModified + isActive + projectName + from + innerJoin + where;
 
