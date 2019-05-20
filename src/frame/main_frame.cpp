@@ -28,6 +28,7 @@
 #include "../dialogs/category_dialog.h"
 #include "../dialogs/edit_list_dialog.h"
 #include "../services/db_service.h"
+#include "../db/database_exception.h"
 
 namespace app::frame
 {
@@ -36,7 +37,6 @@ const int EmployerId = static_cast<int>(ids::MenuIds::EmployerMenuId);
 const int ProjectId = static_cast<int>(ids::MenuIds::ProjectMenuId);
 const int ClientId = static_cast<int>(ids::MenuIds::ClientMenuId);
 const int CategoryId = static_cast<int>(ids::MenuIds::CategoryMenuId);
-const int EmployerEditId = static_cast<int>(ids::MenuIds::EmployerEditId);
 
 wxBEGIN_EVENT_TABLE(main_frame, wxFrame)
     EVT_MENU(wxID_ABOUT, main_frame::on_about)
@@ -45,7 +45,10 @@ wxBEGIN_EVENT_TABLE(main_frame, wxFrame)
     EVT_MENU(ProjectId, main_frame::on_new_project)
     EVT_MENU(ClientId, main_frame::on_new_client)
     EVT_MENU(CategoryId, main_frame::on_new_category)
-    EVT_MENU(EmployerEditId, main_frame::on_edit_employer)
+    EVT_MENU(ids::ID_EDIT_EMPLOYER, main_frame::on_edit_employer)
+    EVT_MENU(ids::ID_EDIT_CLIENT, main_frame::on_edit_client)
+    EVT_MENU(ids::ID_EDIT_PROJECT, main_frame::on_edit_project)
+    EVT_MENU(ids::ID_EDIT_CATEGORY, main_frame::on_edit_category)
     EVT_LIST_ITEM_ACTIVATED(main_frame::IDC_LIST, main_frame::on_item_double_click)
     EVT_COMMAND(main_frame::IDC_LIST, ids::ID_TASK_INSERTED, main_frame::on_task_inserted)
 wxEND_EVENT_TABLE()
@@ -89,7 +92,10 @@ void main_frame::create_controls()
 
     /* Edit Menu Control */
     auto editMenu = new wxMenu();
-    editMenu->Append(EmployerEditId, wxT("Edit &Employers"), wxT("Select a employer to edit"));
+    editMenu->Append(ids::ID_EDIT_EMPLOYER, wxT("Edit &Employers"), wxT("Select a employer to edit"));
+    editMenu->Append(ids::ID_EDIT_CLIENT, wxT("Edit &Client"), wxT("Select a client to edit"));
+    editMenu->Append(ids::ID_EDIT_PROJECT, wxT("Edit &Project"), wxT("Select a project to edit"));
+    editMenu->Append(ids::ID_EDIT_CATEGORY, wxT("Edit C&ategory"), wxT("Select a category to edit"));
 
     /* Help Menu Control */
     wxMenu* helpMenu = new wxMenu();
@@ -244,8 +250,8 @@ void main_frame::refresh_items()
         services::db_service dbService;
         detailedTasks = dbService.get_all_tasks_by_date(std::string(dateString.ToUTF8())); //FIXME
     }
-    catch (const std::exception&) {
-
+    catch (const db::database_exception& e) {
+        wxLogError(wxString::Format("Error %d", e.get_error_code()));
     }
 
     int listIndex = 0;
