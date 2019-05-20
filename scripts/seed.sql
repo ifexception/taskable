@@ -16,13 +16,13 @@ INSERT INTO Variables(Name, Value) SELECT 'insurerFrontEnd', last_insert_rowid()
 INSERT INTO projects (name, display_name, is_active, client_id, employer_id) VALUES ('InsurerBackEnd Modern Rewrite and Port', 'InsurerBackEnd', 1, (SELECT Value FROM Variables WHERE Name = 'myCompany'), (SELECT Value FROM Variables WHERE Name = 'myInsurer'));
 INSERT INTO Variables(Name, Value) SELECT 'insurerBackEnd', last_insert_rowid();
 
-INSERT INTO tasks (task_date, is_active) VALUES (date(now), 1);
+INSERT INTO tasks (task_date, is_active) VALUES ((SELECT strftime('%Y-%m-%d', date('now'))), 1);
 INSERT INTO Variables(Name, Value) SELECT 'taskDate', last_insert_rowid();
 
-INSERT INTO categories (name, description, is_active, project_id) VALUES ('Programming', 'The task of inputting code into the machine to achieve a business objective', (SELECT Value FROM Variables WHERE Name = 'insurerFrontEnd'));
+INSERT INTO categories (name, description, is_active, project_id) VALUES ('Programming', 'The task of inputting code into the machine to achieve a business objective', 1, (SELECT Value FROM Variables WHERE Name = 'insurerFrontEnd'));
 INSERT INTO Variables(Name, Value) SELECT 'programming', last_insert_rowid();
 
-INSERT INTO categories (name, description, is_active, project_id) VALUES ('Analysis', 'Analysing new batch of work and gathering research before starting coding', (SELECT Value FROM Variables WHERE Name = 'insurerFrontEnd'));
+INSERT INTO categories (name, description, is_active, project_id) VALUES ('Analysis', 'Analysing new batch of work and gathering research before starting coding', 1, (SELECT Value FROM Variables WHERE Name = 'insurerFrontEnd'));
 INSERT INTO Variables(Name, Value) SELECT 'analysis', last_insert_rowid();
 
 INSERT INTO task_details(start_time, end_time, duration, description, is_active, project_id, task_id, category_id) VALUES('06:15:00', '07:00:00', '00:45:00', 'Conducting analysis of reusing Angular component for user form input and emailing back client', 1, (SELECT Value FROM Variables WHERE Name = 'insurerFrontEnd'), (SELECT Value FROM Variables WHERE Name = 'taskDate'), (SELECT Value FROM Variables WHERE Name = 'analysis'));
