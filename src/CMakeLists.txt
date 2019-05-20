@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.8)
-project (wxTimesheetsTracker)
+project (wxTasksTracker)
 
 if (MSVC)
     include (${CMAKE_MODULE_PATH}/FindwxWidgetsVcpkg.cmake)
