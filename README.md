@@ -1,4 +1,4 @@
-# Timesheets Tracker Desktop App
+# Tasks Tracker Desktop App
 Help you manage how you spent your time during the day where your time went to
 
 ## Getting Started
