@@ -58,6 +58,7 @@ config::config()
         if (node->first_attribute("type")->value() == "release") {
             auto connectionString = node->value();
             set_connection_string(std::string(connectionString));
+            break;
         }
 #endif
     }
