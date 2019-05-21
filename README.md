@@ -1,5 +1,5 @@
-# Timesheets Tracker Desktop App
-Help you manage how you spent your time during the day where your time went to
+# Tasks Tracker Desktop App
+A desktop app to help you manage how you've spent your time on tasks during the day by tracking the time you've spent on tasks throughout the day
 
 ## Getting Started
 Ensure you have downloaded a suitable [version](https://cmake.org/download/) of CMake. CMake **3.8** is the minimum supported version.
