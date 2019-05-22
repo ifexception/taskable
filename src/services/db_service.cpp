@@ -378,7 +378,7 @@ models::category db_service::get_category_by_id(const int categoryId)
     category.date_created_utc = column.get<int>(3);
     category.date_modified_utc = column.get<int>(4);
     category.is_active = column.get<int>(5);
-    category.project_name = column.get<int>(6);
+    category.project_name = column.get<std::string>(6);
 
     return category;
 }
