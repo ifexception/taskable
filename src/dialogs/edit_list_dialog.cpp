@@ -353,7 +353,7 @@ void category_strategy::data_to_control(wxListCtrl * control)
     int columnIndex = 0;
     for (auto category : categories) {
         listIndex = control->InsertItem(columnIndex++, category.project_name);
-        control->SetItem(listIndex, columnIndex, category.category_name);
+        control->SetItem(listIndex, columnIndex++, category.category_name);
         control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(category.date_created_utc));
         control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(category.date_modified_utc));
         control->SetItemPtrData(listIndex, category.category_id);
