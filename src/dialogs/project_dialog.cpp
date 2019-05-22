@@ -32,15 +32,15 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(project_dialog, wxDialog)
 
 wxBEGIN_EVENT_TABLE(project_dialog, wxDialog)
-    EVT_BUTTON(ids::ID_SAVE, project_dialog::on_save)
-    EVT_BUTTON(wxID_CANCEL, project_dialog::on_cancel)
-    EVT_CHOICE(project_dialog::IDC_EMPLOYERCHOICE, project_dialog::on_employer_select)
-    EVT_CHECKBOX(project_dialog::IDC_ISACTIVE, project_dialog::on_is_active_check)
+EVT_BUTTON(ids::ID_SAVE, project_dialog::on_save)
+EVT_BUTTON(wxID_CANCEL, project_dialog::on_cancel)
+EVT_CHOICE(project_dialog::IDC_EMPLOYERCHOICE, project_dialog::on_employer_select)
+EVT_CHECKBOX(project_dialog::IDC_ISACTIVE, project_dialog::on_is_active_check)
 wxEND_EVENT_TABLE()
 
 project_dialog::project_dialog(wxWindow* parent, bool isEdit, int projectId, const wxString& name)
-    : mNameText(wxT(""))
-    , mDisplayNameText(wxT(""))
+    : mNameText(wxGetEmptyString())
+    , mDisplayNameText(wxGetEmptyString())
     , mEmployerId(-1)
     , mClientId(-1)
     , mProjectId(projectId)
@@ -188,15 +188,15 @@ void project_dialog::create_controls()
 void project_dialog::fill_controls()
 {
     std::vector<models::employer> employers;
+    services::db_service dbService;
     try {
-        services::db_service employerService;
-        employers = employerService.get_employers();
+        employers = dbService.get_employers();
     } catch (const db::database_exception& e) {
         // TODO Log exception
     }
 
     for (auto employer : employers) {
-        pEmployerChoiceCtrl->Append(employer.employer_name, (void*)employer.employer_id);
+        pEmployerChoiceCtrl->Append(employer.employer_name, (void*) employer.employer_id);
     }
 }
 
@@ -216,6 +216,24 @@ void project_dialog::data_to_controls()
     pEmployerChoiceCtrl->SetStringSelection(project.employer_name);
 
     if (!project.client_name.empty()) {
+        pClientChoiceCtrl->Clear();
+        pClientChoiceCtrl->AppendString(wxT("Select a client"));
+        std::vector<models::client> clients;
+        try {
+            services::db_service clientService;
+            clients = clientService.get_clients_by_employer_id(project.employer_id);
+        } catch (const db::database_exception& e) {
+            // TODO Log exception
+        }
+
+        for (auto client : clients) {
+            pClientChoiceCtrl->Append(client.client_name, (void*) client.client_id);
+        }
+
+        pClientChoiceCtrl->SetSelection(0);
+        if (!pClientChoiceCtrl->IsEnabled()) {
+            pClientChoiceCtrl->Enable();
+        }
         pClientChoiceCtrl->SetStringSelection(project.client_name);
     }
 
@@ -261,7 +279,7 @@ void project_dialog::on_employer_select(wxCommandEvent& event)
 {
     pClientChoiceCtrl->Clear();
     pClientChoiceCtrl->AppendString(wxT("Select a client"));
-    int employerId = (int)event.GetClientData(); // FIXME: loss of precision -> convert to intptr_t and then to int
+    int employerId = (int) event.GetClientData(); // FIXME: loss of precision -> convert to intptr_t and then to int
     std::vector<models::client> clients;
     try {
         services::db_service clientService;
@@ -271,7 +289,7 @@ void project_dialog::on_employer_select(wxCommandEvent& event)
     }
 
     for (auto client : clients) {
-        pClientChoiceCtrl->Append(client.client_name, (void*)client.client_id);
+        pClientChoiceCtrl->Append(client.client_name, (void*) client.client_id);
     }
 
     pClientChoiceCtrl->SetSelection(0);
@@ -285,8 +303,8 @@ void project_dialog::on_save(wxCommandEvent& event)
     mNameText = pNameCtrl->GetValue();
     mDisplayNameText = pDisplayNameCtrl->GetValue();
 
-    mEmployerId = (int)pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
-    mClientId = (int)pClientChoiceCtrl->GetClientData(pClientChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
+    mEmployerId = (int) pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
+    mClientId = (int) pClientChoiceCtrl->GetClientData(pClientChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
 
     bool isValid = validate();
     if (!isValid) {
