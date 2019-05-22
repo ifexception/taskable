@@ -245,7 +245,7 @@ std::vector<models::project> db_service::get_projects()
         project.date_created_utc = column.get<int>(3);
         project.date_modified_utc = column.get<int>(4);
         project.is_active = column.get<int>(5);
-        project.employer_name = column.get<int>(6);
+        project.employer_name = column.get < std::string > (6);
         if (column.get_type(7) == db::column_type::Null) {
             project.client_name = "";
         } else {
