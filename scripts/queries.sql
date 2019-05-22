@@ -37,3 +37,16 @@ projects.name AS project_name
 FROM categories
 INNER JOIN projects ON categories.project_id = projects.project_id
 WHERE categories.category_id = 0
+
+SELECT projects.project_id,
+projects.name AS project_name,
+projects.display_name,
+projects.date_created_utc,
+projects.date_modified_utc,
+projects.is_active,
+employers.name AS employer_name,
+clients.name AS client_name
+FROM projects
+INNER JOIN employers ON projects.employer_id = employers.employer_id
+INNER JOIN clients ON projects.client_id = clients.client_id
+WHERE projects.is_active = 1
