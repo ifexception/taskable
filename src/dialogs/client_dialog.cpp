@@ -32,8 +32,9 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(client_dialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(client_dialog, wxDialog)
-EVT_BUTTON(ids::ID_SAVE, client_dialog::on_save)
-EVT_BUTTON(wxID_CANCEL, client_dialog::on_cancel)
+    EVT_BUTTON(ids::ID_SAVE, client_dialog::on_save)
+    EVT_BUTTON(wxID_CANCEL, client_dialog::on_cancel)
+    EVT_CHECKBOX(client_dialog::IDC_ISACTIVE, client_dialog::on_is_active_check)
 wxEND_EVENT_TABLE()
 
 client_dialog::client_dialog(wxWindow* parent, bool isEdit, int clientId, const wxString& name)

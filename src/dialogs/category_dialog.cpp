@@ -33,8 +33,9 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(category_dialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(category_dialog, wxDialog)
-EVT_BUTTON(ids::ID_SAVE, category_dialog::on_save)
-EVT_BUTTON(wxID_CANCEL, category_dialog::on_cancel)
+    EVT_BUTTON(ids::ID_SAVE, category_dialog::on_save)
+    EVT_BUTTON(wxID_CANCEL, category_dialog::on_cancel)
+    EVT_CHECKBOX(category_dialog::IDC_ISACTIVE, category_dialog::on_is_active_check)
 wxEND_EVENT_TABLE()
 
 category_dialog::category_dialog(wxWindow* parent, bool isEdit, int categoryId, const wxString& name)

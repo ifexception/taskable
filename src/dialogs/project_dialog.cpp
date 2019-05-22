@@ -32,9 +32,10 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(project_dialog, wxDialog)
 
 wxBEGIN_EVENT_TABLE(project_dialog, wxDialog)
-EVT_BUTTON(ids::ID_SAVE, project_dialog::on_save)
-EVT_BUTTON(wxID_CANCEL, project_dialog::on_cancel)
-EVT_CHOICE(project_dialog::IDC_EMPLOYERCHOICE, project_dialog::on_employer_select)
+    EVT_BUTTON(ids::ID_SAVE, project_dialog::on_save)
+    EVT_BUTTON(wxID_CANCEL, project_dialog::on_cancel)
+    EVT_CHOICE(project_dialog::IDC_EMPLOYERCHOICE, project_dialog::on_employer_select)
+    EVT_CHECKBOX(project_dialog::IDC_ISACTIVE, project_dialog::on_is_active_check)
 wxEND_EVENT_TABLE()
 
 project_dialog::project_dialog(wxWindow* parent, bool isEdit, int projectId, const wxString& name)

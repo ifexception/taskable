@@ -182,7 +182,7 @@ models::client db_service::get_client_by_id(const int clientId)
     client.date_created_utc = column.get<int>(2);
     client.date_modified_utc = column.get<int>(3);
     client.is_active = column.get<int>(4);
-    client.employer_name = column.get<int>(5);
+    client.employer_name = column.get<std::string>(5);
 
     return client;
 }
