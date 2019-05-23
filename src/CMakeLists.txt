@@ -45,14 +45,15 @@ set (SRC
     "services/db_connection.cpp"
     "services/db_service.cpp"
     "app.cpp"
-    "frame/main_frame.cpp"
-    "dialogs/about_dialog.cpp"
-    "dialogs/task_details_dialog.cpp"
-    "dialogs/employer_dialog.cpp"
-    "dialogs/client_dialog.cpp"
-    "dialogs/project_dialog.cpp"
-    "dialogs/category_dialog.cpp"
-    "dialogs/edit_list_dialog.cpp")
+    "frame/mainframe.cpp"
+    "dialogs/aboutdialog.cpp"
+    "dialogs/taskdetailsdialog.cpp"
+    "dialogs/employerdialog.cpp"
+    "dialogs/clientdialog.cpp"
+    "dialogs/projectdialog.cpp"
+    "dialogs/categorydialog.cpp"
+    "dialogs/editlistdialog.cpp"
+    "wizards/setupwizard.cpp")
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
 

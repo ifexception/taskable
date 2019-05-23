@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "category_dialog.h"
+#include "categorydialog.h"
 
 #include <vector>
 #include <wx/statline.h>
@@ -30,15 +30,15 @@
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(category_dialog, wxDialog);
+wxIMPLEMENT_DYNAMIC_CLASS(CategoryDialog, wxDialog);
 
-wxBEGIN_EVENT_TABLE(category_dialog, wxDialog)
-    EVT_BUTTON(ids::ID_SAVE, category_dialog::on_save)
-    EVT_BUTTON(wxID_CANCEL, category_dialog::on_cancel)
-    EVT_CHECKBOX(category_dialog::IDC_ISACTIVE, category_dialog::on_is_active_check)
+wxBEGIN_EVENT_TABLE(CategoryDialog, wxDialog)
+    EVT_BUTTON(ids::ID_SAVE, CategoryDialog::OnSave)
+    EVT_BUTTON(wxID_CANCEL, CategoryDialog::OnCancel)
+    EVT_CHECKBOX(CategoryDialog::IDC_ISACTIVE, CategoryDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
-category_dialog::category_dialog(wxWindow* parent, bool isEdit, int categoryId, const wxString& name)
+CategoryDialog::CategoryDialog(wxWindow* parent, bool isEdit, int categoryId, const wxString& name)
     : mProjectChoiceId(-1)
     , mNameText(wxGetEmptyString())
     , mDescriptionText(wxGetEmptyString())
@@ -55,38 +55,38 @@ category_dialog::category_dialog(wxWindow* parent, bool isEdit, int categoryId, 
         size.Set(320, 240);
     }
 
-    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
-category_dialog::~category_dialog()
+CategoryDialog::~CategoryDialog()
 {
     Destroy();
 }
 
-void category_dialog::launch_dialog()
+void CategoryDialog::Launch()
 {
     ShowModal();
 }
 
-bool category_dialog::create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
+bool CategoryDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
     if (created) {
-        create_controls();
-        fill_controls();
+        CreateControls();
+        FillControls();
         if (bIsEdit) {
-            data_to_controls();
+            DataToControls();
         }
 
         GetSizer()->Fit(this);
         //SetIcon();
-        Centre();
+        Center();
     }
 
     return false;
 }
 
-void category_dialog::create_controls()
+void CategoryDialog::CreateControls()
 {
     /* Window Sizing */
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -176,7 +176,7 @@ void category_dialog::create_controls()
     buttonPanelSizer->Add(cancelButton, wxSizerFlags().Border(wxALL, 5));
 }
 
-void category_dialog::fill_controls()
+void CategoryDialog::FillControls()
 {
     std::vector<models::project> projects;
     try {
@@ -191,7 +191,7 @@ void category_dialog::fill_controls()
     }
 }
 
-void category_dialog::data_to_controls()
+void CategoryDialog::DataToControls()
 {
     services::db_service dbService;
     models::category category;
@@ -202,21 +202,22 @@ void category_dialog::data_to_controls()
     }
 
     pProjectChoiceCtrl->SetStringSelection(category.project_name);
+    //pProjectChoiceCtrl->SetSelection(1);
     pNameCtrl->SetValue(category.category_name);
     pDescriptionCtrl->SetValue(category.description);
 
-    wxString dateCreatedString = util::convert_unix_timestamp_to_wxdatetime(category.date_created_utc);
+    wxString dateCreatedString = util::ConvertUnixTimestampToString(category.date_created_utc);
     wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
     pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
 
-    wxString dateUpdatedString = util::convert_unix_timestamp_to_wxdatetime(category.date_modified_utc);
+    wxString dateUpdatedString = util::ConvertUnixTimestampToString(category.date_modified_utc);
     wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
     pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
 
     pIsActiveCtrl->SetValue(category.is_active);
 }
 
-bool category_dialog::validate()
+bool CategoryDialog::Validate()
 {
     if (mProjectChoiceId == -1 || mProjectChoiceId == 0) {
         wxMessageBox(wxT("Project is required"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
@@ -235,19 +236,19 @@ bool category_dialog::validate()
     return true;
 }
 
-bool category_dialog::are_controls_empty()
+bool CategoryDialog::AreControlsEmpty()
 {
     bool isEmpty = mProjectChoiceId == -1 && mNameText.empty() && mDescriptionText.empty();
     return isEmpty;
 }
 
-void category_dialog::on_save(wxCommandEvent& event)
+void CategoryDialog::OnSave(wxCommandEvent& event)
 {
     mProjectChoiceId = (int) pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
     mNameText = pNameCtrl->GetValue();
     mDescriptionText = pDescriptionCtrl->GetValue();
 
-    bool isValid = validate();
+    bool isValid = Validate();
     if (!isValid) {
         return;
     }
@@ -260,11 +261,11 @@ void category_dialog::on_save(wxCommandEvent& event)
             category.category_name = std::string(mNameText.ToUTF8());
             category.description = std::string(mNameText.ToUTF8());
             category.project_id = mProjectChoiceId;
-            category.date_modified_utc = util::unix_timestamp();
+            category.date_modified_utc = util::UnixTimestamp();
             dbService.update_category(category);
         }
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            dbService.delete_category(mCategoryId, util::unix_timestamp());
+            dbService.delete_category(mCategoryId, util::UnixTimestamp());
         }
         if (!bIsEdit) {
             dbService.create_new_category(mProjectChoiceId, std::string(mNameText.ToUTF8()), std::string(mDescriptionText.ToUTF8()));
@@ -276,9 +277,9 @@ void category_dialog::on_save(wxCommandEvent& event)
     EndModal(ids::ID_SAVE);
 }
 
-void category_dialog::on_cancel(wxCommandEvent& event)
+void CategoryDialog::OnCancel(wxCommandEvent& event)
 {
-    bool areControlsEmpty = are_controls_empty();
+    bool areControlsEmpty = AreControlsEmpty();
     if (!areControlsEmpty) {
 
         int answer = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Confirm"),
@@ -291,7 +292,7 @@ void category_dialog::on_cancel(wxCommandEvent& event)
     }
 }
 
-void category_dialog::on_is_active_check(wxCommandEvent& event)
+void CategoryDialog::OnIsActiveCheck(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
         pProjectChoiceCtrl->Enable();

@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "employer_dialog.h"
+#include "employerdialog.h"
 
 #include <wx/statline.h>
 
@@ -29,15 +29,15 @@
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(employer_dialog, wxDialog);
+wxIMPLEMENT_DYNAMIC_CLASS(EmployerDialog, wxDialog);
 
-wxBEGIN_EVENT_TABLE(employer_dialog, wxDialog)
-    EVT_BUTTON(ids::ID_SAVE, employer_dialog::on_save)
-    EVT_BUTTON(wxID_CANCEL, employer_dialog::on_cancel)
-    EVT_CHECKBOX(employer_dialog::IDC_ISACTIVE, employer_dialog::on_is_active_check)
+wxBEGIN_EVENT_TABLE(EmployerDialog, wxDialog)
+EVT_BUTTON(ids::ID_SAVE, EmployerDialog::OnSave)
+EVT_BUTTON(wxID_CANCEL, EmployerDialog::OnCancel)
+EVT_CHECKBOX(EmployerDialog::IDC_ISACTIVE, EmployerDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
-employer_dialog::employer_dialog(wxWindow* parent, bool isEdit, int employerId, const wxString& name)
+EmployerDialog::EmployerDialog(wxWindow* parent, bool isEdit, int employerId, const wxString& name)
     : mEmployerText(wxT(""))
     , bIsEdit(isEdit)
     , mEmployerId(employerId)
@@ -52,34 +52,28 @@ employer_dialog::employer_dialog(wxWindow* parent, bool isEdit, int employerId, 
         title = wxT("Add Employer");
         size.Set(WIDTH, HEIGHT);
     }
-    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, size, style, name);
+    bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, size, style, name);
 
     SetMinClientSize(wxSize(MIN_WIDTH, MIN_HEIGHT));
 }
 
-employer_dialog::~employer_dialog()
+EmployerDialog::~EmployerDialog()
 {
     Destroy();
 }
 
-void employer_dialog::launch_employer_dialog()
+void EmployerDialog::Launch()
 {
     ShowModal();
 }
 
-bool employer_dialog::create(wxWindow* parent,
-    wxWindowID windowId,
-    const wxString& title,
-    const wxPoint& point,
-    const wxSize& size,
-    long style,
-    const wxString& name)
+bool EmployerDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
     if (created) {
-        create_controls();
+        CreateControls();
         if (bIsEdit) {
-            data_to_controls();
+            DataToControls();
         }
 
         GetSizer()->Fit(this);
@@ -90,7 +84,7 @@ bool employer_dialog::create(wxWindow* parent,
     return created;
 }
 
-void employer_dialog::create_controls()
+void EmployerDialog::CreateControls()
 {
     /* Window Sizing */
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -159,7 +153,7 @@ void employer_dialog::create_controls()
     buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
 }
 
-void employer_dialog::data_to_controls()
+void EmployerDialog::DataToControls()
 {
     services::db_service dbService;
     models::employer employer;
@@ -171,21 +165,21 @@ void employer_dialog::data_to_controls()
 
     pEmployerCtrl->SetValue(employer.employer_name);
 
-    wxString dateCreatedString = util::convert_unix_timestamp_to_wxdatetime(employer.date_created_utc);
+    wxString dateCreatedString = util::ConvertUnixTimestampToString(employer.date_created_utc);
     wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
     pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
 
-    wxString dateUpdatedString = util::convert_unix_timestamp_to_wxdatetime(employer.date_modified_utc);
+    wxString dateUpdatedString = util::ConvertUnixTimestampToString(employer.date_modified_utc);
     wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
     pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
 
     pIsActiveCtrl->SetValue(employer.is_active);
 }
 
-bool employer_dialog::validate()
+bool EmployerDialog::Validate()
 {
     bool isInvalid = mEmployerText.length() > 255 || mEmployerText.length() < 2 ||
-                   mEmployerText.empty();
+        mEmployerText.empty();
     if (isInvalid) {
         wxMessageBox(wxT("Employer name is invalid"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
@@ -193,17 +187,17 @@ bool employer_dialog::validate()
     return true;
 }
 
-bool employer_dialog::are_controls_empty()
+bool EmployerDialog::AreControlsEmpty()
 {
     bool isEmpty = mEmployerText.empty();
     return isEmpty;
 }
 
-void employer_dialog::on_save(wxCommandEvent& event)
+void EmployerDialog::OnSave(wxCommandEvent& event)
 {
     mEmployerText = pEmployerCtrl->GetValue();
 
-    bool validationSuccess = validate();
+    bool validationSuccess = Validate();
     if (!validationSuccess) {
         return;
     }
@@ -213,7 +207,7 @@ void employer_dialog::on_save(wxCommandEvent& event)
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
             models::employer employer;
             employer.employer_name = std::string(mEmployerText.ToUTF8());
-            employer.date_modified_utc = util::unix_timestamp();
+            employer.date_modified_utc = util::UnixTimestamp();
             dbService.update_employer(employer);
         }
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
@@ -230,13 +224,13 @@ void employer_dialog::on_save(wxCommandEvent& event)
     EndModal(ids::ID_SAVE);
 }
 
-void employer_dialog::on_cancel(wxCommandEvent& event)
+void EmployerDialog::OnCancel(wxCommandEvent& event)
 {
-    bool areControlsEmpty = are_controls_empty();
+    bool areControlsEmpty = AreControlsEmpty();
     if (!areControlsEmpty) {
 
         int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"),
-                                  wxYES_NO | wxICON_QUESTION);
+            wxYES_NO | wxICON_QUESTION);
         if (answer == wxYES) {
             EndModal(wxID_CANCEL);
         }
@@ -245,7 +239,7 @@ void employer_dialog::on_cancel(wxCommandEvent& event)
     }
 }
 
-void employer_dialog::on_is_active_check(wxCommandEvent& event)
+void EmployerDialog::OnIsActiveCheck(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
         pEmployerCtrl->Enable();

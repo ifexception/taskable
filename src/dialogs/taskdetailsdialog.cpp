@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "task_details_dialog.h"
+#include "taskdetailsdialog.h"
 
 #include <wx/timectrl.h>
 #include <wx/dateevt.h>
@@ -31,28 +31,26 @@
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(task_details_dialog, wxDialog);
+wxIMPLEMENT_DYNAMIC_CLASS(TaskDetailsDialog, wxDialog);
 
-//wxDEFINE_EVENT(TASK_INSERTED_EVENT, wxCommandEvent);
-
-wxBEGIN_EVENT_TABLE(task_details_dialog, wxDialog)
-    EVT_BUTTON(ids::ID_SAVE, task_details_dialog::on_save)
-    EVT_BUTTON(wxID_CANCEL, task_details_dialog::on_cancel)
-    EVT_CHOICE(task_details_dialog::IDC_PROJECTCHOICE, task_details_dialog::on_project_choice)
-    EVT_TIME_CHANGED(task_details_dialog::IDC_STARTTIME, task_details_dialog::on_start_time_changed)
-    EVT_TIME_CHANGED(task_details_dialog::IDC_ENDTIME, task_details_dialog::on_end_time_changed)
-    EVT_CHECKBOX(task_details_dialog::IDC_ISACTIVE, task_details_dialog::on_is_active_check)
+wxBEGIN_EVENT_TABLE(TaskDetailsDialog, wxDialog)
+    EVT_BUTTON(ids::ID_SAVE, TaskDetailsDialog::OnSave)
+    EVT_BUTTON(wxID_CANCEL, TaskDetailsDialog::OnCancel)
+    EVT_CHOICE(TaskDetailsDialog::IDC_PROJECTCHOICE, TaskDetailsDialog::OnProjectChoice)
+    EVT_TIME_CHANGED(TaskDetailsDialog::IDC_STARTTIME, TaskDetailsDialog::OnStartTimeChange)
+    EVT_TIME_CHANGED(TaskDetailsDialog::IDC_ENDTIME, TaskDetailsDialog::OnEndTimeChange)
+    EVT_CHECKBOX(TaskDetailsDialog::IDC_ISACTIVE, TaskDetailsDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
-task_details_dialog::task_details_dialog(wxWindow* parent, bool isEdit, int taskDetailId, const wxString& name)
-    : mTaskDate(wxT(""))
+TaskDetailsDialog::TaskDetailsDialog(wxWindow* parent, bool isEdit, int taskDetailId, const wxString& name)
+    : mTaskDate(wxGetEmptyString())
     , bIsEdit(isEdit)
     , mTaskDetailId(taskDetailId)
     , mProjectId(-1)
     , mStartTime()
     , mEndTime()
     , mCategoryId(-1)
-    , mDescriptionText(wxT(""))
+    , mDescriptionText(wxGetEmptyString())
     , pParent(parent)
 {
     wxString title;
@@ -64,32 +62,32 @@ task_details_dialog::task_details_dialog(wxWindow* parent, bool isEdit, int task
         title = wxT("Add Task");
         size.Set(395, 488);
     }
-    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
-task_details_dialog::task_details_dialog()
+TaskDetailsDialog::TaskDetailsDialog()
 {}
 
-task_details_dialog::~task_details_dialog()
+TaskDetailsDialog::~TaskDetailsDialog()
 {
     Destroy();
 }
 
-void task_details_dialog::launch_task_details_dialog()
+void TaskDetailsDialog::Launch()
 {
     ShowModal();
 }
 
-bool task_details_dialog::create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
+bool TaskDetailsDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
 
     if (created) {
-        create_controls();
-        fill_controls();
+        CreateControls();
+        FillControls();
 
         if (bIsEdit) {
-            data_to_controls();
+            DataToControls();
         }
 
         GetSizer()->Fit(this);
@@ -101,7 +99,7 @@ bool task_details_dialog::create(wxWindow* parent, wxWindowID windowId, const wx
     return created;
 }
 
-void task_details_dialog::create_controls()
+void TaskDetailsDialog::CreateControls()
 {
     /* Window Sizing */
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -220,7 +218,7 @@ void task_details_dialog::create_controls()
     buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
 }
 
-void task_details_dialog::fill_controls()
+void TaskDetailsDialog::FillControls()
 {
     std::vector<models::project> projects;
 
@@ -236,7 +234,7 @@ void task_details_dialog::fill_controls()
     }
 }
 
-void task_details_dialog::data_to_controls()
+void TaskDetailsDialog::DataToControls()
 {
     services::db_service dbService;
     models::task_detail taskDetail;
@@ -257,23 +255,23 @@ void task_details_dialog::data_to_controls()
 
     pDurationCtrl->SetLabel(taskDetail.duration);
 
-    fill_category_control(taskDetail.project_id);
+    FillCategoryControl(taskDetail.project_id);
     pCategoryChoiceCtrl->SetStringSelection(taskDetail.category_name);
 
     pDescriptionCtrl->SetValue(taskDetail.description);
 
-    wxString dateCreatedString = util::convert_unix_timestamp_to_wxdatetime(taskDetail.date_created_utc);
+    wxString dateCreatedString = util::ConvertUnixTimestampToString(taskDetail.date_created_utc);
     wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
     pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
 
-    wxString dateUpdatedString = util::convert_unix_timestamp_to_wxdatetime(taskDetail.date_modified_utc);
+    wxString dateUpdatedString = util::ConvertUnixTimestampToString(taskDetail.date_modified_utc);
     wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
     pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
 
     pIsActiveCtrl->SetValue(taskDetail.is_active);
 }
 
-int task_details_dialog::get_task_id()
+int TaskDetailsDialog::GetTaskId()
 {
     wxDateTime date = wxDateTime::Now();
     mTaskDate = date.FormatISODate();
@@ -288,7 +286,7 @@ int task_details_dialog::get_task_id()
     return taskId;
 }
 
-bool task_details_dialog::validate()
+bool TaskDetailsDialog::Validate()
 {
     auto isStartAheadOfEnd = mStartTime.IsLaterThan(mEndTime);
     if (isStartAheadOfEnd) {
@@ -340,7 +338,7 @@ bool task_details_dialog::validate()
     return true;
 }
 
-bool task_details_dialog::are_controls_empty()
+bool TaskDetailsDialog::AreControlsEmpty()
 {
     bool isEmpty = mProjectId == -1 &&
         mStartTime == wxDefaultDateTime &&
@@ -350,36 +348,36 @@ bool task_details_dialog::are_controls_empty()
     return isEmpty;
 }
 
-void task_details_dialog::on_project_choice(wxCommandEvent& event)
+void TaskDetailsDialog::OnProjectChoice(wxCommandEvent& event)
 {
     pCategoryChoiceCtrl->Clear();
     pCategoryChoiceCtrl->AppendString(wxT("Select a category"));
     pCategoryChoiceCtrl->SetSelection(0);
     int projectId = (int)event.GetClientData(); // FIXME: loss of precision -> convert to intptr_t and then to int
 
-    fill_category_control(projectId);
+    FillCategoryControl(projectId);
 }
 
-void task_details_dialog::on_start_time_changed(wxDateEvent& event)
+void TaskDetailsDialog::OnStartTimeChange(wxDateEvent& event)
 {
     auto start = event.GetDate();
     auto end = pEndTimeCtrl->GetValue();
     if (end != wxDefaultDateTime) {
-        calculate_time_diff(start, end);
+        CaclulateTimeDiff(start, end);
     }
 }
 
-void task_details_dialog::on_end_time_changed(wxDateEvent& event)
+void TaskDetailsDialog::OnEndTimeChange(wxDateEvent& event)
 {
     auto end = event.GetDate();
     auto start = pStartTimeCtrl->GetValue();
 
     if (start != wxDefaultDateTime) {
-        calculate_time_diff(start, end);
+        CaclulateTimeDiff(start, end);
     }
 }
 
-void task_details_dialog::on_is_active_check(wxCommandEvent& event)
+void TaskDetailsDialog::OnIsActiveCheck(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
         pProjectChoiceCtrl->Enable();
@@ -398,7 +396,7 @@ void task_details_dialog::on_is_active_check(wxCommandEvent& event)
     }
 }
 
-void task_details_dialog::on_save(wxCommandEvent& event)
+void TaskDetailsDialog::OnSave(wxCommandEvent& event)
 {
     mProjectId = (int)pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
     mStartTime = pStartTimeCtrl->GetValue();
@@ -407,12 +405,12 @@ void task_details_dialog::on_save(wxCommandEvent& event)
     mCategoryId = (int)pCategoryChoiceCtrl->GetClientData(pCategoryChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
     mDescriptionText = pDescriptionCtrl->GetValue();
 
-    auto validationSuccess = validate();
+    auto validationSuccess = Validate();
     if (!validationSuccess) {
         return;
     }
 
-    int taskId = get_task_id();
+    int taskId = GetTaskId();
 
     services::db_service dbService;
     try {
@@ -425,7 +423,7 @@ void task_details_dialog::on_save(wxCommandEvent& event)
             taskDetail.end_time = endTime;
             taskDetail.duration = mDurationText;
             taskDetail.description = std::string(mDescriptionText.ToUTF8());
-            taskDetail.date_modified_utc = util::unix_timestamp();
+            taskDetail.date_modified_utc = util::UnixTimestamp();
             taskDetail.project_id = mProjectId;
             taskDetail.category_id = mCategoryId;
             dbService.update_task_detail(taskDetail);
@@ -438,14 +436,14 @@ void task_details_dialog::on_save(wxCommandEvent& event)
         // TODO Log exception
     }
 
-    on_task_saved(event);
+    OnTaskSaved(event);
 
     EndModal(ids::ID_SAVE);
 }
 
-void task_details_dialog::on_cancel(wxCommandEvent& event)
+void TaskDetailsDialog::OnCancel(wxCommandEvent& event)
 {
-    bool areControlsEmpty = are_controls_empty();
+    bool areControlsEmpty = AreControlsEmpty();
     if (!areControlsEmpty) {
 
         int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
@@ -457,21 +455,21 @@ void task_details_dialog::on_cancel(wxCommandEvent& event)
     }
 }
 
-void task_details_dialog::on_task_saved(wxCommandEvent& event)
+void TaskDetailsDialog::OnTaskSaved(wxCommandEvent& event)
 {
     wxCommandEvent eventForParent(ids::ID_TASK_INSERTED);
     eventForParent.SetEventObject(this);
     pParent->ProcessWindowEvent(eventForParent);
 }
 
-void task_details_dialog::calculate_time_diff(wxDateTime start, wxDateTime end)
+void TaskDetailsDialog::CaclulateTimeDiff(wxDateTime start, wxDateTime end)
 {
     auto diff = end.Subtract(start);
     auto formated = diff.Format(wxT("%H:%M:%S"));
     pDurationCtrl->SetLabelText(formated);
 }
 
-void task_details_dialog::fill_category_control(int projectId)
+void TaskDetailsDialog::FillCategoryControl(int projectId)
 {
     std::vector<models::category> categories;
     try {

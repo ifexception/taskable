@@ -23,31 +23,31 @@
 
 namespace app::dialog
 {
-class employer_dialog final : public wxDialog
+class EmployerDialog final : public wxDialog
 {
-    wxDECLARE_DYNAMIC_CLASS(employer_dialog);
+    wxDECLARE_DYNAMIC_CLASS(EmployerDialog);
     wxDECLARE_EVENT_TABLE();
 
   public:
-    employer_dialog() = default;
-    explicit employer_dialog(wxWindow* parent, bool isEdit = false, int employerId = 0, const wxString& name = "employer_dialog");
-    virtual ~employer_dialog();
+    EmployerDialog() = default;
+    explicit EmployerDialog(wxWindow* parent, bool isEdit = false, int employerId = 0, const wxString& name = "EmployerDialog");
+    virtual ~EmployerDialog();
 
-    void launch_employer_dialog();
+    void Launch();
 
   private:
-    bool create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point,
+    bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point,
                 const wxSize& size, long style, const wxString& name);
 
-    void create_controls();
-    void data_to_controls();
+    void CreateControls();
+    void DataToControls();
 
-    bool validate();
-    bool are_controls_empty();
+    bool Validate();
+    bool AreControlsEmpty();
 
-    void on_save(wxCommandEvent& event);
-    void on_cancel(wxCommandEvent& event);
-    void on_is_active_check(wxCommandEvent& event);
+    void OnSave(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
+    void OnIsActiveCheck(wxCommandEvent& event);
 
     wxTextCtrl* pEmployerCtrl;
     wxCheckBox* pIsActiveCtrl;

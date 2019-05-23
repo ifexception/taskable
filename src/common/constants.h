@@ -49,7 +49,7 @@ static std::string UnableToBackupPage = "Error while backing up";
 
 static std::string StatementInitialization = "Error initializing sqlite statement handle";
 
-static std::string NoRowToGet = "No row to get a column from. run() was not called, or returned false.";
+static std::string NoRowToGet = "No row to get a column from. Run() was not called, or returned false.";
 
 } // namespace Error
 } // namespace app::db::Constants

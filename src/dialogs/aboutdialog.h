@@ -23,19 +23,19 @@
 
 namespace app::dialog
 {
-class about_dialog : public wxDialog
+class AboutDialog : public wxDialog
 {
-    wxDECLARE_DYNAMIC_CLASS(about_dialog);
+    wxDECLARE_DYNAMIC_CLASS(AboutDialog);
     wxDECLARE_EVENT_TABLE();
 
   public:
-    about_dialog() = default;
-    explicit about_dialog(wxWindow* parent,
-        const wxString& name = "about_dialog");
-    virtual ~about_dialog();
+    AboutDialog() = default;
+    explicit AboutDialog(wxWindow* parent,
+        const wxString& name = "AboutDialog");
+    virtual ~AboutDialog();
 
   private:
-    bool create(wxWindow* parent,
+    bool Create(wxWindow* parent,
         wxWindowID windowId,
         const wxString& title,
         const wxPoint& point,
@@ -43,8 +43,8 @@ class about_dialog : public wxDialog
         long style,
         const wxString& name);
 
-    void create_controls();
+    void CreateControls();
 
-    void on_ok(wxCommandEvent& event);
+    void OnOK(wxCommandEvent& event);
 };
 } // namespace app::dialog

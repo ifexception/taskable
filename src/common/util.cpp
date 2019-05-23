@@ -26,7 +26,7 @@
 
 namespace app::util
 {
-std::vector<char> read_file(const std::string& file)
+std::vector<char> ReadFile(const std::string& file)
 {
     std::ifstream cfgFile(file.c_str());
     std::vector<char> buffer(std::istreambuf_iterator<char>{cfgFile}, std::istreambuf_iterator<char>());
@@ -35,7 +35,7 @@ std::vector<char> read_file(const std::string& file)
     return buffer;
 }
 
-wxString convert_unix_timestamp_to_wxdatetime(int timestamp)
+wxString ConvertUnixTimestampToString(int timestamp)
 {
     time_t time = static_cast<time_t>(timestamp);
     wxDateTime asDate(time);
@@ -43,7 +43,7 @@ wxString convert_unix_timestamp_to_wxdatetime(int timestamp)
     return dateString;
 }
 
-int unix_timestamp()
+int UnixTimestamp()
 {
     auto tp = std::chrono::system_clock::now();
     auto dur = tp.time_since_epoch();

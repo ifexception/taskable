@@ -24,38 +24,38 @@
 #include "app.h"
 
 #include "common/constants.h"
-#include "frame/main_frame.h"
+#include "frame/mainframe.h"
 
 namespace app
 {
-app::~app()
+App::~App()
 {
 }
 
-bool app::OnInit()
+bool App::OnInit()
 {
-    bool logDirectoryCreated = create_logs_directory();
+    bool logDirectoryCreated = CreateLogsDirectory();
     if (!logDirectoryCreated) {
         return false;
     }
 
-    bool loggingInitialized = init_logging();
+    bool loggingInitialized = InitializeLogging();
     if (!loggingInitialized) {
         return false;
     }
 
-    bool dbFileExists = database_file_exists();
+    bool dbFileExists = DatabaseFileExists();
     if (!dbFileExists)
     {
         return false;
     }
 
-    frame::main_frame* mf = new frame::main_frame(nullptr);
+    frame::MainFrame* mf = new frame::MainFrame(nullptr);
     mf->Show(true);
     return true;
 }
 
-bool app::create_logs_directory()
+bool App::CreateLogsDirectory()
 {
     wxString logDirectory(wxT("logs"));
     bool logDirectoryExists = wxDirExists(logDirectory);
@@ -66,7 +66,7 @@ bool app::create_logs_directory()
     return true;
 }
 
-bool app::init_logging()
+bool App::InitializeLogging()
 {
 #ifdef _DEBUG
     spdlog::set_level(spdlog::level::info);
@@ -89,11 +89,11 @@ bool app::init_logging()
 
     return true;
 }
-bool app::database_file_exists()
+bool App::DatabaseFileExists()
 {
-    bool dbFileExists = wxFileExists(wxT("tasks-tracker.db"));
+    bool dbFileExists = wxFileExists(wxT("tasks-tracker.db")); // FIXME: remove hardcoded string
     return dbFileExists;
 }
 } // namespace app
 
-wxIMPLEMENT_APP(app::app);
+wxIMPLEMENT_APP(app::App);

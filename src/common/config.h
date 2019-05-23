@@ -23,21 +23,21 @@
 
 namespace app::cfg
 {
-class config
+class Config
 {
   public:
-    static config& get_instance();
+    static Config& Get();
 
-    config(const config&) = delete;
-    config& operator=(const config&) = delete;
+    Config(const Config&) = delete;
+    Config& operator=(const Config&) = delete;
 
-    std::string get_connection_string() const;
+    std::string GetConnectionString() const;
 
   private:
-    config();
-    ~config() = default;
+    Config();
+    ~Config() = default;
 
-    void set_connection_string(const std::string& connectionString);
+    void SetConnectionString(const std::string& connectionString);
 
     std::string mConnectionString;
 };

@@ -17,12 +17,12 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "edit_list_dialog.h"
+#include "editlistdialog.h"
 
-#include "employer_dialog.h"
-#include "client_dialog.h"
-#include "project_dialog.h"
-#include "category_dialog.h"
+#include "employerdialog.h"
+#include "clientdialog.h"
+#include "projectdialog.h"
+#include "categorydialog.h"
 
 #include "../common/util.h"
 #include "../magic_enum/magic_enum.h"
@@ -30,51 +30,51 @@
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(edit_list_dialog, wxDialog);
+wxIMPLEMENT_DYNAMIC_CLASS(EditListDialog, wxDialog);
 
-wxBEGIN_EVENT_TABLE(edit_list_dialog, wxDialog)
-EVT_LIST_ITEM_ACTIVATED(edit_list_dialog::IDC_LIST, edit_list_dialog::on_item_double_click)
+wxBEGIN_EVENT_TABLE(EditListDialog, wxDialog)
+EVT_LIST_ITEM_ACTIVATED(EditListDialog::IDC_LIST, EditListDialog::OnItemDoubleClick)
 wxEND_EVENT_TABLE()
 
-edit_list_dialog::edit_list_dialog(wxWindow* parent, dialog_type dialogType, const wxString& name)
+EditListDialog::EditListDialog(wxWindow* parent, dialog_type dialogType, const wxString& name)
     : mType(dialogType)
     , mStrategy(nullptr)
 {
-    set_strategy();
+    SetStrategy();
     auto enumName = magic_enum::enum_name(mType);
     std::string nameStr = std::string(enumName);
     long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
-    bool success = create(parent, wxID_ANY, wxString(nameStr), wxDefaultPosition, mStrategy->get_size(), style, name);
+    bool success = Create(parent, wxID_ANY, wxString(nameStr), wxDefaultPosition, mStrategy->GetSize(), style, name);
 }
 
-edit_list_dialog::~edit_list_dialog()
+EditListDialog::~EditListDialog()
 {
     if (mStrategy) {
         delete mStrategy;
     }
 }
 
-void edit_list_dialog::launch_dialog()
+void EditListDialog::Launch()
 {
     ShowModal();
 }
 
-bool edit_list_dialog::create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
+bool EditListDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
 {
-    bool created = Create(parent, windowId, title, position, size, style, name);
+    bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
     if (created) {
-        create_controls();
-        data_to_controls();
+        CreateControls();
+        DataToControls();
 
         GetSizer()->Fit(this);
         // SetIcon();
         Center();
     }
 
-    return false;
+    return created;
 }
 
-void edit_list_dialog::create_controls()
+void EditListDialog::CreateControls()
 {
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(mainSizer);
@@ -91,41 +91,41 @@ void edit_list_dialog::create_controls()
     pListCtrl = new wxListCtrl(panel, IDC_LIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
     sizer->Add(pListCtrl, 1, wxEXPAND | wxALL, 5);
 
-    mStrategy->create_control(pListCtrl);
+    mStrategy->CreateControl(pListCtrl);
 }
 
-void edit_list_dialog::data_to_controls()
+void EditListDialog::DataToControls()
 {
-    mStrategy->data_to_control(pListCtrl);
+    mStrategy->DataToControl(pListCtrl);
 }
 
-void edit_list_dialog::on_item_double_click(wxListEvent& event)
+void EditListDialog::OnItemDoubleClick(wxListEvent& event)
 {
     int id = event.GetData();
 
     switch (mType) {
     case dialog_type::Employer:
     {
-        employer_dialog editEmployer(this, true, id);
-        editEmployer.launch_employer_dialog();
+        EmployerDialog editEmployer(this, true, id);
+        editEmployer.Launch();
         break;
     }
     case dialog_type::Client:
     {
-        client_dialog editClient(this, true, id);
-        editClient.launch_client_dialog();
+        ClientDialog editClient(this, true, id);
+        editClient.Launch();
         break;
     }
     case dialog_type::Project:
     {
-        project_dialog editProject(this, true, id);
-        editProject.launch_project_dialog();
+        ProjectDialog editProject(this, true, id);
+        editProject.Launch();
         break;
     }
     case dialog_type::Category:
     {
-        category_dialog editCategory(this, true, id);
-        editCategory.launch_dialog();
+        CategoryDialog editCategory(this, true, id);
+        editCategory.Launch();
         break;
     }
     default:
@@ -134,7 +134,7 @@ void edit_list_dialog::on_item_double_click(wxListEvent& event)
     EndDialog(wxID_OK);
 }
 
-void edit_list_dialog::set_strategy()
+void EditListDialog::SetStrategy()
 {
     if (mStrategy) {
         delete mStrategy;
@@ -142,27 +142,27 @@ void edit_list_dialog::set_strategy()
 
     switch (mType) {
     case dialog_type::Employer:
-        mStrategy = new employer_strategy();
+        mStrategy = new EmployerStrategy();
         break;
     case dialog_type::Client:
-        mStrategy = new client_strategy();
+        mStrategy = new ClientStrategy();
         break;
     case dialog_type::Project:
-        mStrategy = new project_strategy();
+        mStrategy = new ProjectStrategy();
         break;
     case dialog_type::Category:
-        mStrategy = new category_strategy();
+        mStrategy = new CategoryStrategy();
         break;
     default:
         break;
     }
 }
 
-strategy::strategy()
+Strategy::Strategy()
     : dbService()
 { }
 
-void employer_strategy::create_control(wxListCtrl* control)
+void EmployerStrategy::CreateControl(wxListCtrl* control)
 {
     wxListItem nameColumn;
     nameColumn.SetId(0);
@@ -181,7 +181,7 @@ void employer_strategy::create_control(wxListCtrl* control)
     control->InsertColumn(2, dateModifiedColumn);
 }
 
-void employer_strategy::data_to_control(wxListCtrl* control)
+void EmployerStrategy::DataToControl(wxListCtrl* control)
 {
     std::vector<models::employer> employers;
     try {
@@ -194,19 +194,19 @@ void employer_strategy::data_to_control(wxListCtrl* control)
     int columnIndex = 0;
     for (auto employer : employers) {
         listIndex = control->InsertItem(columnIndex++, employer.employer_name);
-        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(employer.date_created_utc));
-        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(employer.date_modified_utc));
+        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(employer.date_created_utc));
+        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(employer.date_modified_utc));
         control->SetItemPtrData(listIndex, employer.employer_id);
         columnIndex = 0;
     }
 }
 
-wxSize employer_strategy::get_size()
+wxSize EmployerStrategy::GetSize()
 {
     return wxSize(320, 260);
 }
 
-void client_strategy::create_control(wxListCtrl* control)
+void ClientStrategy::CreateControl(wxListCtrl* control)
 {
     wxListItem employerColumn;
     employerColumn.SetId(0);
@@ -231,7 +231,7 @@ void client_strategy::create_control(wxListCtrl* control)
     control->InsertColumn(3, dateModifiedColumn);
 }
 
-void client_strategy::data_to_control(wxListCtrl* control)
+void ClientStrategy::DataToControl(wxListCtrl* control)
 {
     std::vector<models::client> clients;
     try {
@@ -245,19 +245,19 @@ void client_strategy::data_to_control(wxListCtrl* control)
     for (auto client : clients) {
         listIndex = control->InsertItem(columnIndex++, client.employer_name);
         control->SetItem(listIndex, columnIndex++, client.client_name);
-        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(client.date_created_utc));
-        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(client.date_modified_utc));
+        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(client.date_created_utc));
+        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(client.date_modified_utc));
         control->SetItemPtrData(listIndex, client.client_id);
         columnIndex = 0;
     }
 }
 
-wxSize client_strategy::get_size()
+wxSize ClientStrategy::GetSize()
 {
     return wxSize(360, 260);
 }
 
-void project_strategy::create_control(wxListCtrl* control)
+void ProjectStrategy::CreateControl(wxListCtrl* control)
 {
     wxListItem employerColumn;
     employerColumn.SetId(0);
@@ -288,7 +288,7 @@ void project_strategy::create_control(wxListCtrl* control)
     control->InsertColumn(4, dateModifiedColumn);
 }
 
-void project_strategy::data_to_control(wxListCtrl* control)
+void ProjectStrategy::DataToControl(wxListCtrl* control)
 {
     std::vector<models::project> projects;
     try {
@@ -303,19 +303,19 @@ void project_strategy::data_to_control(wxListCtrl* control)
         listIndex = control->InsertItem(columnIndex++, project.employer_name);
         control->SetItem(listIndex, columnIndex++, project.client_name);
         control->SetItem(listIndex, columnIndex++, project.project_name);
-        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(project.date_created_utc));
-        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(project.date_modified_utc));
+        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(project.date_created_utc));
+        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(project.date_modified_utc));
         control->SetItemPtrData(listIndex, project.project_id);
         columnIndex = 0;
     }
 }
 
-wxSize project_strategy::get_size()
+wxSize ProjectStrategy::GetSize()
 {
     return wxSize(400, 260);
 }
 
-void category_strategy::create_control(wxListCtrl* control)
+void CategoryStrategy::CreateControl(wxListCtrl* control)
 {
     wxListItem projectColumn;
     projectColumn.SetId(0);
@@ -340,7 +340,7 @@ void category_strategy::create_control(wxListCtrl* control)
     control->InsertColumn(3, dateModifiedColumn);
 }
 
-void category_strategy::data_to_control(wxListCtrl * control)
+void CategoryStrategy::DataToControl(wxListCtrl * control)
 {
     std::vector<models::category> categories;
     try {
@@ -354,14 +354,14 @@ void category_strategy::data_to_control(wxListCtrl * control)
     for (auto category : categories) {
         listIndex = control->InsertItem(columnIndex++, category.project_name);
         control->SetItem(listIndex, columnIndex++, category.category_name);
-        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(category.date_created_utc));
-        control->SetItem(listIndex, columnIndex++, util::convert_unix_timestamp_to_wxdatetime(category.date_modified_utc));
+        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(category.date_created_utc));
+        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(category.date_modified_utc));
         control->SetItemPtrData(listIndex, category.category_id);
         columnIndex = 0;
     }
 }
 
-wxSize category_strategy::get_size()
+wxSize CategoryStrategy::GetSize()
 {
     return wxSize(360, 260);
 }

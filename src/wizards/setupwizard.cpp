@@ -21,31 +21,9 @@
 //  Contact:
 //    szymonwelgus at gmail dot com
 
-#pragma once
+#include "setupwizard.h"
 
-#include <memory>
-#include <wx/wx.h>
-
-#define FMT_HEADER_ONLY
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/daily_file_sink.h>
-
-namespace app
+namespace app::wizard
 {
-class App : public wxApp
-{
-  public:
-    App() = default;
-    virtual ~App();
 
-    bool OnInit() override;
-
-  private:
-    bool CreateLogsDirectory();
-    bool InitializeLogging();
-    bool DatabaseFileExists();
-
-    std::shared_ptr<spdlog::logger> pLogger;
-    // std::shared_ptr<configuration> pConfiguration;
-};
-} // namespace app
+}

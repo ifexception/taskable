@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "client_dialog.h"
+#include "clientdialog.h"
 
 #include <wx/statline.h>
 
@@ -29,15 +29,15 @@
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(client_dialog, wxDialog);
+wxIMPLEMENT_DYNAMIC_CLASS(ClientDialog, wxDialog);
 
-wxBEGIN_EVENT_TABLE(client_dialog, wxDialog)
-    EVT_BUTTON(ids::ID_SAVE, client_dialog::on_save)
-    EVT_BUTTON(wxID_CANCEL, client_dialog::on_cancel)
-    EVT_CHECKBOX(client_dialog::IDC_ISACTIVE, client_dialog::on_is_active_check)
+wxBEGIN_EVENT_TABLE(ClientDialog, wxDialog)
+    EVT_BUTTON(ids::ID_SAVE, ClientDialog::OnSave)
+    EVT_BUTTON(wxID_CANCEL, ClientDialog::OnCancel)
+    EVT_CHECKBOX(ClientDialog::IDC_ISACTIVE, ClientDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
-client_dialog::client_dialog(wxWindow* parent, bool isEdit, int clientId, const wxString& name)
+ClientDialog::ClientDialog(wxWindow* parent, bool isEdit, int clientId, const wxString& name)
     : mNameText(wxT(""))
     , mEmployerId(-1)
     , bIsEdit(isEdit)
@@ -54,28 +54,28 @@ client_dialog::client_dialog(wxWindow* parent, bool isEdit, int clientId, const 
         size.Set(320, 240);
     }
 
-    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, size, style, name);
+    bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, size, style, name);
 }
 
-client_dialog::~client_dialog()
+ClientDialog::~ClientDialog()
 {
     Destroy();
 }
 
-void client_dialog::launch_client_dialog()
+void ClientDialog::Launch()
 {
     ShowModal();
 }
 
-bool client_dialog::create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
+bool ClientDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
 {
-    bool created = Create(parent, windowId, title, position, size, style, name);
+    bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
 
     if (created) {
-        create_controls();
-        fill_controls();
+        CreateControls();
+        FillControls();
         if (bIsEdit) {
-            data_to_controls();
+            DataToControls();
         }
 
         GetSizer()->Fit(this);
@@ -86,7 +86,7 @@ bool client_dialog::create(wxWindow* parent, wxWindowID windowId, const wxString
     return created;
 }
 
-void client_dialog::create_controls()
+void ClientDialog::CreateControls()
 {
     /* Window Sizing */
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -164,7 +164,7 @@ void client_dialog::create_controls()
     buttonPanelSizer->Add(cancelButton, wxSizerFlags().Border(wxALL, 5));
 }
 
-void client_dialog::fill_controls()
+void ClientDialog::FillControls()
 {
     services::db_service dbService;
     std::vector<models::employer> employers;
@@ -179,7 +179,7 @@ void client_dialog::fill_controls()
     }
 }
 
-void client_dialog::data_to_controls()
+void ClientDialog::DataToControls()
 {
     services::db_service dbService;
     models::client client;
@@ -191,18 +191,18 @@ void client_dialog::data_to_controls()
     pNameCtrl->SetValue(client.client_name);
     pEmployerChoiceCtrl->SetStringSelection(client.employer_name);
 
-    wxString dateCreatedString = util::convert_unix_timestamp_to_wxdatetime(client.date_created_utc);
+    wxString dateCreatedString = util::ConvertUnixTimestampToString(client.date_created_utc);
     wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
     pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
 
-    wxString dateUpdatedString = util::convert_unix_timestamp_to_wxdatetime(client.date_modified_utc);
+    wxString dateUpdatedString = util::ConvertUnixTimestampToString(client.date_modified_utc);
     wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
     pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
 
     pIsActiveCtrl->SetValue(client.is_active);
 }
 
-bool client_dialog::validate()
+bool ClientDialog::Validate()
 {
     if (mNameText.length() > 255 || mNameText.length() < 2 || mNameText.empty()) {
         wxMessageBox(wxT("Client name is invalid"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
@@ -216,18 +216,18 @@ bool client_dialog::validate()
     return true;
 }
 
-bool client_dialog::are_controls_empty()
+bool ClientDialog::AreControlsEmpty()
 {
     bool isEmpty = mNameText.empty() && (mEmployerId == -1 || mEmployerId == 0);
     return isEmpty;
 }
 
-void client_dialog::on_save(wxCommandEvent & event)
+void ClientDialog::OnSave(wxCommandEvent & event)
 {
     mNameText = pNameCtrl->GetValue();
     mEmployerId = (int) pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
 
-    bool isValid = validate();
+    bool isValid = Validate();
     if (!isValid) {
         return;
     }
@@ -238,12 +238,12 @@ void client_dialog::on_save(wxCommandEvent & event)
             models::client client;
             client.client_id = mClientId;
             client.client_name = std::string(mNameText.ToUTF8());
-            client.date_modified_utc = util::unix_timestamp();
+            client.date_modified_utc = util::UnixTimestamp();
             client.employer_id = mEmployerId;
             clientService.update_client(client);
         }
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            clientService.delete_client(mClientId, util::unix_timestamp());
+            clientService.delete_client(mClientId, util::UnixTimestamp());
         }
         if (!bIsEdit) {
             clientService.create_new_client(std::string(mNameText.ToUTF8()), mEmployerId);
@@ -254,9 +254,9 @@ void client_dialog::on_save(wxCommandEvent & event)
     EndModal(ids::ID_SAVE);
 }
 
-void client_dialog::on_cancel(wxCommandEvent & event)
+void ClientDialog::OnCancel(wxCommandEvent & event)
 {
-    bool areControlsEmpty = are_controls_empty();
+    bool areControlsEmpty = AreControlsEmpty();
     if (!areControlsEmpty) {
 
         int answer = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Confirm"),
@@ -269,7 +269,7 @@ void client_dialog::on_cancel(wxCommandEvent & event)
     }
 }
 
-void client_dialog::on_is_active_check(wxCommandEvent& event)
+void ClientDialog::OnIsActiveCheck(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
         pNameCtrl->Enable();

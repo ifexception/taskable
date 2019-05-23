@@ -26,41 +26,40 @@ class wxDateEvent;
 
 namespace app::dialog
 {
-class task_details_dialog : public wxDialog
+class TaskDetailsDialog : public wxDialog
 {
-    wxDECLARE_DYNAMIC_CLASS(task_details_dialog);
-    wxDECLARE_EVENT_TABLE();
-    //wxDECLARE_EVENT(TASK_INSERTED_EVENT, wxCommandEvent);
-
 public:
-    task_details_dialog();
-    explicit task_details_dialog(wxWindow* parent, bool isEdit = false, int taskDetailId = 0, const wxString& name = wxT("task_details_dialog"));
-    virtual ~task_details_dialog();
+    TaskDetailsDialog();
+    explicit TaskDetailsDialog(wxWindow* parent, bool isEdit = false, int taskDetailId = 0, const wxString& name = wxT("TaskDetailsDialog"));
+    virtual ~TaskDetailsDialog();
 
-    void launch_task_details_dialog();
+    void Launch();
 
 private:
-    bool create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name);
+    wxDECLARE_DYNAMIC_CLASS(TaskDetailsDialog);
+    wxDECLARE_EVENT_TABLE();
 
-    void create_controls();
-    void fill_controls();
-    void data_to_controls();
+    bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name);
 
-    int get_task_id();
+    void CreateControls();
+    void FillControls();
+    void DataToControls();
 
-    bool validate();
-    bool are_controls_empty();
+    int GetTaskId();
 
-    void on_project_choice(wxCommandEvent& event);
-    void on_start_time_changed(wxDateEvent& event);
-    void on_end_time_changed(wxDateEvent& event);
-    void on_is_active_check(wxCommandEvent& event);
-    void on_save(wxCommandEvent& event);
-    void on_cancel(wxCommandEvent& event);
-    void on_task_saved(wxCommandEvent& event);
+    bool Validate();
+    bool AreControlsEmpty();
 
-    void calculate_time_diff(wxDateTime start, wxDateTime end);
-    void fill_category_control(int projectId);
+    void OnProjectChoice(wxCommandEvent& event);
+    void OnStartTimeChange(wxDateEvent& event);
+    void OnEndTimeChange(wxDateEvent& event);
+    void OnIsActiveCheck(wxCommandEvent& event);
+    void OnSave(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
+    void OnTaskSaved(wxCommandEvent& event);
+
+    void CaclulateTimeDiff(wxDateTime start, wxDateTime end);
+    void FillCategoryControl(int projectId);
 
     wxString mTaskDate;
     bool bIsEdit;

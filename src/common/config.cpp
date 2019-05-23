@@ -27,20 +27,20 @@ namespace app::cfg
 {
 const std::string CFG_FILE = "tasks-tracker.cfg.xml";
 
-config& config::get_instance()
+Config& Config::Get()
 {
-    static config instance;
+    static Config instance;
     return instance;
 }
 
-std::string config::get_connection_string() const
+std::string Config::GetConnectionString() const
 {
     return mConnectionString;
 }
 
-config::config()
+Config::Config()
 {
-    auto cfgFileContents = util::read_file(CFG_FILE);
+    auto cfgFileContents = util::ReadFile(CFG_FILE);
 
     rapidxml::xml_document<> cfgDocument;
     cfgDocument.parse<0>(&cfgFileContents[0]);
@@ -51,7 +51,7 @@ config::config()
 #ifdef _DEBUG
         if (std::string(node->first_attribute("type")->value()) == "debug") {
             auto connectionString = node->value();
-            set_connection_string(std::string(connectionString));
+            SetConnectionString(std::string(connectionString));
             break;
         }
 #else
@@ -64,7 +64,7 @@ config::config()
     }
 }
 
-void config::set_connection_string(const std::string& connectionString)
+void Config::SetConnectionString(const std::string& connectionString)
 {
     mConnectionString = connectionString;
 }

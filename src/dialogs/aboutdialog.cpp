@@ -17,75 +17,51 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "about_dialog.h"
+#include "aboutdialog.h"
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(about_dialog, wxDialog);
+wxIMPLEMENT_DYNAMIC_CLASS(AboutDialog, wxDialog);
 
-wxBEGIN_EVENT_TABLE(about_dialog, wxDialog)
+wxBEGIN_EVENT_TABLE(AboutDialog, wxDialog)
 wxEND_EVENT_TABLE()
 
-about_dialog::about_dialog(wxWindow* parent, const wxString &name)
+AboutDialog::AboutDialog(wxWindow* parent, const wxString &name)
 {
-    bool success = create(parent,
-        wxID_ANY,
-        wxT("About Timesheets Tracker"),
-        wxDefaultPosition,
-        wxSize(320, 240),
-        wxCAPTION | wxCLOSE_BOX,
-        name);
+    bool success = Create(parent, wxID_ANY, wxT("About Timesheets Tracker"), wxDefaultPosition, wxSize(320, 240), wxCAPTION | wxCLOSE_BOX, name);
 
     SetMinClientSize(wxSize(320, 240));
 }
 
-about_dialog::~about_dialog()
+AboutDialog::~AboutDialog()
 {
     Destroy();
 }
 
-bool about_dialog::create(wxWindow* parent,
-    wxWindowID windowId,
-    const wxString& title,
-    const wxPoint& point,
-    const wxSize& size,
-    long style,
-    const wxString& name)
+bool AboutDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
 {
-    bool created = wxDialog::Create(parent,
-        windowId,
-        title,
-        point,
-        size,
-        style,
-        name);
+    bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
 
     if (created) {
-        create_controls();
+        CreateControls();
 
-        Centre();
+        Center();
         ShowModal();
     }
 
     return created;
 }
 
-void about_dialog::create_controls()
+void AboutDialog::CreateControls()
 {
     wxPanel* panel = new wxPanel(this, -1);
 
     wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer* hbox = new wxBoxSizer(wxHORIZONTAL);
 
-    wxStaticBox* staticBox = new wxStaticBox(panel,
-            wxID_ANY,
-            wxT("About Timesheets Tracker"),
-            wxPoint(5, 5),
-            wxSize(240, 140));
+    wxStaticBox* staticBox = new wxStaticBox(panel, wxID_ANY, wxT("About Tasks Tracker"), wxPoint(5, 5), wxSize(240, 140));
 
-    wxButton* okButton = new wxButton(this,
-        wxID_OK,
-        wxT("&Ok"));
+    wxButton* okButton = new wxButton(this, wxID_OK, wxT("&Ok"));
 
     okButton->SetDefault();
     okButton->SetFocus();

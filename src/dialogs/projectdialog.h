@@ -23,46 +23,54 @@
 
 namespace app::dialog
 {
-class client_dialog : public wxDialog
+class ProjectDialog final : public wxDialog
 {
-    wxDECLARE_DYNAMIC_CLASS(client_dialog);
-    wxDECLARE_EVENT_TABLE();
-
 public:
-    client_dialog() = default;
-    explicit client_dialog(wxWindow *parent, bool isEdit = false, int clientId = 0, const wxString &name = "client_dialog");
-    virtual ~client_dialog();
+    ProjectDialog() = default;
+    explicit ProjectDialog(wxWindow* parent, bool isEdit = false, int projectId = 0, const wxString& name = "ProjectDialog");
+    virtual ~ProjectDialog();
 
-    void launch_client_dialog();
+    void Launch();
 
 private:
-    bool create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
-    void create_controls();
-    void fill_controls();
-    void data_to_controls();
+    wxDECLARE_DYNAMIC_CLASS(ProjectDialog);
+    wxDECLARE_EVENT_TABLE();
 
-    bool validate();
-    bool are_controls_empty();
+    bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
 
-    void on_save(wxCommandEvent &event);
-    void on_cancel(wxCommandEvent &event);
-    void on_is_active_check(wxCommandEvent& event);
+    void CreateControls();
+    void FillControls();
+    void DataToControls();
 
-    wxTextCtrl *pNameCtrl;
-    wxComboBox *pEmployerChoiceCtrl;
+    bool Validate();
+    bool AreControlsEmpty();
+
+    void OnEmployerSelect(wxCommandEvent& event);
+    void OnSave(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
+    void OnIsActiveCheck(wxCommandEvent& event);
+
+    wxTextCtrl* pNameCtrl;
+    wxTextCtrl* pDisplayNameCtrl;
+    wxChoice* pEmployerChoiceCtrl;
+    wxChoice* pClientChoiceCtrl;
     wxCheckBox* pIsActiveCtrl;
     wxStaticText* pDateCreatedTextCtrl;
     wxStaticText* pDateUpdatedTextCtrl;
 
     wxString mNameText;
+    wxString mDisplayNameText;
     int mEmployerId;
-    bool bIsEdit;
     int mClientId;
+    int mProjectId;
+    bool bIsEdit;
 
     enum
     {
         IDC_NAME,
-        IDC_EMPLOYER,
+        IDC_DISPLAYNAME,
+        IDC_EMPLOYERCHOICE,
+        IDC_CLIENTCHOICE,
         IDC_ISACTIVE
     };
 };

@@ -17,16 +17,16 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "main_frame.h"
+#include "mainframe.h"
 
 #include "../common/ids.h"
-#include "../dialogs/about_dialog.h"
-#include "../dialogs/task_details_dialog.h"
-#include "../dialogs/employer_dialog.h"
-#include "../dialogs/client_dialog.h"
-#include "../dialogs/project_dialog.h"
-#include "../dialogs/category_dialog.h"
-#include "../dialogs/edit_list_dialog.h"
+#include "../dialogs/aboutdialog.h"
+#include "../dialogs/taskdetailsdialog.h"
+#include "../dialogs/employerdialog.h"
+#include "../dialogs/clientdialog.h"
+#include "../dialogs/projectdialog.h"
+#include "../dialogs/categorydialog.h"
+#include "../dialogs/editlistdialog.h"
 #include "../services/db_service.h"
 #include "../db/database_exception.h"
 
@@ -38,43 +38,43 @@ const int ProjectId = static_cast<int>(ids::MenuIds::ProjectMenuId);
 const int ClientId = static_cast<int>(ids::MenuIds::ClientMenuId);
 const int CategoryId = static_cast<int>(ids::MenuIds::CategoryMenuId);
 
-wxBEGIN_EVENT_TABLE(main_frame, wxFrame)
-    EVT_MENU(wxID_ABOUT, main_frame::on_about)
-    EVT_MENU(TaskId, main_frame::on_new_task)
-    EVT_MENU(EmployerId, main_frame::on_new_employer)
-    EVT_MENU(ProjectId, main_frame::on_new_project)
-    EVT_MENU(ClientId, main_frame::on_new_client)
-    EVT_MENU(CategoryId, main_frame::on_new_category)
-    EVT_MENU(ids::ID_EDIT_EMPLOYER, main_frame::on_edit_employer)
-    EVT_MENU(ids::ID_EDIT_CLIENT, main_frame::on_edit_client)
-    EVT_MENU(ids::ID_EDIT_PROJECT, main_frame::on_edit_project)
-    EVT_MENU(ids::ID_EDIT_CATEGORY, main_frame::on_edit_category)
-    EVT_LIST_ITEM_ACTIVATED(main_frame::IDC_LIST, main_frame::on_item_double_click)
-    EVT_COMMAND(main_frame::IDC_LIST, ids::ID_TASK_INSERTED, main_frame::on_task_inserted)
+wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
+    EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
+    EVT_MENU(TaskId, MainFrame::OnNewTask)
+    EVT_MENU(EmployerId, MainFrame::OnNewEmployer)
+    EVT_MENU(ProjectId, MainFrame::OnNewProject)
+    EVT_MENU(ClientId, MainFrame::OnNewClient)
+    EVT_MENU(CategoryId, MainFrame::OnNewCategory)
+    EVT_MENU(ids::ID_EDIT_EMPLOYER, MainFrame::OnEditEmployer)
+    EVT_MENU(ids::ID_EDIT_CLIENT, MainFrame::OnEditClient)
+    EVT_MENU(ids::ID_EDIT_PROJECT, MainFrame::OnEditProject)
+    EVT_MENU(ids::ID_EDIT_CATEGORY, MainFrame::OnEditCategory)
+    EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
+    EVT_COMMAND(MainFrame::IDC_LIST, ids::ID_TASK_INSERTED, MainFrame::OnTaskInserted)
 wxEND_EVENT_TABLE()
 
-main_frame::main_frame(wxWindow* parent, const wxString& name)
+MainFrame::MainFrame(wxWindow* parent, const wxString& name)
     : wxFrame(parent, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(700, 500), wxDEFAULT_FRAME_STYLE, name)
 {
-    bool success = create(/*parent, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(640, 480), wxDEFAULT_FRAME_STYLE, name*/);
+    bool success = Create(/*parent, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(640, 480), wxDEFAULT_FRAME_STYLE, name*/);
     SetMinClientSize(wxSize(640, 480));
 }
 
-main_frame::~main_frame()
+MainFrame::~MainFrame()
 {}
 
-bool main_frame::create(/*wxWindow * parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name*/)
+bool MainFrame::Create(/*wxWindow * parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name*/)
 {
     //bool created = new wxFrame(parent, windowId, title, point, size, style, name);
     //if (created) {
-    create_controls();
-    data_to_controls();
+    CreateControls();
+    DataToControls();
     //}
     //return created;
     return true;
 }
 
-void main_frame::create_controls()
+void MainFrame::CreateControls()
 {
     /* Status Bar Control */
     CreateStatusBar(1);
@@ -158,90 +158,90 @@ void main_frame::create_controls()
     pListCtrl->InsertColumn(6, descriptionColumn);
 }
 
-void main_frame::data_to_controls()
+void MainFrame::DataToControls()
 {
-    refresh_items();
+    RefreshItems();
 }
 
-void main_frame::on_about(wxCommandEvent& event)
+void MainFrame::OnAbout(wxCommandEvent& event)
 {
-    dialog::about_dialog about(nullptr);
+    dialog::AboutDialog about(nullptr);
 }
 
-void main_frame::on_close(wxCommandEvent& event)
+void MainFrame::OnClose(wxCommandEvent& event)
 {
     Close(true);
 }
 
-void main_frame::on_new_task(wxCommandEvent& event)
+void MainFrame::OnNewTask(wxCommandEvent& event)
 {
-    dialog::task_details_dialog newTask(this);
-    newTask.launch_task_details_dialog();
+    dialog::TaskDetailsDialog newTask(this);
+    newTask.Launch();
 }
 
-void main_frame::on_new_employer(wxCommandEvent& event)
+void MainFrame::OnNewEmployer(wxCommandEvent& event)
 {
-    dialog::employer_dialog newEmployer(this);
-    newEmployer.launch_employer_dialog();
+    dialog::EmployerDialog newEmployer(this);
+    newEmployer.Launch();
 }
 
-void main_frame::on_new_client(wxCommandEvent& event)
+void MainFrame::OnNewClient(wxCommandEvent& event)
 {
-    dialog::client_dialog newClient(this);
-    newClient.launch_client_dialog();
+    dialog::ClientDialog newClient(this);
+    newClient.Launch();
 }
 
-void main_frame::on_new_project(wxCommandEvent& event)
+void MainFrame::OnNewProject(wxCommandEvent& event)
 {
-    dialog::project_dialog newProject(this);
-    newProject.launch_project_dialog();
+    dialog::ProjectDialog newProject(this);
+    newProject.Launch();
 }
 
-void main_frame::on_new_category(wxCommandEvent& event)
+void MainFrame::OnNewCategory(wxCommandEvent& event)
 {
-    dialog::category_dialog categoryDialog(this);
-    categoryDialog.launch_dialog();
+    dialog::CategoryDialog categoryDialog(this);
+    categoryDialog.Launch();
 }
 
-void main_frame::on_edit_employer(wxCommandEvent& event)
+void MainFrame::OnEditEmployer(wxCommandEvent& event)
 {
-    dialog::edit_list_dialog employerEdit(this, dialog::dialog_type::Employer);
-    employerEdit.launch_dialog();
+    dialog::EditListDialog employerEdit(this, dialog::dialog_type::Employer);
+    employerEdit.Launch();
 }
 
-void main_frame::on_edit_client(wxCommandEvent & event)
+void MainFrame::OnEditClient(wxCommandEvent & event)
 {
-    dialog::edit_list_dialog clientEdit(this, dialog::dialog_type::Client);
-    clientEdit.launch_dialog();
+    dialog::EditListDialog clientEdit(this, dialog::dialog_type::Client);
+    clientEdit.Launch();
 }
 
-void main_frame::on_edit_project(wxCommandEvent & event)
+void MainFrame::OnEditProject(wxCommandEvent & event)
 {
-    dialog::edit_list_dialog projectEdit(this, dialog::dialog_type::Project);
-    projectEdit.launch_dialog();
+    dialog::EditListDialog projectEdit(this, dialog::dialog_type::Project);
+    projectEdit.Launch();
 }
 
-void main_frame::on_edit_category(wxCommandEvent & event)
+void MainFrame::OnEditCategory(wxCommandEvent & event)
 {
-    dialog::edit_list_dialog categoryEdit(this, dialog::dialog_type::Category);
-    categoryEdit.launch_dialog();
+    dialog::EditListDialog categoryEdit(this, dialog::dialog_type::Category);
+    categoryEdit.Launch();
 }
 
-void main_frame::on_task_inserted(wxCommandEvent& event)
+void MainFrame::OnTaskInserted(wxCommandEvent& event)
 {
     pListCtrl->DeleteAllItems();
 
-    refresh_items();
+    RefreshItems();
 }
 
-void main_frame::on_item_double_click(wxListEvent& event)
+void MainFrame::OnItemDoubleClick(wxListEvent& event)
 {
     int taskDetailId = event.GetData();
-    dialog::task_details_dialog editTask(this, true, taskDetailId);
-    editTask.launch_task_details_dialog();
+    dialog::TaskDetailsDialog editTask(this, true, taskDetailId);
+    editTask.Launch();
 }
 
-void main_frame::refresh_items()
+void MainFrame::RefreshItems()
 {
     wxDateTime date = wxDateTime::Now();
     wxString dateString = date.FormatISODate();

@@ -23,55 +23,50 @@
 
 namespace app::dialog
 {
-class project_dialog : public wxDialog
+class CategoryDialog : public wxDialog
 {
 public:
-    project_dialog() = default;
-    explicit project_dialog(wxWindow* parent, bool isEdit = false, int projectId = 0, const wxString& name = "project_dialog");
-    virtual ~project_dialog();
+    CategoryDialog() = default;
+    explicit CategoryDialog(wxWindow* parent, bool isEdit = false, int categoryId = 0, const wxString& name = "CategoryDialog");
+    virtual ~CategoryDialog();
 
-    void launch_project_dialog();
+    void Launch();
 
 private:
-    wxDECLARE_DYNAMIC_CLASS(project_dialog);
+    wxDECLARE_DYNAMIC_CLASS(CategoryDialog);
     wxDECLARE_EVENT_TABLE();
 
-    bool create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
+    bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
+    void CreateControls();
+    void FillControls();
+    void DataToControls();
 
-    void create_controls();
-    void fill_controls();
-    void data_to_controls();
+    bool Validate();
+    bool AreControlsEmpty();
 
-    bool validate();
-    bool are_controls_empty();
+    void OnSave(wxCommandEvent &event);
+    void OnCancel(wxCommandEvent &event);
+    void OnIsActiveCheck(wxCommandEvent& event);
 
-    void on_employer_select(wxCommandEvent& event);
-    void on_save(wxCommandEvent& event);
-    void on_cancel(wxCommandEvent& event);
-    void on_is_active_check(wxCommandEvent& event);
-
+    wxChoice* pProjectChoiceCtrl;
     wxTextCtrl* pNameCtrl;
-    wxTextCtrl* pDisplayNameCtrl;
-    wxChoice* pEmployerChoiceCtrl;
-    wxChoice* pClientChoiceCtrl;
+    wxTextCtrl* pDescriptionCtrl;
     wxCheckBox* pIsActiveCtrl;
     wxStaticText* pDateCreatedTextCtrl;
     wxStaticText* pDateUpdatedTextCtrl;
 
+    int mProjectChoiceId;
     wxString mNameText;
-    wxString mDisplayNameText;
-    int mEmployerId;
-    int mClientId;
-    int mProjectId;
+    wxString mDescriptionText;
     bool bIsEdit;
+    int mCategoryId;
 
     enum
     {
+        IDC_PROJECTCHOICE,
         IDC_NAME,
-        IDC_DISPLAYNAME,
-        IDC_EMPLOYERCHOICE,
-        IDC_CLIENTCHOICE,
+        IDC_DESCRIPTION,
         IDC_ISACTIVE
     };
 };
-} // namespace app::dialog
+} // app::dialog

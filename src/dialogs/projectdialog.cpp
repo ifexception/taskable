@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "project_dialog.h"
+#include "projectdialog.h"
 
 #include <wx/statline.h>
 
@@ -29,16 +29,16 @@
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(project_dialog, wxDialog)
+wxIMPLEMENT_DYNAMIC_CLASS(ProjectDialog, wxDialog)
 
-wxBEGIN_EVENT_TABLE(project_dialog, wxDialog)
-EVT_BUTTON(ids::ID_SAVE, project_dialog::on_save)
-EVT_BUTTON(wxID_CANCEL, project_dialog::on_cancel)
-EVT_CHOICE(project_dialog::IDC_EMPLOYERCHOICE, project_dialog::on_employer_select)
-EVT_CHECKBOX(project_dialog::IDC_ISACTIVE, project_dialog::on_is_active_check)
+wxBEGIN_EVENT_TABLE(ProjectDialog, wxDialog)
+    EVT_BUTTON(ids::ID_SAVE, ProjectDialog::OnSave)
+    EVT_BUTTON(wxID_CANCEL, ProjectDialog::OnCancel)
+    EVT_CHOICE(ProjectDialog::IDC_EMPLOYERCHOICE, ProjectDialog::OnEmployerSelect)
+    EVT_CHECKBOX(ProjectDialog::IDC_ISACTIVE, ProjectDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
-project_dialog::project_dialog(wxWindow* parent, bool isEdit, int projectId, const wxString& name)
+ProjectDialog::ProjectDialog(wxWindow* parent, bool isEdit, int projectId, const wxString& name)
     : mNameText(wxGetEmptyString())
     , mDisplayNameText(wxGetEmptyString())
     , mEmployerId(-1)
@@ -55,38 +55,38 @@ project_dialog::project_dialog(wxWindow* parent, bool isEdit, int projectId, con
         title = wxT("Add Project");
         size.Set(420, 440);
     }
-    bool success = create(parent, wxID_ANY, title, wxDefaultPosition, wxSize(420, 380), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, wxSize(420, 380), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
-project_dialog::~project_dialog()
+ProjectDialog::~ProjectDialog()
 {
     Destroy();
 }
 
-void project_dialog::launch_project_dialog()
+void ProjectDialog::Launch()
 {
     ShowModal();
 }
 
-bool project_dialog::create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
+bool ProjectDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
 
     if (created) {
-        create_controls();
-        fill_controls();
+        CreateControls();
+        FillControls();
         if (bIsEdit) {
-            data_to_controls();
+            DataToControls();
         }
 
         GetSizer()->Fit(this);
         //SetIcon();
-        Centre();
+        Center();
     }
     return created;
 }
 
-void project_dialog::create_controls()
+void ProjectDialog::CreateControls()
 {
     /* Window Sizing */
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -185,7 +185,7 @@ void project_dialog::create_controls()
     buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
 }
 
-void project_dialog::fill_controls()
+void ProjectDialog::FillControls()
 {
     std::vector<models::employer> employers;
     services::db_service dbService;
@@ -200,7 +200,7 @@ void project_dialog::fill_controls()
     }
 }
 
-void project_dialog::data_to_controls()
+void ProjectDialog::DataToControls()
 {
     services::db_service dbService;
     models::project project;
@@ -237,18 +237,18 @@ void project_dialog::data_to_controls()
         pClientChoiceCtrl->SetStringSelection(project.client_name);
     }
 
-    wxString dateCreatedString = util::convert_unix_timestamp_to_wxdatetime(project.date_created_utc);
+    wxString dateCreatedString = util::ConvertUnixTimestampToString(project.date_created_utc);
     wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
     pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
 
-    wxString dateUpdatedString = util::convert_unix_timestamp_to_wxdatetime(project.date_modified_utc);
+    wxString dateUpdatedString = util::ConvertUnixTimestampToString(project.date_modified_utc);
     wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
     pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
 
     pIsActiveCtrl->SetValue(project.is_active);
 }
 
-bool project_dialog::validate()
+bool ProjectDialog::Validate()
 {
     if (mNameText.length() > 255 || mNameText.length() < 2 || mNameText.empty()) {
         wxMessageBox(wxT("Project name is invalid"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
@@ -269,13 +269,13 @@ bool project_dialog::validate()
     return true;
 }
 
-bool project_dialog::are_controls_empty()
+bool ProjectDialog::AreControlsEmpty()
 {
     bool isEmpty = mNameText.empty() && mDisplayNameText.empty();
     return isEmpty;
 }
 
-void project_dialog::on_employer_select(wxCommandEvent& event)
+void ProjectDialog::OnEmployerSelect(wxCommandEvent& event)
 {
     pClientChoiceCtrl->Clear();
     pClientChoiceCtrl->AppendString(wxT("Select a client"));
@@ -298,7 +298,7 @@ void project_dialog::on_employer_select(wxCommandEvent& event)
     }
 }
 
-void project_dialog::on_save(wxCommandEvent& event)
+void ProjectDialog::OnSave(wxCommandEvent& event)
 {
     mNameText = pNameCtrl->GetValue();
     mDisplayNameText = pDisplayNameCtrl->GetValue();
@@ -306,7 +306,7 @@ void project_dialog::on_save(wxCommandEvent& event)
     mEmployerId = (int) pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
     mClientId = (int) pClientChoiceCtrl->GetClientData(pClientChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
 
-    bool isValid = validate();
+    bool isValid = Validate();
     if (!isValid) {
         return;
     }
@@ -326,7 +326,7 @@ void project_dialog::on_save(wxCommandEvent& event)
             dbService.update_project(project);
         }
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            dbService.delete_project(mProjectId, util::unix_timestamp());
+            dbService.delete_project(mProjectId, util::UnixTimestamp());
         }
         if (!bIsEdit) {
             if (mClientId == -1 || mClientId == 0) {
@@ -342,9 +342,9 @@ void project_dialog::on_save(wxCommandEvent& event)
     EndModal(ids::ID_SAVE);
 }
 
-void project_dialog::on_cancel(wxCommandEvent& event)
+void ProjectDialog::OnCancel(wxCommandEvent& event)
 {
-    bool areControlsEmpty = are_controls_empty();
+    bool areControlsEmpty = AreControlsEmpty();
     if (!areControlsEmpty) {
 
         int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
@@ -355,7 +355,7 @@ void project_dialog::on_cancel(wxCommandEvent& event)
         EndModal(wxID_CANCEL);
     }
 }
-void project_dialog::on_is_active_check(wxCommandEvent& event)
+void ProjectDialog::OnIsActiveCheck(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
         pNameCtrl->Enable();
