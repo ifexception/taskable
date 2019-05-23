@@ -5,18 +5,16 @@ A desktop app to help you manage how you've spent your time on tasks during the 
 Ensure you have downloaded a suitable [version](https://cmake.org/download/) of CMake. CMake **3.8** is the minimum supported version.
 
 ### Windows
-_This guide assumes you are using Visual Studio with CMake_
-
-First, go to [vcpkg](https://github.com/Microsoft/vcpkg) and download the package manager.
+You will need [vcpkg](https://github.com/Microsoft/vcpkg) to compile and manage the dependencies.
 Once you've installed and configured `vcpkg`, install the following libraries:
 
-    * sqlite3 (3.0 +)
-    * spdlog (1.2 +)
-    * wxwidgets (3.1 +)
-    * catch2 (2.4 +) 
+ * sqlite3 (3.0 +)
+ * spdlog (1.2 +)
+ * wxwidgets (3.1 +)
+ * rapidxml (1.13 +)
 
 Ensure that when you have started Visual Studio that the _CMake Server_ does not give any warnings about missing packages.
-You can now use Visual Studio to build the project. 
+You can now use Visual Studio to build the project. Currently only _Visual Studio 2017_ is supported to the version of CMake being used by Visual Studio.
 
 ### Linux
 `//TODO`
@@ -24,10 +22,10 @@ You can now use Visual Studio to build the project.
 ## Installing
 ### Building from source
 #### Windows
-    * Open the folder in Visual Studio
-    * Switch to `x86-Release` mode
-    * Build the project
-    * Run the install target
+* Open the folder in Visual Studio
+* Switch to `x86-Release` mode
+* Build the project
+* ~Run the install target~ TODO
 
 #### Linux
 `//TODO`
