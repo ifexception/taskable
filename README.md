@@ -1,4 +1,4 @@
-# Tasks Tracker Desktop App
+# Tasks Tracker
 A desktop app to help you manage how you've spent your time on tasks during the day by tracking the time you've spent on tasks throughout the day
 
 ## Getting Started
@@ -40,8 +40,5 @@ _Still work in progress, no release timeline yet_
 This project is licensed under the GPL-3 license - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgements
-    * Inspiration taken from SQLiteCpp [1]
-    *
 
-[1] - [SQLiteCPP](https://github.com/SRombauts/SQLiteCpp)
 
