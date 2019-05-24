@@ -31,12 +31,32 @@ class SetupWizard final : public wxWizard
 public:
     SetupWizard() = default;
     explicit SetupWizard(wxFrame* frame);
-    virtual ~SetupWizard();
+    virtual ~SetupWizard() = default;
 
     void Run();
 
+    wxString GetEmployer() const;
+    void SetEmployer(const wxString& employer);
+    int GetEmployerId() const;
+    void SetEmployerId(const int employerId);
+    wxString GetClient() const;
+    void SetClient(const wxString& client);
+    int GetClientId() const;
+    void SetClientId(const int clientId);
+    wxString GetProject() const;
+    void SetProject(const wxString& project);
+    int GetProjectId() const;
+    void SetProjectId(const int projectId);
+
 private:
     wxWizardPageSimple* pPage1;
+
+    wxString mEmployer;
+    int mEmployerId;
+    wxString mClient;
+    int mClientId;
+    wxString mProject;
+    int mProjectId;
 };
 
 class AddEmployerAndClientPage final : public wxWizardPageSimple
@@ -44,7 +64,7 @@ class AddEmployerAndClientPage final : public wxWizardPageSimple
 public:
     AddEmployerAndClientPage() = default;
     AddEmployerAndClientPage(SetupWizard* parent);
-    virtual ~AddEmployerAndClientPage();
+    virtual ~AddEmployerAndClientPage() = default;
 
     bool TransferDataFromWindow() override;
 
@@ -59,7 +79,7 @@ class AddProjectPage final : public wxWizardPageSimple
 public:
     AddProjectPage() = default;
     explicit AddProjectPage(SetupWizard* parent);
-    virtual ~AddProjectPage();
+    virtual ~AddProjectPage() = default;
 
     bool TransferDataFromWindow() override;
 
@@ -74,7 +94,7 @@ class AddCategoriesPage final : public wxWizardPageSimple
 public:
     AddCategoriesPage() = default;
     explicit AddCategoriesPage(SetupWizard* parent);
-    virtual ~AddCategoriesPage();
+    virtual ~AddCategoriesPage() = default;
 
     bool TransferDataFromWindow() override;
 
