@@ -27,6 +27,12 @@
 
 namespace app::services
 {
+int db_service::get_last_insert_rowid()
+{
+    int id = (int) db_connection::get_instance().get_database()->get_last_rowid();
+    return id;
+}
+
 void db_service::create_new_employer(const std::string& employerName)
 {
     std::string cmd("INSERT INTO employers (name, is_active) VALUES (?, 1);");

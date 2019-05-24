@@ -36,6 +36,8 @@ struct db_service
     db_service() = default;
     ~db_service() = default;
 
+    int get_last_insert_rowid();
+
     void create_new_employer(const std::string& employerName);
 
     std::vector<models::employer> get_employers();
