@@ -163,7 +163,7 @@ bool AddEmployerAndClientPage::TransferDataFromWindow()
 {
     const wxString employer = pEmployerCtrl->GetValue().Trim();
     if (employer.empty()) {
-        wxMessageBox(wxT("An employer is required"), wxT(""), wxOK | wxICON_ERROR, this);
+        wxMessageBox(wxT("An employer is required"), wxT("TasksTracker"), wxOK | wxICON_ERROR, this);
         return false;
     }
 
@@ -196,15 +196,91 @@ bool AddEmployerAndClientPage::TransferDataFromWindow()
 }
 
 AddProjectPage::AddProjectPage(SetupWizard* parent)
-{ }
+    : wxWizardPageSimple(parent)
+    , pParent(parent)
+{
+    auto sizer = new wxBoxSizer(wxVERTICAL);
+
+    // TODO message to say adding info to %employer% and %client%
+    wxString infoMessage = wxGetEmptyString();
+    if (pParent->GetClientId() != 0) {
+        infoMessage = wxString::Format("Add a project for employer: %s and client: %s");
+    } else {
+        infoMessage = wxString::Format("Add a project for employer: %s");
+    }
+
+    auto infoText = new wxStaticText(this, wxID_ANY, infoMessage);
+    sizer->Add(infoText, 0, wxALL, 5);
+
+    auto projectText = new wxStaticText(this, wxID_ANY, wxT("Project:"));
+    sizer->Add(projectText, 0, wxALL, 5);
+
+    pNameCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), 0);
+    sizer->Add(pNameCtrl, 0, wxALL, 5);
+
+    wxString projectNameHelpMessage = wxT("Specify a descriptive project name.\n"
+        "A project is a undertaking of a business for a client or for itself carried out individually or in a group to achieve a business goal");
+    auto projectNameHelpText = new wxStaticText(this, wxID_ANY, projectNameHelpMessage);
+    sizer->Add(projectNameHelpText, 0, wxALL, 5);
+
+    auto displayNameText = new wxStaticText(this, wxID_ANY, wxT("Display Name:"));
+    sizer->Add(displayNameText, 0, wxALL, 5);
+
+    pDisplayNameCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), 0);
+    sizer->Add(pDisplayNameCtrl, 0, wxALL, 5);
+
+    wxString displayNameHelpMessage = wxT("Specify a shortened version of the project name.\n"
+        "Similar to a project name, a display name is merely a shortened version of the project name to aid in readability, identification and display");
+    auto displayNameHelpText = new wxStaticText(this, wxID_ANY, displayNameHelpMessage);
+    sizer->Add(displayNameHelpText, 0, wxALL, 5);
+
+    SetSizer(sizer);
+    sizer->Fit(this);
+}
 
 bool AddProjectPage::TransferDataFromWindow()
 {
-    return false;
+    services::db_service dbService;
+
+    const wxString projectName = pNameCtrl->GetValue().Trim();
+    if (projectName.empty()) {
+        wxMessageBox(wxT("An project name is required"), wxT("TasksTracker"), wxOK | wxICON_ERROR, this);
+        return false;
+    }
+
+    const wxString displayName = pDisplayNameCtrl->GetValue().Trim();
+    if (displayName.empty()) {
+        wxMessageBox(wxT("An display name is required"), wxT("TasksTracker"), wxOK | wxICON_ERROR, this);
+        return false;
+    }
+
+    int projectId = 0;
+    try {
+        bool isAssociatedWithClient = pParent->GetClientId() != 0;
+        if (isAssociatedWithClient) {
+            int clientId = pParent->GetClientId();
+            dbService.create_new_project(std::string(projectName.ToUTF8()), std::string(displayName.ToUTF8()), pParent->GetEmployerId(), &clientId);
+        } else {
+            dbService.create_new_project(std::string(projectName.ToUTF8()), std::string(displayName.ToUTF8()), pParent->GetEmployerId(), nullptr);
+        }
+        projectId = dbService.get_last_insert_rowid();
+    } catch (const db::database_exception& e) {
+        // TODO log exception
+    }
+
+    pParent->SetProject(projectName);
+    pParent->SetProjectId(projectId);
+
+    return true;
 }
 
-AddCategoriesPage::AddCategoriesPage(SetupWizard * parent)
-{ }
+AddCategoriesPage::AddCategoriesPage(SetupWizard* parent)
+    : wxWizardPageSimple(parent)
+    , pParent(parent)
+{
+    auto sizer = new wxBoxSizer(wxVERTICAL);
+
+}
 
 bool AddCategoriesPage::TransferDataFromWindow()
 {
