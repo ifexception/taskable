@@ -204,9 +204,9 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
     // TODO message to say adding info to %employer% and %client%
     wxString infoMessage = wxGetEmptyString();
     if (pParent->GetClientId() != 0) {
-        infoMessage = wxString::Format("Add a project for employer: %s and client: %s");
+        infoMessage = wxString::Format("Add a project for employer: %s and client: %s", pParent->GetEmployer(), pParent->GetClient());
     } else {
-        infoMessage = wxString::Format("Add a project for employer: %s");
+        infoMessage = wxString::Format("Add a project for employer: %s", pParent->GetEmployer());
     }
 
     auto infoText = new wxStaticText(this, wxID_ANY, infoMessage);
@@ -280,10 +280,57 @@ AddCategoriesPage::AddCategoriesPage(SetupWizard* parent)
 {
     auto sizer = new wxBoxSizer(wxVERTICAL);
 
+    auto infoMessage = wxString::Format("Add a category to the project: %s", pParent->GetProject());
+    auto infoText = new wxStaticText(this, wxID_ANY, infoMessage);
+    sizer->Add(infoText, 0, wxALL, 5);
+
+    auto categoryText = new wxStaticText(this, wxID_ANY, wxT("Category:"));
+    sizer->Add(categoryText, 0, wxALL, 5);
+
+    pNameCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), 0);
+    sizer->Add(pNameCtrl, 0, wxALL, 5);
+
+    wxString categoryNameHelpMessage = wxT("Specify a category for the project.\n"
+        "A category is the specific type of task you worked on or did for said project, e.g. \"meetings\"");
+    auto categoryNameHelpText = new wxStaticText(this, wxID_ANY, categoryNameHelpMessage);
+    sizer->Add(categoryNameHelpText, 0, wxALL, 5);
+
+    auto descriptionText = new wxStaticText(this, wxID_ANY, wxT("Description:"));
+    sizer->Add(descriptionText, 0, wxALL, 5);
+
+    pDescriptionCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), 0);
+    sizer->Add(pDescriptionCtrl, 0, wxALL, 5);
+
+    wxString descriptionHelpMessage = wxT("Specify a description for the above category.\n"
+        "A description for the category helps you create a distinction between similar categories for different projects");
+    auto descriptionHelpText = new wxStaticText(this, wxID_ANY, descriptionHelpMessage);
+    sizer->Add(descriptionHelpText, 0, wxALL, 5);
+
+    SetSizer(sizer);
+    sizer->Fit(this);
 }
 
 bool AddCategoriesPage::TransferDataFromWindow()
 {
-    return false;
+    services::db_service dbService;
+    const wxString category = pNameCtrl->GetValue().Trim();
+    if (category.empty()) {
+        wxMessageBox(wxT("An category name is required"), wxT("TasksTracker"), wxOK | wxICON_ERROR, this);
+        return false;
+    }
+
+    const wxString description = pDescriptionCtrl->GetValue().Trim();
+    if (description.empty()) {
+        wxMessageBox(wxT("An description is required"), wxT("TasksTracker"), wxOK | wxICON_ERROR, this);
+        return false;
+    }
+
+    try {
+        dbService.create_new_category(pParent->GetProjectId(), std::string(category.ToUTF8()), std::string(description.ToUTF8()));
+    } catch (const db::database_exception& e) {
+        // TODO log exception
+    }
+
+    return true;
 }
 }
