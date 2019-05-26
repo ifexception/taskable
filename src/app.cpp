@@ -23,14 +23,15 @@
 
 #include "app.h"
 
+#include <wx/msw/registry.h>
+
 #include "common/constants.h"
 #include "frame/mainframe.h"
 
 namespace app
 {
 App::~App()
-{
-}
+{ }
 
 bool App::OnInit()
 {
@@ -45,12 +46,17 @@ bool App::OnInit()
     }
 
     bool dbFileExists = DatabaseFileExists();
-    if (!dbFileExists)
-    {
+    if (!dbFileExists) {
         return false;
     }
 
+    bool isInstalled = IsInstalled();
+
     frame::MainFrame* mf = new frame::MainFrame(nullptr);
+    if (!isInstalled) {
+        mf->OnStartUp();
+        return false;
+    }
     mf->Show(true);
     return true;
 }
@@ -75,7 +81,7 @@ bool App::InitializeLogging()
 #endif
 
     std::string logDirectory = std::string(Constants::LogsDirectory) + std::string("/") +
-                               std::string(Constants::LogsFilename);
+        std::string(Constants::LogsFilename);
     spdlog::flush_every(std::chrono::seconds(3));
     try {
         pLogger = spdlog::daily_logger_st(Constants::LoggerName, logDirectory);
@@ -93,6 +99,18 @@ bool App::DatabaseFileExists()
 {
     bool dbFileExists = wxFileExists(wxT("tasks-tracker.db")); // FIXME: remove hardcoded string
     return dbFileExists;
+}
+bool App::IsInstalled()
+{
+    wxRegKey key(wxRegKey::HKLM, "SOFTWARE\\TasksTracker");
+
+    if (key.Exists()) {
+        auto y = key.GetName();
+    } else {
+       auto x = key.Create();
+    }
+
+    return false;
 }
 } // namespace app
 

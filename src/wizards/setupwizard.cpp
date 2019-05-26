@@ -27,11 +27,12 @@
 
 #include "../db/database_exception.h"
 #include "../services/db_service.h"
+#include "setup.xpm"
 
 namespace app::wizard
 {
 SetupWizard::SetupWizard(wxFrame* frame)
-    : wxWizard(frame, wxID_ANY, wxT(""), wxNullBitmap, wxDefaultPosition, wxDEFAULT_DIALOG_STYLE)
+    : wxWizard(frame, wxID_ANY, wxT("Setup Wizard"), wxBitmap(setupwizardxpm), wxDefaultPosition, wxDEFAULT_DIALOG_STYLE)
     , pPage1(nullptr)
     , mEmployer(wxGetEmptyString())
     , mEmployerId(0)
@@ -42,19 +43,19 @@ SetupWizard::SetupWizard(wxFrame* frame)
 {
     pPage1 = new wxWizardPageSimple(this);
 
-    wxString welcomeString = wxT("This wizard will help you get started with Tasks Tracker.\n"
+   /* wxString welcomeString = wxT("This wizard will help you get started with Tasks Tracker.\n"
         "The next few pages will setup a employer, a client (which is optional), a project\n"
         " and a category\n. Please press \"Next\" to begin the process.");
 
-    new wxStaticText(this, wxID_ANY, welcomeString);
+    new wxStaticText(this, wxID_ANY, welcomeString);*/
 
     auto page2 = new AddEmployerAndClientPage(this);
-    auto page3 = new AddProjectPage(this);
-    auto page4 = new AddCategoriesPage(this);
+    // auto page3 = new AddProjectPage(this);
+    // auto page4 = new AddCategoriesPage(this);
 
     wxWizardPageSimple::Chain(pPage1, page2);
-    wxWizardPageSimple::Chain(page2, page3);
-    wxWizardPageSimple::Chain(page3, page4);
+    // wxWizardPageSimple::Chain(page2, page3);
+    // wxWizardPageSimple::Chain(page3, page4);
 
     GetPageAreaSizer()->Add(pPage1);
     this->CenterOnParent();

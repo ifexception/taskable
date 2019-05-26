@@ -44,8 +44,8 @@ class App : public wxApp
     bool CreateLogsDirectory();
     bool InitializeLogging();
     bool DatabaseFileExists();
+    bool IsInstalled();
 
     std::shared_ptr<spdlog::logger> pLogger;
-    // std::shared_ptr<configuration> pConfiguration;
 };
 } // namespace app

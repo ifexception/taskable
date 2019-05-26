@@ -29,6 +29,7 @@
 #include "../dialogs/editlistdialog.h"
 #include "../services/db_service.h"
 #include "../db/database_exception.h"
+#include "../wizards/setupwizard.h"
 
 namespace app::frame
 {
@@ -62,6 +63,13 @@ MainFrame::MainFrame(wxWindow* parent, const wxString& name)
 
 MainFrame::~MainFrame()
 {}
+
+void MainFrame::OnStartUp()
+{
+    auto wizard = new wizard::SetupWizard(this);
+    wizard->CenterOnParent();
+    wizard->Run();
+}
 
 bool MainFrame::Create(/*wxWindow * parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name*/)
 {

@@ -33,6 +33,8 @@ public:
 
     MainFrame& operator=(const MainFrame&) = delete;
 
+    void OnStartUp();
+
 private:
     wxDECLARE_EVENT_TABLE();
     bool Create(/*wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name*/);
