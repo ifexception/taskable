@@ -62,9 +62,6 @@ SetupWizard::SetupWizard(wxFrame* frame)
 bool SetupWizard::Run()
 {
     auto wizardSuccess = wxWizard::RunWizard(pPage1);
-    if (wizardSuccess) {
-        // TODO
-    }
     Destroy();
     return wizardSuccess;
 }
