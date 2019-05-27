@@ -217,19 +217,19 @@ void MainFrame::OnEditEmployer(wxCommandEvent& event)
     employerEdit.Launch();
 }
 
-void MainFrame::OnEditClient(wxCommandEvent & event)
+void MainFrame::OnEditClient(wxCommandEvent& event)
 {
     dialog::EditListDialog clientEdit(this, dialog::dialog_type::Client);
     clientEdit.Launch();
 }
 
-void MainFrame::OnEditProject(wxCommandEvent & event)
+void MainFrame::OnEditProject(wxCommandEvent& event)
 {
     dialog::EditListDialog projectEdit(this, dialog::dialog_type::Project);
     projectEdit.Launch();
 }
 
-void MainFrame::OnEditCategory(wxCommandEvent & event)
+void MainFrame::OnEditCategory(wxCommandEvent& event)
 {
     dialog::EditListDialog categoryEdit(this, dialog::dialog_type::Category);
     categoryEdit.Launch();
