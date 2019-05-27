@@ -43,11 +43,11 @@ SetupWizard::SetupWizard(wxFrame* frame)
 {
     pPage1 = new wxWizardPageSimple(this);
 
-   /* wxString welcomeString = wxT("This wizard will help you get started with Tasks Tracker.\n"
+    wxString introWizardMessage = wxT("This wizard will help you get started with Tasks Tracker.\n"
         "The next few pages will setup a employer, a client (which is optional), a project\n"
         " and a category\n. Please press \"Next\" to begin the process.");
 
-    new wxStaticText(this, wxID_ANY, welcomeString);*/
+    new wxStaticText(pPage1, wxID_ANY, introWizardMessage);
 
     auto page2 = new AddEmployerAndClientPage(this);
     // auto page3 = new AddProjectPage(this);
@@ -58,15 +58,15 @@ SetupWizard::SetupWizard(wxFrame* frame)
     // wxWizardPageSimple::Chain(page3, page4);
 
     GetPageAreaSizer()->Add(pPage1);
-    this->CenterOnParent();
 }
-void SetupWizard::Run()
+bool SetupWizard::Run()
 {
     auto wizardSuccess = wxWizard::RunWizard(pPage1);
     if (wizardSuccess) {
         // TODO
     }
     Destroy();
+    return wizardSuccess;
 }
 wxString SetupWizard::GetEmployer() const
 {

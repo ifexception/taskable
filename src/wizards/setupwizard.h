@@ -33,7 +33,7 @@ public:
     explicit SetupWizard(wxFrame* frame);
     virtual ~SetupWizard() = default;
 
-    void Run();
+    bool Run();
 
     wxString GetEmployer() const;
     void SetEmployer(const wxString& employer);
