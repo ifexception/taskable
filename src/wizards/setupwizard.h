@@ -37,26 +37,23 @@ public:
 
     wxString GetEmployer() const;
     void SetEmployer(const wxString& employer);
-    int GetEmployerId() const;
-    void SetEmployerId(const int employerId);
     wxString GetClient() const;
     void SetClient(const wxString& client);
-    int GetClientId() const;
-    void SetClientId(const int clientId);
     wxString GetProject() const;
     void SetProject(const wxString& project);
-    int GetProjectId() const;
-    void SetProjectId(const int projectId);
+    void SetProjectDisplayName(const wxString& project);
+    void SetCategory(const wxString& category);
+    void SetDescription(const wxString& description);
 
 private:
     wxWizardPageSimple* pPage1;
 
     wxString mEmployer;
-    int mEmployerId;
     wxString mClient;
-    int mClientId;
     wxString mProject;
-    int mProjectId;
+    wxString mDisplayName;
+    wxString mCategory;
+    wxString mDescription;
 };
 
 class AddEmployerAndClientPage final : public wxWizardPageSimple

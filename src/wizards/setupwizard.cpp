@@ -35,11 +35,8 @@ SetupWizard::SetupWizard(wxFrame* frame)
     : wxWizard(frame, wxID_ANY, wxT("Setup Wizard"), wxBitmap(setupwizardxpm), wxDefaultPosition, wxDEFAULT_DIALOG_STYLE)
     , pPage1(nullptr)
     , mEmployer(wxGetEmptyString())
-    , mEmployerId(0)
     , mClient(wxGetEmptyString())
-    , mClientId(0)
     , mProject(wxGetEmptyString())
-    , mProjectId(0)
 {
     pPage1 = new wxWizardPageSimple(this);
 
@@ -50,21 +47,63 @@ SetupWizard::SetupWizard(wxFrame* frame)
     new wxStaticText(pPage1, wxID_ANY, introWizardMessage);
 
     auto page2 = new AddEmployerAndClientPage(this);
-    // auto page3 = new AddProjectPage(this);
-    // auto page4 = new AddCategoriesPage(this);
+    auto page3 = new AddProjectPage(this);
+    auto page4 = new AddCategoriesPage(this);
 
     wxWizardPageSimple::Chain(pPage1, page2);
-    // wxWizardPageSimple::Chain(page2, page3);
-    // wxWizardPageSimple::Chain(page3, page4);
+    wxWizardPageSimple::Chain(page2, page3);
+    wxWizardPageSimple::Chain(page3, page4);
 
     GetPageAreaSizer()->Add(pPage1);
 }
 bool SetupWizard::Run()
 {
     auto wizardSuccess = wxWizard::RunWizard(pPage1);
+    if (wizardSuccess) {
+        // TODO with upgrade to SqliteModernCpp use a transaction here
+
+        services::db_service dbService;
+        int employerId = 0;
+        try {
+            dbService.create_new_employer(std::string(mEmployer.ToUTF8()));
+            employerId = dbService.get_last_insert_rowid();
+        } catch (const db::database_exception& e) {
+            // TODO log exception
+        }
+
+        int clientId = 0;
+        if (!mClient.empty()) {
+            try {
+                dbService.create_new_client(std::string(mClient.ToUTF8()), employerId);
+                clientId = dbService.get_last_insert_rowid();
+            } catch (const db::database_exception& e) {
+                // TODO log exception
+            }
+        }
+
+        int projectId = 0;
+        try {
+            bool isAssociatedWithClient = clientId != 0;
+            if (isAssociatedWithClient) {
+                dbService.create_new_project(std::string(mProject.ToUTF8()), std::string(mDisplayName.ToUTF8()), employerId, &clientId);
+            } else {
+                dbService.create_new_project(std::string(mProject.ToUTF8()), std::string(mDisplayName.ToUTF8()), employerId, nullptr);
+            }
+            projectId = dbService.get_last_insert_rowid();
+        } catch (const db::database_exception& e) {
+            // TODO log exception
+        }
+
+        try {
+            dbService.create_new_category(projectId, std::string(mCategory.ToUTF8()), std::string(mDescription.ToUTF8()));
+        } catch (const db::database_exception& e) {
+            // TODO log exception
+        }
+    }
     Destroy();
     return wizardSuccess;
 }
+
 wxString SetupWizard::GetEmployer() const
 {
     return mEmployer;
@@ -73,16 +112,6 @@ wxString SetupWizard::GetEmployer() const
 void SetupWizard::SetEmployer(const wxString& employer)
 {
     mEmployer = employer;
-}
-
-int SetupWizard::GetEmployerId() const
-{
-    return mEmployerId;
-}
-
-void SetupWizard::SetEmployerId(const int employerId)
-{
-    mEmployerId = employerId;
 }
 
 wxString SetupWizard::GetClient() const
@@ -95,16 +124,6 @@ void SetupWizard::SetClient(const wxString& client)
     mClient = client;
 }
 
-int SetupWizard::GetClientId() const
-{
-    return mClientId;
-}
-
-void SetupWizard::SetClientId(const int clientId)
-{
-    mClientId = clientId;
-}
-
 wxString SetupWizard::GetProject() const
 {
     return mProject;
@@ -115,14 +134,19 @@ void SetupWizard::SetProject(const wxString& project)
     mProject = project;
 }
 
-int SetupWizard::GetProjectId() const
+void SetupWizard::SetProjectDisplayName(const wxString& displayName)
 {
-    return mProjectId;
+    mDisplayName = displayName;
 }
 
-void SetupWizard::SetProjectId(const int projectId)
+void SetupWizard::SetCategory(const wxString& category)
 {
-    mProjectId = projectId;
+    mCategory = category;
+}
+
+void SetupWizard::SetDescription(const wxString& description)
+{
+    mDescription = description;
 }
 
 AddEmployerAndClientPage::AddEmployerAndClientPage(SetupWizard* parent)
@@ -165,30 +189,10 @@ bool AddEmployerAndClientPage::TransferDataFromWindow()
         return false;
     }
 
-    services::db_service dbService;
-    int employerId = 0;
-    try {
-        dbService.create_new_employer(std::string(employer.ToUTF8()));
-        employerId = dbService.get_last_insert_rowid();
-    } catch (const db::database_exception& e) {
-        // TODO log exception
-    }
-
     const wxString client = pClientCtrl->GetValue().Trim();
-    int clientId = 0;
-    if (!client.empty()) {
-        try {
-            dbService.create_new_client(std::string(client.ToUTF8()), employerId);
-            clientId = dbService.get_last_insert_rowid();
-        } catch (const db::database_exception& e) {
-            // TODO log exception
-        }
-    }
 
     pParent->SetEmployer(employer);
-    pParent->SetEmployerId(employerId);
     pParent->SetClient(client);
-    pParent->SetClientId(clientId);
 
     return true;
 }
@@ -199,9 +203,8 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
 {
     auto sizer = new wxBoxSizer(wxVERTICAL);
 
-    // TODO message to say adding info to %employer% and %client%
     wxString infoMessage = wxGetEmptyString();
-    if (pParent->GetClientId() != 0) {
+    if (!pParent->GetClient().empty()) {
         infoMessage = wxString::Format("Add a project for employer: %s and client: %s", pParent->GetEmployer(), pParent->GetClient());
     } else {
         infoMessage = wxString::Format("Add a project for employer: %s", pParent->GetEmployer());
@@ -238,8 +241,6 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
 
 bool AddProjectPage::TransferDataFromWindow()
 {
-    services::db_service dbService;
-
     const wxString projectName = pNameCtrl->GetValue().Trim();
     if (projectName.empty()) {
         wxMessageBox(wxT("An project name is required"), wxT("TasksTracker"), wxOK | wxICON_ERROR, this);
@@ -252,22 +253,8 @@ bool AddProjectPage::TransferDataFromWindow()
         return false;
     }
 
-    int projectId = 0;
-    try {
-        bool isAssociatedWithClient = pParent->GetClientId() != 0;
-        if (isAssociatedWithClient) {
-            int clientId = pParent->GetClientId();
-            dbService.create_new_project(std::string(projectName.ToUTF8()), std::string(displayName.ToUTF8()), pParent->GetEmployerId(), &clientId);
-        } else {
-            dbService.create_new_project(std::string(projectName.ToUTF8()), std::string(displayName.ToUTF8()), pParent->GetEmployerId(), nullptr);
-        }
-        projectId = dbService.get_last_insert_rowid();
-    } catch (const db::database_exception& e) {
-        // TODO log exception
-    }
-
     pParent->SetProject(projectName);
-    pParent->SetProjectId(projectId);
+    pParent->SetProjectDisplayName(displayName);
 
     return true;
 }
@@ -310,7 +297,6 @@ AddCategoriesPage::AddCategoriesPage(SetupWizard* parent)
 
 bool AddCategoriesPage::TransferDataFromWindow()
 {
-    services::db_service dbService;
     const wxString category = pNameCtrl->GetValue().Trim();
     if (category.empty()) {
         wxMessageBox(wxT("An category name is required"), wxT("TasksTracker"), wxOK | wxICON_ERROR, this);
@@ -323,11 +309,8 @@ bool AddCategoriesPage::TransferDataFromWindow()
         return false;
     }
 
-    try {
-        dbService.create_new_category(pParent->GetProjectId(), std::string(category.ToUTF8()), std::string(description.ToUTF8()));
-    } catch (const db::database_exception& e) {
-        // TODO log exception
-    }
+    pParent->SetCategory(category);
+    pParent->SetDescription(description);
 
     return true;
 }
