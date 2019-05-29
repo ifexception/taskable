@@ -54,8 +54,10 @@ bool App::OnInit()
 
     frame::MainFrame* mf = new frame::MainFrame(nullptr);
     if (!isInstalled) {
-        mf->OnStartUp();
-        return false;
+        bool wizardSetupSuccess = mf->OnStartUp();
+        if (!wizardSetupSuccess) {
+            return false;
+        }
     }
     mf->Show(true);
     return true;
@@ -105,12 +107,16 @@ bool App::IsInstalled()
     wxRegKey key(wxRegKey::HKLM, "SOFTWARE\\TasksTracker");
 
     if (key.Exists()) {
-        auto y = key.GetName();
+        long value = -1;
+        key.QueryValue(wxT("Installed"), &value);
+        return !!value;
     } else {
-       auto x = key.Create();
+        key.Create();
+        key.SetValue("Installed", 1);
+        return false;
     }
-
-    return false;
+    // FIXME need to figure out way to see if registry was potentially tampered with when running this
+    // FIXME should app fix it or bomb out on the user?
 }
 } // namespace app
 

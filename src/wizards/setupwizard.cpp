@@ -61,7 +61,8 @@ bool SetupWizard::Run()
     auto wizardSuccess = wxWizard::RunWizard(pPage1);
     if (wizardSuccess) {
         // TODO with upgrade to SqliteModernCpp use a transaction here
-
+        wxStopWatch stopWatch;
+        stopWatch.Start();
         services::db_service dbService;
         int employerId = 0;
         try {
@@ -99,6 +100,8 @@ bool SetupWizard::Run()
         } catch (const db::database_exception& e) {
             // TODO log exception
         }
+        stopWatch.Pause();
+        wxLogDebug(wxString::Format("DbService calls elapsed time: %ldms", stopWatch.Time()));
     }
     Destroy();
     return wizardSuccess;

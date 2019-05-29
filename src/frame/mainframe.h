@@ -33,7 +33,7 @@ public:
 
     MainFrame& operator=(const MainFrame&) = delete;
 
-    void OnStartUp();
+    bool OnStartUp();
 
 private:
     wxDECLARE_EVENT_TABLE();

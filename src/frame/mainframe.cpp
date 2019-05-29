@@ -64,11 +64,12 @@ MainFrame::MainFrame(wxWindow* parent, const wxString& name)
 MainFrame::~MainFrame()
 {}
 
-void MainFrame::OnStartUp()
+bool MainFrame::OnStartUp()
 {
     auto wizard = new wizard::SetupWizard(this);
     wizard->CenterOnParent();
-    wizard->Run();
+    bool wizardSetupSuccess = wizard->Run();
+    return wizardSetupSuccess;
 }
 
 bool MainFrame::Create(/*wxWindow * parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name*/)
