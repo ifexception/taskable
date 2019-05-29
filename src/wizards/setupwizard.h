@@ -66,6 +66,10 @@ public:
     bool TransferDataFromWindow() override;
 
 private:
+    wxDECLARE_EVENT_TABLE();
+
+    void OnWizardCancel(wxWizardEvent& event);
+
     SetupWizard* pParent;
     wxTextCtrl* pEmployerCtrl;
     wxTextCtrl* pClientCtrl;
@@ -81,6 +85,10 @@ public:
     bool TransferDataFromWindow() override;
 
 private:
+    wxDECLARE_EVENT_TABLE();
+
+    void OnWizardCancel(wxWizardEvent& event);
+
     SetupWizard* pParent;
     wxTextCtrl* pNameCtrl;
     wxTextCtrl* pDisplayNameCtrl;
@@ -96,6 +104,10 @@ public:
     bool TransferDataFromWindow() override;
 
 private:
+    wxDECLARE_EVENT_TABLE();
+
+    void OnWizardCancel(wxWizardEvent& event);
+
     SetupWizard* pParent;
     wxTextCtrl* pNameCtrl;
     wxTextCtrl* pDescriptionCtrl;

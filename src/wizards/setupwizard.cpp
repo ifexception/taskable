@@ -152,6 +152,10 @@ void SetupWizard::SetDescription(const wxString& description)
     mDescription = description;
 }
 
+wxBEGIN_EVENT_TABLE(AddEmployerAndClientPage, wxWizardPageSimple)
+    EVT_WIZARD_CANCEL(wxID_ANY, AddEmployerAndClientPage::OnWizardCancel)
+wxEND_EVENT_TABLE()
+
 AddEmployerAndClientPage::AddEmployerAndClientPage(SetupWizard* parent)
     : wxWizardPageSimple(parent)
     , pParent(parent)
@@ -199,6 +203,18 @@ bool AddEmployerAndClientPage::TransferDataFromWindow()
 
     return true;
 }
+
+void AddEmployerAndClientPage::OnWizardCancel(wxWizardEvent& event)
+{
+    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"), wxT("Tasks Tracker Wizard"), wxICON_QUESTION | wxYES_NO);
+    if (userResponse == wxNO) {
+        event.Veto();
+    }
+}
+
+wxBEGIN_EVENT_TABLE(AddProjectPage, wxWizardPageSimple)
+    EVT_WIZARD_CANCEL(wxID_ANY, AddProjectPage::OnWizardCancel)
+wxEND_EVENT_TABLE()
 
 AddProjectPage::AddProjectPage(SetupWizard* parent)
     : wxWizardPageSimple(parent)
@@ -262,6 +278,17 @@ bool AddProjectPage::TransferDataFromWindow()
     return true;
 }
 
+void AddProjectPage::OnWizardCancel(wxWizardEvent& event)
+{
+    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"), wxT("Tasks Tracker Wizard"), wxICON_QUESTION | wxYES_NO);
+    if (userResponse == wxNO) {
+        event.Veto();
+    }
+}
+
+wxBEGIN_EVENT_TABLE(AddCategoriesPage, wxWizardPageSimple)
+wxEND_EVENT_TABLE()
+
 AddCategoriesPage::AddCategoriesPage(SetupWizard* parent)
     : wxWizardPageSimple(parent)
     , pParent(parent)
@@ -316,5 +343,13 @@ bool AddCategoriesPage::TransferDataFromWindow()
     pParent->SetDescription(description);
 
     return true;
+}
+
+void AddCategoriesPage::OnWizardCancel(wxWizardEvent& event)
+{
+    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"), wxT("Tasks Tracker Wizard"), wxICON_QUESTION | wxYES_NO);
+    if (userResponse == wxNO) {
+        event.Veto();
+    }
 }
 }
