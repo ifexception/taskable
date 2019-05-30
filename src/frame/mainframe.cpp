@@ -58,7 +58,7 @@ wxEND_EVENT_TABLE()
 MainFrame::MainFrame(wxWindow* parent, const wxString& name)
     : wxFrame(parent, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(700, 500), wxDEFAULT_FRAME_STYLE, name)
 {
-    bool success = Create(/*parent, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(640, 480), wxDEFAULT_FRAME_STYLE, name*/);
+    bool success = Create();
     SetMinClientSize(wxSize(640, 480));
 }
 
@@ -73,14 +73,10 @@ bool MainFrame::OnStartUp()
     return wizardSetupSuccess;
 }
 
-bool MainFrame::Create(/*wxWindow * parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name*/)
+bool MainFrame::Create()
 {
-    //bool created = new wxFrame(parent, windowId, title, point, size, style, name);
-    //if (created) {
     CreateControls();
     DataToControls();
-    //}
-    //return created;
     return true;
 }
 
