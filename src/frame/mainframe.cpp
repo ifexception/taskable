@@ -20,6 +20,7 @@
 #include "mainframe.h"
 
 #include "../common/ids.h"
+#include "../common/version.h"
 #include "../dialogs/aboutdialog.h"
 #include "../dialogs/taskdetailsdialog.h"
 #include "../dialogs/employerdialog.h"
@@ -86,8 +87,9 @@ bool MainFrame::Create(/*wxWindow * parent, wxWindowID windowId, const wxString&
 void MainFrame::CreateControls()
 {
     /* Status Bar Control */
-    CreateStatusBar(1);
+    CreateStatusBar(2);
     SetStatusText(wxT("Ready"));
+    SetStatusText(wxString::Format("%d.%d.%d", TASKS_TRACKER_MAJOR, TASKS_TRACKER_MINOR, TASKS_TRACKER_PATCH), 1);
 
     /* File Menu Control */
     wxMenu* fileMenu = new wxMenu();
