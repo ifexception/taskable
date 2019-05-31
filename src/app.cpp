@@ -30,11 +30,21 @@
 
 namespace app
 {
+App::App()
+    : pInstanceChecker(std::make_unique<wxSingleInstanceChecker>())
+{ }
+
 App::~App()
 { }
 
 bool App::OnInit()
 {
+    bool isInstanceAlreadyRunning = pInstanceChecker->IsAnotherRunning();
+    if (isInstanceAlreadyRunning) {
+        wxMessageBox(wxT("Another instance of the application is already running."), wxT("Tasks Tracker"), wxOK_DEFAULT | wxICON_WARNING);
+        return false;
+    }
+
     bool logDirectoryCreated = CreateLogsDirectory();
     if (!logDirectoryCreated) {
         return false;

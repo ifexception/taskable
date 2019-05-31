@@ -24,7 +24,9 @@
 #pragma once
 
 #include <memory>
+
 #include <wx/wx.h>
+#include <wx/snglinst.h>
 
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
@@ -35,7 +37,7 @@ namespace app
 class App : public wxApp
 {
   public:
-    App() = default;
+    App();
     virtual ~App();
 
     bool OnInit() override;
@@ -47,5 +49,6 @@ class App : public wxApp
     bool IsInstalled();
 
     std::shared_ptr<spdlog::logger> pLogger;
+    std::unique_ptr<wxSingleInstanceChecker> pInstanceChecker;
 };
 } // namespace app
