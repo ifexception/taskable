@@ -60,9 +60,9 @@ bool App::OnInit()
         return false;
     }
 
-    bool isInstalled = IsInstalled();
-
     frame::MainFrame* mf = new frame::MainFrame(nullptr);
+
+    bool isInstalled = IsInstalled();
     if (!isInstalled) {
         bool wizardSetupSuccess = mf->OnStartUp();
         if (!wizardSetupSuccess) {
