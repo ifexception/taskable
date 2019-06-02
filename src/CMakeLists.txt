@@ -46,6 +46,7 @@ set (SRC
     "services/db_service.cpp"
     "app.cpp"
     "frame/mainframe.cpp"
+    "frame/taskbaricon.cpp"
     "dialogs/aboutdialog.cpp"
     "dialogs/taskdetailsdialog.cpp"
     "dialogs/employerdialog.cpp"
