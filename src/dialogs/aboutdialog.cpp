@@ -19,6 +19,8 @@
 
 #include "aboutdialog.h"
 
+#include "../common/common.h"
+
 namespace app::dialog
 {
 wxIMPLEMENT_DYNAMIC_CLASS(AboutDialog, wxDialog);
@@ -44,7 +46,7 @@ bool AboutDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& 
 
     if (created) {
         CreateControls();
-
+        SetIcon(common::GetProgramIcon());
         Center();
         ShowModal();
     }

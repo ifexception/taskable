@@ -18,3 +18,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "common.h"
+
+#include "../../res/icons8-tasks-64.xpm"
+
+const char** app::common::GetProgramIcon()
+{
+    return tasks_tracker_xpm;
+}

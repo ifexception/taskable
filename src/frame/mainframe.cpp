@@ -19,6 +19,9 @@
 
 #include "mainframe.h"
 
+#include <wx/taskbarbutton.h>
+
+#include "../common/common.h"
 #include "../common/ids.h"
 #include "../common/version.h"
 #include "../dialogs/aboutdialog.h"
@@ -53,6 +56,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(ids::ID_EDIT_CATEGORY, MainFrame::OnEditCategory)
     EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
     EVT_COMMAND(MainFrame::IDC_LIST, ids::ID_TASK_INSERTED, MainFrame::OnTaskInserted)
+    EVT_ICONIZE(MainFrame::OnIconize)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(wxWindow* parent, const wxString& name)
@@ -60,6 +64,7 @@ MainFrame::MainFrame(wxWindow* parent, const wxString& name)
 {
     bool success = Create();
     SetMinClientSize(wxSize(640, 480));
+    SetIcon(common::GetProgramIcon());
 }
 
 MainFrame::~MainFrame()
@@ -246,6 +251,14 @@ void MainFrame::OnItemDoubleClick(wxListEvent& event)
     int taskDetailId = event.GetData();
     dialog::TaskDetailsDialog editTask(this, true, taskDetailId);
     editTask.Launch();
+}
+
+void MainFrame::OnIconize(wxIconizeEvent& event)
+{
+     // TODO Iconizing and closing to notification area must be configurable
+    if (event.IsIconized()) {
+        MSWGetTaskBarButton()->Hide();
+    }
 }
 
 void MainFrame::RefreshItems()

@@ -55,6 +55,7 @@ private:
     void OnEditCategory(wxCommandEvent& event);
     void OnTaskInserted(wxCommandEvent& event);
     void OnItemDoubleClick(wxListEvent& event);
+    void OnIconize(wxIconizeEvent& event);
 
     void RefreshItems();
 
