@@ -26,8 +26,33 @@ namespace app::dialog
 class SettingsDialog : public wxDialog
 {
 public:
+    SettingsDialog() = default;
+    explicit SettingsDialog(wxWindow* parent, const wxString& name = wxT("SettingsDialog"));
+    virtual ~SettingsDialog() = default;
 
 private:
+    wxDECLARE_DYNAMIC_CLASS(SettingsDialog);
+    wxDECLARE_EVENT_TABLE();
 
+    bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
+    void CreateControls();
+    void FillControls();
+
+    void OnSave(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
+
+    wxCheckBox* pDialogOnExit;
+
+    wxCheckBox* pMinimizeToTray;
+    wxCheckBox* pCloseToTray;
+    wxCheckBox* pShowBalloonNotifications;
+
+    enum
+    {
+        IDC_DIALOG_EXIT = 1,
+        IDC_MINIMIZE_TO_TRAY,
+        IDC_CLOSE_TO_TRAY,
+        IDC_SHOW_BALLOON_NOTIFICATIONS
+    };
 };
 }

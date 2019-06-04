@@ -19,7 +19,55 @@
 
 #include "settingsdialog.h"
 
+#include "../common/common.h"
+
 namespace app::dialog
 {
+wxIMPLEMENT_DYNAMIC_CLASS(SettingsDialog, wxDialog);
 
+wxBEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
+wxEND_EVENT_TABLE()
+
+SettingsDialog::SettingsDialog(wxWindow* parent, const wxString& name)
+{
+    long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
+    bool success = Create(parent, wxID_ANY, wxT("Settings"), wxDefaultPosition, wxSize(480, 320), style, name);
+    SetMinClientSize(wxSize(480, 320));
+}
+
+bool SettingsDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
+{
+    bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
+    if (created) {
+        CreateControls();
+        FillControls();
+
+        GetSizer()->Fit(this);
+        SetIcon(common::GetProgramIcon());
+        Center();
+    }
+
+    return created;
+}
+
+void SettingsDialog::CreateControls()
+{
+    auto mainSizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(mainSizer);
+
+    auto windowsSettingsBox = new wxStaticBox(this, wxID_ANY, wxT("Windows"));
+    auto windowsSettingsSizer = new wxStaticBoxSizer(windowsSettingsBox, wxHORIZONTAL);
+    mainSizer->Add(windowsSettingsSizer, common::sizers::ControlExpandProp);
+
+    auto settingsPanel = new wxPanel(this, wxID_STATIC);
+}
+
+void SettingsDialog::FillControls()
+{ }
+
+void SettingsDialog::OnSave(wxCommandEvent& event)
+{ }
+
+void SettingsDialog::OnCancel(wxCommandEvent& event)
+{ }
 }
