@@ -24,6 +24,8 @@
 
 namespace app::frame
 {
+class TaskBarIcon;
+
 class MainFrame : public wxFrame
 {
 public:
@@ -60,6 +62,7 @@ private:
     void RefreshItems();
 
     wxListCtrl* pListCtrl;
+    TaskBarIcon* pTaskBarIcon;
 
     enum
     {

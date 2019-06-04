@@ -19,7 +19,69 @@
 
 #include "taskbaricon.h"
 
+#include <wx/taskbarbutton.h>
+
+#include "../common/common.h"
+#include "../dialogs/taskdetailsdialog.h"
+
 namespace app::frame
 {
+wxBEGIN_EVENT_TABLE(TaskBarIcon, wxTaskBarIcon)
+    EVT_MENU(TaskBarIcon::ID_ADD_TASK, TaskBarIcon::OnNewTask)
+    EVT_MENU(TaskBarIcon::ID_SETTINGS, TaskBarIcon::OnSettings)
+    EVT_MENU(wxID_EXIT, TaskBarIcon::OnExit)
+    EVT_TASKBAR_LEFT_DOWN(TaskBarIcon::OnLeftButtonDown)
+wxEND_EVENT_TABLE()
+
+TaskBarIcon::TaskBarIcon(wxFrame* parent)
+    : pParent(parent)
+{ }
+
+void TaskBarIcon::SetTaskBarIcon()
+{
+    SetIcon(wxIcon(common::GetProgramIcon()), wxT("Tasks Tracker"));
+}
+
+//bool TaskBarIcon::PopupMenu(wxMenu * menu)
+//{
+//    return false;
+//}
+
+wxMenu* TaskBarIcon::CreatePopupMenu()
+{
+    auto menu = new wxMenu();
+
+    menu->Append(ID_ADD_TASK, wxT("Add Task"));
+    menu->AppendSeparator();
+    menu->Append(ID_SETTINGS, wxT("Settings"));
+    menu->AppendSeparator();
+    menu->Append(wxID_EXIT, wxT("Exit"));
+
+    return menu;
+}
+
+void TaskBarIcon::OnNewTask(wxCommandEvent& WXUNUSED(event))
+{
+    dialog::TaskDetailsDialog newTask(pParent);
+    newTask.Launch();
+}
+
+void TaskBarIcon::OnSettings(wxCommandEvent& WXUNUSED(event))
+{
+    wxMessageBox(wxT("This feature is not yet available"), wxT("Tasks Tracker"), wxICON_INFORMATION | wxOK_DEFAULT);
+}
+
+void TaskBarIcon::OnExit(wxCommandEvent& WXUNUSED(event))
+{
+    pParent->Close(true);
+}
+
+void TaskBarIcon::OnLeftButtonDown(wxTaskBarIconEvent& WXUNUSED(event))
+{
+    pParent->MSWGetTaskBarButton()->Show();
+    pParent->Restore();
+    pParent->Raise();
+    pParent->Show();
+}
 
 }

@@ -17,6 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <wx/wx.h>
 #include <wx/taskbar.h>
 
 namespace app::frame
@@ -25,18 +26,27 @@ class TaskBarIcon : public wxTaskBarIcon
 {
 public:
     TaskBarIcon(wxFrame* parent);
-    virtual ~TaskBarIcon();
+    virtual ~TaskBarIcon() = default;
+
+    void SetTaskBarIcon();
+    //bool PopUpMenu(wxMenu* menu) override;
 
 private:
     wxDECLARE_EVENT_TABLE();
 
-    wxMenu* CreatePopUpMenu() override;
+    wxMenu* CreatePopupMenu() override;
+
+    void OnNewTask(wxCommandEvent& event);
+    void OnSettings(wxCommandEvent& event);
+    void OnExit(wxCommandEvent& event);
+    void OnLeftButtonDown(wxTaskBarIconEvent& event);
+
+    wxFrame* pParent;
 
     enum
     {
-        IDC_ADD_TASK = 0,
-        IDC_RESTORE,
-        IDC_SETTINGS
+        ID_ADD_TASK = wxID_HIGHEST,
+        ID_SETTINGS
     };
 };
 }

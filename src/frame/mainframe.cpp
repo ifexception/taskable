@@ -34,6 +34,7 @@
 #include "../services/db_service.h"
 #include "../db/database_exception.h"
 #include "../wizards/setupwizard.h"
+#include "taskbaricon.h"
 
 namespace app::frame
 {
@@ -65,6 +66,9 @@ MainFrame::MainFrame(wxWindow* parent, const wxString& name)
     bool success = Create();
     SetMinClientSize(wxSize(640, 480));
     SetIcon(common::GetProgramIcon());
+    pTaskBarIcon = new TaskBarIcon(this);
+    // TODO preference if should run in notification area
+    pTaskBarIcon->SetTaskBarIcon();
 }
 
 MainFrame::~MainFrame()
