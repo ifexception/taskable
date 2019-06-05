@@ -58,6 +58,7 @@ private:
     void OnTaskInserted(wxCommandEvent& event);
     void OnItemDoubleClick(wxListEvent& event);
     void OnIconize(wxIconizeEvent& event);
+    void OnSettings(wxCommandEvent& event);
 
     void RefreshItems();
 

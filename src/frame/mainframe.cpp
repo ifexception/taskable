@@ -31,6 +31,7 @@
 #include "../dialogs/projectdialog.h"
 #include "../dialogs/categorydialog.h"
 #include "../dialogs/editlistdialog.h"
+#include "../dialogs/settingsdialog.h"
 #include "../services/db_service.h"
 #include "../db/database_exception.h"
 #include "../wizards/setupwizard.h"
@@ -55,6 +56,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(ids::ID_EDIT_CLIENT, MainFrame::OnEditClient)
     EVT_MENU(ids::ID_EDIT_PROJECT, MainFrame::OnEditProject)
     EVT_MENU(ids::ID_EDIT_CATEGORY, MainFrame::OnEditCategory)
+    EVT_MENU(ids::ID_SETTINGS, MainFrame::OnSettings)
     EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
     EVT_COMMAND(MainFrame::IDC_LIST, ids::ID_TASK_INSERTED, MainFrame::OnTaskInserted)
     EVT_ICONIZE(MainFrame::OnIconize)
@@ -112,6 +114,8 @@ void MainFrame::CreateControls()
     editMenu->Append(ids::ID_EDIT_CLIENT, wxT("Edit &Client"), wxT("Select a client to edit"));
     editMenu->Append(ids::ID_EDIT_PROJECT, wxT("Edit &Project"), wxT("Select a project to edit"));
     editMenu->Append(ids::ID_EDIT_CATEGORY, wxT("Edit C&ategory"), wxT("Select a category to edit"));
+    editMenu->AppendSeparator();
+    editMenu->Append(ids::ID_SETTINGS, wxT("&Settings"), wxT("Edit application settings"));
 
     /* Help Menu Control */
     wxMenu* helpMenu = new wxMenu();
@@ -263,6 +267,12 @@ void MainFrame::OnIconize(wxIconizeEvent& event)
     if (event.IsIconized()) {
         MSWGetTaskBarButton()->Hide();
     }
+}
+
+void MainFrame::OnSettings(wxCommandEvent& event)
+{
+    dialog::SettingsDialog settings(this);
+    settings.ShowModal();
 }
 
 void MainFrame::RefreshItems()

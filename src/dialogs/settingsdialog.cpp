@@ -57,9 +57,35 @@ void SettingsDialog::CreateControls()
 
     auto windowsSettingsBox = new wxStaticBox(this, wxID_ANY, wxT("Windows"));
     auto windowsSettingsSizer = new wxStaticBoxSizer(windowsSettingsBox, wxHORIZONTAL);
-    mainSizer->Add(windowsSettingsSizer, common::sizers::ControlExpandProp);
+    mainSizer->Add(windowsSettingsSizer, common::sizers::ControlExpand);
 
     auto settingsPanel = new wxPanel(this, wxID_STATIC);
+    windowsSettingsSizer->Add(settingsPanel, common::sizers::ControlDefault);
+
+    auto windowsGridSizer = new wxFlexGridSizer(2, 10, 10);
+    settingsPanel->SetSizer(windowsGridSizer);
+
+    pDialogOnExit = new wxCheckBox(settingsPanel, IDC_DIALOG_EXIT, wxT("Show confirmation dialog on exit"));
+    windowsGridSizer->Add(pDialogOnExit, common::sizers::ControlDefault);
+
+    auto traySettingsBox = new wxStaticBox(this, wxID_ANY, wxT("Tray"));
+    auto traySettingsSizer = new wxStaticBoxSizer(traySettingsBox, wxHORIZONTAL);
+    mainSizer->Add(traySettingsSizer, common::sizers::ControlExpand);
+
+    auto traySettingsPanel = new wxPanel(this, wxID_STATIC);
+    traySettingsSizer->Add(traySettingsPanel, common::sizers::ControlDefault);
+
+    auto trayGridSizer = new wxFlexGridSizer(2, 10, 10);
+    traySettingsPanel->SetSizer(trayGridSizer);
+
+    pMinimizeToTray = new wxCheckBox(traySettingsPanel, IDC_MINIMIZE_TO_TRAY, wxT("Minimize application to Windows tray"));
+    trayGridSizer->Add(pMinimizeToTray, common::sizers::ControlDefault);
+
+    pCloseToTray = new wxCheckBox(traySettingsPanel, IDC_CLOSE_TO_TRAY, wxT("Close application to Windows tray"));
+    trayGridSizer->Add(pCloseToTray, common::sizers::ControlDefault);
+
+    pShowBalloonNotifications = new wxCheckBox(traySettingsPanel, IDC_SHOW_BALLOON_NOTIFICATIONS, wxT("Show balloon notifications"));
+    trayGridSizer->Add(pShowBalloonNotifications, common::sizers::ControlDefault);
 }
 
 void SettingsDialog::FillControls()
