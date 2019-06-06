@@ -38,21 +38,30 @@ private:
     void CreateControls();
     void FillControls();
 
-    void OnSave(wxCommandEvent& event);
+    void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
+    void OnOpenDirectory(wxCommandEvent& event);
 
     wxCheckBox* pDialogOnExit;
+    wxCheckBox* pStartWithWindows;
 
     wxCheckBox* pMinimizeToTray;
     wxCheckBox* pCloseToTray;
     wxCheckBox* pShowBalloonNotifications;
 
+    wxCheckBox* pBackupDatabase;
+    wxTextCtrl* pBackupLocation;
+
     enum
     {
         IDC_DIALOG_EXIT = 1,
+        IDC_START_WITH_WINDOWS,
         IDC_MINIMIZE_TO_TRAY,
         IDC_CLOSE_TO_TRAY,
-        IDC_SHOW_BALLOON_NOTIFICATIONS
+        IDC_SHOW_BALLOON_NOTIFICATIONS,
+        IDC_BACKUP_DATABASE,
+        IDC_BACKUP_LOCATION,
+        IDC_BACKUP_LOCATION_BUTTON,
     };
 };
 }
