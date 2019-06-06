@@ -29,7 +29,7 @@ wxIMPLEMENT_DYNAMIC_CLASS(SettingsDialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
     EVT_CHECKBOX(IDC_BACKUP_DATABASE, SettingsDialog::OnBackupDatabaseCheck)
-    EVT_BUTTON(IDC_BACKUP_LOCATION_BUTTON, SettingsDialog::OnOpenDirectory)
+    EVT_BUTTON(IDC_BACKUP_PATH_BUTTON, SettingsDialog::OnOpenDirectory)
 wxEND_EVENT_TABLE()
 
 SettingsDialog::SettingsDialog(wxWindow* parent, const wxString& name)
@@ -113,19 +113,19 @@ void SettingsDialog::CreateControls()
     auto gridSizer = new wxBoxSizer(wxHORIZONTAL);
     databaseSizer->Add(gridSizer, common::sizers::ControlDefault);
 
-    auto backUpLocationText = new wxStaticText(databasePanel, wxID_ANY, wxT("Location"));
+    auto backUpLocationText = new wxStaticText(databasePanel, wxID_ANY, wxT("Path"));
     gridSizer->Add(backUpLocationText, common::sizers::ControlCenter);
 
-    pBackupLocation = new wxTextCtrl(databasePanel, IDC_BACKUP_LOCATION, wxGetEmptyString(), wxDefaultPosition, wxSize(256, -1), 0);
-    pBackupLocation->SetEditable(false);
-    pBackupLocation->Disable();
-    gridSizer->Add(pBackupLocation, common::sizers::ControlDefault);
+    pBackupPath = new wxTextCtrl(databasePanel, IDC_BACKUP_PATH, wxGetEmptyString(), wxDefaultPosition, wxSize(256, -1), 0);
+    pBackupPath->SetEditable(false);
+    pBackupPath->Disable();
+    gridSizer->Add(pBackupPath, common::sizers::ControlDefault);
 
-    pBrowseBackupLocation = new wxButton(databasePanel, IDC_BACKUP_LOCATION_BUTTON, wxT("Browse"));
-    gridSizer->Add(pBrowseBackupLocation, common::sizers::ControlDefault);
+    pBrowseBackupPath = new wxButton(databasePanel, IDC_BACKUP_PATH_BUTTON, wxT("Browse"));
+    gridSizer->Add(pBrowseBackupPath, common::sizers::ControlDefault);
 
     /* Horizontal Line*/
-    auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("new_task_static_line"));
+    auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("settings_static_line"));
     mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
@@ -147,17 +147,18 @@ void SettingsDialog::FillControls()
 void SettingsDialog::OnOk(wxCommandEvent& event)
 { }
 
-void SettingsDialog::OnCancel(wxCommandEvent& event)
-{ }
+void SettingsDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
+{
+}
 
 void SettingsDialog::OnBackupDatabaseCheck(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
-        pBackupLocation->Enable();
-        pBrowseBackupLocation->Enable();
+        pBackupPath->Enable();
+        pBrowseBackupPath->Enable();
     } else {
-        pBackupLocation->Disable();
-        pBrowseBackupLocation->Disable();
+        pBackupPath->Disable();
+        pBrowseBackupPath->Disable();
     }
 }
 
@@ -167,8 +168,8 @@ void SettingsDialog::OnOpenDirectory(wxCommandEvent& WXUNUSED(event))
     auto res = openDirDialog->ShowModal();
     if (res == wxID_OK) {
         auto fileLocation = openDirDialog->GetPath(); // TODO: append file name with bak extension
-        pBackupLocation->SetValue(fileLocation);
-        pBackupLocation->SetToolTip(fileLocation);
+        pBackupPath->SetValue(fileLocation);
+        pBackupPath->SetToolTip(fileLocation);
     }
     openDirDialog->Destroy();
 }

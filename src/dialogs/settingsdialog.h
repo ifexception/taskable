@@ -51,8 +51,8 @@ private:
     wxCheckBox* pShowBalloonNotifications;
 
     wxCheckBox* pBackupDatabase;
-    wxTextCtrl* pBackupLocation;
-    wxButton* pBrowseBackupLocation;
+    wxTextCtrl* pBackupPath;
+    wxButton* pBrowseBackupPath;
 
     enum
     {
@@ -62,8 +62,8 @@ private:
         IDC_CLOSE_TO_TRAY,
         IDC_SHOW_BALLOON_NOTIFICATIONS,
         IDC_BACKUP_DATABASE,
-        IDC_BACKUP_LOCATION,
-        IDC_BACKUP_LOCATION_BUTTON,
+        IDC_BACKUP_PATH,
+        IDC_BACKUP_PATH_BUTTON,
     };
 };
 }
