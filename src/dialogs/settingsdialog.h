@@ -40,6 +40,7 @@ private:
 
     void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
+    void OnBackupDatabaseCheck(wxCommandEvent& event);
     void OnOpenDirectory(wxCommandEvent& event);
 
     wxCheckBox* pDialogOnExit;
@@ -51,6 +52,7 @@ private:
 
     wxCheckBox* pBackupDatabase;
     wxTextCtrl* pBackupLocation;
+    wxButton* pBrowseBackupLocation;
 
     enum
     {

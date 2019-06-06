@@ -28,6 +28,7 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(SettingsDialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
+    EVT_CHECKBOX(IDC_BACKUP_DATABASE, SettingsDialog::OnBackupDatabaseCheck)
     EVT_BUTTON(IDC_BACKUP_LOCATION_BUTTON, SettingsDialog::OnOpenDirectory)
 wxEND_EVENT_TABLE()
 
@@ -117,10 +118,11 @@ void SettingsDialog::CreateControls()
 
     pBackupLocation = new wxTextCtrl(databasePanel, IDC_BACKUP_LOCATION, wxGetEmptyString(), wxDefaultPosition, wxSize(256, -1), 0);
     pBackupLocation->SetEditable(false);
+    pBackupLocation->Disable();
     gridSizer->Add(pBackupLocation, common::sizers::ControlDefault);
 
-    auto backupLocationButton = new wxButton(databasePanel, IDC_BACKUP_LOCATION_BUTTON, wxT("Browse"));
-    gridSizer->Add(backupLocationButton, common::sizers::ControlDefault);
+    pBrowseBackupLocation = new wxButton(databasePanel, IDC_BACKUP_LOCATION_BUTTON, wxT("Browse"));
+    gridSizer->Add(pBrowseBackupLocation, common::sizers::ControlDefault);
 
     /* Horizontal Line*/
     auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("new_task_static_line"));
@@ -148,6 +150,17 @@ void SettingsDialog::OnOk(wxCommandEvent& event)
 void SettingsDialog::OnCancel(wxCommandEvent& event)
 { }
 
+void SettingsDialog::OnBackupDatabaseCheck(wxCommandEvent& event)
+{
+    if (event.IsChecked()) {
+        pBackupLocation->Enable();
+        pBrowseBackupLocation->Enable();
+    } else {
+        pBackupLocation->Disable();
+        pBrowseBackupLocation->Disable();
+    }
+}
+
 void SettingsDialog::OnOpenDirectory(wxCommandEvent& WXUNUSED(event))
 {
     auto openDirDialog = new wxDirDialog(this, wxT("Select a Backup directory"), wxEmptyString, wxDD_DEFAULT_STYLE, wxDefaultPosition);
@@ -155,6 +168,7 @@ void SettingsDialog::OnOpenDirectory(wxCommandEvent& WXUNUSED(event))
     if (res == wxID_OK) {
         auto fileLocation = openDirDialog->GetPath(); // TODO: append file name with bak extension
         pBackupLocation->SetValue(fileLocation);
+        pBackupLocation->SetToolTip(fileLocation);
     }
     openDirDialog->Destroy();
 }
