@@ -25,6 +25,7 @@ set (SRC
     "common/common.cpp"
     "common/util.cpp"
     "common/config.cpp"
+    "config/configuration.cpp"
     "common/constants.cpp"
     "db/database.cpp"
     "db/permission.cpp"
