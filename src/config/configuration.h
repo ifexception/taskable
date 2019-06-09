@@ -27,7 +27,9 @@ class Configuration
 {
 public:
     Configuration();
-    ~Configuration() = default;
+    ~Configuration();
+
+    void Save();
 
     wxString GetConnectionString() const;
     void SetConnectionString(const wxString& value);

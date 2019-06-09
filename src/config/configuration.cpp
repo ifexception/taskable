@@ -29,6 +29,16 @@ Configuration::Configuration()
     mConfig = new wxFileConfig(wxEmptyString, wxEmptyString, configPath);
 }
 
+Configuration::~Configuration()
+{
+    delete mConfig;
+}
+
+void Configuration::Save()
+{
+    mConfig->Flush();
+}
+
 wxString Configuration::GetConnectionString() const
 {
     return Get<wxString>(wxT("connection"), wxT("connectionString"), wxT(""));
