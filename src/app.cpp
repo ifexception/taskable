@@ -32,6 +32,7 @@ namespace app
 {
 App::App()
     : pInstanceChecker(std::make_unique<wxSingleInstanceChecker>())
+    , pConfig(std::make_shared<cfg::Configuration>())
 { }
 
 App::~App()

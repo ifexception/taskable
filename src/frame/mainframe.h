@@ -19,8 +19,12 @@
 
 #pragma once
 
+#include <memory>
+
 #include <wx/wx.h>
 #include <wx/listctrl.h>
+
+#include "../config/configuration.h"
 
 namespace app::frame
 {
@@ -29,7 +33,7 @@ class TaskBarIcon;
 class MainFrame : public wxFrame
 {
 public:
-    MainFrame(wxWindow* parent, const wxString& name = wxT("MainFrame"));
+    MainFrame(std::shared_ptr<cfg::Configuration> config, const wxString& name = wxT("MainFrame"));
     MainFrame(const MainFrame&) = delete;
     virtual ~MainFrame();
 
@@ -39,6 +43,7 @@ public:
 
 private:
     wxDECLARE_EVENT_TABLE();
+
     bool Create();
 
     void CreateControls();
@@ -64,6 +69,7 @@ private:
 
     wxListCtrl* pListCtrl;
     TaskBarIcon* pTaskBarIcon;
+    std::shared_ptr<cfg::Configuration> pConfig;
 
     enum
     {

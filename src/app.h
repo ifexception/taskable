@@ -32,6 +32,8 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/daily_file_sink.h>
 
+#include "config/configuration.h"
+
 namespace app
 {
 class App : public wxApp
@@ -48,6 +50,7 @@ class App : public wxApp
     bool DatabaseFileExists();
     bool IsInstalled();
 
+    std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
     std::unique_ptr<wxSingleInstanceChecker> pInstanceChecker;
 };

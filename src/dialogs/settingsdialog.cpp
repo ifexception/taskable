@@ -32,7 +32,8 @@ wxBEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
     EVT_BUTTON(IDC_BACKUP_PATH_BUTTON, SettingsDialog::OnOpenDirectory)
 wxEND_EVENT_TABLE()
 
-SettingsDialog::SettingsDialog(wxWindow* parent, const wxString& name)
+SettingsDialog::SettingsDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, const wxString& name)
+    : pConfig(config)
 {
     long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
     bool success = Create(parent, wxID_ANY, wxT("Settings"), wxDefaultPosition, wxSize(480, 320), style, name);

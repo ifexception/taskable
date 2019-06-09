@@ -62,8 +62,9 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_ICONIZE(MainFrame::OnIconize)
 wxEND_EVENT_TABLE()
 
-MainFrame::MainFrame(wxWindow* parent, const wxString& name)
-    : wxFrame(parent, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(700, 500), wxDEFAULT_FRAME_STYLE, name)
+MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, const wxString& name)
+    : wxFrame(nullptr, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(700, 500), wxDEFAULT_FRAME_STYLE, name)
+    , pConfig(config)
 {
     bool success = Create();
     SetMinClientSize(wxSize(640, 480));
@@ -271,7 +272,7 @@ void MainFrame::OnIconize(wxIconizeEvent& event)
 
 void MainFrame::OnSettings(wxCommandEvent& event)
 {
-    dialog::SettingsDialog settings(this);
+    dialog::SettingsDialog settings(this, pConfig);
     settings.ShowModal();
 }
 
@@ -282,7 +283,7 @@ void MainFrame::RefreshItems()
     std::vector<models::detailed_task> detailedTasks;
     try {
         services::db_service dbService;
-        detailedTasks = dbService.get_all_tasks_by_date(std::string(dateString.ToUTF8())); //FIXME
+        detailedTasks = dbService.get_all_tasks_by_date(std::string(dateString.ToUTF8()));
     }
     catch (const db::database_exception& e) {
         wxLogError(wxString::Format("Error %d", e.get_error_code()));

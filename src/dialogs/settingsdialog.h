@@ -19,7 +19,11 @@
 
 #pragma once
 
+#include <memory>
+
 #include <wx/wx.h>
+
+#include "../config/configuration.h"
 
 namespace app::dialog
 {
@@ -27,7 +31,7 @@ class SettingsDialog : public wxDialog
 {
 public:
     SettingsDialog() = default;
-    explicit SettingsDialog(wxWindow* parent, const wxString& name = wxT("SettingsDialog"));
+    explicit SettingsDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, const wxString& name = wxT("SettingsDialog"));
     virtual ~SettingsDialog() = default;
 
 private:
@@ -53,6 +57,8 @@ private:
     wxCheckBox* pBackupDatabase;
     wxTextCtrl* pBackupPath;
     wxButton* pBrowseBackupPath;
+
+    std::shared_ptr<cfg::Configuration> pConfig;
 
     enum
     {
