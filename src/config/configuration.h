@@ -17,7 +17,51 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <wx/string.h>
+#include <wx/stdpaths.h>
+#include <wx/fileconf.h>
+
 namespace app::cfg
 {
+class Configuration
+{
+public:
+    Configuration();
+    ~Configuration() = default;
 
+    wxString GetConnectionString() const;
+    void SetConnectionString(const wxString& value);
+
+    bool IsConfirmOnExit() const;
+    void SetConfirmOnExit(bool value);
+
+    bool IsStartOnBoot() const;
+    void SetStartOnBoot(bool value);
+
+    bool IsMinimizeToTray() const;
+    void SetMinimizeToTray(bool value);
+
+    bool IsCloseToTray() const;
+    void SetCloseToTray(bool value);
+
+    bool IsShowBalloonNotifications() const;
+    void SetShowBalloonNotifications(bool value);
+
+    bool IsBackupEnabled() const;
+    void SetBackupEnabled(bool value);
+
+    wxString GetBackupPath() const;
+    void SetBackupPath(const wxString& value);
+
+private:
+    static wxString CFG_FILE;
+
+    template<class T>
+    T Get(const wxString& group, const wxString& key, T defaultValue) const;
+
+    template<class T>
+    void Set(const wxString& group, const wxString& key, T value);
+
+    wxFileConfig* mConfig;
+};
 }
