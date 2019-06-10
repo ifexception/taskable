@@ -143,7 +143,17 @@ void SettingsDialog::CreateControls()
 }
 
 void SettingsDialog::FillControls()
-{ }
+{
+    pDialogOnExit->SetValue(pConfig->IsConfirmOnExit());
+    pStartWithWindows->SetValue(pConfig->IsStartOnBoot());
+
+    pMinimizeToTray->SetValue(pConfig->IsMinimizeToTray());
+    pCloseToTray->SetValue(pConfig->IsCloseToTray());
+    pShowBalloonNotifications->SetValue(pConfig->IsShowBalloonNotifications());
+
+    pBackupDatabase->SetValue(pConfig->IsBackupEnabled());
+    pBackupPath->SetValue(pConfig->GetBackupPath());
+}
 
 void SettingsDialog::OnOk(wxCommandEvent& event)
 { }
