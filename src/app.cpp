@@ -61,7 +61,7 @@ bool App::OnInit()
         return false;
     }
 
-    frame::MainFrame* mf = new frame::MainFrame(nullptr);
+    frame::MainFrame* mf = new frame::MainFrame(pConfig);
 
     bool isInstalled = IsInstalled();
     if (!isInstalled) {
