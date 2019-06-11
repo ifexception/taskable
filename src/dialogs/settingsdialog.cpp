@@ -119,7 +119,6 @@ void SettingsDialog::CreateControls()
 
     pBackupPath = new wxTextCtrl(databasePanel, IDC_BACKUP_PATH, wxGetEmptyString(), wxDefaultPosition, wxSize(256, -1), 0);
     pBackupPath->SetEditable(false);
-    pBackupPath->Disable();
     gridSizer->Add(pBackupPath, common::sizers::ControlDefault);
 
     pBrowseBackupPath = new wxButton(databasePanel, IDC_BACKUP_PATH_BUTTON, wxT("Browse"));
@@ -153,13 +152,39 @@ void SettingsDialog::FillControls()
 
     pBackupDatabase->SetValue(pConfig->IsBackupEnabled());
     pBackupPath->SetValue(pConfig->GetBackupPath());
+
+    bool enabled = pBackupDatabase->GetValue();
+    if (!enabled) {
+        pBackupPath->Disable();
+        pBrowseBackupPath->Disable();
+    }
 }
 
-void SettingsDialog::OnOk(wxCommandEvent& event)
-{ }
+void SettingsDialog::OnOk(wxCommandEvent& WXUNUSED(event))
+{
+    pConfig->SetConfirmOnExit(pDialogOnExit->GetValue());
+    pConfig->SetStartOnBoot(pStartWithWindows->GetValue());
+
+    pConfig->SetMinimizeToTray(pMinimizeToTray->GetValue());
+    pConfig->SetCloseToTray(pCloseToTray->GetValue());
+    pConfig->SetShowBalloonNotifications(pShowBalloonNotifications->GetValue());
+
+    pConfig->SetBackupEnabled(pBackupDatabase->GetValue());
+    pConfig->SetBackupPath(pBackupPath->GetValue());
+
+    pConfig->Save();
+
+    EndModal(wxID_OK);
+}
 
 void SettingsDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
 {
+    int ret = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Tasks Tracker"), wxICON_QUESTION | wxYES_NO);
+    if (ret == wxNO) {
+        return;
+    }
+
+    EndModal(wxID_CANCEL);
 }
 
 void SettingsDialog::OnBackupDatabaseCheck(wxCommandEvent& event)
