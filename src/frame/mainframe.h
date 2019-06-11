@@ -50,7 +50,7 @@ private:
     void DataToControls();
 
     void OnAbout(wxCommandEvent& event);
-    void OnClose(wxCommandEvent& event);
+    void OnClose(wxCloseEvent& event);
     void OnNewTask(wxCommandEvent& event);
     void OnNewEmployer(wxCommandEvent& event);
     void OnNewClient(wxCommandEvent& event);

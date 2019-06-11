@@ -42,6 +42,9 @@ public:
     bool IsStartOnBoot() const;
     void SetStartOnBoot(bool value);
 
+    bool IsShowInTray() const;
+    void SetShowInTray(bool value);
+
     bool IsMinimizeToTray() const;
     void SetMinimizeToTray(bool value);
 

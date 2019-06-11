@@ -46,20 +46,20 @@ const int ClientId = static_cast<int>(ids::MenuIds::ClientMenuId);
 const int CategoryId = static_cast<int>(ids::MenuIds::CategoryMenuId);
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
-    EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
-    EVT_MENU(TaskId, MainFrame::OnNewTask)
-    EVT_MENU(EmployerId, MainFrame::OnNewEmployer)
-    EVT_MENU(ProjectId, MainFrame::OnNewProject)
-    EVT_MENU(ClientId, MainFrame::OnNewClient)
-    EVT_MENU(CategoryId, MainFrame::OnNewCategory)
-    EVT_MENU(ids::ID_EDIT_EMPLOYER, MainFrame::OnEditEmployer)
-    EVT_MENU(ids::ID_EDIT_CLIENT, MainFrame::OnEditClient)
-    EVT_MENU(ids::ID_EDIT_PROJECT, MainFrame::OnEditProject)
-    EVT_MENU(ids::ID_EDIT_CATEGORY, MainFrame::OnEditCategory)
-    EVT_MENU(ids::ID_SETTINGS, MainFrame::OnSettings)
-    EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
-    EVT_COMMAND(MainFrame::IDC_LIST, ids::ID_TASK_INSERTED, MainFrame::OnTaskInserted)
-    EVT_ICONIZE(MainFrame::OnIconize)
+EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
+EVT_MENU(TaskId, MainFrame::OnNewTask)
+EVT_MENU(EmployerId, MainFrame::OnNewEmployer)
+EVT_MENU(ProjectId, MainFrame::OnNewProject)
+EVT_MENU(ClientId, MainFrame::OnNewClient)
+EVT_MENU(CategoryId, MainFrame::OnNewCategory)
+EVT_MENU(ids::ID_EDIT_EMPLOYER, MainFrame::OnEditEmployer)
+EVT_MENU(ids::ID_EDIT_CLIENT, MainFrame::OnEditClient)
+EVT_MENU(ids::ID_EDIT_PROJECT, MainFrame::OnEditProject)
+EVT_MENU(ids::ID_EDIT_CATEGORY, MainFrame::OnEditCategory)
+EVT_MENU(ids::ID_SETTINGS, MainFrame::OnSettings)
+EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
+EVT_COMMAND(MainFrame::IDC_LIST, ids::ID_TASK_INSERTED, MainFrame::OnTaskInserted)
+EVT_ICONIZE(MainFrame::OnIconize)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, const wxString& name)
@@ -70,12 +70,13 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, const wxString&
     SetMinClientSize(wxSize(640, 480));
     SetIcon(common::GetProgramIcon());
     pTaskBarIcon = new TaskBarIcon(this);
-    // TODO preference if should run in notification area
-    pTaskBarIcon->SetTaskBarIcon();
+    if (pConfig->IsShowInTray()) {
+        pTaskBarIcon->SetTaskBarIcon();
+    }
 }
 
 MainFrame::~MainFrame()
-{}
+{ }
 
 bool MainFrame::OnStartUp()
 {
@@ -189,9 +190,19 @@ void MainFrame::OnAbout(wxCommandEvent& event)
     dialog::AboutDialog about(nullptr);
 }
 
-void MainFrame::OnClose(wxCommandEvent& event)
+void MainFrame::OnClose(wxCloseEvent& event)
 {
-    Close(true);
+    if (pConfig->IsConfirmOnExit() && event.CanVeto()) {
+        int ret = wxMessageBox(wxT("Are you sure to exit the application?"), wxT("Tasks Tracker"), wxICON_QUESTION | wxYES_NO);
+        if (ret == wxNO) {
+            event.Veto();
+        }
+    } else if (pConfig->IsCloseToTray() && pConfig->IsShowInTray() && event.CanVeto()) {
+        Hide();
+        MSWGetTaskBarButton()->Hide();
+    } else {
+        event.Skip();
+    }
 }
 
 void MainFrame::OnNewTask(wxCommandEvent& event)
@@ -264,8 +275,7 @@ void MainFrame::OnItemDoubleClick(wxListEvent& event)
 
 void MainFrame::OnIconize(wxIconizeEvent& event)
 {
-     // TODO Iconizing and closing to notification area must be configurable
-    if (event.IsIconized()) {
+    if (event.IsIconized() && pConfig->IsShowInTray() && pConfig->IsMinimizeToTray()) {
         MSWGetTaskBarButton()->Hide();
     }
 }
@@ -284,8 +294,7 @@ void MainFrame::RefreshItems()
     try {
         services::db_service dbService;
         detailedTasks = dbService.get_all_tasks_by_date(std::string(dateString.ToUTF8()));
-    }
-    catch (const db::database_exception& e) {
+    } catch (const db::database_exception& e) {
         wxLogError(wxString::Format("Error %d", e.get_error_code()));
     }
 

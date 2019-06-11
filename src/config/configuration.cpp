@@ -73,6 +73,16 @@ void Configuration::SetStartOnBoot(bool value)
     Set<bool>(wxT("settings"), wxT("startOnBoot"), value);
 }
 
+bool Configuration::IsShowInTray() const
+{
+    return Get<bool>(wxT("settings"), wxT("showInTray"));
+}
+
+void Configuration::SetShowInTray(bool value)
+{
+    Set<bool>(wxT("settings"), wxT("showInTray"), value);
+}
+
 bool Configuration::IsMinimizeToTray() const
 {
     return Get<bool>(wxT("settings"), wxT("minimizeToTray"));
