@@ -26,22 +26,26 @@ wxString Configuration::CFG_FILE = "tasks-tracker.ini";
 Configuration::Configuration()
 {
     wxString configPath = wxPathOnly(wxStandardPaths::Get().GetExecutablePath()) + "\\" + CFG_FILE;
-    mConfig = new wxFileConfig(wxEmptyString, wxEmptyString, configPath);
+    pConfig = new wxFileConfig(wxEmptyString, wxEmptyString, configPath);
+    /*auto b = mConfig->GetNumberOfGroups();
+    mConfig->SetPath("settings");
+    bool def = false;
+    auto value = mConfig->Read("confirmOnExit", &def);*/
 }
 
 Configuration::~Configuration()
 {
-    delete mConfig;
+    delete pConfig;
 }
 
 void Configuration::Save()
 {
-    mConfig->Flush();
+    pConfig->Flush();
 }
 
 wxString Configuration::GetConnectionString() const
 {
-    return Get<wxString>(wxT("connection"), wxT("connectionString"), wxT(""));
+    return Get<wxString>(wxT("connection"), wxT("connectionString"));
 }
 
 void Configuration::SetConnectionString(const wxString& value)
@@ -51,7 +55,7 @@ void Configuration::SetConnectionString(const wxString& value)
 
 bool Configuration::IsConfirmOnExit() const
 {
-    return Get<bool>(wxT("settings"), wxT("confirmOnExit"), false);
+    return Get<bool>(wxT("settings"), wxT("confirmOnExit"));
 }
 
 void Configuration::SetConfirmOnExit(bool value)
@@ -61,7 +65,7 @@ void Configuration::SetConfirmOnExit(bool value)
 
 bool Configuration::IsStartOnBoot() const
 {
-    return Get<bool>(wxT("settings"), wxT("startOnBoot"), false);
+    return Get<bool>(wxT("settings"), wxT("startOnBoot"));
 }
 
 void Configuration::SetStartOnBoot(bool value)
@@ -71,7 +75,7 @@ void Configuration::SetStartOnBoot(bool value)
 
 bool Configuration::IsMinimizeToTray() const
 {
-    return Get<bool>(wxT("settings"), wxT("minimizeToTray"), false);
+    return Get<bool>(wxT("settings"), wxT("minimizeToTray"));
 }
 
 void Configuration::SetMinimizeToTray(bool value)
@@ -81,7 +85,7 @@ void Configuration::SetMinimizeToTray(bool value)
 
 bool Configuration::IsCloseToTray() const
 {
-    return Get<bool>(wxT("settings"), wxT("closeToTray"), false);
+    return Get<bool>(wxT("settings"), wxT("closeToTray"));
 }
 
 void Configuration::SetCloseToTray(bool value)
@@ -91,7 +95,7 @@ void Configuration::SetCloseToTray(bool value)
 
 bool Configuration::IsShowBalloonNotifications() const
 {
-    return Get<bool>(wxT("settings"), wxT("showBalloonNotifications"), false);
+    return Get<bool>(wxT("settings"), wxT("showBalloonNotifications"));
 }
 
 void Configuration::SetShowBalloonNotifications(bool value)
@@ -101,7 +105,7 @@ void Configuration::SetShowBalloonNotifications(bool value)
 
 bool Configuration::IsBackupEnabled() const
 {
-    return Get<bool>(wxT("settings"), wxT("backupEnabled"), false);
+    return Get<bool>(wxT("settings"), wxT("backupEnabled"));
 }
 
 void Configuration::SetBackupEnabled(bool value)
@@ -111,7 +115,7 @@ void Configuration::SetBackupEnabled(bool value)
 
 wxString Configuration::GetBackupPath() const
 {
-    return Get<wxString>(wxT("settings"), wxT("backupPath"), wxT(""));
+    return Get<wxString>(wxT("settings"), wxT("backupPath"));
 }
 
 void Configuration::SetBackupPath(const wxString& value)
@@ -120,17 +124,19 @@ void Configuration::SetBackupPath(const wxString& value)
 }
 
 template<class T>
-T Configuration::Get(const wxString& group, const wxString& key, T defaultValue) const
+T Configuration::Get(const wxString& group, const wxString& key) const
 {
-    mConfig->SetPath(group);
-    T value = mConfig->Read(key, defaultValue);
+    pConfig->SetPath(group);
+    T value;
+    pConfig->Read(key, &value);
+    pConfig->SetPath("/");
     return value;
 }
 
 template<class T>
 void Configuration::Set(const wxString& group, const wxString& key, T value)
 {
-    mConfig->SetPath(group);
-    mConfig->Write(key, value);
+    pConfig->SetPath(group);
+    pConfig->Write(key, value);
 }
 }

@@ -61,11 +61,11 @@ private:
     static wxString CFG_FILE;
 
     template<class T>
-    T Get(const wxString& group, const wxString& key, T defaultValue) const;
+    T Get(const wxString& group, const wxString& key) const;
 
     template<class T>
     void Set(const wxString& group, const wxString& key, T value);
 
-    wxFileConfig* mConfig;
+    wxFileConfig* pConfig;
 };
 }
