@@ -77,7 +77,9 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, const wxString&
 }
 
 MainFrame::~MainFrame()
-{ }
+{
+    delete pTaskBarIcon;
+}
 
 bool MainFrame::OnStartUp()
 {
