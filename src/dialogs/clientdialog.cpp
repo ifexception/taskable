@@ -254,11 +254,10 @@ void ClientDialog::OnSave(wxCommandEvent & event)
     EndModal(ids::ID_SAVE);
 }
 
-void ClientDialog::OnCancel(wxCommandEvent & event)
+void ClientDialog::OnCancel(wxCommandEvent& event)
 {
     bool areControlsEmpty = AreControlsEmpty();
-    if (!areControlsEmpty) {
-
+    if (areControlsEmpty) {
         int answer = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Confirm"),
             wxYES_NO | wxICON_QUESTION);
         if (answer == wxYES) {
