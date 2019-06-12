@@ -28,8 +28,11 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(SettingsDialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
-    EVT_CHECKBOX(IDC_BACKUP_DATABASE, SettingsDialog::OnBackupDatabaseCheck)
-    EVT_BUTTON(IDC_BACKUP_PATH_BUTTON, SettingsDialog::OnOpenDirectory)
+EVT_CHECKBOX(IDC_BACKUP_DATABASE, SettingsDialog::OnBackupDatabaseCheck)
+EVT_CHECKBOX(IDC_SHOW_IN_TRAY, SettingsDialog::OnShowInTrayCheck)
+EVT_BUTTON(IDC_BACKUP_PATH_BUTTON, SettingsDialog::OnOpenDirectory)
+EVT_BUTTON(wxID_OK, SettingsDialog::OnOk)
+EVT_BUTTON(wxID_CANCEL, SettingsDialog::OnCancel)
 wxEND_EVENT_TABLE()
 
 SettingsDialog::SettingsDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, const wxString& name)
@@ -88,11 +91,19 @@ void SettingsDialog::CreateControls()
     auto trayGridSizer = new wxFlexGridSizer(2, 10, 10);
     traySettingsPanel->SetSizer(trayGridSizer);
 
-    pMinimizeToTray = new wxCheckBox(traySettingsPanel, IDC_MINIMIZE_TO_TRAY, wxT("Minimize application to Windows tray"));
-    trayGridSizer->Add(pMinimizeToTray, common::sizers::ControlDefault);
+    auto panel = new wxPanel(traySettingsPanel, wxID_STATIC);
+    auto panelSizer = new wxBoxSizer(wxVERTICAL);
+    panel->SetSizer(panelSizer);
 
-    pCloseToTray = new wxCheckBox(traySettingsPanel, IDC_CLOSE_TO_TRAY, wxT("Close application to Windows tray"));
-    trayGridSizer->Add(pCloseToTray, common::sizers::ControlDefault);
+    pShowInTray = new wxCheckBox(panel, IDC_SHOW_IN_TRAY, wxT("Show in tray"));
+    panelSizer->Add(pShowInTray, common::sizers::ControlDefault);
+
+    pMinimizeToTray = new wxCheckBox(panel, IDC_MINIMIZE_TO_TRAY, wxT("Minimize application to Windows tray"));
+    panelSizer->Add(pMinimizeToTray, common::sizers::ControlDefault);
+
+    pCloseToTray = new wxCheckBox(panel, IDC_CLOSE_TO_TRAY, wxT("Close application to Windows tray"));
+    panelSizer->Add(pCloseToTray, common::sizers::ControlDefault);
+    trayGridSizer->Add(panel, common::sizers::ControlDefault);
 
     pShowBalloonNotifications = new wxCheckBox(traySettingsPanel, IDC_SHOW_BALLOON_NOTIFICATIONS, wxT("Show balloon notifications"));
     trayGridSizer->Add(pShowBalloonNotifications, common::sizers::ControlDefault);
@@ -146,6 +157,16 @@ void SettingsDialog::FillControls()
     pDialogOnExit->SetValue(pConfig->IsConfirmOnExit());
     pStartWithWindows->SetValue(pConfig->IsStartOnBoot());
 
+    pShowInTray->SetValue(pConfig->IsShowInTray());
+    bool enabled = pShowInTray->GetValue();
+    if (enabled) {
+        pMinimizeToTray->Enable();
+        pCloseToTray->Enable();
+    } else {
+        pMinimizeToTray->Disable();
+        pCloseToTray->Disable();
+    }
+
     pMinimizeToTray->SetValue(pConfig->IsMinimizeToTray());
     pCloseToTray->SetValue(pConfig->IsCloseToTray());
     pShowBalloonNotifications->SetValue(pConfig->IsShowBalloonNotifications());
@@ -153,7 +174,7 @@ void SettingsDialog::FillControls()
     pBackupDatabase->SetValue(pConfig->IsBackupEnabled());
     pBackupPath->SetValue(pConfig->GetBackupPath());
 
-    bool enabled = pBackupDatabase->GetValue();
+    enabled = pBackupDatabase->GetValue();
     if (!enabled) {
         pBackupPath->Disable();
         pBrowseBackupPath->Disable();
@@ -165,6 +186,7 @@ void SettingsDialog::OnOk(wxCommandEvent& WXUNUSED(event))
     pConfig->SetConfirmOnExit(pDialogOnExit->GetValue());
     pConfig->SetStartOnBoot(pStartWithWindows->GetValue());
 
+    pConfig->SetShowInTray(pShowInTray->GetValue());
     pConfig->SetMinimizeToTray(pMinimizeToTray->GetValue());
     pConfig->SetCloseToTray(pCloseToTray->GetValue());
     pConfig->SetShowBalloonNotifications(pShowBalloonNotifications->GetValue());
@@ -179,7 +201,7 @@ void SettingsDialog::OnOk(wxCommandEvent& WXUNUSED(event))
 
 void SettingsDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
 {
-    int ret = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Tasks Tracker"), wxICON_QUESTION | wxYES_NO);
+    int ret = wxMessageBox(wxT("Are you sure you want to exit?\nAny changes you've made will be lost."), wxT("Tasks Tracker"), wxYES_NO | wxICON_QUESTION);
     if (ret == wxNO) {
         return;
     }
@@ -195,6 +217,17 @@ void SettingsDialog::OnBackupDatabaseCheck(wxCommandEvent& event)
     } else {
         pBackupPath->Disable();
         pBrowseBackupPath->Disable();
+    }
+}
+
+void SettingsDialog::OnShowInTrayCheck(wxCommandEvent & event)
+{
+    if (event.IsChecked()) {
+        pMinimizeToTray->Enable();
+        pCloseToTray->Enable();
+    } else {
+        pMinimizeToTray->Disable();
+        pCloseToTray->Disable();
     }
 }
 

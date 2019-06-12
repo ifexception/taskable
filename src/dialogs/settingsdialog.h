@@ -45,11 +45,13 @@ private:
     void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnBackupDatabaseCheck(wxCommandEvent& event);
+    void OnShowInTrayCheck(wxCommandEvent& event);
     void OnOpenDirectory(wxCommandEvent& event);
 
     wxCheckBox* pDialogOnExit;
     wxCheckBox* pStartWithWindows;
 
+    wxCheckBox* pShowInTray;
     wxCheckBox* pMinimizeToTray;
     wxCheckBox* pCloseToTray;
     wxCheckBox* pShowBalloonNotifications;
@@ -64,6 +66,7 @@ private:
     {
         IDC_DIALOG_EXIT = 1,
         IDC_START_WITH_WINDOWS,
+        IDC_SHOW_IN_TRAY,
         IDC_MINIMIZE_TO_TRAY,
         IDC_CLOSE_TO_TRAY,
         IDC_SHOW_BALLOON_NOTIFICATIONS,
