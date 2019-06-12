@@ -46,6 +46,7 @@ const int ClientId = static_cast<int>(ids::MenuIds::ClientMenuId);
 const int CategoryId = static_cast<int>(ids::MenuIds::CategoryMenuId);
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
+EVT_CLOSE(MainFrame::OnClose)
 EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
 EVT_MENU(TaskId, MainFrame::OnNewTask)
 EVT_MENU(EmployerId, MainFrame::OnNewEmployer)
