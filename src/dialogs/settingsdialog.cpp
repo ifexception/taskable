@@ -98,6 +98,7 @@ void SettingsDialog::CreateControls()
     pShowInTray = new wxCheckBox(panel, IDC_SHOW_IN_TRAY, wxT("Show in tray"));
     panelSizer->Add(pShowInTray, common::sizers::ControlDefault);
 
+    // TODO Indent the below two controls with an offset to the right
     pMinimizeToTray = new wxCheckBox(panel, IDC_MINIMIZE_TO_TRAY, wxT("Minimize application to Windows tray"));
     panelSizer->Add(pMinimizeToTray, common::sizers::ControlDefault);
 
