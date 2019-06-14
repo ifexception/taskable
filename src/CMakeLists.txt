@@ -7,24 +7,20 @@ else (MSVC)
     find_package (wxWidgets REQUIRED COMPONENTS base core)
     include (${wxWidgets_USE_FILE})
 endif ()
-include (${CMAKE_MODULE_PATH}/FindRapidXml.cmake)
 
 message (STATUS "CMAKE_CONFIGURATION_TYPES:${CMAKE_CONFIGURATION_TYPES}")
 
-find_package (rapidxml REQUIRED)
-find_package (sqlite3 REQUIRED)
+find_package (sqlite3 CONFIG REQUIRED)
 find_package (spdlog CONFIG REQUIRED)
 
 message (STATUS "sqlite3 found: ${sqlite3_FOUND}")
 message (STATUS "spdlog found: ${spdlog_FOUND}")
-message (STATUS "rapidxml_FOUND: ${rapidxml_FOUND}")
 message (STATUS "wxWidgets_FOUND: ${wxWidgets_FOUND}")
 
 set (SRC
     "common/ids.cpp"
     "common/common.cpp"
     "common/util.cpp"
-    "common/config.cpp"
     "config/configuration.cpp"
     "common/constants.cpp"
     "db/database.cpp"
@@ -76,9 +72,6 @@ target_compile_definitions (${PROJECT_NAME} PUBLIC
     wxUSE_TIMEPICKCTRL=1
     __WXMSW__
     $<$<CONFIG:Debug>:_DEBUG>)
-
-target_include_directories (${PROJECT_NAME} PUBLIC
-    rapidxml)
 
 target_link_libraries (${PROJECT_NAME}
     ${wxWidgets_LIBRARIES}

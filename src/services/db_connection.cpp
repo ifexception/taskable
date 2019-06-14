@@ -18,7 +18,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "db_connection.h"
-#include "../common/config.h"
 
 namespace app::services
 {
@@ -41,7 +40,6 @@ db::database* db_connection::get_database()
 db_connection::db_connection()
     : mPermission(db::permission::ReadWrite)
 {
-    auto connectionString = cfg::Config::Get().GetConnectionString();
-    pDatabase = new db::database(connectionString, mPermission);
+    pDatabase = new db::database("tasks-tracker.db", mPermission);
 }
 }
