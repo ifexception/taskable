@@ -1,32 +1,38 @@
-{
-    "configurations": [
+﻿{
+  "configurations": [
+    {
+      "name": "x86-Debug",
+      "generator": "Visual Studio 16 2019",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\build\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-m -v:minimal",
+      "variables": [
         {
-            "name": "x86-Debug",
-            "generator": "Visual Studio 15 2017",
-            "configurationType": "Debug",
-            "buildRoot": "${projectDir}\\build\\${name}",
-            "cmakeCommandArgs": "",
-            "buildCommandArgs": "-m -v:minimal",
-            "variables": [
-                {
-                    "name": "CMAKE_TOOLCHAIN_FILE",
-                    "value": "C:\\Microsoft\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake"
-                }
-            ]
-        },
-        {
-            "name": "x86-Release",
-            "generator": "Visual Studio 15 2017",
-            "configurationType": "Release",
-            "buildRoot": "${projectDir}\\build\\${name}",
-            "cmakeCommandArgs": "",
-            "buildCommandArgs": "-m -v:minimal",
-            "variables": [
-                {
-                    "name": "CMAKE_TOOLCHAIN_FILE",
-                    "value": "C:\\Microsoft\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake"
-                }
-            ]
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "C:\\Microsoft\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
+          "type": "STRING"
         }
-    ]
+      ],
+      "inheritEnvironments": [],
+      "intelliSenseMode": "windows-msvc-x86"
+    },
+    {
+      "name": "x86-Release",
+      "generator": "Visual Studio 16 2019",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\build\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-m -v:minimal",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "C:\\Microsoft\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
+          "type": "STRING"
+        }
+      ],
+      "inheritEnvironments": [],
+      "intelliSenseMode": "windows-msvc-x86"
+    }
+  ]
 }
