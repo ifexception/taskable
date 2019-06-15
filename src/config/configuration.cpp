@@ -43,16 +43,6 @@ void Configuration::Save()
     pConfig->Flush();
 }
 
-wxString Configuration::GetConnectionString() const
-{
-    return Get<wxString>(wxT("connection"), wxT("connectionString"));
-}
-
-void Configuration::SetConnectionString(const wxString& value)
-{
-    Set<wxString>(wxT("connection"), wxT("connectionString"), value);
-}
-
 bool Configuration::IsConfirmOnExit() const
 {
     return Get<bool>(wxT("settings"), wxT("confirmOnExit"));

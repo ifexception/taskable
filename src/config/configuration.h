@@ -33,9 +33,6 @@ public:
 
     void Save();
 
-    wxString GetConnectionString() const;
-    void SetConnectionString(const wxString& value);
-
     bool IsConfirmOnExit() const;
     void SetConfirmOnExit(bool value);
 
