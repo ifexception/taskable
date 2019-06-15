@@ -23,6 +23,7 @@
 
 #include <wx/wx.h>
 #include <wx/listctrl.h>
+#include <wx/datectrl.h>
 
 #include "../config/configuration.h"
 
@@ -67,12 +68,16 @@ private:
 
     void RefreshItems();
 
+    wxDatePickerCtrl* pDatePickerCtrl;
+    wxStaticText* pTotalHoursText;
     wxListCtrl* pListCtrl;
     TaskBarIcon* pTaskBarIcon;
     std::shared_ptr<cfg::Configuration> pConfig;
 
     enum
     {
+        IDC_GO_TO_DATE = 1,
+        IDC_HOURS_TEXT,
         IDC_LIST
     };
 };

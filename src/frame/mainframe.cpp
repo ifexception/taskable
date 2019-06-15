@@ -134,12 +134,38 @@ void MainFrame::CreateControls()
 
     SetMenuBar(menuBar);
 
-    auto panel = new wxPanel(this);
-    auto sizer = new wxBoxSizer(wxHORIZONTAL);
+    /* Main Controls */
+    auto mainSizer = new wxBoxSizer(wxVERTICAL);
+    auto mainPanel = new  wxPanel(this);
+    mainPanel->SetSizer(mainSizer);
 
-    pListCtrl = new wxListCtrl(panel, IDC_LIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
-    sizer->Add(pListCtrl, 1, wxEXPAND | wxALL, 5);
-    panel->SetSizer(sizer);
+    /* Utilities Panel and Controls*/
+    auto utilPanel = new wxPanel(mainPanel);
+    mainSizer->Add(utilPanel);
+    auto utilSizer = new wxBoxSizer(wxHORIZONTAL);
+    utilPanel->SetSizer(utilSizer);
+
+    auto gotoText = new wxStaticText(utilPanel, wxID_ANY, wxT("Go To"));
+    const auto& flags = common::sizers::ControlCenterVertical;
+    utilSizer->Add(gotoText, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+
+    pDatePickerCtrl = new wxDatePickerCtrl(utilPanel, IDC_GO_TO_DATE, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1), wxDP_DROPDOWN);
+    pDatePickerCtrl->SetToolTip(wxT("Select a date to navigate to"));
+    utilSizer->Add(pDatePickerCtrl, common::sizers::ControlDefault);
+
+    pTotalHoursText = new wxStaticText(utilPanel, IDC_HOURS_TEXT, wxT("Total Hours: %d"));
+    pTotalHoursText->SetToolTip(wxT("Indicates the total hours spent on a given task for today"));
+    utilSizer->AddStretchSpacer();
+    utilSizer->Add(pTotalHoursText, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+
+    /* List Panel and Control*/
+    auto listPanel = new wxPanel(mainPanel);
+    mainSizer->Add(listPanel, 1, wxEXPAND);
+    auto listSizer = new wxBoxSizer(wxHORIZONTAL);
+    listPanel->SetSizer(listSizer);
+
+    pListCtrl = new wxListCtrl(listPanel, IDC_LIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
+    listSizer->Add(pListCtrl, 1, wxEXPAND | wxALL, 5);
 
     wxListItem projectColumn;
     projectColumn.SetId(0);
