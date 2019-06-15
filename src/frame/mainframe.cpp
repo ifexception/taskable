@@ -61,6 +61,7 @@ EVT_MENU(ids::ID_SETTINGS, MainFrame::OnSettings)
 EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
 EVT_COMMAND(MainFrame::IDC_LIST, ids::ID_TASK_INSERTED, MainFrame::OnTaskInserted)
 EVT_ICONIZE(MainFrame::OnIconize)
+EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, const wxString& name)
@@ -315,9 +316,14 @@ void MainFrame::OnSettings(wxCommandEvent& event)
     settings.ShowModal();
 }
 
-void MainFrame::RefreshItems()
+void MainFrame::OnDateChanged(wxDateEvent& event)
 {
-    wxDateTime date = wxDateTime::Now();
+    auto date = event.GetDate();
+    RefreshItems(date);
+}
+
+void MainFrame::RefreshItems(wxDateTime date)
+{
     wxString dateString = date.FormatISODate();
     std::vector<models::detailed_task> detailedTasks;
     try {

@@ -24,6 +24,7 @@
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/datectrl.h>
+#include <wx/dateevt.h>
 
 #include "../config/configuration.h"
 
@@ -65,8 +66,9 @@ private:
     void OnItemDoubleClick(wxListEvent& event);
     void OnIconize(wxIconizeEvent& event);
     void OnSettings(wxCommandEvent& event);
+    void OnDateChanged(wxDateEvent& event);
 
-    void RefreshItems();
+    void RefreshItems(wxDateTime date = wxDateTime::Now());
 
     wxDatePickerCtrl* pDatePickerCtrl;
     wxStaticText* pTotalHoursText;
