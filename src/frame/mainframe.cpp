@@ -100,17 +100,17 @@ bool MainFrame::Create()
 void MainFrame::CreateControls()
 {
     /* Status Bar Control */
-    CreateStatusBar(2);
+    pStatusBar = CreateStatusBar(2);
     SetStatusText(wxT("Ready"));
     SetStatusText(wxString::Format("%d.%d.%d", TASKS_TRACKER_MAJOR, TASKS_TRACKER_MINOR, TASKS_TRACKER_PATCH), 1);
 
     /* File Menu Control */
     wxMenu* fileMenu = new wxMenu();
     fileMenu->Append(TaskId, wxT("New &Task...\tCtrl-N"), wxT("Create new task"));
-    fileMenu->Append(EmployerId, wxT("New &Employer...\tCtrl-E"), wxT("Create new employer"));
-    fileMenu->Append(ClientId, wxT("New &Client...\tCtrl-L"), wxT("Create new client"));
-    fileMenu->Append(ProjectId, wxT("New &Project...\tCtrl-R"), wxT("Create new project"));
-    fileMenu->Append(CategoryId, wxT("New C&ategory...\tCtrl-A"), wxT("Create new category"));
+    fileMenu->Append(EmployerId, wxT("New &Employer"), wxT("Create new employer"));
+    fileMenu->Append(ClientId, wxT("New &Client"), wxT("Create new client"));
+    fileMenu->Append(ProjectId, wxT("New &Project"), wxT("Create new project"));
+    fileMenu->Append(CategoryId, wxT("New C&ategory"), wxT("Create new category"));
     fileMenu->AppendSeparator();
     fileMenu->Append(wxID_EXIT);
 
@@ -121,7 +121,7 @@ void MainFrame::CreateControls()
     editMenu->Append(ids::ID_EDIT_PROJECT, wxT("Edit &Project"), wxT("Select a project to edit"));
     editMenu->Append(ids::ID_EDIT_CATEGORY, wxT("Edit C&ategory"), wxT("Select a category to edit"));
     editMenu->AppendSeparator();
-    editMenu->Append(ids::ID_SETTINGS, wxT("&Settings"), wxT("Edit application settings"));
+    editMenu->Append(ids::ID_SETTINGS, wxT("&Settings...\tCtrl-P"), wxT("Edit application settings"));
 
     /* Help Menu Control */
     wxMenu* helpMenu = new wxMenu();
@@ -134,6 +134,14 @@ void MainFrame::CreateControls()
     menuBar->Append(helpMenu, "&Help");
 
     SetMenuBar(menuBar);
+
+    /* Accelerator Table */
+    wxAcceleratorEntry entries[3];
+    entries[0].Set(wxACCEL_CTRL, (int)'N', TaskId);
+    entries[1].Set(wxACCEL_CTRL, (int)'P', ids::ID_SETTINGS);
+
+    wxAcceleratorTable table(ARRAYSIZE(entries), entries);
+    SetAcceleratorTable(table);
 
     /* Main Controls */
     auto mainSizer = new wxBoxSizer(wxVERTICAL);

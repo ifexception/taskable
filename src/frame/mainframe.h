@@ -73,6 +73,7 @@ private:
     wxDatePickerCtrl* pDatePickerCtrl;
     wxStaticText* pTotalHoursText;
     wxListCtrl* pListCtrl;
+    wxStatusBar* pStatusBar;
     TaskBarIcon* pTaskBarIcon;
     std::shared_ptr<cfg::Configuration> pConfig;
 
