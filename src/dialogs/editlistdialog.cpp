@@ -33,7 +33,7 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(EditListDialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(EditListDialog, wxDialog)
-EVT_LIST_ITEM_ACTIVATED(EditListDialog::IDC_LIST, EditListDialog::OnItemDoubleClick)
+    EVT_LIST_ITEM_ACTIVATED(EditListDialog::IDC_LIST, EditListDialog::OnItemDoubleClick)
 wxEND_EVENT_TABLE()
 
 EditListDialog::EditListDialog(wxWindow* parent, dialog_type dialogType, const wxString& name)

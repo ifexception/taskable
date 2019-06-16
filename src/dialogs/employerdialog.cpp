@@ -32,9 +32,9 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(EmployerDialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(EmployerDialog, wxDialog)
-EVT_BUTTON(ids::ID_SAVE, EmployerDialog::OnSave)
-EVT_BUTTON(wxID_CANCEL, EmployerDialog::OnCancel)
-EVT_CHECKBOX(EmployerDialog::IDC_ISACTIVE, EmployerDialog::OnIsActiveCheck)
+    EVT_BUTTON(ids::ID_SAVE, EmployerDialog::OnSave)
+    EVT_BUTTON(wxID_CANCEL, EmployerDialog::OnCancel)
+    EVT_CHECKBOX(EmployerDialog::IDC_ISACTIVE, EmployerDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
 EmployerDialog::EmployerDialog(wxWindow* parent, bool isEdit, int employerId, const wxString& name)

@@ -28,11 +28,11 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(SettingsDialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
-EVT_CHECKBOX(IDC_BACKUP_DATABASE, SettingsDialog::OnBackupDatabaseCheck)
-EVT_CHECKBOX(IDC_SHOW_IN_TRAY, SettingsDialog::OnShowInTrayCheck)
-EVT_BUTTON(IDC_BACKUP_PATH_BUTTON, SettingsDialog::OnOpenDirectory)
-EVT_BUTTON(wxID_OK, SettingsDialog::OnOk)
-EVT_BUTTON(wxID_CANCEL, SettingsDialog::OnCancel)
+    EVT_CHECKBOX(IDC_BACKUP_DATABASE, SettingsDialog::OnBackupDatabaseCheck)
+    EVT_CHECKBOX(IDC_SHOW_IN_TRAY, SettingsDialog::OnShowInTrayCheck)
+    EVT_BUTTON(IDC_BACKUP_PATH_BUTTON, SettingsDialog::OnOpenDirectory)
+    EVT_BUTTON(wxID_OK, SettingsDialog::OnOk)
+    EVT_BUTTON(wxID_CANCEL, SettingsDialog::OnCancel)
 wxEND_EVENT_TABLE()
 
 SettingsDialog::SettingsDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, const wxString& name)
