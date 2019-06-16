@@ -25,29 +25,35 @@ namespace app::ids
 {
 enum class MenuIds : int
 {
-    EmployerMenuId = 1,
-    ProjectMenuId = 2,
-    ClientMenuId = 3,
-    TaskDetailMenuId = 4,
-    CategoryMenuId = 5,
-    EmployerEditId = 6,
-    ClientEditId = 7,
-    ProjectEditId = 8,
-    CategoryEditId = 9,
-    SettingsMenuId = 10,
+    NewEmployerId = 1,
+    NewClientId = 2,
+    NewProjectId = 3,
+    NewTaskId = 4,
+    NewCategoryId = 5,
+    EditEmployerId = 6,
+    EditClientId = 7,
+    EditProjectId = 8,
+    EditCategoryId = 9,
+    SettingsId = 10,
 };
 
-static const int ID_EDIT_EMPLOYER = static_cast<int>(MenuIds::EmployerEditId);
-static const int ID_EDIT_CLIENT = static_cast<int>(MenuIds::ClientEditId);
-static const int ID_EDIT_PROJECT = static_cast<int>(MenuIds::ProjectEditId);
-static const int ID_EDIT_CATEGORY = static_cast<int>(MenuIds::CategoryEditId);
-static const int ID_SETTINGS = static_cast<int>(MenuIds::SettingsMenuId);
+static const int ID_NEW_TASK = static_cast<int>(ids::MenuIds::NewTaskId);
+static const int ID_NEW_EMPLOYER = static_cast<int>(ids::MenuIds::NewEmployerId);
+static const int ID_NEW_CLIENT = static_cast<int>(ids::MenuIds::NewClientId);
+static const int ID_NEW_PROJECT = static_cast<int>(ids::MenuIds::NewProjectId);
+static const int ID_NEW_CATEGORY = static_cast<int>(ids::MenuIds::NewCategoryId);
+
+static const int ID_EDIT_EMPLOYER = static_cast<int>(MenuIds::EditEmployerId);
+static const int ID_EDIT_CLIENT = static_cast<int>(MenuIds::EditClientId);
+static const int ID_EDIT_PROJECT = static_cast<int>(MenuIds::EditProjectId);
+static const int ID_EDIT_CATEGORY = static_cast<int>(MenuIds::EditCategoryId);
+static const int ID_SETTINGS = static_cast<int>(MenuIds::SettingsId);
 
 enum class Events : int
 {
     ID_OFFSET = 1,
     ID_SAVE = wxID_HIGHEST + ID_OFFSET,
-    ID_TASK_INSERTED = ID_SAVE + ID_OFFSET
+    ID_TASK_INSERTED,
 };
 
 static const int ID_SAVE = static_cast<int>(Events::ID_SAVE);

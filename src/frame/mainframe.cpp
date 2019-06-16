@@ -39,20 +39,14 @@
 
 namespace app::frame
 {
-const int TaskId = static_cast<int>(ids::MenuIds::TaskDetailMenuId);
-const int EmployerId = static_cast<int>(ids::MenuIds::EmployerMenuId);
-const int ProjectId = static_cast<int>(ids::MenuIds::ProjectMenuId);
-const int ClientId = static_cast<int>(ids::MenuIds::ClientMenuId);
-const int CategoryId = static_cast<int>(ids::MenuIds::CategoryMenuId);
-
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 EVT_CLOSE(MainFrame::OnClose)
 EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
-EVT_MENU(TaskId, MainFrame::OnNewTask)
-EVT_MENU(EmployerId, MainFrame::OnNewEmployer)
-EVT_MENU(ProjectId, MainFrame::OnNewProject)
-EVT_MENU(ClientId, MainFrame::OnNewClient)
-EVT_MENU(CategoryId, MainFrame::OnNewCategory)
+EVT_MENU(ids::ID_NEW_TASK, MainFrame::OnNewTask)
+EVT_MENU(ids::ID_NEW_EMPLOYER, MainFrame::OnNewEmployer)
+EVT_MENU(ids::ID_NEW_PROJECT, MainFrame::OnNewProject)
+EVT_MENU(ids::ID_NEW_CLIENT, MainFrame::OnNewClient)
+EVT_MENU(ids::ID_NEW_CATEGORY, MainFrame::OnNewCategory)
 EVT_MENU(ids::ID_EDIT_EMPLOYER, MainFrame::OnEditEmployer)
 EVT_MENU(ids::ID_EDIT_CLIENT, MainFrame::OnEditClient)
 EVT_MENU(ids::ID_EDIT_PROJECT, MainFrame::OnEditProject)
@@ -106,11 +100,11 @@ void MainFrame::CreateControls()
 
     /* File Menu Control */
     wxMenu* fileMenu = new wxMenu();
-    fileMenu->Append(TaskId, wxT("New &Task...\tCtrl-N"), wxT("Create new task"));
-    fileMenu->Append(EmployerId, wxT("New &Employer"), wxT("Create new employer"));
-    fileMenu->Append(ClientId, wxT("New &Client"), wxT("Create new client"));
-    fileMenu->Append(ProjectId, wxT("New &Project"), wxT("Create new project"));
-    fileMenu->Append(CategoryId, wxT("New C&ategory"), wxT("Create new category"));
+    fileMenu->Append(ids::ID_NEW_TASK, wxT("New &Task...\tCtrl-N"), wxT("Create new task"));
+    fileMenu->Append(ids::ID_NEW_EMPLOYER, wxT("New &Employer"), wxT("Create new employer"));
+    fileMenu->Append(ids::ID_NEW_CLIENT, wxT("New &Client"), wxT("Create new client"));
+    fileMenu->Append(ids::ID_NEW_PROJECT, wxT("New &Project"), wxT("Create new project"));
+    fileMenu->Append(ids::ID_NEW_CATEGORY, wxT("New C&ategory"), wxT("Create new category"));
     fileMenu->AppendSeparator();
     fileMenu->Append(wxID_EXIT);
 
@@ -137,7 +131,7 @@ void MainFrame::CreateControls()
 
     /* Accelerator Table */
     wxAcceleratorEntry entries[3];
-    entries[0].Set(wxACCEL_CTRL, (int)'N', TaskId);
+    entries[0].Set(wxACCEL_CTRL, (int)'N', ids::ID_NEW_TASK);
     entries[1].Set(wxACCEL_CTRL, (int)'P', ids::ID_SETTINGS);
     entries[2].Set(wxACCEL_CTRL, (int)'H', wxID_ABOUT);
 
@@ -226,7 +220,7 @@ void MainFrame::DataToControls()
 
 void MainFrame::OnAbout(wxCommandEvent& event)
 {
-    dialog::AboutDialog about(nullptr);
+    dialog::AboutDialog about(this);
 }
 
 void MainFrame::OnClose(wxCloseEvent& event)
