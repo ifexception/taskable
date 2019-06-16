@@ -61,16 +61,17 @@ bool App::OnInit()
         return false;
     }
 
-    frame::MainFrame* mf = new frame::MainFrame(pConfig);
+    frame::MainFrame* frame = new frame::MainFrame(pConfig);
 
     bool isInstalled = IsInstalled();
     if (!isInstalled) {
-        bool wizardSetupSuccess = mf->OnStartUp();
+        bool wizardSetupSuccess = frame->OnStartUp();
         if (!wizardSetupSuccess) {
             return false;
         }
     }
-    mf->Show(true);
+    frame->Show(true);
+    SetTopWindow(frame);
     return true;
 }
 
