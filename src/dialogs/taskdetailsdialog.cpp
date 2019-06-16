@@ -237,9 +237,9 @@ void TaskDetailsDialog::FillControls()
 void TaskDetailsDialog::DataToControls()
 {
     services::db_service dbService;
-    models::task_detail taskDetail;
+    models::task_item taskDetail;
     try {
-        taskDetail = dbService.get_task_by_id(mTaskDetailId);
+        taskDetail = dbService.get_task_item_by_id(mTaskDetailId);
     } catch (const db::database_exception& e) {
         // TODO Log exception
     }
@@ -417,7 +417,7 @@ void TaskDetailsDialog::OnSave(wxCommandEvent& event)
         wxString startTime = mStartTime.FormatISOTime();
         wxString endTime = mEndTime.FormatISOTime();
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
-            models::task_detail taskDetail;
+            models::task_item taskDetail;
             taskDetail.task_detail_id = mTaskDetailId;
             taskDetail.start_time = startTime;
             taskDetail.end_time = endTime;
@@ -426,11 +426,11 @@ void TaskDetailsDialog::OnSave(wxCommandEvent& event)
             taskDetail.date_modified_utc = util::UnixTimestamp();
             taskDetail.project_id = mProjectId;
             taskDetail.category_id = mCategoryId;
-            dbService.update_task_detail(taskDetail);
+            dbService.update_task_item(taskDetail);
         } else if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            dbService.delete_task_detail(mTaskDetailId);
+            dbService.delete_task_item(mTaskDetailId);
         } else {
-            dbService.create_new_task(mProjectId, taskId, std::string(startTime.ToUTF8()), std::string(endTime.ToUTF8()), std::string(mDurationText.ToUTF8()), mCategoryId, std::string(mDescriptionText.ToUTF8()));
+            dbService.create_new_task_item(mProjectId, taskId, std::string(startTime.ToUTF8()), std::string(endTime.ToUTF8()), std::string(mDurationText.ToUTF8()), mCategoryId, std::string(mDescriptionText.ToUTF8()));
         }
     } catch (const db::database_exception& e) {
         // TODO Log exception

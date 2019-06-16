@@ -23,10 +23,10 @@
 
 namespace app::models
 {
-struct task_detail
+struct task_item
 {
-    task_detail() = default;
-    ~task_detail() = default;
+    task_item() = default;
+    ~task_item() = default;
 
     int task_detail_id;
     int project_id;

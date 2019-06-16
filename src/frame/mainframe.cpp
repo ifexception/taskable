@@ -331,7 +331,7 @@ void MainFrame::RefreshItems(wxDateTime date)
     std::vector<models::detailed_task> detailedTasks;
     try {
         services::db_service dbService;
-        detailedTasks = dbService.get_all_tasks_by_date(std::string(dateString.ToUTF8()));
+        detailedTasks = dbService.get_all_task_items_by_date(std::string(dateString.ToUTF8()));
     } catch (const db::database_exception& e) {
         wxLogError(wxString::Format("Error %d", e.get_error_code()));
     }
