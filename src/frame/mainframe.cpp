@@ -139,6 +139,7 @@ void MainFrame::CreateControls()
     wxAcceleratorEntry entries[3];
     entries[0].Set(wxACCEL_CTRL, (int)'N', TaskId);
     entries[1].Set(wxACCEL_CTRL, (int)'P', ids::ID_SETTINGS);
+    entries[2].Set(wxACCEL_CTRL, (int)'H', wxID_ABOUT);
 
     wxAcceleratorTable table(ARRAYSIZE(entries), entries);
     SetAcceleratorTable(table);
