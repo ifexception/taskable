@@ -38,7 +38,7 @@ set (SRC
     "services/models/project.cpp"
     "services/models/category.cpp"
     "services/models/detailed_task.cpp"
-    "services/models/task_detail.cpp"
+    "services/models/task_item.cpp"
     "services/db_connection.cpp"
     "services/db_service.cpp"
     "app.cpp"

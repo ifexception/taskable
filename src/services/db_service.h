@@ -94,6 +94,6 @@ struct db_service
 
     void delete_task_item(const int taskId);
 
-    std::vector<std::string> get_task_hours_by_id(const int taskId);
+    std::vector<std::string> get_task_hours_by_id(const std::string& date);
 };
 }

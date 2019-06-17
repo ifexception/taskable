@@ -29,7 +29,7 @@ namespace app::services
 {
 int db_service::get_last_insert_rowid()
 {
-    int id = (int) db_connection::get_instance().get_database()->get_last_rowid();
+    int id = ( int) db_connection::get_instance().get_database()->get_last_rowid();
     return id;
 }
 
@@ -214,7 +214,7 @@ void db_service::create_new_project(const std::string& name, const std::string& 
     std::string cmd("INSERT INTO projects (name, display_name, is_active, employer_id, client_id) VALUES (?, ?, 1, ?, ?)");
     db::command command(*db_connection::get_instance().get_database(), cmd);
     if (clientId == nullptr) {
-        command.binder() << name << displayName << employerId << (void*)0;
+        command.binder() << name << displayName << employerId << ( void*) 0;
     } else {
         command.binder() << name << displayName << employerId << *clientId;
     }
@@ -251,7 +251,7 @@ std::vector<models::project> db_service::get_projects()
         project.date_created_utc = column.get<int>(3);
         project.date_modified_utc = column.get<int>(4);
         project.is_active = column.get<int>(5);
-        project.employer_name = column.get < std::string > (6);
+        project.employer_name = column.get < std::string >(6);
         if (column.get_type(7) == db::column_type::Null) {
             project.client_name = "";
         } else {
@@ -309,7 +309,7 @@ void db_service::update_project(models::project project)
     std::string cmd("UPDATE projects SET name = ?, display_name = ?, date_modified_utc = ?, employer_id = ?, client_id = ?");
     db::command command(*db_connection::get_instance().get_database(), cmd);
     if (project.client_id == 0) {
-        command.binder() << project.project_name << project.display_name << project.employer_id << (void*) 0;
+        command.binder() << project.project_name << project.display_name << project.employer_id << ( void*) 0;
     } else {
         command.binder() << project.project_name << project.display_name << project.employer_id << project.client_id;
     }
@@ -454,7 +454,7 @@ int db_service::create_or_get_task_id(const std::string& date, const int project
         db::command command(*db_connection::get_instance().get_database(), cmd2);
         command.binder() << date << projectId;
         command.execute();
-        taskId = (int)db_connection::get_instance().get_database()->get_last_rowid();
+        taskId = (int) db_connection::get_instance().get_database()->get_last_rowid();
     } else {
         taskId = column.get<int>(0);
     }
@@ -571,9 +571,25 @@ void db_service::delete_task_item(const int taskId)
     command.execute();
 }
 
-std::vector<std::string> db_service::get_task_hours_by_id(const int taskId)
+std::vector<std::string> db_service::get_task_hours_by_id(const std::string& date)
 {
-    return std::vector<std::string>();
+    std::string select("SELECT task_details.duration ");
+    std::string from("FROM task_details ");
+    std::string innerJoin("INNER JOIN tasks ON task_details.task_id = tasks.task_id");
+    std::string where("WHERE task_date = ?");
+
+    std::string qry = select + from + innerJoin + where;
+    db::query query(*db_connection::get_instance().get_database(), qry);
+    query.bind(1, date, db::copy_options::NoCopy);
+
+    std::vector<std::string> taskDurations;
+
+    while (query.run()) {
+        db::column column(query.get_handle());
+        taskDurations.push_back(column.get<std::string>(0));
+    }
+
+    return taskDurations;
 }
 
 } // namespace app::services
