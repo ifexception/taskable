@@ -22,6 +22,7 @@
 #include <vector>
 #include <wx/statline.h>
 
+#include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
 #include "../common/util.h"
@@ -33,9 +34,9 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(CategoryDialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(CategoryDialog, wxDialog)
-    EVT_BUTTON(ids::ID_SAVE, CategoryDialog::OnSave)
-    EVT_BUTTON(wxID_CANCEL, CategoryDialog::OnCancel)
-    EVT_CHECKBOX(CategoryDialog::IDC_ISACTIVE, CategoryDialog::OnIsActiveCheck)
+EVT_BUTTON(ids::ID_SAVE, CategoryDialog::OnSave)
+EVT_BUTTON(wxID_CANCEL, CategoryDialog::OnCancel)
+EVT_CHECKBOX(CategoryDialog::IDC_ISACTIVE, CategoryDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
 CategoryDialog::CategoryDialog(wxWindow* parent, bool isEdit, int categoryId, const wxString& name)
@@ -55,17 +56,7 @@ CategoryDialog::CategoryDialog(wxWindow* parent, bool isEdit, int categoryId, co
         size.Set(320, 240);
     }
 
-    bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
-}
-
-CategoryDialog::~CategoryDialog()
-{
-    Destroy();
-}
-
-void CategoryDialog::Launch()
-{
-    ShowModal();
+    Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
 bool CategoryDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
@@ -79,11 +70,11 @@ bool CategoryDialog::Create(wxWindow* parent, wxWindowID windowId, const wxStrin
         }
 
         GetSizer()->Fit(this);
-        //SetIcon();
+        SetIcon(common::GetProgramIcon());
         Center();
     }
 
-    return false;
+    return created;
 }
 
 void CategoryDialog::CreateControls()
@@ -160,20 +151,20 @@ void CategoryDialog::CreateControls()
     }
 
     /* Horizontal Line*/
-    auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("category_static_line"));
-    mainSizer->Add(separation_line, 0, wxEXPAND | wxALL, 1);
+    auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("category_static_line"));
+    mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
     auto buttonPanel = new wxPanel(this, wxID_STATIC);
     auto buttonPanelSizer = new wxBoxSizer(wxHORIZONTAL);
     buttonPanel->SetSizer(buttonPanelSizer);
-    mainSizer->Add(buttonPanel, wxSizerFlags(wxSizerFlags().Border(wxALL, 5)).Center());
+    mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
     auto okButton = new wxButton(buttonPanel, ids::ID_SAVE, wxT("&Save"));
     auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
-    buttonPanelSizer->Add(okButton, wxSizerFlags().Border(wxALL, 5));
-    buttonPanelSizer->Add(cancelButton, wxSizerFlags().Border(wxALL, 5));
+    buttonPanelSizer->Add(okButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
 }
 
 void CategoryDialog::FillControls()
@@ -187,7 +178,7 @@ void CategoryDialog::FillControls()
     }
 
     for (auto p : projects) {
-        pProjectChoiceCtrl->Append(p.display_name, (void*) p.project_id);
+        pProjectChoiceCtrl->Append(p.display_name, (void*)p.project_id);
     }
 }
 
@@ -220,31 +211,59 @@ void CategoryDialog::DataToControls()
 bool CategoryDialog::Validate()
 {
     if (mProjectChoiceId == -1 || mProjectChoiceId == 0) {
-        wxMessageBox(wxT("Project is required"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        auto message = wxString::Format(Constants::Messages::SelectionRequired, wxT("Project"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
 
-    if (mNameText.length() > 255 || mNameText.length() < 2 || mNameText.empty()) {
-        wxMessageBox(wxT("Category name is invalid"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    if (mNameText.empty()) {
+        auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Category name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
 
-    if (mDescriptionText.length() > 512 || mDescriptionText.length() < 8 || mDescriptionText.empty()) {
-        wxMessageBox(wxT("Category description is invalid"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    if (mNameText.length() < 2) {
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Category name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
+
+    if (mNameText.length() > 255) {
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Category name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    if (mDescriptionText.empty()) {
+        auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Description"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    if (mDescriptionText.length() < 2) {
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Description"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    if (mDescriptionText.length() > 255) {
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Description"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
     return true;
 }
 
 bool CategoryDialog::AreControlsEmpty()
 {
-    bool isEmpty = mProjectChoiceId == -1 && mNameText.empty() && mDescriptionText.empty();
+    bool isEmpty = (mProjectChoiceId == -1 || mProjectChoiceId == 0) && mNameText.empty() && mDescriptionText.empty();
     return isEmpty;
 }
 
 void CategoryDialog::OnSave(wxCommandEvent& event)
 {
-    mProjectChoiceId = (int) pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
+    mProjectChoiceId = (int)pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
     mNameText = pNameCtrl->GetValue();
     mDescriptionText = pDescriptionCtrl->GetValue();
 

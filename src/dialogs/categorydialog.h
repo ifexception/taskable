@@ -28,9 +28,7 @@ class CategoryDialog : public wxDialog
 public:
     CategoryDialog() = default;
     explicit CategoryDialog(wxWindow* parent, bool isEdit = false, int categoryId = 0, const wxString& name = "CategoryDialog");
-    virtual ~CategoryDialog();
-
-    void Launch();
+    virtual ~CategoryDialog() = default;
 
 private:
     wxDECLARE_DYNAMIC_CLASS(CategoryDialog);
