@@ -65,9 +65,6 @@ TaskDetailsDialog::TaskDetailsDialog(wxWindow* parent, bool isEdit, int taskDeta
     bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
-TaskDetailsDialog::TaskDetailsDialog()
-{}
-
 TaskDetailsDialog::~TaskDetailsDialog()
 {
     Destroy();

@@ -29,7 +29,7 @@ namespace app::dialog
 class TaskDetailsDialog : public wxDialog
 {
 public:
-    TaskDetailsDialog();
+    TaskDetailsDialog() = default;
     explicit TaskDetailsDialog(wxWindow* parent, bool isEdit = false, int taskDetailId = 0, const wxString& name = wxT("TaskDetailsDialog"));
     virtual ~TaskDetailsDialog();
 
