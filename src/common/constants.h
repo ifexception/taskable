@@ -31,6 +31,19 @@ static const char* LogsFilename = "TasksTracker.log.txt";
 
 static const char* TotalHours = "Total Hours %H:%M:%S";
 
+namespace Titles
+{
+
+}
+
+namespace Messages
+{
+static const char* SelectionRequired = "A %s selection is required!";
+static const char* IsEmpty = "%s is required. Please provide a value";
+static const char* TooShort = "%s provided is too short. Minimum length is %d";
+static const char* TooLong = "%s provided is too long. Maximum length is %d";
+}
+
 namespace Info
 {
 static std::string LoggerInitialized = "Logger initialized.";
