@@ -29,7 +29,7 @@ static const std::string LoggerName = "TasksTracker_Daily";
 static const char* LogsDirectory = "logs";
 static const char* LogsFilename = "TasksTracker.log.txt";
 
-static const char* TotalHours = "Total Hours %d:%d:%d";
+static const char* TotalHours = "Total Hours %H:%M:%S";
 
 namespace Info
 {
