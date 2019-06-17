@@ -21,6 +21,7 @@
 
 #include <chrono>
 #include <fstream>
+#include <sstream>
 #include <wx/datetime.h>
 #include <wx/string.h>
 
@@ -51,3 +52,15 @@ int UnixTimestamp()
     return seconds;
 }
 } // namespace app::util
+
+std::vector<std::string> app::util::lib::split(const std::string& in, char delimiter)
+{
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(in);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+
+    return tokens;
+}

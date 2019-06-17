@@ -31,4 +31,9 @@ std::vector<char> ReadFile(const std::string& file);
 wxString ConvertUnixTimestampToString(int timestamp);
 
 int UnixTimestamp();
+
+namespace lib
+{
+std::vector<std::string> split(const std::string& in, char delimiter);
+}
 }

@@ -19,10 +19,14 @@
 
 #include "mainframe.h"
 
+#include <vector>
+
 #include <wx/taskbarbutton.h>
 
+#include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
+#include "../common/util.h"
 #include "../common/version.h"
 #include "../dialogs/aboutdialog.h"
 #include "../dialogs/taskdetailsdialog.h"
@@ -215,6 +219,25 @@ void MainFrame::CreateControls()
 
 void MainFrame::DataToControls()
 {
+    std::vector<std::string> taskDurations;
+    services::db_service dbService;
+    auto dateNow = wxDateTime::Now();
+    auto dateString = dateNow.FormatISODate();
+    try {
+        taskDurations = dbService.get_task_hours_by_id(dateString);
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
+    }
+
+    wxTimeSpan totalDuration;
+    for (auto duration : taskDurations) {
+        std::vector<std::string> durationSplit = util::lib::split(duration, ':');
+        wxTimeSpan currentDuration(std::atol(durationSplit[0].c_str()), std::atol(durationSplit[1].c_str()), ( wxLongLong) std::atoll(durationSplit[2].c_str()));
+        totalDuration += currentDuration;
+    }
+
+    pTotalHoursText->SetLabel(totalDuration.Format(Constants::TotalHours));
+
     RefreshItems();
 }
 
