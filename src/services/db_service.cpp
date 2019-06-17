@@ -575,7 +575,7 @@ std::vector<std::string> db_service::get_task_hours_by_id(const std::string& dat
 {
     std::string select("SELECT task_details.duration ");
     std::string from("FROM task_details ");
-    std::string innerJoin("INNER JOIN tasks ON task_details.task_id = tasks.task_id");
+    std::string innerJoin("INNER JOIN tasks ON task_details.task_id = tasks.task_id ");
     std::string where("WHERE task_date = ?");
 
     std::string qry = select + from + innerJoin + where;
