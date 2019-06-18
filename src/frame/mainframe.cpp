@@ -282,7 +282,7 @@ void MainFrame::OnNewClient(wxCommandEvent& event)
 void MainFrame::OnNewProject(wxCommandEvent& event)
 {
     dialog::ProjectDialog newProject(this);
-    newProject.Launch();
+    newProject.ShowModal();
 }
 
 void MainFrame::OnNewCategory(wxCommandEvent& event)
@@ -294,25 +294,25 @@ void MainFrame::OnNewCategory(wxCommandEvent& event)
 void MainFrame::OnEditEmployer(wxCommandEvent& event)
 {
     dialog::EditListDialog employerEdit(this, dialog::dialog_type::Employer);
-    employerEdit.Launch();
+    employerEdit.ShowModal();
 }
 
 void MainFrame::OnEditClient(wxCommandEvent& event)
 {
     dialog::EditListDialog clientEdit(this, dialog::dialog_type::Client);
-    clientEdit.Launch();
+    clientEdit.ShowModal();
 }
 
 void MainFrame::OnEditProject(wxCommandEvent& event)
 {
     dialog::EditListDialog projectEdit(this, dialog::dialog_type::Project);
-    projectEdit.Launch();
+    projectEdit.ShowModal();
 }
 
 void MainFrame::OnEditCategory(wxCommandEvent& event)
 {
     dialog::EditListDialog categoryEdit(this, dialog::dialog_type::Category);
-    categoryEdit.Launch();
+    categoryEdit.ShowModal();
 }
 
 void MainFrame::OnTaskInserted(wxCommandEvent& event)

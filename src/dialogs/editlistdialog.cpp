@@ -55,11 +55,6 @@ EditListDialog::~EditListDialog()
     }
 }
 
-void EditListDialog::Launch()
-{
-    ShowModal();
-}
-
 bool EditListDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
@@ -120,7 +115,7 @@ void EditListDialog::OnItemDoubleClick(wxListEvent& event)
     case dialog_type::Project:
     {
         ProjectDialog editProject(this, true, id);
-        editProject.Launch();
+        editProject.ShowModal();
         break;
     }
     case dialog_type::Category:

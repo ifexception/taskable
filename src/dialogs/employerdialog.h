@@ -27,7 +27,7 @@ class EmployerDialog final : public wxDialog
 {
 public:
     EmployerDialog() = default;
-    explicit EmployerDialog(wxWindow* parent, bool isEdit = false, int employerId = 0, const wxString & name = "EmployerDialog");
+    explicit EmployerDialog(wxWindow* parent, bool isEdit = false, int employerId = 0, const wxString& name = "EmployerDialog");
     virtual ~EmployerDialog() = default;
 
 private:

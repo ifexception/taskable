@@ -28,9 +28,7 @@ class ProjectDialog final : public wxDialog
 public:
     ProjectDialog() = default;
     explicit ProjectDialog(wxWindow* parent, bool isEdit = false, int projectId = 0, const wxString& name = "ProjectDialog");
-    virtual ~ProjectDialog();
-
-    void Launch();
+    virtual ~ProjectDialog() = default;
 
 private:
     wxDECLARE_DYNAMIC_CLASS(ProjectDialog);

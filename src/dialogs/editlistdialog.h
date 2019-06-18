@@ -99,8 +99,6 @@ public:
     explicit EditListDialog(wxWindow* parent, dialog_type dialogType, const wxString& name = wxT("EditListDialog"));
     virtual ~EditListDialog();
 
-    void Launch();
-
 private:
     wxDECLARE_DYNAMIC_CLASS(EditListDialog);
     wxDECLARE_EVENT_TABLE();

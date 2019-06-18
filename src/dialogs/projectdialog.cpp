@@ -21,6 +21,7 @@
 
 #include <wx/statline.h>
 
+#include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
 #include "../common/util.h"
@@ -55,17 +56,7 @@ ProjectDialog::ProjectDialog(wxWindow* parent, bool isEdit, int projectId, const
         title = wxT("Add Project");
         size.Set(420, 440);
     }
-    bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, wxSize(420, 380), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
-}
-
-ProjectDialog::~ProjectDialog()
-{
-    Destroy();
-}
-
-void ProjectDialog::Launch()
-{
-    ShowModal();
+    Create(parent, wxID_ANY, title, wxDefaultPosition, wxSize(420, 380), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
 bool ProjectDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
@@ -80,7 +71,7 @@ bool ProjectDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString
         }
 
         GetSizer()->Fit(this);
-        //SetIcon();
+        SetIcon(common::GetProgramIcon());
         Center();
     }
     return created;
@@ -250,28 +241,55 @@ void ProjectDialog::DataToControls()
 
 bool ProjectDialog::Validate()
 {
-    if (mNameText.length() > 255 || mNameText.length() < 2 || mNameText.empty()) {
-        wxMessageBox(wxT("Project name is invalid"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    if (mNameText.empty()) {
+        auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Project name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
 
-    if (mDisplayNameText.length() > 255 || mDisplayNameText.length() < 2 || mDisplayNameText.empty()) {
-        wxMessageBox(wxT("Display name is invalid"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    if (mNameText.length() < 2) {
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Project name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
 
-    if (mEmployerId == -1) {
-        wxMessageBox(wxT("An employer is required"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    if (mNameText.length() > 255) {
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Project name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
-    // VERIFY: A client is optional, should check for it?
+
+    if (mDisplayNameText.empty()) {
+        auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Display name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    if (mDisplayNameText.length() < 2) {
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Display name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    if (mDisplayNameText.length() > 255) {
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Display name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    if (mEmployerId == -1 || mEmployerId == 0) {
+        auto message = wxString::Format(Constants::Messages::SelectionRequired, wxT("Employer"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+    // TODO: A client is optional, should check for it?
 
     return true;
 }
 
 bool ProjectDialog::AreControlsEmpty()
 {
-    bool isEmpty = mNameText.empty() && mDisplayNameText.empty();
+    bool isEmpty = mNameText.empty() && mDisplayNameText.empty() && (mEmployerId == -1 || mEmployerId == 0);
     return isEmpty;
 }
 
