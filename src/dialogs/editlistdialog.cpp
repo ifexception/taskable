@@ -125,7 +125,7 @@ void EditListDialog::OnItemDoubleClick(wxListEvent& event)
     case dialog_type::Category:
     {
         CategoryDialog editCategory(this, true, id);
-        editCategory.Launch();
+        editCategory.ShowModal();
         break;
     }
     default:
