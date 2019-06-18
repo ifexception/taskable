@@ -108,7 +108,7 @@ void EditListDialog::OnItemDoubleClick(wxListEvent& event)
     case dialog_type::Employer:
     {
         EmployerDialog editEmployer(this, true, id);
-        editEmployer.Launch();
+        editEmployer.ShowModal();
         break;
     }
     case dialog_type::Client:

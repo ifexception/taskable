@@ -25,19 +25,16 @@ namespace app::dialog
 {
 class EmployerDialog final : public wxDialog
 {
+public:
+    EmployerDialog() = default;
+    explicit EmployerDialog(wxWindow* parent, bool isEdit = false, int employerId = 0, const wxString & name = "EmployerDialog");
+    virtual ~EmployerDialog() = default;
+
+private:
     wxDECLARE_DYNAMIC_CLASS(EmployerDialog);
     wxDECLARE_EVENT_TABLE();
 
-  public:
-    EmployerDialog() = default;
-    explicit EmployerDialog(wxWindow* parent, bool isEdit = false, int employerId = 0, const wxString& name = "EmployerDialog");
-    virtual ~EmployerDialog();
-
-    void Launch();
-
-  private:
-    bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point,
-                const wxSize& size, long style, const wxString& name);
+    bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name);
 
     void CreateControls();
     void DataToControls();
@@ -54,7 +51,7 @@ class EmployerDialog final : public wxDialog
     wxStaticText* pDateCreatedTextCtrl;
     wxStaticText* pDateUpdatedTextCtrl;
 
-    wxString mEmployerText;
+    wxString mNameText;
     bool bIsEdit;
     int mEmployerId;
 

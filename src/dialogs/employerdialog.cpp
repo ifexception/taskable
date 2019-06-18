@@ -21,6 +21,7 @@
 
 #include <wx/statline.h>
 
+#include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
 #include "../common/util.h"
@@ -32,13 +33,13 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(EmployerDialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(EmployerDialog, wxDialog)
-    EVT_BUTTON(ids::ID_SAVE, EmployerDialog::OnSave)
-    EVT_BUTTON(wxID_CANCEL, EmployerDialog::OnCancel)
-    EVT_CHECKBOX(EmployerDialog::IDC_ISACTIVE, EmployerDialog::OnIsActiveCheck)
+EVT_BUTTON(ids::ID_SAVE, EmployerDialog::OnSave)
+EVT_BUTTON(wxID_CANCEL, EmployerDialog::OnCancel)
+EVT_CHECKBOX(EmployerDialog::IDC_ISACTIVE, EmployerDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
 EmployerDialog::EmployerDialog(wxWindow* parent, bool isEdit, int employerId, const wxString& name)
-    : mEmployerText(wxT(""))
+    : mNameText(wxGetEmptyString())
     , bIsEdit(isEdit)
     , mEmployerId(employerId)
 {
@@ -52,19 +53,9 @@ EmployerDialog::EmployerDialog(wxWindow* parent, bool isEdit, int employerId, co
         title = wxT("Add Employer");
         size.Set(WIDTH, HEIGHT);
     }
-    bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, size, style, name);
 
+    Create(parent, wxID_ANY, title, wxDefaultPosition, size, style, name);
     SetMinClientSize(wxSize(MIN_WIDTH, MIN_HEIGHT));
-}
-
-EmployerDialog::~EmployerDialog()
-{
-    Destroy();
-}
-
-void EmployerDialog::Launch()
-{
-    ShowModal();
 }
 
 bool EmployerDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
@@ -77,7 +68,7 @@ bool EmployerDialog::Create(wxWindow* parent, wxWindowID windowId, const wxStrin
         }
 
         GetSizer()->Fit(this);
-        //SetIcon
+        SetIcon(common::GetProgramIcon());
         Centre();
     }
 
@@ -178,10 +169,21 @@ void EmployerDialog::DataToControls()
 
 bool EmployerDialog::Validate()
 {
-    bool isInvalid = mEmployerText.length() > 255 || mEmployerText.length() < 2 ||
-        mEmployerText.empty();
-    if (isInvalid) {
-        wxMessageBox(wxT("Employer name is invalid"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    if (mNameText.empty()) {
+        auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Employer name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    if (mNameText.length() < 2) {
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Employer name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    if (mNameText.length() > 255) {
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Employer name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
     return true;
@@ -189,16 +191,16 @@ bool EmployerDialog::Validate()
 
 bool EmployerDialog::AreControlsEmpty()
 {
-    bool isEmpty = mEmployerText.empty();
+    bool isEmpty = mNameText.empty();
     return isEmpty;
 }
 
 void EmployerDialog::OnSave(wxCommandEvent& event)
 {
-    mEmployerText = pEmployerCtrl->GetValue();
+    mNameText = pEmployerCtrl->GetValue();
 
-    bool validationSuccess = Validate();
-    if (!validationSuccess) {
+    bool isValid = Validate();
+    if (!isValid) {
         return;
     }
 
@@ -206,19 +208,18 @@ void EmployerDialog::OnSave(wxCommandEvent& event)
     try {
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
             models::employer employer;
-            employer.employer_name = std::string(mEmployerText.ToUTF8());
+            employer.employer_name = std::string(mNameText.ToUTF8());
             employer.date_modified_utc = util::UnixTimestamp();
             dbService.update_employer(employer);
         }
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            dbService.delete_employer(mEmployerId); // need to add date_modified
+            dbService.delete_employer(mEmployerId); // TODO need to add date_modified
         }
         if (!bIsEdit) {
-            dbService.create_new_employer(std::string(mEmployerText.ToUTF8()));
+            dbService.create_new_employer(std::string(mNameText.ToUTF8()));
         }
     } catch (const db::database_exception& e) {
-        wxMessageBox(wxT("An error occured\n"), wxT("Error"), wxOK_DEFAULT | wxICON_ERROR);
-        return;
+        // TODO Log exception
     }
 
     EndModal(ids::ID_SAVE);

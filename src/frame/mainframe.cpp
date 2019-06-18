@@ -270,7 +270,7 @@ void MainFrame::OnNewTask(wxCommandEvent& event)
 void MainFrame::OnNewEmployer(wxCommandEvent& event)
 {
     dialog::EmployerDialog newEmployer(this);
-    newEmployer.Launch();
+    newEmployer.ShowModal();
 }
 
 void MainFrame::OnNewClient(wxCommandEvent& event)
