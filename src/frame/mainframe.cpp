@@ -276,7 +276,7 @@ void MainFrame::OnNewEmployer(wxCommandEvent& event)
 void MainFrame::OnNewClient(wxCommandEvent& event)
 {
     dialog::ClientDialog newClient(this);
-    newClient.Launch();
+    newClient.ShowModal();
 }
 
 void MainFrame::OnNewProject(wxCommandEvent& event)
@@ -288,7 +288,7 @@ void MainFrame::OnNewProject(wxCommandEvent& event)
 void MainFrame::OnNewCategory(wxCommandEvent& event)
 {
     dialog::CategoryDialog categoryDialog(this);
-    categoryDialog.Launch();
+    categoryDialog.ShowModal();
 }
 
 void MainFrame::OnEditEmployer(wxCommandEvent& event)
