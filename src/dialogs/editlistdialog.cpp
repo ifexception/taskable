@@ -24,6 +24,7 @@
 #include "projectdialog.h"
 #include "categorydialog.h"
 
+#include "../common/common.h"
 #include "../common/util.h"
 #include "../magic_enum/magic_enum.h"
 #include "../db/database_exception.h"
@@ -33,7 +34,7 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(EditListDialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(EditListDialog, wxDialog)
-    EVT_LIST_ITEM_ACTIVATED(EditListDialog::IDC_LIST, EditListDialog::OnItemDoubleClick)
+EVT_LIST_ITEM_ACTIVATED(EditListDialog::IDC_LIST, EditListDialog::OnItemDoubleClick)
 wxEND_EVENT_TABLE()
 
 EditListDialog::EditListDialog(wxWindow* parent, dialog_type dialogType, const wxString& name)
@@ -67,7 +68,7 @@ bool EditListDialog::Create(wxWindow* parent, wxWindowID windowId, const wxStrin
         DataToControls();
 
         GetSizer()->Fit(this);
-        // SetIcon();
+        SetIcon(common::GetProgramIcon());
         Center();
     }
 
@@ -340,7 +341,7 @@ void CategoryStrategy::CreateControl(wxListCtrl* control)
     control->InsertColumn(3, dateModifiedColumn);
 }
 
-void CategoryStrategy::DataToControl(wxListCtrl * control)
+void CategoryStrategy::DataToControl(wxListCtrl* control)
 {
     std::vector<models::category> categories;
     try {
