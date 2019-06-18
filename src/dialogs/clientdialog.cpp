@@ -21,6 +21,7 @@
 
 #include <wx/statline.h>
 
+#include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
 #include "../common/util.h"
@@ -38,7 +39,7 @@ wxBEGIN_EVENT_TABLE(ClientDialog, wxDialog)
 wxEND_EVENT_TABLE()
 
 ClientDialog::ClientDialog(wxWindow* parent, bool isEdit, int clientId, const wxString& name)
-    : mNameText(wxT(""))
+    : mNameText(wxGetEmptyString())
     , mEmployerId(-1)
     , bIsEdit(isEdit)
     , mClientId(clientId)
@@ -54,17 +55,7 @@ ClientDialog::ClientDialog(wxWindow* parent, bool isEdit, int clientId, const wx
         size.Set(320, 240);
     }
 
-    bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, size, style, name);
-}
-
-ClientDialog::~ClientDialog()
-{
-    Destroy();
-}
-
-void ClientDialog::Launch()
-{
-    ShowModal();
+    Create(parent, wxID_ANY, title, wxDefaultPosition, size, style, name);
 }
 
 bool ClientDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
@@ -79,8 +70,8 @@ bool ClientDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString&
         }
 
         GetSizer()->Fit(this);
-        //SetIcon();
-        Centre();
+        SetIcon(common::GetProgramIcon());
+        Center();
     }
 
     return created;
@@ -148,8 +139,8 @@ void ClientDialog::CreateControls()
     }
 
     /* Horizontal Line*/
-    auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("new_task_static_line"));
-    mainSizer->Add(separation_line, 0, wxEXPAND | wxALL, 1);
+    auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("new_task_static_line"));
+    mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
     auto buttonPanel = new wxPanel(this, wxID_STATIC);
@@ -186,6 +177,7 @@ void ClientDialog::DataToControls()
     try {
         client = dbService.get_client_by_id(mClientId);
     } catch (const db::database_exception& e) {
+        // TODO Log exception
     }
 
     pNameCtrl->SetValue(client.client_name);
@@ -204,13 +196,27 @@ void ClientDialog::DataToControls()
 
 bool ClientDialog::Validate()
 {
-    if (mNameText.length() > 255 || mNameText.length() < 2 || mNameText.empty()) {
-        wxMessageBox(wxT("Client name is invalid"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    if (mNameText.empty()) {
+        auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Client name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    if (mNameText.length() < 2) {
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Client name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    if (mNameText.length() > 255) {
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Client name"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
 
     if (mEmployerId == -1 || mEmployerId == 0) {
-        wxMessageBox(wxT("A employer is required"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        auto message = wxString::Format(Constants::Messages::SelectionRequired, wxT("Employer"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
     return true;
@@ -257,7 +263,7 @@ void ClientDialog::OnSave(wxCommandEvent & event)
 void ClientDialog::OnCancel(wxCommandEvent& event)
 {
     bool areControlsEmpty = AreControlsEmpty();
-    if (areControlsEmpty) {
+    if (!areControlsEmpty) {
         int answer = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Confirm"),
             wxYES_NO | wxICON_QUESTION);
         if (answer == wxYES) {

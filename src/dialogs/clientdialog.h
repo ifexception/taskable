@@ -30,10 +30,8 @@ class ClientDialog : public wxDialog
 
 public:
     ClientDialog() = default;
-    explicit ClientDialog(wxWindow *parent, bool isEdit = false, int clientId = 0, const wxString &name = "ClientDialog");
-    virtual ~ClientDialog();
-
-    void Launch();
+    explicit ClientDialog(wxWindow* parent, bool isEdit = false, int clientId = 0, const wxString& name = "ClientDialog");
+    virtual ~ClientDialog() = default;
 
 private:
     bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
@@ -44,12 +42,12 @@ private:
     bool Validate();
     bool AreControlsEmpty();
 
-    void OnSave(wxCommandEvent &event);
-    void OnCancel(wxCommandEvent &event);
+    void OnSave(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
 
-    wxTextCtrl *pNameCtrl;
-    wxComboBox *pEmployerChoiceCtrl;
+    wxTextCtrl* pNameCtrl;
+    wxComboBox* pEmployerChoiceCtrl;
     wxCheckBox* pIsActiveCtrl;
     wxStaticText* pDateCreatedTextCtrl;
     wxStaticText* pDateUpdatedTextCtrl;
