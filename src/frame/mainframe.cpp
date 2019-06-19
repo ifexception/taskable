@@ -29,7 +29,7 @@
 #include "../common/util.h"
 #include "../common/version.h"
 #include "../dialogs/aboutdialog.h"
-#include "../dialogs/taskdetailsdialog.h"
+#include "../dialogs/taskitemdialog.h"
 #include "../dialogs/employerdialog.h"
 #include "../dialogs/clientdialog.h"
 #include "../dialogs/projectdialog.h"

@@ -22,7 +22,7 @@
 #include <wx/taskbarbutton.h>
 
 #include "../common/common.h"
-#include "../dialogs/taskdetailsdialog.h"
+#include "../dialogs/taskitemdialog.h"
 
 namespace app::frame
 {

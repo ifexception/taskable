@@ -45,7 +45,7 @@ set (SRC
     "frame/mainframe.cpp"
     "frame/taskbaricon.cpp"
     "dialogs/aboutdialog.cpp"
-    "dialogs/taskdetailsdialog.cpp"
+    "dialogs/taskitemdialog.cpp"
     "dialogs/employerdialog.cpp"
     "dialogs/clientdialog.cpp"
     "dialogs/projectdialog.cpp"
