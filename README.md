@@ -11,7 +11,6 @@ Once you've installed and configured `vcpkg`, install the following libraries:
  * sqlite3 (3.0 +)
  * spdlog (1.2 +)
  * wxwidgets (3.1 +)
- * rapidxml (1.13 +)
 
 Ensure that when you have started Visual Studio that the _CMake Server_ does not give any warnings about missing packages.
 You can now use Visual Studio to build the project. Currently only _Visual Studio 2017_ is supported to the version of CMake being used by Visual Studio.
