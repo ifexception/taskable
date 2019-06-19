@@ -42,11 +42,6 @@ void TaskBarIcon::SetTaskBarIcon()
     SetIcon(wxIcon(common::GetProgramIcon()), wxT("Tasks Tracker"));
 }
 
-//bool TaskBarIcon::PopupMenu(wxMenu * menu)
-//{
-//    return false;
-//}
-
 wxMenu* TaskBarIcon::CreatePopupMenu()
 {
     auto menu = new wxMenu();
@@ -63,7 +58,7 @@ wxMenu* TaskBarIcon::CreatePopupMenu()
 void TaskBarIcon::OnNewTask(wxCommandEvent& WXUNUSED(event))
 {
     dialog::TaskDetailsDialog newTask(pParent);
-    newTask.Launch();
+    newTask.ShowModal();
 }
 
 void TaskBarIcon::OnSettings(wxCommandEvent& WXUNUSED(event))

@@ -56,6 +56,7 @@ ProjectDialog::ProjectDialog(wxWindow* parent, bool isEdit, int projectId, const
         title = wxT("Add Project");
         size.Set(420, 440);
     }
+
     Create(parent, wxID_ANY, title, wxDefaultPosition, wxSize(420, 380), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 

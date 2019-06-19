@@ -23,6 +23,7 @@
 #include <wx/dateevt.h>
 #include <wx/statline.h>
 
+#include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
 #include "../common/util.h"
@@ -34,12 +35,12 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(TaskDetailsDialog, wxDialog);
 
 wxBEGIN_EVENT_TABLE(TaskDetailsDialog, wxDialog)
-    EVT_BUTTON(ids::ID_SAVE, TaskDetailsDialog::OnSave)
-    EVT_BUTTON(wxID_CANCEL, TaskDetailsDialog::OnCancel)
-    EVT_CHOICE(TaskDetailsDialog::IDC_PROJECTCHOICE, TaskDetailsDialog::OnProjectChoice)
-    EVT_TIME_CHANGED(TaskDetailsDialog::IDC_STARTTIME, TaskDetailsDialog::OnStartTimeChange)
-    EVT_TIME_CHANGED(TaskDetailsDialog::IDC_ENDTIME, TaskDetailsDialog::OnEndTimeChange)
-    EVT_CHECKBOX(TaskDetailsDialog::IDC_ISACTIVE, TaskDetailsDialog::OnIsActiveCheck)
+EVT_BUTTON(ids::ID_SAVE, TaskDetailsDialog::OnSave)
+EVT_BUTTON(wxID_CANCEL, TaskDetailsDialog::OnCancel)
+EVT_CHOICE(TaskDetailsDialog::IDC_PROJECTCHOICE, TaskDetailsDialog::OnProjectChoice)
+EVT_TIME_CHANGED(TaskDetailsDialog::IDC_STARTTIME, TaskDetailsDialog::OnStartTimeChange)
+EVT_TIME_CHANGED(TaskDetailsDialog::IDC_ENDTIME, TaskDetailsDialog::OnEndTimeChange)
+EVT_CHECKBOX(TaskDetailsDialog::IDC_ISACTIVE, TaskDetailsDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
 TaskDetailsDialog::TaskDetailsDialog(wxWindow* parent, bool isEdit, int taskDetailId, const wxString& name)
@@ -65,16 +66,6 @@ TaskDetailsDialog::TaskDetailsDialog(wxWindow* parent, bool isEdit, int taskDeta
     bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
-TaskDetailsDialog::~TaskDetailsDialog()
-{
-    Destroy();
-}
-
-void TaskDetailsDialog::Launch()
-{
-    ShowModal();
-}
-
 bool TaskDetailsDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
@@ -88,7 +79,7 @@ bool TaskDetailsDialog::Create(wxWindow* parent, wxWindowID windowId, const wxSt
         }
 
         GetSizer()->Fit(this);
-        //SetIcon();
+        SetIcon(common::GetProgramIcon());
         GetSizer()->SetSizeHints(this);
         Center();
     }
@@ -298,8 +289,7 @@ bool TaskDetailsDialog::Validate()
     }
 
     auto isEndTimeInTheFuture = mEndTime.IsLaterThan(wxDateTime::Now());
-    if (isEndTimeInTheFuture)
-    {
+    if (isEndTimeInTheFuture) {
         wxMessageBox(wxT("A task cannot end in the future"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
@@ -318,17 +308,15 @@ bool TaskDetailsDialog::Validate()
         return false;
     }
 
-    auto isProjectChoiceValid = mProjectId != 0 || mProjectId != -1;
-    if (!isProjectChoiceValid)
-    {
-        wxMessageBox(wxT("A project is required"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    if (mProjectId == 0 || mProjectId == -1) {
+        auto message = wxString::Format(Constants::Messages::SelectionRequired, wxT("Project"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
 
-    auto isCategoryChoiceValid = mCategoryId != 0 || mCategoryId != -1;
-    if (!isCategoryChoiceValid)
-    {
-        wxMessageBox(wxT("A category is required"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    if (mCategoryId == 0 || mCategoryId == -1) {
+        auto message = wxString::Format(Constants::Messages::SelectionRequired, wxT("Category"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
 
@@ -337,10 +325,10 @@ bool TaskDetailsDialog::Validate()
 
 bool TaskDetailsDialog::AreControlsEmpty()
 {
-    bool isEmpty = mProjectId == -1 &&
+    bool isEmpty = (mProjectId == 0 || mProjectId == -1) &&
         mStartTime == wxDefaultDateTime &&
         mEndTime == wxDefaultDateTime &&
-        mCategoryId == -1 &&
+        (mCategoryId == 0 || mCategoryId == -1) &&
         mDescriptionText.empty();
     return isEmpty;
 }

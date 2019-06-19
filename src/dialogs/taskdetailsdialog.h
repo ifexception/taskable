@@ -31,9 +31,7 @@ class TaskDetailsDialog : public wxDialog
 public:
     TaskDetailsDialog() = default;
     explicit TaskDetailsDialog(wxWindow* parent, bool isEdit = false, int taskDetailId = 0, const wxString& name = wxT("TaskDetailsDialog"));
-    virtual ~TaskDetailsDialog();
-
-    void Launch();
+    virtual ~TaskDetailsDialog() = default;
 
 private:
     wxDECLARE_DYNAMIC_CLASS(TaskDetailsDialog);

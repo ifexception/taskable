@@ -29,7 +29,6 @@ public:
     virtual ~TaskBarIcon() = default;
 
     void SetTaskBarIcon();
-    //bool PopUpMenu(wxMenu* menu) override;
 
 private:
     wxDECLARE_EVENT_TABLE();
@@ -45,7 +44,7 @@ private:
 
     enum
     {
-        ID_ADD_TASK = wxID_HIGHEST,
+        ID_ADD_TASK = wxID_HIGHEST + 1,
         ID_SETTINGS
     };
 };
