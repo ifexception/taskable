@@ -17,15 +17,19 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <memory>
+
 #include <wx/wx.h>
 #include <wx/taskbar.h>
+
+#include "../config/configuration.h"
 
 namespace app::frame
 {
 class TaskBarIcon : public wxTaskBarIcon
 {
 public:
-    TaskBarIcon(wxFrame* parent);
+    TaskBarIcon(wxFrame* parent, std::shared_ptr<cfg::Configuration> config);
     virtual ~TaskBarIcon() = default;
 
     void SetTaskBarIcon();
@@ -41,6 +45,7 @@ private:
     void OnLeftButtonDown(wxTaskBarIconEvent& event);
 
     wxFrame* pParent;
+    std::shared_ptr<cfg::Configuration> pConfig;
 
     enum
     {

@@ -23,6 +23,7 @@
 
 #include "../common/common.h"
 #include "../dialogs/taskitemdialog.h"
+#include "../dialogs/settingsdialog.h"
 
 namespace app::frame
 {
@@ -33,8 +34,9 @@ wxBEGIN_EVENT_TABLE(TaskBarIcon, wxTaskBarIcon)
     EVT_TASKBAR_LEFT_DOWN(TaskBarIcon::OnLeftButtonDown)
 wxEND_EVENT_TABLE()
 
-TaskBarIcon::TaskBarIcon(wxFrame* parent)
+TaskBarIcon::TaskBarIcon(wxFrame* parent, std::shared_ptr<cfg::Configuration> config)
     : pParent(parent)
+    , pConfig(config)
 { }
 
 void TaskBarIcon::SetTaskBarIcon()
@@ -63,7 +65,8 @@ void TaskBarIcon::OnNewTask(wxCommandEvent& WXUNUSED(event))
 
 void TaskBarIcon::OnSettings(wxCommandEvent& WXUNUSED(event))
 {
-    wxMessageBox(wxT("This feature is not yet available"), wxT("Tasks Tracker"), wxICON_INFORMATION | wxOK_DEFAULT);
+    dialog::SettingsDialog settings(pParent, pConfig);
+    settings.ShowModal();
 }
 
 void TaskBarIcon::OnExit(wxCommandEvent& WXUNUSED(event))
