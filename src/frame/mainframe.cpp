@@ -70,7 +70,7 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, const wxString&
     bool success = Create();
     SetMinClientSize(wxSize(640, 480));
     SetIcon(common::GetProgramIcon());
-    pTaskBarIcon = new TaskBarIcon(this);
+    pTaskBarIcon = new TaskBarIcon(this, pConfig);
     if (pConfig->IsShowInTray()) {
         pTaskBarIcon->SetTaskBarIcon();
     }
@@ -145,7 +145,7 @@ void MainFrame::CreateControls()
 
     /* Main Controls */
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
-    auto mainPanel = new  wxPanel(this);
+    auto mainPanel = new wxPanel(this);
     mainPanel->SetSizer(mainSizer);
 
     /* Utilities Panel and Controls*/
