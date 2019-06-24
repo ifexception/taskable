@@ -27,10 +27,7 @@ Configuration::Configuration()
 {
     wxString configPath = wxPathOnly(wxStandardPaths::Get().GetExecutablePath()) + "\\" + CFG_FILE;
     pConfig = new wxFileConfig(wxEmptyString, wxEmptyString, configPath);
-    /*auto b = mConfig->GetNumberOfGroups();
-    mConfig->SetPath("settings");
-    bool def = false;
-    auto value = mConfig->Read("confirmOnExit", &def);*/
+    pConfig->SetPath("/");
 }
 
 Configuration::~Configuration()
@@ -121,22 +118,5 @@ wxString Configuration::GetBackupPath() const
 void Configuration::SetBackupPath(const wxString& value)
 {
     Set<wxString>(wxT("settings"), wxT("backupPath"), value);
-}
-
-template<class T>
-T Configuration::Get(const wxString& group, const wxString& key) const
-{
-    pConfig->SetPath(group);
-    T value;
-    pConfig->Read(key, &value);
-    pConfig->SetPath("/");
-    return value;
-}
-
-template<class T>
-void Configuration::Set(const wxString& group, const wxString& key, T value)
-{
-    pConfig->SetPath(group);
-    pConfig->Write(key, value);
 }
 }

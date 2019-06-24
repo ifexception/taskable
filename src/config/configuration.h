@@ -68,4 +68,22 @@ private:
 
     wxFileConfig* pConfig;
 };
+
+template<class T>
+T Configuration::Get(const wxString& group, const wxString& key) const
+{
+    pConfig->SetPath(group);
+    T value;
+    pConfig->Read(key, &value);
+    pConfig->SetPath("/");
+    return value;
+}
+
+template<class T>
+void Configuration::Set(const wxString& group, const wxString& key, T value)
+{
+    pConfig->SetPath(group);
+    pConfig->Write(key, value);
+    pConfig->SetPath("/");
+}
 }
