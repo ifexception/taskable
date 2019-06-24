@@ -52,6 +52,7 @@ set (SRC
     "dialogs/categorydialog.cpp"
     "dialogs/editlistdialog.cpp"
     "dialogs/settingsdialog.cpp"
+    "dialogs/timedtaskdialog.cpp"
     "wizards/setupwizard.cpp")
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
