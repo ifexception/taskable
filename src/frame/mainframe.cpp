@@ -44,22 +44,23 @@
 namespace app::frame
 {
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
-    EVT_CLOSE(MainFrame::OnClose)
-    EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
-    EVT_MENU(ids::ID_NEW_TASK, MainFrame::OnNewTask)
-    EVT_MENU(ids::ID_NEW_EMPLOYER, MainFrame::OnNewEmployer)
-    EVT_MENU(ids::ID_NEW_PROJECT, MainFrame::OnNewProject)
-    EVT_MENU(ids::ID_NEW_CLIENT, MainFrame::OnNewClient)
-    EVT_MENU(ids::ID_NEW_CATEGORY, MainFrame::OnNewCategory)
-    EVT_MENU(ids::ID_EDIT_EMPLOYER, MainFrame::OnEditEmployer)
-    EVT_MENU(ids::ID_EDIT_CLIENT, MainFrame::OnEditClient)
-    EVT_MENU(ids::ID_EDIT_PROJECT, MainFrame::OnEditProject)
-    EVT_MENU(ids::ID_EDIT_CATEGORY, MainFrame::OnEditCategory)
-    EVT_MENU(ids::ID_SETTINGS, MainFrame::OnSettings)
-    EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
-    EVT_COMMAND(MainFrame::IDC_LIST, ids::ID_TASK_INSERTED, MainFrame::OnTaskInserted)
-    EVT_ICONIZE(MainFrame::OnIconize)
-    EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
+EVT_CLOSE(MainFrame::OnClose)
+EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
+EVT_MENU(ids::ID_NEW_TASK, MainFrame::OnNewTask)
+EVT_MENU(ids::ID_NEW_EMPLOYER, MainFrame::OnNewEmployer)
+EVT_MENU(ids::ID_NEW_PROJECT, MainFrame::OnNewProject)
+EVT_MENU(ids::ID_NEW_CLIENT, MainFrame::OnNewClient)
+EVT_MENU(ids::ID_NEW_CATEGORY, MainFrame::OnNewCategory)
+EVT_MENU(ids::ID_EDIT_EMPLOYER, MainFrame::OnEditEmployer)
+EVT_MENU(ids::ID_EDIT_CLIENT, MainFrame::OnEditClient)
+EVT_MENU(ids::ID_EDIT_PROJECT, MainFrame::OnEditProject)
+EVT_MENU(ids::ID_EDIT_CATEGORY, MainFrame::OnEditCategory)
+EVT_MENU(ids::ID_SETTINGS, MainFrame::OnSettings)
+EVT_MENU(ids::ID_NEW_TIMED_TASK, MainFrame::OnNewTimedTask)
+EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
+EVT_COMMAND(MainFrame::IDC_LIST, ids::ID_TASK_INSERTED, MainFrame::OnTaskInserted)
+EVT_ICONIZE(MainFrame::OnIconize)
+EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, const wxString& name)
@@ -232,7 +233,7 @@ void MainFrame::DataToControls()
     wxTimeSpan totalDuration;
     for (auto duration : taskDurations) {
         std::vector<std::string> durationSplit = util::lib::split(duration, ':');
-        wxTimeSpan currentDuration(std::atol(durationSplit[0].c_str()), std::atol(durationSplit[1].c_str()), ( wxLongLong) std::atoll(durationSplit[2].c_str()));
+        wxTimeSpan currentDuration(std::atol(durationSplit[0].c_str()), std::atol(durationSplit[1].c_str()), (wxLongLong)std::atoll(durationSplit[2].c_str()));
         totalDuration += currentDuration;
     }
 
@@ -252,13 +253,14 @@ void MainFrame::OnClose(wxCloseEvent& event)
         int ret = wxMessageBox(wxT("Are you sure to exit the application?"), wxT("Tasks Tracker"), wxICON_QUESTION | wxYES_NO);
         if (ret == wxNO) {
             event.Veto();
+            return;
         }
     } else if (pConfig->IsCloseToTray() && pConfig->IsShowInTray() && event.CanVeto()) {
         Hide();
         MSWGetTaskBarButton()->Hide();
-    } else {
-        event.Skip();
+        return;
     }
+    event.Skip();
 }
 
 void MainFrame::OnNewTask(wxCommandEvent& event)
@@ -340,6 +342,11 @@ void MainFrame::OnSettings(wxCommandEvent& event)
 {
     dialog::SettingsDialog settings(this, pConfig);
     settings.ShowModal();
+}
+
+void MainFrame::OnNewTimedTask(wxCommandEvent& event)
+{
+    MSWGetTaskBarButton()->Hide();
 }
 
 void MainFrame::OnDateChanged(wxDateEvent& event)

@@ -66,6 +66,7 @@ private:
     void OnItemDoubleClick(wxListEvent& event);
     void OnIconize(wxIconizeEvent& event);
     void OnSettings(wxCommandEvent& event);
+    void OnNewTimedTask(wxCommandEvent& event);
     void OnDateChanged(wxDateEvent& event);
 
     void RefreshItems(wxDateTime date = wxDateTime::Now());
@@ -79,7 +80,7 @@ private:
 
     enum
     {
-        IDC_GO_TO_DATE = 1,
+        IDC_GO_TO_DATE = wxID_HIGHEST + 1,
         IDC_HOURS_TEXT,
         IDC_LIST
     };

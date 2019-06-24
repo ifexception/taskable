@@ -35,6 +35,7 @@ enum class MenuIds : int
     EditProjectId = 8,
     EditCategoryId = 9,
     SettingsId = 10,
+    NewTimedTask = 11,
 };
 
 static const int ID_NEW_TASK = static_cast<int>(ids::MenuIds::NewTaskId);
@@ -42,6 +43,7 @@ static const int ID_NEW_EMPLOYER = static_cast<int>(ids::MenuIds::NewEmployerId)
 static const int ID_NEW_CLIENT = static_cast<int>(ids::MenuIds::NewClientId);
 static const int ID_NEW_PROJECT = static_cast<int>(ids::MenuIds::NewProjectId);
 static const int ID_NEW_CATEGORY = static_cast<int>(ids::MenuIds::NewCategoryId);
+static const int ID_NEW_TIMED_TASK = static_cast<int>(ids::MenuIds::NewTimedTask);
 
 static const int ID_EDIT_EMPLOYER = static_cast<int>(MenuIds::EditEmployerId);
 static const int ID_EDIT_CLIENT = static_cast<int>(MenuIds::EditClientId);
@@ -51,8 +53,7 @@ static const int ID_SETTINGS = static_cast<int>(MenuIds::SettingsId);
 
 enum class Events : int
 {
-    ID_OFFSET = 1,
-    ID_SAVE = wxID_HIGHEST + ID_OFFSET,
+    ID_SAVE = wxID_HIGHEST + 1,
     ID_TASK_INSERTED,
 };
 
