@@ -36,6 +36,7 @@
 #include "../dialogs/categorydialog.h"
 #include "../dialogs/editlistdialog.h"
 #include "../dialogs/settingsdialog.h"
+#include "../dialogs/timedtaskdialog.h"
 #include "../services/db_service.h"
 #include "../db/database_exception.h"
 #include "../wizards/setupwizard.h"
@@ -106,6 +107,7 @@ void MainFrame::CreateControls()
     /* File Menu Control */
     wxMenu* fileMenu = new wxMenu();
     fileMenu->Append(ids::ID_NEW_TASK, wxT("New &Task...\tCtrl-N"), wxT("Create new task"));
+    fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("&Timed Task...\tCtrl-Q"), wxT("Create new timed task"));
     fileMenu->Append(ids::ID_NEW_EMPLOYER, wxT("New &Employer"), wxT("Create new employer"));
     fileMenu->Append(ids::ID_NEW_CLIENT, wxT("New &Client"), wxT("Create new client"));
     fileMenu->Append(ids::ID_NEW_PROJECT, wxT("New &Project"), wxT("Create new project"));
@@ -122,23 +124,28 @@ void MainFrame::CreateControls()
     editMenu->AppendSeparator();
     editMenu->Append(ids::ID_SETTINGS, wxT("&Settings...\tCtrl-P"), wxT("Edit application settings"));
 
+    /* Export Menu Control */
+    auto exportMenu = new wxMenu();
+
     /* Help Menu Control */
     wxMenu* helpMenu = new wxMenu();
     helpMenu->Append(wxID_ABOUT);
 
     /* Menu Bar */
     wxMenuBar* menuBar = new wxMenuBar();
-    menuBar->Append(fileMenu, "&File");
-    menuBar->Append(editMenu, "&Edit");
-    menuBar->Append(helpMenu, "&Help");
+    menuBar->Append(fileMenu, wxT("&File"));
+    menuBar->Append(editMenu, wxT("&Edit"));
+    menuBar->Append(exportMenu, wxT("E&xport"));
+    menuBar->Append(helpMenu, wxT("&Help"));
 
     SetMenuBar(menuBar);
 
     /* Accelerator Table */
-    wxAcceleratorEntry entries[3];
+    wxAcceleratorEntry entries[4];
     entries[0].Set(wxACCEL_CTRL, (int)'N', ids::ID_NEW_TASK);
     entries[1].Set(wxACCEL_CTRL, (int)'P', ids::ID_SETTINGS);
     entries[2].Set(wxACCEL_CTRL, (int)'H', wxID_ABOUT);
+    entries[3].Set(wxACCEL_CTRL, (int)'Q', ids::ID_NEW_TIMED_TASK);
 
     wxAcceleratorTable table(ARRAYSIZE(entries), entries);
     SetAcceleratorTable(table);
@@ -346,7 +353,8 @@ void MainFrame::OnSettings(wxCommandEvent& event)
 
 void MainFrame::OnNewTimedTask(wxCommandEvent& event)
 {
-    MSWGetTaskBarButton()->Hide();
+    dialog::TimedTaskDialog timedTask(this);
+    timedTask.Show();
 }
 
 void MainFrame::OnDateChanged(wxDateEvent& event)
