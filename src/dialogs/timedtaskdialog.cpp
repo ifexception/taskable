@@ -28,6 +28,8 @@ namespace app::dialog
 {
 static const wxString ElapsedTimeText = wxT("Elapsed Time: %s");
 
+wxIMPLEMENT_DYNAMIC_CLASS(TimedTaskDialog, wxDialog)
+
 wxBEGIN_EVENT_TABLE(TimedTaskDialog, wxDialog)
 EVT_TIMER(TimedTaskDialog::IDC_TIMER, TimedTaskDialog::OnTimer)
 EVT_TIMER(TimedTaskDialog::IDC_HIDE_WINDOW_TIMER, TimedTaskDialog::OnHideWindow)
@@ -46,18 +48,18 @@ TimedTaskDialog::TimedTaskDialog(wxWindow* parent, const wxString& name)
     , bIsPaused(false)
 {
     long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
-    Create(parent, wxID_ANY, wxT("Timed Task"), wxDefaultPosition, wxSize(380, 300), style, name);
-    //SetMinClientSize(wxSize(320, 240));
+    Create(parent, wxID_ANY, wxT("Timed Task"), wxDefaultPosition, wxSize(320, 240), style, name);
 }
 
-void TimedTaskDialog::Show()
+void TimedTaskDialog::Launch()
 {
     mStartTime = wxDateTime::Now();
     pElapsedTimer->Start(1000);
     pTimer->Start(/*1800000*/6000);
 
     bIsRunning = true;
-    wxTopLevelWindow::Iconize(true);
+    wxDialog::ShowModal();
+    //wxTopLevelWindow::Iconize(true);
 }
 
 bool TimedTaskDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
@@ -65,9 +67,10 @@ bool TimedTaskDialog::Create(wxWindow* parent, wxWindowID windowId, const wxStri
     bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
     if (created) {
         CreateControls();
-        SetIcon(common::GetProgramIcon());
+
         GetSizer()->Fit(this);
-        CenterOnScreen();
+        SetIcon(common::GetProgramIcon());
+        Center();
     }
 
     return created;
@@ -77,33 +80,37 @@ void TimedTaskDialog::CreateControls()
 {
     /* Sizer and Panel Control */
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
-    auto mainPanel = new wxPanel(this);
-    mainPanel->SetSizer(mainSizer);
+    SetSizer(mainSizer);
+
+    auto sizer = new wxBoxSizer(wxHORIZONTAL);
+    mainSizer->Add(sizer, common::sizers::ControlDefault);
+
+    auto mainPanel = new wxPanel(this, wxID_STATIC);
+    mainPanel->SetSizer(sizer);
+    mainSizer->Add(mainPanel, common::sizers::ControlExpandProp);
 
     /* Elapsed Time Text Control */
     pElapsedTimeText = new wxStaticText(mainPanel, IDC_ELAPSED, wxT("Elapsed Time: %s"));
     auto font = pElapsedTimeText->GetFont();
-    font.SetPointSize(16);
+    font.SetPointSize(14);
     pElapsedTimeText->SetFont(font);
-    pElapsedTimeText->CenterOnParent();
-
-    mainSizer->Add(pElapsedTimeText, common::sizers::ControlCenter);
+    sizer->Add(pElapsedTimeText, common::sizers::ControlExpand);
 
     /* Horizontal Line*/
-    //auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
-    //mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
+    auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+    mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
 
-    ///* Button Panel */
-    //auto buttonPanel = new wxPanel(this, wxID_STATIC);
-    //auto buttonPanelSizer = new wxBoxSizer(wxHORIZONTAL);
-    //buttonPanel->SetSizer(buttonPanelSizer);
-    //mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
+    /* Button Panel */
+    auto buttonPanel = new wxPanel(this, wxID_STATIC);
+    auto buttonPanelSizer = new wxBoxSizer(wxHORIZONTAL);
+    buttonPanel->SetSizer(buttonPanelSizer);
+    mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
-    //auto startButton = new wxButton(buttonPanel, IDC_START, wxT("St&art"));
-    //auto stopButton = new wxButton(buttonPanel, ids::ID_STOP, wxT("&Stop"));
+    auto startButton = new wxButton(buttonPanel, IDC_START, wxT("St&art"));
+    auto stopButton = new wxButton(buttonPanel, ids::ID_STOP, wxT("&Stop"));
 
-    //buttonPanelSizer->Add(startButton, common::sizers::ControlDefault);
-    //buttonPanelSizer->Add(stopButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(startButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(stopButton, common::sizers::ControlDefault);
 }
 
 void TimedTaskDialog::OnElapsedTimeUpdate(wxTimerEvent& event)

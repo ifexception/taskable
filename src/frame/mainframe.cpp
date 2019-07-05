@@ -354,7 +354,7 @@ void MainFrame::OnSettings(wxCommandEvent& event)
 void MainFrame::OnNewTimedTask(wxCommandEvent& event)
 {
     dialog::TimedTaskDialog timedTask(this);
-    timedTask.Show();
+    timedTask.Launch();
 }
 
 void MainFrame::OnDateChanged(wxDateEvent& event)
