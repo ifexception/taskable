@@ -57,7 +57,7 @@ ProjectDialog::ProjectDialog(wxWindow* parent, bool isEdit, int projectId, const
         size.Set(420, 440);
     }
 
-    Create(parent, wxID_ANY, title, wxDefaultPosition, wxSize(420, 380), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
 bool ProjectDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
@@ -75,6 +75,7 @@ bool ProjectDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString
         SetIcon(common::GetProgramIcon());
         Center();
     }
+
     return created;
 }
 
