@@ -28,8 +28,6 @@ namespace app::dialog
 {
 static const wxString ElapsedTimeText = wxT("Elapsed Time: %s");
 
-wxIMPLEMENT_DYNAMIC_CLASS(TimedTaskDialog, wxDialog)
-
 wxBEGIN_EVENT_TABLE(TimedTaskDialog, wxDialog)
 EVT_TIMER(TimedTaskDialog::IDC_TIMER, TimedTaskDialog::OnTimer)
 EVT_TIMER(TimedTaskDialog::IDC_HIDE_WINDOW_TIMER, TimedTaskDialog::OnHideWindow)
@@ -82,19 +80,19 @@ void TimedTaskDialog::CreateControls()
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(mainSizer);
 
-    auto sizer = new wxBoxSizer(wxHORIZONTAL);
-    mainSizer->Add(sizer, common::sizers::ControlDefault);
+    auto sizer = new wxBoxSizer(wxVERTICAL);
+    mainSizer->Add(sizer, 0);
 
     auto mainPanel = new wxPanel(this, wxID_STATIC);
     mainPanel->SetSizer(sizer);
-    mainSizer->Add(mainPanel, common::sizers::ControlExpandProp);
+    mainSizer->Add(mainPanel, common::sizers::ControlDefault);
 
     /* Elapsed Time Text Control */
-    pElapsedTimeText = new wxStaticText(mainPanel, IDC_ELAPSED, wxT("Elapsed Time: %s"));
+    pElapsedTimeText = new wxStaticText(mainPanel, IDC_ELAPSED, wxT("Elapsed Time: 00:00:00"));
     auto font = pElapsedTimeText->GetFont();
-    font.SetPointSize(14);
+    font.SetPointSize(16);
     pElapsedTimeText->SetFont(font);
-    sizer->Add(pElapsedTimeText, common::sizers::ControlExpand);
+    sizer->Add(pElapsedTimeText, common::sizers::ControlCenter);
 
     /* Horizontal Line*/
     auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
