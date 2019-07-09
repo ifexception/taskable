@@ -19,6 +19,7 @@
 
 #include "timedtaskdialog.h"
 
+#include <wx/notifmsg.h>
 #include <wx/statline.h>
 
 #include "../common/common.h"
@@ -55,6 +56,7 @@ void TimedTaskDialog::Launch()
 
     bIsRunning = true;
     wxDialog::ShowModal();
+    Iconize(true);
 }
 
 bool TimedTaskDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
@@ -108,16 +110,21 @@ void TimedTaskDialog::CreateControls()
     buttonPanelSizer->Add(stopButton, common::sizers::ControlDefault);
 }
 
-void TimedTaskDialog::OnElapsedTimeUpdate(wxTimerEvent& event)
+void TimedTaskDialog::OnElapsedTimeUpdate(wxTimerEvent& WXUNUSED(event))
 {
     auto current = wxDateTime::Now();
     auto timeDiff = current - mStartTime;
     pElapsedTimeText->SetLabel(wxString::Format(ElapsedTimeText, timeDiff.Format()));
 }
 
-void TimedTaskDialog::OnTimer(wxTimerEvent& event)
+void TimedTaskDialog::OnTimer(wxTimerEvent& WXUNUSED(event))
 {
-
+    auto current = wxDateTime::Now();
+    auto elapsed = current - mStartTime;
+    auto message = wxString::Format(wxT("Timed Task running for: %s", elapsed.Format()));
+    wxLogDebug(message);
+    wxNotificationMessage taskElaspedMessage(wxT("Task Tracker"), wxT("Message"), this);
+    taskElaspedMessage.Show();
 }
 
 void TimedTaskDialog::OnRestart(wxCommandEvent& event)
