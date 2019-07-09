@@ -30,7 +30,6 @@ static const wxString ElapsedTimeText = wxT("Elapsed Time: %s");
 
 wxBEGIN_EVENT_TABLE(TimedTaskDialog, wxDialog)
 EVT_TIMER(TimedTaskDialog::IDC_TIMER, TimedTaskDialog::OnTimer)
-EVT_TIMER(TimedTaskDialog::IDC_HIDE_WINDOW_TIMER, TimedTaskDialog::OnHideWindow)
 EVT_TIMER(TimedTaskDialog::IDC_ELAPSED_TIMER, TimedTaskDialog::OnElapsedTimeUpdate)
 EVT_BUTTON(TimedTaskDialog::IDC_STOP, TimedTaskDialog::OnStop)
 wxEND_EVENT_TABLE()
@@ -40,7 +39,6 @@ TimedTaskDialog::TimedTaskDialog(wxWindow* parent, const wxString& name)
     , pElapsedTimeText(nullptr)
     , pElapsedTimer(std::make_unique<wxTimer>(this, IDC_ELAPSED_TIMER))
     , pTimer(std::make_unique<wxTimer>(this, IDC_TIMER))
-    , pHideWindowTimer(std::make_unique<wxTimer>(this, IDC_HIDE_WINDOW_TIMER))
     , mStartTime()
     , bIsRunning(false)
     , bIsPaused(false)
@@ -53,11 +51,10 @@ void TimedTaskDialog::Launch()
 {
     mStartTime = wxDateTime::Now();
     pElapsedTimer->Start(1000);
-    pTimer->Start(/*1800000*/6000);
+    pTimer->Start(/*1800000*/10000);
 
     bIsRunning = true;
     wxDialog::ShowModal();
-    //wxTopLevelWindow::Iconize(true);
 }
 
 bool TimedTaskDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
@@ -120,19 +117,7 @@ void TimedTaskDialog::OnElapsedTimeUpdate(wxTimerEvent& event)
 
 void TimedTaskDialog::OnTimer(wxTimerEvent& event)
 {
-    if (!IsShownOnScreen()) {
-        Restore();
-        Raise();
-        wxTopLevelWindowMSW::Show();
-    }
 
-    pHideWindowTimer->Start(2000);
-}
-
-void TimedTaskDialog::OnHideWindow(wxTimerEvent& event)
-{
-    pHideWindowTimer->Stop();
-    wxTopLevelWindow::Iconize(true);
 }
 
 void TimedTaskDialog::OnRestart(wxCommandEvent& event)

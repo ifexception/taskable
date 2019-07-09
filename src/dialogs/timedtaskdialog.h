@@ -43,7 +43,6 @@ private:
 
     void OnElapsedTimeUpdate(wxTimerEvent& event);
     void OnTimer(wxTimerEvent& event);
-    void OnHideWindow(wxTimerEvent& event);
     void OnRestart(wxCommandEvent& event);
     void OnPause(wxCommandEvent& event);
     void OnStop(wxCommandEvent& event);
@@ -52,7 +51,6 @@ private:
     wxStaticText* pElapsedTimeText;
     std::unique_ptr<wxTimer> pElapsedTimer;
     std::unique_ptr<wxTimer> pTimer;
-    std::unique_ptr<wxTimer> pHideWindowTimer;
 
     wxDateTime mStartTime;
     wxDateTime mEndTime;
@@ -64,7 +62,6 @@ private:
         IDC_ELAPSED = wxID_HIGHEST + 1,
         IDC_ELAPSED_TIMER,
         IDC_TIMER,
-        IDC_HIDE_WINDOW_TIMER,
         IDC_START,
         IDC_PAUSE,
         IDC_STOP,
