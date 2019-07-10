@@ -50,6 +50,8 @@ private:
 
     wxWindow* pParent;
     wxStaticText* pElapsedTimeText;
+    wxButton* pStartButton;
+    wxButton* pStopButton;
     std::unique_ptr<wxTimer> pElapsedTimer;
     std::unique_ptr<wxTimer> pTimer;
     std::unique_ptr<wxTimer> pHideWindowTimer;

@@ -57,6 +57,7 @@ void TimedTaskDialog::Launch()
 
     bIsRunning = true;
     pHideWindowTimer->Start(2000, true);
+    pStartButton->Disable();
     wxDialog::ShowModal();
 }
 
@@ -104,12 +105,11 @@ void TimedTaskDialog::CreateControls()
     buttonPanel->SetSizer(buttonPanelSizer);
     mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
-    auto startButton = new wxButton(buttonPanel, IDC_START, wxT("St&art"));
-    startButton->Disable();
-    auto stopButton = new wxButton(buttonPanel, IDC_STOP, wxT("&Stop"));
+    pStartButton = new wxButton(buttonPanel, IDC_START, wxT("St&art"));
+    pStopButton = new wxButton(buttonPanel, IDC_STOP, wxT("&Stop"));
 
-    buttonPanelSizer->Add(startButton, common::sizers::ControlDefault);
-    buttonPanelSizer->Add(stopButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(pStartButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(pStartButton, common::sizers::ControlDefault);
 }
 
 void TimedTaskDialog::OnElapsedTimeUpdate(wxTimerEvent& WXUNUSED(event))
@@ -141,6 +141,8 @@ void TimedTaskDialog::OnStop(wxCommandEvent& event)
     bIsRunning = false;
     pTimer->Stop();
     pElapsedTimer->Stop();
+    pStopButton->Disable();
+    pStartButton->Enable();
 
     // TODO Start taskitem dialog
     // TODO Pass along the start and end time to pre-populate the dialog
