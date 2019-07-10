@@ -56,8 +56,8 @@ void TimedTaskDialog::Launch()
     pTimer->Start(/*1800000*/10000);
 
     bIsRunning = true;
-    wxDialog::ShowModal();
     pHideWindowTimer->Start(2000, true);
+    wxDialog::ShowModal();
 }
 
 bool TimedTaskDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
@@ -128,8 +128,9 @@ void TimedTaskDialog::OnTimer(wxTimerEvent& WXUNUSED(event))
     taskElaspedMessage.Show();
 }
 
-void TimedTaskDialog::OnHideWindow(wxTimerEvent& event)
+void TimedTaskDialog::OnHideWindow(wxTimerEvent& WXUNUSED(event))
 {
+    wxLogDebug("OnHideWindow");
     Iconize(true);
     pHideWindowTimer->Stop();
 }
