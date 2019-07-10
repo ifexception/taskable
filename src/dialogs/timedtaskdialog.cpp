@@ -23,7 +23,6 @@
 #include <wx/statline.h>
 
 #include "../common/common.h"
-#include "../common/ids.h"
 
 namespace app::dialog
 {
@@ -32,6 +31,7 @@ static const wxString ElapsedTimeText = wxT("Elapsed Time: %s");
 wxBEGIN_EVENT_TABLE(TimedTaskDialog, wxDialog)
 EVT_TIMER(TimedTaskDialog::IDC_TIMER, TimedTaskDialog::OnTimer)
 EVT_TIMER(TimedTaskDialog::IDC_ELAPSED_TIMER, TimedTaskDialog::OnElapsedTimeUpdate)
+EVT_TIMER(TimedTaskDialog::IDC_HIDE_WINDOW_TIMER, TimedTaskDialog::OnHideWindow)
 EVT_BUTTON(TimedTaskDialog::IDC_STOP, TimedTaskDialog::OnStop)
 wxEND_EVENT_TABLE()
 
@@ -40,6 +40,7 @@ TimedTaskDialog::TimedTaskDialog(wxWindow* parent, const wxString& name)
     , pElapsedTimeText(nullptr)
     , pElapsedTimer(std::make_unique<wxTimer>(this, IDC_ELAPSED_TIMER))
     , pTimer(std::make_unique<wxTimer>(this, IDC_TIMER))
+    , pHideWindowTimer(std::make_unique<wxTimer>(this, IDC_HIDE_WINDOW_TIMER))
     , mStartTime()
     , bIsRunning(false)
     , bIsPaused(false)
@@ -56,7 +57,7 @@ void TimedTaskDialog::Launch()
 
     bIsRunning = true;
     wxDialog::ShowModal();
-    Iconize(true);
+    pHideWindowTimer->Start(2000, true);
 }
 
 bool TimedTaskDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
@@ -104,7 +105,8 @@ void TimedTaskDialog::CreateControls()
     mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
     auto startButton = new wxButton(buttonPanel, IDC_START, wxT("St&art"));
-    auto stopButton = new wxButton(buttonPanel, ids::ID_STOP, wxT("&Stop"));
+    startButton->Disable();
+    auto stopButton = new wxButton(buttonPanel, IDC_STOP, wxT("&Stop"));
 
     buttonPanelSizer->Add(startButton, common::sizers::ControlDefault);
     buttonPanelSizer->Add(stopButton, common::sizers::ControlDefault);
@@ -121,24 +123,15 @@ void TimedTaskDialog::OnTimer(wxTimerEvent& WXUNUSED(event))
 {
     auto current = wxDateTime::Now();
     auto elapsed = current - mStartTime;
-    auto message = wxString::Format(wxT("Timed Task running for: %s", elapsed.Format()));
-    wxLogDebug(message);
-    wxNotificationMessage taskElaspedMessage(wxT("Task Tracker"), wxT("Message"), this);
+    auto message = wxString::Format(wxT("Timed Task running for: %s"), elapsed.Format());
+    wxNotificationMessage taskElaspedMessage(wxT("Task Tracker"), message, this);
     taskElaspedMessage.Show();
 }
 
-void TimedTaskDialog::OnRestart(wxCommandEvent& event)
+void TimedTaskDialog::OnHideWindow(wxTimerEvent& event)
 {
-    bIsRunning = true;
-    bIsPaused = false;
-}
-
-void TimedTaskDialog::OnPause(wxCommandEvent& event)
-{
-    bIsRunning = false;
-    bIsPaused = true;
-
-    // TODO Handle multiple pauses, how to log all the time? Is this a requirement?
+    Iconize(true);
+    pHideWindowTimer->Stop();
 }
 
 void TimedTaskDialog::OnStop(wxCommandEvent& event)
