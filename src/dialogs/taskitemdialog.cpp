@@ -32,8 +32,6 @@
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(TaskDetailsDialog, wxDialog);
-
 wxBEGIN_EVENT_TABLE(TaskDetailsDialog, wxDialog)
 EVT_BUTTON(ids::ID_SAVE, TaskDetailsDialog::OnSave)
 EVT_BUTTON(wxID_CANCEL, TaskDetailsDialog::OnCancel)
@@ -66,6 +64,20 @@ TaskDetailsDialog::TaskDetailsDialog(wxWindow* parent, bool isEdit, int taskDeta
     bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
+TaskDetailsDialog::TaskDetailsDialog(wxWindow* parent, wxDateTime startTime, wxDateTime endTime, const wxString& name)
+    : mTaskDate(wxGetEmptyString())
+    , bIsEdit(false)
+    , mTaskDetailId(0)
+    , mProjectId(-1)
+    , mStartTime(startTime)
+    , mEndTime(endTime)
+    , mCategoryId(-1)
+    , mDescriptionText(wxGetEmptyString())
+    , pParent(parent)
+{
+    CreateWithParams(pParent, wxID_ANY, wxT("Add Task"), wxDefaultPosition, wxSize(395, 488), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+}
+
 bool TaskDetailsDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
@@ -77,6 +89,25 @@ bool TaskDetailsDialog::Create(wxWindow* parent, wxWindowID windowId, const wxSt
         if (bIsEdit) {
             DataToControls();
         }
+
+        GetSizer()->Fit(this);
+        SetIcon(common::GetProgramIcon());
+        GetSizer()->SetSizeHints(this);
+        Center();
+    }
+
+    return created;
+}
+
+bool TaskDetailsDialog::CreateWithParams(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
+{
+    bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
+
+    if (created) {
+        CreateControls();
+        FillControls();
+
+        SetValuesToControls();
 
         GetSizer()->Fit(this);
         SetIcon(common::GetProgramIcon());
@@ -257,6 +288,12 @@ void TaskDetailsDialog::DataToControls()
     pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
 
     pIsActiveCtrl->SetValue(taskDetail.is_active);
+}
+
+void TaskDetailsDialog::SetValuesToControls()
+{
+    pStartTimeCtrl->SetValue(mStartTime);
+    pEndTimeCtrl->SetValue(mEndTime);
 }
 
 int TaskDetailsDialog::GetTaskId()

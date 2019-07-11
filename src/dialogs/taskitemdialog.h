@@ -29,19 +29,22 @@ namespace app::dialog
 class TaskDetailsDialog : public wxDialog
 {
 public:
-    TaskDetailsDialog() = default;
+    TaskDetailsDialog() = delete;
     explicit TaskDetailsDialog(wxWindow* parent, bool isEdit = false, int taskDetailId = 0, const wxString& name = wxT("TaskDetailsDialog"));
+    explicit TaskDetailsDialog(wxWindow* parent, wxDateTime startTime, wxDateTime endTime, const wxString& name = wxT("TaskDetailsDialog"));
     virtual ~TaskDetailsDialog() = default;
 
 private:
-    wxDECLARE_DYNAMIC_CLASS(TaskDetailsDialog);
     wxDECLARE_EVENT_TABLE();
 
     bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name);
 
+    bool CreateWithParams(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name);
+
     void CreateControls();
     void FillControls();
     void DataToControls();
+    void SetValuesToControls();
 
     int GetTaskId();
 
