@@ -44,8 +44,6 @@ private:
     void OnElapsedTimeUpdate(wxTimerEvent& event);
     void OnTimer(wxTimerEvent& event);
     void OnHideWindow(wxTimerEvent& event);
-    void OnRestart(wxCommandEvent& event);
-    void OnPause(wxCommandEvent& event);
     void OnStop(wxCommandEvent& event);
 
     wxWindow* pParent;

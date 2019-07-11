@@ -23,6 +23,7 @@
 #include <wx/statline.h>
 
 #include "../common/common.h"
+#include "taskitemdialog.h"
 
 namespace app::dialog
 {
@@ -130,7 +131,6 @@ void TimedTaskDialog::OnTimer(wxTimerEvent& WXUNUSED(event))
 
 void TimedTaskDialog::OnHideWindow(wxTimerEvent& WXUNUSED(event))
 {
-    wxLogDebug("OnHideWindow");
     Iconize(true);
     pHideWindowTimer->Stop();
 }
@@ -144,8 +144,10 @@ void TimedTaskDialog::OnStop(wxCommandEvent& event)
     pStopButton->Disable();
     pStartButton->Enable();
 
-    // TODO Start taskitem dialog
-    // TODO Pass along the start and end time to pre-populate the dialog
+    dialog::TaskDetailsDialog newTask(this, mStartTime, mEndTime);
+    newTask.ShowModal();
+
+    EndModal(wxID_OK);
 }
 
 } // app::dialog
