@@ -58,7 +58,7 @@ void TimedTaskDialog::Launch()
 
     bIsRunning = true;
     pHideWindowTimer->Start(2000, true);
-    pStartButton->Disable();
+    //pStartButton->Disable();
     wxDialog::ShowModal();
 }
 
@@ -83,7 +83,7 @@ void TimedTaskDialog::CreateControls()
     SetSizer(mainSizer);
 
     auto sizer = new wxBoxSizer(wxVERTICAL);
-    mainSizer->Add(sizer, 0);
+    mainSizer->Add(sizer, common::sizers::ControlDefault);
 
     auto mainPanel = new wxPanel(this, wxID_STATIC);
     mainPanel->SetSizer(sizer);
@@ -110,14 +110,14 @@ void TimedTaskDialog::CreateControls()
     pStopButton = new wxButton(buttonPanel, IDC_STOP, wxT("&Stop"));
 
     buttonPanelSizer->Add(pStartButton, common::sizers::ControlDefault);
-    buttonPanelSizer->Add(pStartButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(pStopButton, common::sizers::ControlDefault);
 }
 
 void TimedTaskDialog::OnElapsedTimeUpdate(wxTimerEvent& WXUNUSED(event))
 {
     auto current = wxDateTime::Now();
     auto timeDiff = current - mStartTime;
-    pElapsedTimeText->SetLabel(wxString::Format(ElapsedTimeText, timeDiff.Format()));
+    //pElapsedTimeText->SetLabel(wxString::Format(ElapsedTimeText, timeDiff.Format()));
 }
 
 void TimedTaskDialog::OnTimer(wxTimerEvent& WXUNUSED(event))
@@ -142,7 +142,7 @@ void TimedTaskDialog::OnStop(wxCommandEvent& event)
     pTimer->Stop();
     pElapsedTimer->Stop();
     pStopButton->Disable();
-    pStartButton->Enable();
+    //pStartButton->Enable();
 
     dialog::TaskDetailsDialog newTask(this, mStartTime, mEndTime);
     newTask.ShowModal();
