@@ -26,13 +26,13 @@ class wxDateEvent;
 
 namespace app::dialog
 {
-class TaskDetailsDialog : public wxDialog
+class TaskItemDialog : public wxDialog
 {
 public:
-    TaskDetailsDialog() = delete;
-    explicit TaskDetailsDialog(wxWindow* parent, bool isEdit = false, int taskDetailId = 0, const wxString& name = wxT("TaskDetailsDialog"));
-    explicit TaskDetailsDialog(wxWindow* parent, wxDateTime startTime, wxDateTime endTime, const wxString& name = wxT("TaskDetailsDialog"));
-    virtual ~TaskDetailsDialog() = default;
+    TaskItemDialog() = delete;
+    explicit TaskItemDialog(wxWindow* parent, bool isEdit = false, int taskDetailId = 0, const wxString& name = wxT("TaskItemDialog"));
+    explicit TaskItemDialog(wxWindow* parent, wxDateTime startTime, wxDateTime endTime, const wxString& name = wxT("TaskItemDialog"));
+    virtual ~TaskItemDialog() = default;
 
 private:
     wxDECLARE_EVENT_TABLE();

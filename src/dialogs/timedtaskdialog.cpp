@@ -142,7 +142,7 @@ void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
     pStopButton->Disable();
     //pStartButton->Enable();
 
-    dialog::TaskDetailsDialog newTask(this, mStartTime, mEndTime);
+    dialog::TaskItemDialog newTask(this, mStartTime, mEndTime);
     newTask.ShowModal();
 
     EndModal(wxID_OK);

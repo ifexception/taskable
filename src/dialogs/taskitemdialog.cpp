@@ -32,16 +32,16 @@
 
 namespace app::dialog
 {
-wxBEGIN_EVENT_TABLE(TaskDetailsDialog, wxDialog)
-EVT_BUTTON(ids::ID_SAVE, TaskDetailsDialog::OnSave)
-EVT_BUTTON(wxID_CANCEL, TaskDetailsDialog::OnCancel)
-EVT_CHOICE(TaskDetailsDialog::IDC_PROJECTCHOICE, TaskDetailsDialog::OnProjectChoice)
-EVT_TIME_CHANGED(TaskDetailsDialog::IDC_STARTTIME, TaskDetailsDialog::OnStartTimeChange)
-EVT_TIME_CHANGED(TaskDetailsDialog::IDC_ENDTIME, TaskDetailsDialog::OnEndTimeChange)
-EVT_CHECKBOX(TaskDetailsDialog::IDC_ISACTIVE, TaskDetailsDialog::OnIsActiveCheck)
+wxBEGIN_EVENT_TABLE(TaskItemDialog, wxDialog)
+EVT_BUTTON(ids::ID_SAVE, TaskItemDialog::OnSave)
+EVT_BUTTON(wxID_CANCEL, TaskItemDialog::OnCancel)
+EVT_CHOICE(TaskItemDialog::IDC_PROJECTCHOICE, TaskItemDialog::OnProjectChoice)
+EVT_TIME_CHANGED(TaskItemDialog::IDC_STARTTIME, TaskItemDialog::OnStartTimeChange)
+EVT_TIME_CHANGED(TaskItemDialog::IDC_ENDTIME, TaskItemDialog::OnEndTimeChange)
+EVT_CHECKBOX(TaskItemDialog::IDC_ISACTIVE, TaskItemDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
-TaskDetailsDialog::TaskDetailsDialog(wxWindow* parent, bool isEdit, int taskDetailId, const wxString& name)
+TaskItemDialog::TaskItemDialog(wxWindow* parent, bool isEdit, int taskDetailId, const wxString& name)
     : mTaskDate(wxGetEmptyString())
     , bIsEdit(isEdit)
     , mTaskDetailId(taskDetailId)
@@ -64,7 +64,7 @@ TaskDetailsDialog::TaskDetailsDialog(wxWindow* parent, bool isEdit, int taskDeta
     bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
-TaskDetailsDialog::TaskDetailsDialog(wxWindow* parent, wxDateTime startTime, wxDateTime endTime, const wxString& name)
+TaskItemDialog::TaskItemDialog(wxWindow* parent, wxDateTime startTime, wxDateTime endTime, const wxString& name)
     : mTaskDate(wxGetEmptyString())
     , bIsEdit(false)
     , mTaskDetailId(0)
@@ -78,7 +78,7 @@ TaskDetailsDialog::TaskDetailsDialog(wxWindow* parent, wxDateTime startTime, wxD
     CreateWithParams(pParent, wxID_ANY, wxT("Add Task"), wxDefaultPosition, wxSize(395, 488), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
-bool TaskDetailsDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
+bool TaskItemDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
 
@@ -99,7 +99,7 @@ bool TaskDetailsDialog::Create(wxWindow* parent, wxWindowID windowId, const wxSt
     return created;
 }
 
-bool TaskDetailsDialog::CreateWithParams(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
+bool TaskItemDialog::CreateWithParams(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
 
@@ -118,7 +118,7 @@ bool TaskDetailsDialog::CreateWithParams(wxWindow* parent, wxWindowID windowId, 
     return created;
 }
 
-void TaskDetailsDialog::CreateControls()
+void TaskItemDialog::CreateControls()
 {
     /* Window Sizing */
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -237,7 +237,7 @@ void TaskDetailsDialog::CreateControls()
     buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
 }
 
-void TaskDetailsDialog::FillControls()
+void TaskItemDialog::FillControls()
 {
     std::vector<models::project> projects;
 
@@ -253,7 +253,7 @@ void TaskDetailsDialog::FillControls()
     }
 }
 
-void TaskDetailsDialog::DataToControls()
+void TaskItemDialog::DataToControls()
 {
     services::db_service dbService;
     models::task_item taskDetail;
@@ -290,13 +290,13 @@ void TaskDetailsDialog::DataToControls()
     pIsActiveCtrl->SetValue(taskDetail.is_active);
 }
 
-void TaskDetailsDialog::SetValuesToControls()
+void TaskItemDialog::SetValuesToControls()
 {
     pStartTimeCtrl->SetValue(mStartTime);
     pEndTimeCtrl->SetValue(mEndTime);
 }
 
-int TaskDetailsDialog::GetTaskId()
+int TaskItemDialog::GetTaskId()
 {
     wxDateTime date = wxDateTime::Now();
     mTaskDate = date.FormatISODate();
@@ -311,7 +311,7 @@ int TaskDetailsDialog::GetTaskId()
     return taskId;
 }
 
-bool TaskDetailsDialog::Validate()
+bool TaskItemDialog::Validate()
 {
     auto isStartAheadOfEnd = mStartTime.IsLaterThan(mEndTime);
     if (isStartAheadOfEnd) {
@@ -360,7 +360,7 @@ bool TaskDetailsDialog::Validate()
     return true;
 }
 
-bool TaskDetailsDialog::AreControlsEmpty()
+bool TaskItemDialog::AreControlsEmpty()
 {
     bool isEmpty = (mProjectId == 0 || mProjectId == -1) &&
         mStartTime == wxDefaultDateTime &&
@@ -370,7 +370,7 @@ bool TaskDetailsDialog::AreControlsEmpty()
     return isEmpty;
 }
 
-void TaskDetailsDialog::OnProjectChoice(wxCommandEvent& event)
+void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
 {
     pCategoryChoiceCtrl->Clear();
     pCategoryChoiceCtrl->AppendString(wxT("Select a category"));
@@ -380,7 +380,7 @@ void TaskDetailsDialog::OnProjectChoice(wxCommandEvent& event)
     FillCategoryControl(projectId);
 }
 
-void TaskDetailsDialog::OnStartTimeChange(wxDateEvent& event)
+void TaskItemDialog::OnStartTimeChange(wxDateEvent& event)
 {
     auto start = event.GetDate();
     auto end = pEndTimeCtrl->GetValue();
@@ -389,7 +389,7 @@ void TaskDetailsDialog::OnStartTimeChange(wxDateEvent& event)
     }
 }
 
-void TaskDetailsDialog::OnEndTimeChange(wxDateEvent& event)
+void TaskItemDialog::OnEndTimeChange(wxDateEvent& event)
 {
     auto end = event.GetDate();
     auto start = pStartTimeCtrl->GetValue();
@@ -399,7 +399,7 @@ void TaskDetailsDialog::OnEndTimeChange(wxDateEvent& event)
     }
 }
 
-void TaskDetailsDialog::OnIsActiveCheck(wxCommandEvent& event)
+void TaskItemDialog::OnIsActiveCheck(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
         pProjectChoiceCtrl->Enable();
@@ -418,7 +418,7 @@ void TaskDetailsDialog::OnIsActiveCheck(wxCommandEvent& event)
     }
 }
 
-void TaskDetailsDialog::OnSave(wxCommandEvent& event)
+void TaskItemDialog::OnSave(wxCommandEvent& event)
 {
     mProjectId = (int)pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
     mStartTime = pStartTimeCtrl->GetValue();
@@ -463,7 +463,7 @@ void TaskDetailsDialog::OnSave(wxCommandEvent& event)
     EndModal(ids::ID_SAVE);
 }
 
-void TaskDetailsDialog::OnCancel(wxCommandEvent& event)
+void TaskItemDialog::OnCancel(wxCommandEvent& event)
 {
     bool areControlsEmpty = AreControlsEmpty();
     if (!areControlsEmpty) {
@@ -477,21 +477,21 @@ void TaskDetailsDialog::OnCancel(wxCommandEvent& event)
     }
 }
 
-void TaskDetailsDialog::OnTaskSaved(wxCommandEvent& event)
+void TaskItemDialog::OnTaskSaved(wxCommandEvent& event)
 {
     wxCommandEvent eventForParent(ids::ID_TASK_INSERTED);
     eventForParent.SetEventObject(this);
     pParent->ProcessWindowEvent(eventForParent);
 }
 
-void TaskDetailsDialog::CaclulateTimeDiff(wxDateTime start, wxDateTime end)
+void TaskItemDialog::CaclulateTimeDiff(wxDateTime start, wxDateTime end)
 {
     auto diff = end.Subtract(start);
     auto formated = diff.Format(wxT("%H:%M:%S"));
     pDurationCtrl->SetLabelText(formated);
 }
 
-void TaskDetailsDialog::FillCategoryControl(int projectId)
+void TaskItemDialog::FillCategoryControl(int projectId)
 {
     std::vector<models::category> categories;
     try {

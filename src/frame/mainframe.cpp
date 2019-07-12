@@ -272,7 +272,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
 
 void MainFrame::OnNewTask(wxCommandEvent& event)
 {
-    dialog::TaskDetailsDialog newTask(this);
+    dialog::TaskItemDialog newTask(this);
     newTask.ShowModal();
 }
 
@@ -334,7 +334,7 @@ void MainFrame::OnTaskInserted(wxCommandEvent& event)
 void MainFrame::OnItemDoubleClick(wxListEvent& event)
 {
     int taskDetailId = event.GetData();
-    dialog::TaskDetailsDialog editTask(this, true, taskDetailId);
+    dialog::TaskItemDialog editTask(this, true, taskDetailId);
     editTask.ShowModal();
 }
 

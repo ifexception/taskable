@@ -59,7 +59,7 @@ wxMenu* TaskBarIcon::CreatePopupMenu()
 
 void TaskBarIcon::OnNewTask(wxCommandEvent& WXUNUSED(event))
 {
-    dialog::TaskDetailsDialog newTask(pParent);
+    dialog::TaskItemDialog newTask(pParent);
     newTask.ShowModal();
 }
 
