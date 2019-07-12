@@ -18,7 +18,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #define TASKS_TRACKER_MAJOR 0
-#define TASKS_TRACKER_MINOR 8
+#define TASKS_TRACKER_MINOR 9
 #define TASKS_TRACKER_PATCH 0
 
 #define TASKS_TRACKER_VERSION (TASKS_TRACKER_MAJOR * 1000 + TASKS_TRACKER_MINOR * 100 + TASKS_TRACKER_PATCH)
