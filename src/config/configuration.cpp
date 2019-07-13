@@ -119,4 +119,24 @@ void Configuration::SetBackupPath(const wxString& value)
 {
     Set<wxString>(wxT("settings"), wxT("backupPath"), value);
 }
+
+int Configuration::GetHideWindowTimerInterval() const
+{
+    return Get<int>(wxT("settings"), wxT("hideWindowTimer"));
+}
+
+void Configuration::SetHideWindowTimerInterval(int value)
+{
+    Set<int>(wxT("settings"), wxT("hideWindowTimer"), value);
+}
+
+int Configuration::GetNotificationTimerInterval() const
+{
+    return Get<int>(wxT("settings"), wxT("notificationTimer"));
+}
+
+void Configuration::SetNotificationTimerInterval(int value)
+{
+    Set<int>(wxT("settings"), wxT("notificationTimer"), value);
+}
 }
