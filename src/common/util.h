@@ -32,6 +32,10 @@ wxString ConvertUnixTimestampToString(int timestamp);
 
 int UnixTimestamp();
 
+int SecondsToMilliseconds(int value);
+
+int MinutesToMilliseconds(int value);
+
 namespace lib
 {
 std::vector<std::string> split(const std::string& in, char delimiter);

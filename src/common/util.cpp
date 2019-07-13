@@ -51,6 +51,16 @@ int UnixTimestamp()
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(dur).count();
     return seconds;
 }
+
+int SecondsToMilliseconds(int value)
+{
+    return value * 1000;
+}
+
+int MinutesToMilliseconds(int value)
+{
+    return value * 60000;
+}
 } // namespace app::util
 
 std::vector<std::string> app::util::lib::split(const std::string& in, char delimiter)

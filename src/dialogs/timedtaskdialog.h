@@ -23,13 +23,15 @@
 
 #include <wx/wx.h>
 
+#include "../config/configuration.h"
+
 namespace app::dialog
 {
 class TimedTaskDialog : public wxDialog
 {
 public:
     TimedTaskDialog() = delete;
-    explicit TimedTaskDialog(wxWindow* parent, const wxString& name = wxT("TimedTaskDialog"));
+    explicit TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, const wxString& name = wxT("TimedTaskDialog"));
     virtual ~TimedTaskDialog() = default;
 
     void Launch();
@@ -51,19 +53,18 @@ private:
     wxButton* pStartButton;
     wxButton* pStopButton;
     std::unique_ptr<wxTimer> pElapsedTimer;
-    std::unique_ptr<wxTimer> pTimer;
+    std::unique_ptr<wxTimer> pNotificationTimer;
     std::unique_ptr<wxTimer> pHideWindowTimer;
+    std::shared_ptr<cfg::Configuration> pConfig;
 
     wxDateTime mStartTime;
     wxDateTime mEndTime;
-    bool bIsRunning;
-    bool bIsPaused;
 
     enum
     {
         IDC_ELAPSED = wxID_HIGHEST + 1,
         IDC_ELAPSED_TIMER,
-        IDC_TIMER,
+        IDC__NOTIFICATION_TIMER,
         IDC_HIDE_WINDOW_TIMER,
         IDC_START,
         IDC_STOP,

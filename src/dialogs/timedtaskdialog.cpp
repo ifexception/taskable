@@ -23,6 +23,7 @@
 #include <wx/statline.h>
 
 #include "../common/common.h"
+#include "../common/util.h"
 #include "taskitemdialog.h"
 
 namespace app::dialog
@@ -30,21 +31,20 @@ namespace app::dialog
 static const wxString ElapsedTimeText = wxT("Elapsed Time: %s");
 
 wxBEGIN_EVENT_TABLE(TimedTaskDialog, wxDialog)
-EVT_TIMER(TimedTaskDialog::IDC_TIMER, TimedTaskDialog::OnTimer)
+EVT_TIMER(TimedTaskDialog::IDC__NOTIFICATION_TIMER, TimedTaskDialog::OnTimer)
 EVT_TIMER(TimedTaskDialog::IDC_ELAPSED_TIMER, TimedTaskDialog::OnElapsedTimeUpdate)
 EVT_TIMER(TimedTaskDialog::IDC_HIDE_WINDOW_TIMER, TimedTaskDialog::OnHideWindow)
 EVT_BUTTON(TimedTaskDialog::IDC_STOP, TimedTaskDialog::OnStop)
 wxEND_EVENT_TABLE()
 
-TimedTaskDialog::TimedTaskDialog(wxWindow* parent, const wxString& name)
+TimedTaskDialog::TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, const wxString& name)
     : pParent(parent)
     , pElapsedTimeText(nullptr)
     , pElapsedTimer(std::make_unique<wxTimer>(this, IDC_ELAPSED_TIMER))
-    , pTimer(std::make_unique<wxTimer>(this, IDC_TIMER))
+    , pNotificationTimer(std::make_unique<wxTimer>(this, IDC__NOTIFICATION_TIMER))
     , pHideWindowTimer(std::make_unique<wxTimer>(this, IDC_HIDE_WINDOW_TIMER))
+    , pConfig(config)
     , mStartTime()
-    , bIsRunning(false)
-    , bIsPaused(false)
 {
     long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
     Create(parent, wxID_ANY, wxT("Timed Task"), wxDefaultPosition, wxSize(320, 240), style, name);
@@ -54,10 +54,11 @@ void TimedTaskDialog::Launch()
 {
     mStartTime = wxDateTime::Now();
     pElapsedTimer->Start(1000);
-    pTimer->Start(/*1800000*/10000);
+    wxLogDebug(wxString::Format("%d\n", pConfig->GetNotificationTimerInterval()));
+    wxLogDebug(wxString::Format("%d\n", util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval())));
+    pNotificationTimer->Start(util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval()));
 
-    bIsRunning = true;
-    pHideWindowTimer->Start(2000, true);
+    pHideWindowTimer->Start(util::SecondsToMilliseconds(pConfig->GetHideWindowTimerInterval()), true);
     pStartButton->Disable();
     wxDialog::ShowModal();
 }
@@ -136,8 +137,7 @@ void TimedTaskDialog::OnHideWindow(wxTimerEvent& WXUNUSED(event))
 void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 {
     mEndTime = wxDateTime::Now();
-    bIsRunning = false;
-    pTimer->Stop();
+    pNotificationTimer->Stop();
     pElapsedTimer->Stop();
     pStopButton->Disable();
     //pStartButton->Enable();

@@ -181,6 +181,7 @@ void MainFrame::CreateControls()
     listPanel->SetSizer(listSizer);
 
     pListCtrl = new wxListCtrl(listPanel, IDC_LIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
+    pListCtrl->SetFocus();
     listSizer->Add(pListCtrl, 1, wxEXPAND | wxALL, 5);
 
     wxListItem projectColumn;
@@ -353,7 +354,7 @@ void MainFrame::OnSettings(wxCommandEvent& event)
 
 void MainFrame::OnNewTimedTask(wxCommandEvent& event)
 {
-    dialog::TimedTaskDialog timedTask(this);
+    dialog::TimedTaskDialog timedTask(this, pConfig);
     timedTask.Launch();
 }
 
