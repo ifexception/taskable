@@ -60,6 +60,9 @@ private:
     wxTextCtrl* pBackupPath;
     wxButton* pBrowseBackupPath;
 
+    wxChoice* pHideWindowTimeChoice;
+    wxChoice* pNotificationTimeChoice;
+
     std::shared_ptr<cfg::Configuration> pConfig;
 
     enum
@@ -73,6 +76,8 @@ private:
         IDC_BACKUP_DATABASE,
         IDC_BACKUP_PATH,
         IDC_BACKUP_PATH_BUTTON,
+        IDC_HIDE_WINDOW_TIME_CHOICE,
+        IDC_NOTIFICATION_TIME_CHOICE
     };
 };
 }

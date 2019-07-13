@@ -39,7 +39,7 @@ SettingsDialog::SettingsDialog(wxWindow* parent, std::shared_ptr<cfg::Configurat
     : pConfig(config)
 {
     long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
-    bool success = Create(parent, wxID_ANY, wxT("Settings"), wxDefaultPosition, wxSize(480, 320), style, name);
+    bool success = Create(parent, wxID_ANY, wxT("Settings"), wxDefaultPosition, wxSize(500, 320), style, name);
     SetMinClientSize(wxSize(480, 320));
 }
 
@@ -136,6 +136,43 @@ void SettingsDialog::CreateControls()
     pBrowseBackupPath = new wxButton(databasePanel, IDC_BACKUP_PATH_BUTTON, wxT("Browse"));
     gridSizer->Add(pBrowseBackupPath, common::sizers::ControlDefault);
 
+    /* Timed Task Settings */
+    auto timedTaskSettingsBox = new wxStaticBox(this, wxID_ANY, wxT("Timed Task"));
+    auto timedTaskSettingsSizer = new wxStaticBoxSizer(timedTaskSettingsBox, wxHORIZONTAL);
+    mainSizer->Add(timedTaskSettingsSizer, common::sizers::ControlExpand);
+
+    auto timedTaskPanel = new wxPanel(this, wxID_STATIC);
+    timedTaskSettingsSizer->Add(timedTaskPanel, common::sizers::ControlDefault);
+
+    auto timedTaskGridSizer = new wxFlexGridSizer(2, 10, 10);
+    timedTaskPanel->SetSizer(timedTaskGridSizer);
+
+    auto hideWindowTimeText = new wxStaticText(timedTaskPanel, wxID_ANY, wxT("Hide Window"));
+    timedTaskGridSizer->Add(hideWindowTimeText, common::sizers::ControlDefault);
+
+    wxArrayString hideWindowTimeChoices;
+    hideWindowTimeChoices.Add("1");
+    hideWindowTimeChoices.Add("2");
+    hideWindowTimeChoices.Add("3");
+    hideWindowTimeChoices.Add("4");
+    hideWindowTimeChoices.Add("5");
+    pHideWindowTimeChoice = new wxChoice(timedTaskPanel, IDC_HIDE_WINDOW_TIME_CHOICE, wxDefaultPosition, wxSize(150, -1), hideWindowTimeChoices);
+    pHideWindowTimeChoice->SetToolTip(wxT("Hide the timed task after X amount of seconds"));
+    timedTaskGridSizer->Add(pHideWindowTimeChoice, common::sizers::ControlDefault);
+
+    auto notificationTimeText = new wxStaticText(timedTaskPanel, wxID_ANY, wxT("Notifications Interval"));
+    timedTaskGridSizer->Add(notificationTimeText, common::sizers::ControlDefault);
+
+    wxArrayString notificationTimeChoices;
+    notificationTimeChoices.Add("5");
+    notificationTimeChoices.Add("15");
+    notificationTimeChoices.Add("30");
+    notificationTimeChoices.Add("45");
+    notificationTimeChoices.Add("60");
+    pNotificationTimeChoice = new wxChoice(timedTaskPanel, IDC_NOTIFICATION_TIME_CHOICE, wxDefaultPosition, wxSize(150, -1), notificationTimeChoices);
+    pNotificationTimeChoice->SetToolTip(wxT("Select a interval in minutes for timed task notification update"));
+    timedTaskGridSizer->Add(pNotificationTimeChoice, common::sizers::ControlDefault);
+
     /* Horizontal Line*/
     auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("settings_static_line"));
     mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
@@ -180,6 +217,9 @@ void SettingsDialog::FillControls()
         pBackupPath->Disable();
         pBrowseBackupPath->Disable();
     }
+
+    pHideWindowTimeChoice->SetStringSelection(std::to_string(pConfig->GetHideWindowTimerInterval()));
+    pNotificationTimeChoice->SetStringSelection(std::to_string(pConfig->GetNotificationTimerInterval()));
 }
 
 void SettingsDialog::OnOk(wxCommandEvent& WXUNUSED(event))
@@ -194,6 +234,9 @@ void SettingsDialog::OnOk(wxCommandEvent& WXUNUSED(event))
 
     pConfig->SetBackupEnabled(pBackupDatabase->GetValue());
     pConfig->SetBackupPath(pBackupPath->GetValue());
+
+    pConfig->SetHideWindowTimerInterval(std::stoi(pHideWindowTimeChoice->GetStringSelection().ToStdString()));
+    pConfig->SetNotificationTimerInterval(std::stoi(pNotificationTimeChoice->GetStringSelection().ToStdString()));
 
     pConfig->Save();
 

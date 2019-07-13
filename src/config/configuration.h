@@ -57,6 +57,12 @@ public:
     wxString GetBackupPath() const;
     void SetBackupPath(const wxString& value);
 
+    int GetHideWindowTimerInterval() const;
+    void SetHideWindowTimerInterval(int value);
+
+    int GetNotificationTimerInterval() const;
+    void SetNotificationTimerInterval(int value);
+
 private:
     static wxString CFG_FILE;
 
