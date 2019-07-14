@@ -44,7 +44,6 @@ set (SRC
     "app.cpp"
     "frame/mainframe.cpp"
     "frame/taskbaricon.cpp"
-    "dialogs/aboutdialog.cpp"
     "dialogs/taskitemdialog.cpp"
     "dialogs/employerdialog.cpp"
     "dialogs/clientdialog.cpp"

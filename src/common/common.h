@@ -35,4 +35,6 @@ const wxSizerFlags ControlExpandProp = wxSizerFlags(ControlDefault).Align(wxEXPA
 
 // TODO Check licensing https://icons8.com/icon/pack/business/plasticine
 extern const char** GetProgramIcon();
+
+std::string GetLicense();
 } // namespace app::common

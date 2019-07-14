@@ -21,6 +21,7 @@
 
 #include <vector>
 
+#include <wx/aboutdlg.h>
 #include <wx/taskbarbutton.h>
 
 #include "../common/constants.h"
@@ -28,7 +29,6 @@
 #include "../common/ids.h"
 #include "../common/util.h"
 #include "../common/version.h"
-#include "../dialogs/aboutdialog.h"
 #include "../dialogs/taskitemdialog.h"
 #include "../dialogs/employerdialog.h"
 #include "../dialogs/clientdialog.h"
@@ -252,7 +252,17 @@ void MainFrame::DataToControls()
 
 void MainFrame::OnAbout(wxCommandEvent& event)
 {
-    dialog::AboutDialog about(this);
+    wxAboutDialogInfo aboutInfo;
+    aboutInfo.SetIcon(common::GetProgramIcon());
+    aboutInfo.SetName(wxT("TasksTracker"));
+    aboutInfo.SetVersion(wxString::Format("%d.%d.%d", TASKS_TRACKER_MAJOR, TASKS_TRACKER_MINOR, TASKS_TRACKER_PATCH));
+    aboutInfo.SetDescription(wxT("A desktop application to help you manage how you've spent your time on tasks during the day\n by tracking the time you've spent on those tasks throughout the day"));
+    aboutInfo.SetCopyright("(C) 2018-2019");
+    aboutInfo.SetWebSite(wxT("https://github.com/ifexception/wx-tasks-tracker"));
+    aboutInfo.SetLicence(common::GetLicense());
+    aboutInfo.AddDeveloper(wxT("Szymon Welgus"));
+
+    wxAboutBox(aboutInfo);
 }
 
 void MainFrame::OnClose(wxCloseEvent& event)
