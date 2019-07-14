@@ -263,16 +263,14 @@ void db_service::delete_project(const int projectId, const int dateModified)
 
 void db_service::create_new_category(const int projectId, const std::string& name, const std::string& description)
 {
-    std::string cmd("INSERT INTO categories (name, description, is_active, project_id) VALUES (?, ?, 1, ?)");
-    db::command command(*db_connection::get_instance().get_database(), cmd);
+    db::command command(*db_connection::get_instance().get_database(), models::category::createNewCategory);
     command.binder() << name << description << projectId;
     command.execute();
 }
 
 std::vector<models::category> db_service::get_categories_by_project_id(const int projectId)
 {
-    std::string qry("SELECT * FROM categories WHERE project_id = ?");
-    db::query query(*db_connection::get_instance().get_database(), qry);
+    db::query query(*db_connection::get_instance().get_database(), models::category::getCategoriesByProjectId);
     query.bind(1, projectId);
 
     std::vector<models::category> categories;
@@ -296,19 +294,7 @@ std::vector<models::category> db_service::get_categories_by_project_id(const int
 
 models::category db_service::get_category_by_id(const int categoryId)
 {
-    std::string select("SELECT categories.category_id, ");
-    std::string categoryName("categories.name AS category_name, ");
-    std::string description("categories.description, ");
-    std::string dateCreated("categories.date_created_utc, ");
-    std::string dateModified("categories.date_modified_utc, ");
-    std::string isActive("categories.is_active, ");
-    std::string projectName("projects.name AS project_name ");
-    std::string from("FROM categories ");
-    std::string innerJoin("INNER JOIN projects ON categories.project_id = projects.project_id ");
-    std::string where("WHERE categories.category_id = ?");
-    std::string qry = select + categoryName + description + dateCreated + dateModified + isActive + projectName + from + innerJoin + where;
-
-    db::query query(*db_connection::get_instance().get_database(), qry);
+    db::query query(*db_connection::get_instance().get_database(), models::category::getCategoryById);
     query.bind(1, categoryId);
     query.run();
     db::column column(query.get_handle());
@@ -327,20 +313,8 @@ models::category db_service::get_category_by_id(const int categoryId)
 
 std::vector<models::category> db_service::get_categories()
 {
-    std::string select("SELECT categories.category_id, ");
-    std::string categoryName("categories.name AS category_name, ");
-    std::string description("categories.description, ");
-    std::string dateCreated("categories.date_created_utc, ");
-    std::string dateModified("categories.date_modified_utc, ");
-    std::string isActive("categories.is_active, ");
-    std::string projectName("projects.name AS project_name ");
-    std::string from("FROM categories ");
-    std::string innerJoin("INNER JOIN projects ON categories.project_id = projects.project_id ");
-    std::string where("WHERE categories.is_active = 1");
-    std::string qry = select + categoryName + description + dateCreated + dateModified + isActive + projectName + from + innerJoin + where;
-
     auto instance = db_connection::get_instance().get_database();
-    db::query query(*instance, qry);
+    db::query query(*instance, models::category::getCategories);
 
     std::vector<models::category> categories;
     while (query.run()) {
@@ -363,16 +337,14 @@ std::vector<models::category> db_service::get_categories()
 
 void db_service::update_category(models::category category)
 {
-    std::string cmd("UPDATE categories SET name = ?, description = ?, project_id = ?, date_modified_utc = ? WHERE category_id = ?");
-    db::command command(*db_connection::get_instance().get_database(), cmd);
+    db::command command(*db_connection::get_instance().get_database(), models::category::updateCategory);
     command.binder() << category.category_name << category.description << category.project_id << category.date_modified_utc;
     command.execute();
 }
 
 void db_service::delete_category(const int categoryId, const int dateModified)
 {
-    std::string cmd("UPDATE categories SET is_active = 0, date_modified_utc = ? WHERE category_id = ?");
-    db::command command(*db_connection::get_instance().get_database(), cmd);
+    db::command command(*db_connection::get_instance().get_database(), models::category::deleteCategory);
     command.binder() << dateModified;
     command.execute();
 }

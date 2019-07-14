@@ -36,5 +36,12 @@ struct category
     int is_active;
     int project_id;
     std::string project_name;
+
+    static const std::string createNewCategory;
+    static const std::string getCategoriesByProjectId;
+    static const std::string getCategoryById;
+    static const std::string getCategories;
+    static const std::string updateCategory;
+    static const std::string deleteCategory;
 };
 }
