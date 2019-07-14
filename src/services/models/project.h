@@ -38,5 +38,11 @@ struct project
     int client_id;
     std::string employer_name;
     std::string client_name;
+
+    static const std::string createNewProject;
+    static const std::string getProjects;
+    static const std::string getProjectById;
+    static const std::string updateProject;
+    static const std::string deleteProject;
 };
 }

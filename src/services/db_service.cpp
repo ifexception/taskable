@@ -179,8 +179,7 @@ void db_service::delete_client(const int clientId, const int dateModified)
 
 void db_service::create_new_project(const std::string& name, const std::string& displayName, const int employerId, const int* clientId)
 {
-    std::string cmd("INSERT INTO projects (name, display_name, is_active, employer_id, client_id) VALUES (?, ?, 1, ?, ?)");
-    db::command command(*db_connection::get_instance().get_database(), cmd);
+    db::command command(*db_connection::get_instance().get_database(), models::project::createNewProject);
     if (clientId == nullptr) {
         command.binder() << name << displayName << employerId << ( void*) 0;
     } else {
@@ -192,21 +191,7 @@ void db_service::create_new_project(const std::string& name, const std::string& 
 
 std::vector<models::project> db_service::get_projects()
 {
-    std::string select("SELECT projects.project_id, ");
-    std::string projectName("projects.name AS project_name, ");
-    std::string displayName("projects.display_name, ");
-    std::string dateCreated("projects.date_created_utc, ");
-    std::string dateModified("projects.date_modified_utc, ");
-    std::string isActive("projects.is_active, ");
-    std::string employerName("employers.name AS employer_name, ");
-    std::string clientName("clients.name AS client_name ");
-    std::string from("FROM projects ");
-    std::string innerJoinEmployers("INNER JOIN employers ON projects.employer_id = employers.employer_id ");
-    std::string innerJoinClients("INNER JOIN clients ON projects.client_id = clients.client_id ");
-    std::string where("WHERE projects.is_active = 1");
-    std::string qry = select + projectName + displayName + dateCreated + dateModified + isActive + employerName + clientName + from + innerJoinEmployers + innerJoinClients + where;
-
-    db::query query(*db_connection::get_instance().get_database(), qry);
+    db::query query(*db_connection::get_instance().get_database(), models::project::getProjects);
 
     std::vector<models::project> projects;
     while (query.run()) {
@@ -234,22 +219,7 @@ std::vector<models::project> db_service::get_projects()
 
 models::project db_service::get_project_by_id(const int projectId)
 {
-    std::string select("SELECT projects.project_id, ");
-    std::string projectName("projects.name AS project_name, ");
-    std::string displayName("projects.display_name, ");
-    std::string dateCreated("projects.date_created_utc, ");
-    std::string dateModified("projects.date_modified_utc, ");
-    std::string isActive("projects.is_active, ");
-    std::string employerId("employers.employer_id, ");
-    std::string employerName("employers.name AS employer_name, ");
-    std::string clientName("clients.name AS client_name ");
-    std::string from("FROM projects ");
-    std::string innerJoinEmployers("INNER JOIN employers ON projects.employer_id = employers.employer_id ");
-    std::string innerJoinClients("INNER JOIN clients ON projects.client_id = clients.client_id ");
-    std::string where("WHERE projects.project_id = ?");
-    std::string qry = select + projectName + displayName + dateCreated + dateModified + isActive + employerId + employerName + clientName + from + innerJoinEmployers + innerJoinClients + where;
-
-    db::query query(*db_connection::get_instance().get_database(), qry);
+    db::query query(*db_connection::get_instance().get_database(), models::project::getProjectById);
     query.bind(1, projectId);
     query.run();
     db::column column(query.get_handle());
@@ -274,8 +244,7 @@ models::project db_service::get_project_by_id(const int projectId)
 
 void db_service::update_project(models::project project)
 {
-    std::string cmd("UPDATE projects SET name = ?, display_name = ?, date_modified_utc = ?, employer_id = ?, client_id = ?");
-    db::command command(*db_connection::get_instance().get_database(), cmd);
+    db::command command(*db_connection::get_instance().get_database(), models::project::updateProject);
     if (project.client_id == 0) {
         command.binder() << project.project_name << project.display_name << project.employer_id << ( void*) 0;
     } else {
@@ -287,8 +256,7 @@ void db_service::update_project(models::project project)
 
 void db_service::delete_project(const int projectId, const int dateModified)
 {
-    std::string cmd("UPDATE projects SET is_active = 0, date_modified_utc = ? WHERE project_id = ?");
-    db::command command(*db_connection::get_instance().get_database(), cmd);
+    db::command command(*db_connection::get_instance().get_database(), models::project::deleteProject);
     command.binder() << dateModified << projectId;
     command.execute();
 }

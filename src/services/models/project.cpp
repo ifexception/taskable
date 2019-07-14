@@ -21,5 +21,32 @@
 
 namespace app::models
 {
-
+const std::string project::createNewProject = "INSERT INTO projects(name, display_name, is_active, employer_id, client_id) VALUES(? , ? , 1, ? , ? )";
+const std::string project::getProjects = "SELECT projects.project_id, "
+                                         "projects.name AS project_name, "
+                                         "projects.display_name, "
+                                         "projects.date_created_utc, "
+                                         "projects.date_modified_utc, "
+                                         "projects.is_active, "
+                                         "employers.name AS employer_name, "
+                                         "clients.name AS client_name "
+                                         "FROM projects "
+                                         "INNER JOIN employers ON projects.employer_id = employers.employer_id "
+                                         "INNER JOIN clients ON projects.client_id = clients.client_id "
+                                         "WHERE projects.is_active = 1";
+const std::string project::getProjectById = "SELECT projects.project_id, "
+                                            "projects.name AS project_name, "
+                                            "projects.display_name, "
+                                            "projects.date_created_utc, "
+                                            "projects.date_modified_utc, "
+                                            "projects.is_active, "
+                                            "employers.employer_id, "
+                                            "employers.name AS employer_name, "
+                                            "clients.name AS client_name "
+                                            "FROM projects "
+                                            "INNER JOIN employers ON projects.employer_id = employers.employer_id "
+                                            "INNER JOIN clients ON projects.client_id = clients.client_id "
+                                            "WHERE projects.project_id = ?";
+const std::string project::updateProject = "UPDATE projects SET name = ?, display_name = ?, date_modified_utc = ?, employer_id = ?, client_id = ?";
+const std::string project::deleteProject = "UPDATE projects SET is_active = 0, date_modified_utc = ? WHERE project_id = ?";
 }
