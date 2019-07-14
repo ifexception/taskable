@@ -96,16 +96,14 @@ void db_service::delete_employer(const int employerId)
 
 void db_service::create_new_client(const std::string& name, const int employerId)
 {
-    std::string cmd("INSERT INTO clients (name, is_active, employer_id) VALUES (?, 1, ?)");
-    db::command command(*db_connection::get_instance().get_database(), cmd);
+    db::command command(*db_connection::get_instance().get_database(), models::client::createNewClient);
     command.binder() << name << employerId;
     command.execute();
 }
 
 std::vector<models::client> db_service::get_clients_by_employer_id(const int employerId)
 {
-    std::string cmd("SELECT * FROM clients WHERE employer_id = ?");
-    db::query query(*db_connection::get_instance().get_database(), cmd);
+    db::query query(*db_connection::get_instance().get_database(), models::client::getClientsByEmployerId);
     query.bind(1, employerId);
 
     std::vector<models::client> clients;
@@ -127,19 +125,8 @@ std::vector<models::client> db_service::get_clients_by_employer_id(const int emp
 
 std::vector<models::client> db_service::get_clients()
 {
-    std::string select("SELECT clients.client_id, ");
-    std::string clientName("clients.name AS client_name, ");
-    std::string dateCreated("clients.date_created_utc, ");
-    std::string dateModified("clients.date_modified_utc, ");
-    std::string isActive("clients.is_active, ");
-    std::string employerName("employers.name AS employer_name ");
-    std::string from("FROM clients ");
-    std::string innerJoin("INNER JOIN employers ON clients.employer_id = employers.employer_id ");
-    std::string where("WHERE clients.is_active = 1");
-
-    std::string qry = select + clientName + dateCreated + dateModified + isActive + employerName + from + innerJoin + where;
     auto instance = db_connection::get_instance().get_database();
-    db::query query(*instance, qry);
+    db::query query(*instance, models::client::getClients);
 
     std::vector<models::client> clients;
     while (query.run()) {
@@ -160,19 +147,7 @@ std::vector<models::client> db_service::get_clients()
 
 models::client db_service::get_client_by_id(const int clientId)
 {
-
-    std::string select("SELECT clients.client_id, ");
-    std::string clientName("clients.name AS client_name, ");
-    std::string dateCreated("clients.date_created_utc, ");
-    std::string dateModified("clients.date_modified_utc, ");
-    std::string isActive("clients.is_active, ");
-    std::string employerName("employers.name AS employer_name ");
-    std::string from("FROM clients ");
-    std::string innerJoin("INNER JOIN employers ON clients.employer_id = employers.employer_id ");
-    std::string where("WHERE clients.client_id = ?");
-
-    std::string qry = select + clientName + dateCreated + dateModified + isActive + employerName + from + innerJoin + where;
-    db::query query(*db_connection::get_instance().get_database(), qry);
+    db::query query(*db_connection::get_instance().get_database(), models::client::getClientById);
     query.bind(1, clientId);
     query.run();
     db::column column(query.get_handle());
@@ -190,16 +165,14 @@ models::client db_service::get_client_by_id(const int clientId)
 
 void db_service::update_client(models::client client)
 {
-    std::string cmd("UPDATE clients SET name = ?, date_modified_utc = ?, employer_id = ? WHERE client_id = ?");
-    db::command command(*db_connection::get_instance().get_database(), cmd);
+    db::command command(*db_connection::get_instance().get_database(), models::client::updateClient);
     command.binder() << client.client_name << client.date_modified_utc << client.employer_id << client.client_id;
     command.execute();
 }
 
 void db_service::delete_client(const int clientId, const int dateModified)
 {
-    std::string cmd("UPDATE clients SET is_active = 0, date_modified_utc = ? WHERE client_id = ?");
-    db::command command(*db_connection::get_instance().get_database(), cmd);
+    db::command command(*db_connection::get_instance().get_database(), models::client::deleteClient);
     command.binder() << dateModified << clientId;
     command.execute();
 }

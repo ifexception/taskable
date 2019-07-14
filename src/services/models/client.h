@@ -35,5 +35,12 @@ struct client
     int is_active;
     int employer_id;
     std::string employer_name;
+
+    static const std::string createNewClient;
+    static const std::string getClientsByEmployerId;
+    static const std::string getClients;
+    static const std::string getClientById;
+    static const std::string updateClient;
+    static const std::string deleteClient;
 };
 }
