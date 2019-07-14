@@ -40,5 +40,21 @@ struct task_item
     int date_created_utc;
     int date_modified_utc;
     int is_active;
+
+    static const std::string createNewTaskItem;
+    static const std::string getAllTaskItemsByDate;
+    static const std::string getTaskItemById;
+    static const std::string updateTaskItem;
+    static const std::string deleteTaskItem;
+};
+
+struct task
+{
+    task() = default;
+    ~task() = default;
+
+    static const std::string getTaskId;
+    static const std::string createTask;
+    static const std::string getTaskHoursById;
 };
 }

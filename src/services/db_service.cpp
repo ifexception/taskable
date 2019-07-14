@@ -351,15 +351,13 @@ void db_service::delete_category(const int categoryId, const int dateModified)
 
 int db_service::create_or_get_task_id(const std::string& date, const int projectId)
 {
-    std::string cmd("SELECT task_id FROM tasks WHERE task_date = ?");
-    db::query query(*db_connection::get_instance().get_database(), cmd);
+    db::query query(*db_connection::get_instance().get_database(), models::task::getTaskId);
     query.bind(1, date, db::copy_options::NoCopy);
     int taskId = 0;
     query.run();
     db::column column(query.get_handle());
     if (column.get_type(0) == db::column_type::Null) {
-        std::string cmd2("INSERT INTO tasks (task_date, is_active, project_id) VALUES (?, 1, ?)");
-        db::command command(*db_connection::get_instance().get_database(), cmd2);
+        db::command command(*db_connection::get_instance().get_database(), models::task::createTask);
         command.binder() << date << projectId;
         command.execute();
         taskId = (int) db_connection::get_instance().get_database()->get_last_rowid();
@@ -372,28 +370,14 @@ int db_service::create_or_get_task_id(const std::string& date, const int project
 
 void db_service::create_new_task_item(const int projectId, const int taskId, const std::string& startTime, const std::string& endTime, const std::string& duration, const int categoryId, const std::string& description)
 {
-    std::string cmd("INSERT INTO task_details (start_time, end_time, duration, description, is_active, project_id, task_id, category_id) VALUES (?, ?, ?, ?, 1, ?, ?, ?)");
-    db::command command(*db_connection::get_instance().get_database(), cmd);
+    db::command command(*db_connection::get_instance().get_database(), models::task_item::createNewTaskItem);
     command.binder() << startTime << endTime << duration << description << projectId << taskId << categoryId;
     command.execute();
 }
 
 std::vector<models::detailed_task> db_service::get_all_task_items_by_date(const std::string& date)
 {
-    std::string select("SELECT task_details.task_detail_id, tasks.task_date, ");
-    std::string startTime("task_details.start_time, ");
-    std::string endTime("task_details.end_time, ");
-    std::string duration("task_details.duration, ");
-    std::string description("task_details.description as description, ");
-    std::string category("categories.name as category_name, ");
-    std::string project("projects.display_name as project_name ");
-    std::string from("FROM task_details ");
-    std::string innerJoinTasks("INNER JOIN tasks ON task_details.task_id = tasks.task_id ");
-    std::string innerJoinCategories("INNER JOIN categories ON task_details.category_id = categories.category_id ");
-    std::string innerJoinProjects("INNER JOIN projects ON task_details.project_id = projects.project_id ");
-    std::string where("WHERE task_date = ?");
-    std::string qry = select + startTime + endTime + duration + description + category + project + from + innerJoinTasks + innerJoinCategories + innerJoinProjects + where;
-    db::query query(*db_connection::get_instance().get_database(), qry);
+    db::query query(*db_connection::get_instance().get_database(), models::task_item::getAllTaskItemsByDate);
     query.bind(1, date, db::copy_options::NoCopy);
 
     std::vector<models::detailed_task> detailedTasks;
@@ -418,26 +402,7 @@ std::vector<models::detailed_task> db_service::get_all_task_items_by_date(const 
 
 models::task_item db_service::get_task_item_by_id(const int taskId)
 {
-    std::string select("SELECT task_details.task_detail_id, ");
-    std::string projectId("projects.project_id,");
-    std::string project("projects.display_name as project_name, ");
-    std::string startTime("task_details.start_time, ");
-    std::string endTime("task_details.end_time, ");
-    std::string duration("task_details.duration, ");
-    std::string categoryId("categories.category_id, ");
-    std::string category("categories.name as category_name, ");
-    std::string description("task_details.description as description, ");
-    std::string dateCreatedUtc("task_details.date_created_utc, ");
-    std::string dateModifiedUtc("task_details.date_modified_utc, ");
-    std::string isActive("task_details.is_active ");
-    std::string from("FROM task_details ");
-    std::string innerJoinTasks("INNER JOIN tasks ON task_details.task_id = tasks.task_id ");
-    std::string innerJoinCategories("INNER JOIN categories ON task_details.category_id = categories.category_id ");
-    std::string innerJoinProjects("INNER JOIN projects ON task_details.project_id = projects.project_id ");
-    std::string where("WHERE task_detail_id = ?");
-
-    std::string qry = select + projectId + project + startTime + endTime + duration + categoryId + category + description + dateCreatedUtc + dateModifiedUtc + isActive + from + innerJoinTasks + innerJoinCategories + innerJoinProjects + where;
-    db::query query(*db_connection::get_instance().get_database(), qry);
+    db::query query(*db_connection::get_instance().get_database(), models::task_item::getTaskItemById);
     query.bind(1, taskId);
 
     query.run();
@@ -463,8 +428,7 @@ models::task_item db_service::get_task_item_by_id(const int taskId)
 
 void db_service::update_task_item(models::task_item task)
 {
-    std::string cmd("UPDATE task_details SET start_time = ?, end_time = ?, duration = ?, description = ?, date_modified_utc = ?, project_id = ?, category_id = ? WHERE task_detail_id = ?");
-    db::command command(*db_connection::get_instance().get_database(), cmd);
+    db::command command(*db_connection::get_instance().get_database(), models::task_item::updateTaskItem);
 
     command.binder() << task.start_time << task.end_time << task.duration << task.description << task.date_modified_utc << task.project_id << task.category_id << task.task_detail_id;
     command.execute();
@@ -472,8 +436,7 @@ void db_service::update_task_item(models::task_item task)
 
 void db_service::delete_task_item(const int taskId)
 {
-    std::string cmd("UPDATE task_details SET is_active = 0 WHERE task_detail_id = ?");
-    db::command command(*db_connection::get_instance().get_database(), cmd);
+    db::command command(*db_connection::get_instance().get_database(), models::task_item::deleteTaskItem);
 
     command.binder() << taskId;
     command.execute();
@@ -481,13 +444,7 @@ void db_service::delete_task_item(const int taskId)
 
 std::vector<std::string> db_service::get_task_hours_by_id(const std::string& date)
 {
-    std::string select("SELECT task_details.duration ");
-    std::string from("FROM task_details ");
-    std::string innerJoin("INNER JOIN tasks ON task_details.task_id = tasks.task_id ");
-    std::string where("WHERE task_date = ?");
-
-    std::string qry = select + from + innerJoin + where;
-    db::query query(*db_connection::get_instance().get_database(), qry);
+    db::query query(*db_connection::get_instance().get_database(), models::task::getTaskHoursById);
     query.bind(1, date, db::copy_options::NoCopy);
 
     std::vector<std::string> taskDurations;
