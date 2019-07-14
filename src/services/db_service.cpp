@@ -35,18 +35,16 @@ int db_service::get_last_insert_rowid()
 
 void db_service::create_new_employer(const std::string& employerName)
 {
-    std::string cmd("INSERT INTO employers (name, is_active) VALUES (?, 1);");
     auto instance = db_connection::get_instance().get_database();
-    db::command command(*instance, cmd);
+    db::command command(*instance, models::employer::createNewEmployer);
     command.bind(1, employerName, db::copy_options::NoCopy);
     command.execute();
 }
 
 std::vector<models::employer> db_service::get_employers()
 {
-    std::string qry("SELECT * FROM employers WHERE is_active = 1;");
     auto instance = db_connection::get_instance().get_database();
-    db::query query(*instance, qry);
+    db::query query(*instance, models::employer::getEmployers);
 
     std::vector<models::employer> employers;
     while (query.run()) {
@@ -66,9 +64,8 @@ std::vector<models::employer> db_service::get_employers()
 
 models::employer db_service::get_employer(const int employerId)
 {
-    std::string qry("SELECT * FROM employers WHERE employer_id = ?");
     auto instance = db_connection::get_instance().get_database();
-    db::query query(*instance, qry);
+    db::query query(*instance, models::employer::getEmployer);
     query.bind(1, employerId);
     query.run();
     db::column column(query.get_handle());
@@ -85,16 +82,14 @@ models::employer db_service::get_employer(const int employerId)
 
 void db_service::update_employer(models::employer employer)
 {
-    std::string cmd("UPDATE employers SET name = ?, date_modified_utc = ? WHERE employer_id = ?");
-    db::command command(*db_connection::get_instance().get_database(), cmd);
+    db::command command(*db_connection::get_instance().get_database(), models::employer::updateEmployer);
     command.binder() << employer.employer_name << employer.date_modified_utc << employer.employer_id;
     command.execute();
 }
 
 void db_service::delete_employer(const int employerId)
 {
-    std::string cmd("UPDATE employers SET is_active = 0 WHERE employer_id = ?");
-    db::command command(*db_connection::get_instance().get_database(), cmd);
+    db::command command(*db_connection::get_instance().get_database(), models::employer::deleteEmployer);
     command.binder() << employerId;
     command.execute();
 }

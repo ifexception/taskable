@@ -33,5 +33,11 @@ struct employer
     int date_created_utc;
     int date_modified_utc;
     int is_active;
+
+    static const std::string createNewEmployer;
+    static const std::string getEmployers;
+    static const std::string getEmployer;
+    static const std::string updateEmployer;
+    static const std::string deleteEmployer;
 };
 }
