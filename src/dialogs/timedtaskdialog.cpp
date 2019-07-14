@@ -54,8 +54,6 @@ void TimedTaskDialog::Launch()
 {
     mStartTime = wxDateTime::Now();
     pElapsedTimer->Start(1000);
-    wxLogDebug(wxString::Format("%d\n", pConfig->GetNotificationTimerInterval()));
-    wxLogDebug(wxString::Format("%d\n", util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval())));
     pNotificationTimer->Start(util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval()));
 
     pHideWindowTimer->Start(util::SecondsToMilliseconds(pConfig->GetHideWindowTimerInterval()), true);
