@@ -21,28 +21,28 @@
 
 namespace app::models
 {
-const std::string createNewCategory = "INSERT INTO categories (name, description, is_active, project_id) VALUES (?, ?, 1, ?)";
-const std::string getCategoriesByProjectId = "SELECT * FROM categories WHERE project_id = ?";
-const std::string getCategoryById = "SELECT categories.category_id, "
-                                    "categories.name AS category_name, "
-                                    "categories.description, "
-                                    "categories.date_created_utc, "
-                                    "categories.date_modified_utc, "
-                                    "categories.is_active, "
-                                    "projects.name AS project_name "
-                                    "FROM categories "
-                                    "INNER JOIN projects ON categories.project_id = projects.project_id "
-                                    "WHERE categories.category_id = ?";
-const std::string getCategories = "SELECT categories.category_id, "
-                                  "categories.name AS category_name, "
-                                  "categories.description, "
-                                  "categories.date_created_utc, "
-                                  "categories.date_modified_utc, "
-                                  "categories.is_active, "
-                                  "projects.name AS project_name "
-                                  "FROM categories "
-                                  "INNER JOIN projects ON categories.project_id = projects.project_id "
-                                  "WHERE categories.is_active = 1";
-const std::string updateCategory = "UPDATE categories SET name = ?, description = ?, project_id = ?, date_modified_utc = ? WHERE category_id = ?";
-const std::string deleteCategory = "UPDATE categories SET is_active = 0, date_modified_utc = ? WHERE category_id = ?";
+const std::string category::createNewCategory = "INSERT INTO categories (name, description, is_active, project_id) VALUES (?, ?, 1, ?)";
+const std::string category::getCategoriesByProjectId = "SELECT * FROM categories WHERE project_id = ?";
+const std::string category::getCategoryById = "SELECT categories.category_id, "
+                                              "categories.name AS category_name, "
+                                              "categories.description, "
+                                              "categories.date_created_utc, "
+                                              "categories.date_modified_utc, "
+                                              "categories.is_active, "
+                                              "projects.name AS project_name "
+                                              "FROM categories "
+                                              "INNER JOIN projects ON categories.project_id = projects.project_id "
+                                              "WHERE categories.category_id = ?";
+const std::string category::getCategories = "SELECT categories.category_id, "
+                                            "categories.name AS category_name, "
+                                            "categories.description, "
+                                            "categories.date_created_utc, "
+                                            "categories.date_modified_utc, "
+                                            "categories.is_active, "
+                                            "projects.name AS project_name "
+                                            "FROM categories "
+                                            "INNER JOIN projects ON categories.project_id = projects.project_id "
+                                            "WHERE categories.is_active = 1";
+const std::string category::updateCategory = "UPDATE categories SET name = ?, description = ?, project_id = ?, date_modified_utc = ? WHERE category_id = ?";
+const std::string category::deleteCategory = "UPDATE categories SET is_active = 0, date_modified_utc = ? WHERE category_id = ?";
 }
