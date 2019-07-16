@@ -27,12 +27,12 @@
 
 #include "../db/database_exception.h"
 #include "../services/db_service.h"
-#include "setup.xpm"
+#include "../../res/icons8-service-64.xpm"
 
 namespace app::wizard
 {
 SetupWizard::SetupWizard(wxFrame* frame)
-    : wxWizard(frame, wxID_ANY, wxT("Setup Wizard"), wxBitmap(setupwizardxpm), wxDefaultPosition, wxDEFAULT_DIALOG_STYLE)
+    : wxWizard(frame, wxID_ANY, wxT("Setup Wizard"), wxBitmap(tasks_tracker_service), wxDefaultPosition, wxDEFAULT_DIALOG_STYLE)
     , pPage1(nullptr)
     , mEmployer(wxGetEmptyString())
     , mClient(wxGetEmptyString())
@@ -63,6 +63,8 @@ bool SetupWizard::Run()
         // TODO with upgrade to SqliteModernCpp use a transaction here
         wxStopWatch stopWatch;
         stopWatch.Start();
+        SetUpDatabase();
+
         services::db_service dbService;
         int employerId = 0;
         try {
@@ -150,6 +152,22 @@ void SetupWizard::SetCategory(const wxString& category)
 void SetupWizard::SetDescription(const wxString& description)
 {
     mDescription = description;
+}
+
+void SetupWizard::SetUpDatabase()
+{
+    services::db_service dbService;
+
+    try {
+        dbService.create_employers_table();
+        dbService.create_clients_table();
+        dbService.create_projects_table();
+        dbService.create_categories_table();
+        dbService.create_tasks_table();
+        dbService.create_task_items_table();
+    } catch (const db::database_exception& e) {
+        // TODO Log exception
+    }
 }
 
 wxBEGIN_EVENT_TABLE(AddEmployerAndClientPage, wxWizardPageSimple)

@@ -46,6 +46,8 @@ public:
     void SetDescription(const wxString& description);
 
 private:
+    void SetUpDatabase();
+
     wxWizardPageSimple* pPage1;
 
     wxString mEmployer;
@@ -60,7 +62,7 @@ class AddEmployerAndClientPage final : public wxWizardPageSimple
 {
 public:
     AddEmployerAndClientPage() = default;
-    AddEmployerAndClientPage(SetupWizard* parent);
+    explicit AddEmployerAndClientPage(SetupWizard* parent);
     virtual ~AddEmployerAndClientPage() = default;
 
     bool TransferDataFromWindow() override;

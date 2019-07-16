@@ -66,10 +66,10 @@ CREATE TABLE categories
     FOREIGN KEY (project_id) REFERENCES projects(project_id)
 );
 
--- task details table
-CREATE TABLE task_details
+-- task items table
+CREATE TABLE task_items
 (
-    task_detail_id INTEGER PRIMARY KEY NOT NULL,
+    task_item_id INTEGER PRIMARY KEY NOT NULL,
     start_time TEXT NOT NULL,
     end_time TEXT NOT NULL,
     duration TEXT NOT NULL,

@@ -27,9 +27,119 @@
 
 namespace app::services
 {
+void db_service::create_employers_table()
+{
+    // TODO Move sql queries out db_service
+    const std::string query = "CREATE TABLE employers"
+        "("
+        "    employer_id INTEGER PRIMARY KEY NOT NULL,"
+        "    name TEXT NOT NULL,"
+        "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "    is_active INTEGER NOT NULL"
+        ");";
+
+    db::command command(*db_connection::get_instance().get_database(), query);
+    command.execute();
+}
+
+void db_service::create_clients_table()
+{
+    const std::string query = "CREATE TABLE clients"
+        "("
+        "    client_id INTEGER PRIMARY KEY NOT NULL,"
+        "    name TEXT NOT NULL,"
+        "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "    is_active INTEGER NOT NULL,"
+        "    employer_id INTEGER NOT NULL,"
+        "    FOREIGN KEY (employer_id) REFERENCES employers(employer_id)"
+        ");";
+
+    db::command command(*db_connection::get_instance().get_database(), query);
+    command.execute();
+}
+
+void db_service::create_projects_table()
+{
+    const std::string query = "CREATE TABLE projects"
+        "("
+        "    project_id INTEGER PRIMARY KEY NOT NULL,"
+        "    name TEXT NOT NULL UNIQUE,"
+        "    display_name TEXT NOT NULL,"
+        "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "    is_active INTEGER NOT NULL,"
+        "    employer_id INTEGER NOT NULL,"
+        "    client_id INTEGER NULL,"
+        "    FOREIGN KEY (employer_id) REFERENCES employers(employer_id),"
+        "    FOREIGN KEY (client_id) REFERENCES clients(client_id)"
+        ");";
+
+    db::command command(*db_connection::get_instance().get_database(), query);
+    command.execute();
+}
+
+void db_service::create_categories_table()
+{
+    const std::string query = "CREATE TABLE categories"
+        "("
+        "    category_id INTEGER PRIMARY KEY NOT NULL,"
+        "    name TEXT NOT NULL,"
+        "    description TEXT NOT NULL,"
+        "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "    is_active INTEGER NOT NULL,"
+        "    project_id INTEGER NOT NULL,"
+        "    FOREIGN KEY (project_id) REFERENCES projects(project_id)"
+        ");";
+
+    db::command command(*db_connection::get_instance().get_database(), query);
+    command.execute();
+}
+
+void db_service::create_tasks_table()
+{
+    const std::string query = "CREATE TABLE tasks"
+        "("
+        "    task_id INTEGER PRIMARY KEY NOT NULL,"
+        "    task_date TEXT NOT NULL UNIQUE,"
+        "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "    is_active INTEGER NOT NULL"
+        ");";
+
+    db::command command(*db_connection::get_instance().get_database(), query);
+    command.execute();
+}
+
+void db_service::create_task_items_table()
+{
+    const std::string query = "CREATE TABLE task_items"
+        "("
+        "    task_item_id INTEGER PRIMARY KEY NOT NULL,"
+        "    start_time TEXT NOT NULL,"
+        "    end_time TEXT NOT NULL,"
+        "    duration TEXT NOT NULL,"
+        "    description TEXT NOT NULL,"
+        "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+        "    is_active INTEGER NOT NULL,"
+        "    project_id INTEGER NOT NULL,"
+        "    task_id INTEGER NOT NULL,"
+        "    category_id INTEGER NOT NULL,"
+        "    FOREIGN KEY (project_id) REFERENCES projects(project_id),"
+        "    FOREIGN KEY (task_id) REFERENCES tasks(task_id),"
+        "    FOREIGN KEY (category_id) REFERENCES categories(category_id)"
+        ");";
+
+    db::command command(*db_connection::get_instance().get_database(), query);
+    command.execute();
+}
+
 int db_service::get_last_insert_rowid()
 {
-    int id = ( int) db_connection::get_instance().get_database()->get_last_rowid();
+    int id = (int) db_connection::get_instance().get_database()->get_last_rowid();
     return id;
 }
 

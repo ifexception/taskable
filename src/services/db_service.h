@@ -36,6 +36,13 @@ struct db_service
     db_service() = default;
     ~db_service() = default;
 
+    void create_employers_table();
+    void create_clients_table();
+    void create_projects_table();
+    void create_categories_table();
+    void create_tasks_table();
+    void create_task_items_table();
+
     int get_last_insert_rowid();
 
     void create_new_employer(const std::string& employerName);
