@@ -67,6 +67,24 @@ wxEND_EVENT_TABLE()
 MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, const wxString& name)
     : wxFrame(nullptr, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(700, 500), wxDEFAULT_FRAME_STYLE, name)
     , pConfig(config)
+{ }
+
+MainFrame::~MainFrame()
+{
+    if (!pTaskBarIcon) {
+        delete pTaskBarIcon;
+    }
+}
+
+bool MainFrame::RunWizard()
+{
+    auto wizard = new wizard::SetupWizard(this);
+    wizard->CenterOnParent();
+    bool wizardSetupSuccess = wizard->Run();
+    return wizardSetupSuccess;
+}
+
+bool MainFrame::CreateFrame()
 {
     bool success = Create();
     SetMinClientSize(wxSize(640, 480));
@@ -75,19 +93,7 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, const wxString&
     if (pConfig->IsShowInTray()) {
         pTaskBarIcon->SetTaskBarIcon();
     }
-}
-
-MainFrame::~MainFrame()
-{
-    delete pTaskBarIcon;
-}
-
-bool MainFrame::OnStartUp()
-{
-    auto wizard = new wizard::SetupWizard(this);
-    wizard->CenterOnParent();
-    bool wizardSetupSuccess = wizard->Run();
-    return wizardSetupSuccess;
+    return success;
 }
 
 bool MainFrame::Create()

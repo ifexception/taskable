@@ -41,7 +41,8 @@ public:
 
     MainFrame& operator=(const MainFrame&) = delete;
 
-    bool OnStartUp();
+    bool RunWizard();
+    bool CreateFrame();
 
 private:
     wxDECLARE_EVENT_TABLE();
