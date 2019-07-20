@@ -49,6 +49,7 @@ class App : public wxApp
     bool InitializeLogging();
     bool DatabaseFileExists();
     bool IsInstalled();
+    void ConfigureRegistry();
 
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;

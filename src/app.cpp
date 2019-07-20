@@ -56,20 +56,24 @@ bool App::OnInit()
         return false;
     }
 
+    auto frame = new frame::MainFrame(pConfig);
+
+    bool isInstalled = IsInstalled();
+    if (!isInstalled) {
+        bool wizardSetupSuccess = frame->RunWizard();
+        if (!wizardSetupSuccess) {
+            return false;
+        }
+
+        ConfigureRegistry();
+    }
+
     bool dbFileExists = DatabaseFileExists();
     if (!dbFileExists) {
         return false;
     }
 
-    frame::MainFrame* frame = new frame::MainFrame(pConfig);
-
-    bool isInstalled = IsInstalled();
-    if (!isInstalled) {
-        bool wizardSetupSuccess = frame->OnStartUp();
-        if (!wizardSetupSuccess) {
-            return false;
-        }
-    }
+    frame->CreateFrame();
     frame->Show(true);
     SetTopWindow(frame);
     return true;
@@ -122,13 +126,15 @@ bool App::IsInstalled()
         long value = -1;
         key.QueryValue(wxT("Installed"), &value);
         return !!value;
-    } else {
-        key.Create();
-        key.SetValue("Installed", 1);
-        return false;
     }
-    // FIXME need to figure out way to see if registry was potentially tampered with when running this
-    // FIXME should app fix it or bomb out on the user?
+    return false;
+}
+
+void App::ConfigureRegistry()
+{
+    wxRegKey key(wxRegKey::HKLM, "SOFTWARE\\TasksTracker");
+    key.Create();
+    key.SetValue("Installed", 1);
 }
 } // namespace app
 
