@@ -24,6 +24,7 @@
 #include "setupwizard.h"
 
 #include <wx/wx.h>
+#include <wx/file.h>
 
 #include "../db/database_exception.h"
 #include "../services/db_service.h"
@@ -41,8 +42,8 @@ SetupWizard::SetupWizard(wxFrame* frame)
     pPage1 = new wxWizardPageSimple(this);
 
     wxString introWizardMessage = wxT("This wizard will help you get started with Tasks Tracker.\n"
-        "The next few pages will setup a employer, a client (which is optional), a project\n"
-        " and a category\n. Please press \"Next\" to begin the process.");
+        "The next few pages will setup a employer, a client (which is optional), a project and a category.\n "
+        "Please press \"Next\" to begin the process.");
 
     new wxStaticText(pPage1, wxID_ANY, introWizardMessage);
 
@@ -56,6 +57,7 @@ SetupWizard::SetupWizard(wxFrame* frame)
 
     GetPageAreaSizer()->Add(pPage1);
 }
+
 bool SetupWizard::Run()
 {
     auto wizardSuccess = wxWizard::RunWizard(pPage1);
@@ -63,6 +65,7 @@ bool SetupWizard::Run()
         // TODO with upgrade to SqliteModernCpp use a transaction here
         wxStopWatch stopWatch;
         stopWatch.Start();
+        CreateDatabaseFile();
         SetUpDatabase();
 
         services::db_service dbService;
@@ -152,6 +155,13 @@ void SetupWizard::SetCategory(const wxString& category)
 void SetupWizard::SetDescription(const wxString& description)
 {
     mDescription = description;
+}
+
+void SetupWizard::CreateDatabaseFile()
+{
+    const wxString& databaseFilename = wxT("tasks-tracker.db");
+    wxFile file;
+    file.Create(databaseFilename);
 }
 
 void SetupWizard::SetUpDatabase()

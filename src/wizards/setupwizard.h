@@ -46,6 +46,7 @@ public:
     void SetDescription(const wxString& description);
 
 private:
+    void CreateDatabaseFile();
     void SetUpDatabase();
 
     wxWizardPageSimple* pPage1;
