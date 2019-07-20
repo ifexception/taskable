@@ -22,7 +22,7 @@
 namespace app::models
 {
 const std::string task_item::createNewTaskItem = "INSERT INTO task_items (start_time, end_time, duration, description, is_active, project_id, task_id, category_id) VALUES (?, ?, ?, ?, 1, ?, ?, ?)";
-const std::string task_item::getAllTaskItemsByDate = "SELECT task_items.task_detail_id, tasks.task_date, "
+const std::string task_item::getAllTaskItemsByDate = "SELECT task_items.task_item_id, tasks.task_date, "
                                                      "task_items.start_time, "
                                                      "task_items.end_time, "
                                                      "task_items.duration, "
@@ -34,7 +34,7 @@ const std::string task_item::getAllTaskItemsByDate = "SELECT task_items.task_det
                                                      "INNER JOIN categories ON task_items.category_id = categories.category_id "
                                                      "INNER JOIN projects ON task_items.project_id = projects.project_id "
                                                      "WHERE task_date = ?";
-const std::string task_item::getTaskItemById = "SELECT task_items.task_detail_id, "
+const std::string task_item::getTaskItemById = "SELECT task_items.task_item_id, "
                                                "projects.project_id,"
                                                "projects.display_name as project_name, "
                                                "task_items.start_time, "
@@ -50,9 +50,9 @@ const std::string task_item::getTaskItemById = "SELECT task_items.task_detail_id
                                                "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
                                                "INNER JOIN categories ON task_items.category_id = categories.category_id "
                                                "INNER JOIN projects ON task_items.project_id = projects.project_id "
-                                               "WHERE task_detail_id = ?";
-const std::string task_item::updateTaskItem = "UPDATE task_items SET start_time = ?, end_time = ?, duration = ?, description = ?, date_modified_utc = ?, project_id = ?, category_id = ? WHERE task_detail_id = ?";
-const std::string task_item::deleteTaskItem = "UPDATE task_items SET is_active = 0 WHERE task_detail_id = ?";
+                                               "WHERE task_item_id = ?";
+const std::string task_item::updateTaskItem = "UPDATE task_items SET start_time = ?, end_time = ?, duration = ?, description = ?, date_modified_utc = ?, project_id = ?, category_id = ? WHERE task_item_id = ?";
+const std::string task_item::deleteTaskItem = "UPDATE task_items SET is_active = 0 WHERE task_item_id = ?";
 
 const std::string task::getTaskId = "SELECT task_id FROM tasks WHERE task_date = ?";
 const std::string task::createTask = "INSERT INTO tasks (task_date, is_active, project_id) VALUES (?, 1, ?)";
