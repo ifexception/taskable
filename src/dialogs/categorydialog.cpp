@@ -39,8 +39,9 @@ EVT_BUTTON(wxID_CANCEL, CategoryDialog::OnCancel)
 EVT_CHECKBOX(CategoryDialog::IDC_ISACTIVE, CategoryDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
-CategoryDialog::CategoryDialog(wxWindow* parent, bool isEdit, int categoryId, const wxString& name)
-    : mProjectChoiceId(-1)
+CategoryDialog::CategoryDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit, int categoryId, const wxString& name)
+    : pLogger(logger)
+    , mProjectChoiceId(-1)
     , mNameText(wxGetEmptyString())
     , mDescriptionText(wxGetEmptyString())
     , bIsEdit(isEdit)
@@ -174,11 +175,11 @@ void CategoryDialog::FillControls()
         services::db_service dbService;
         projects = dbService.get_projects();
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured in get_projects() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     for (auto p : projects) {
-        pProjectChoiceCtrl->Append(p.display_name, (void*)p.project_id);
+        pProjectChoiceCtrl->Append(p.display_name, util::IntToVoidPointer(p.project_id));
     }
 }
 
@@ -189,11 +190,10 @@ void CategoryDialog::DataToControls()
     try {
         category = dbService.get_category_by_id(mCategoryId);
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured in get_category_by_id() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     pProjectChoiceCtrl->SetStringSelection(category.project_name);
-    //pProjectChoiceCtrl->SetSelection(1);
     pNameCtrl->SetValue(category.category_name);
     pDescriptionCtrl->SetValue(category.description);
 
@@ -263,7 +263,7 @@ bool CategoryDialog::AreControlsEmpty()
 
 void CategoryDialog::OnSave(wxCommandEvent& event)
 {
-    mProjectChoiceId = (int)pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
+    mProjectChoiceId = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
     mNameText = pNameCtrl->GetValue();
     mDescriptionText = pDescriptionCtrl->GetValue();
 
@@ -290,7 +290,7 @@ void CategoryDialog::OnSave(wxCommandEvent& event)
             dbService.create_new_category(mProjectChoiceId, std::string(mNameText.ToUTF8()), std::string(mDescriptionText.ToUTF8()));
         }
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured in category OnSave() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     EndModal(ids::ID_SAVE);
