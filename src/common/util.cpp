@@ -61,6 +61,18 @@ int MinutesToMilliseconds(int value)
 {
     return value * 60000;
 }
+
+int VoidPointerToInt(void* value)
+{
+    intptr_t p = reinterpret_cast<intptr_t>(value);
+    return static_cast<int>(p);
+}
+
+void* IntToVoidPointer(int value)
+{
+    intptr_t p = static_cast<intptr_t>(value);
+    return reinterpret_cast<void*>(p);
+}
 } // namespace app::util
 
 std::vector<std::string> app::util::lib::split(const std::string& in, char delimiter)

@@ -36,6 +36,10 @@ int SecondsToMilliseconds(int value);
 
 int MinutesToMilliseconds(int value);
 
+int VoidPointerToInt(void* value);
+
+void* IntToVoidPointer(int value);
+
 namespace lib
 {
 std::vector<std::string> split(const std::string& in, char delimiter);
