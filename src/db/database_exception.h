@@ -26,7 +26,7 @@
 
 namespace app::db
 {
-class database_exception : std::runtime_error
+class database_exception : public std::runtime_error
 {
   public:
     database_exception() = delete;
