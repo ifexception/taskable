@@ -302,7 +302,7 @@ void MainFrame::OnNewEmployer(wxCommandEvent& event)
 
 void MainFrame::OnNewClient(wxCommandEvent& event)
 {
-    dialog::ClientDialog newClient(this);
+    dialog::ClientDialog newClient(this, pLogger);
     newClient.ShowModal();
 }
 

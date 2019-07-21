@@ -38,8 +38,9 @@ wxBEGIN_EVENT_TABLE(ClientDialog, wxDialog)
     EVT_CHECKBOX(ClientDialog::IDC_ISACTIVE, ClientDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
-ClientDialog::ClientDialog(wxWindow* parent, bool isEdit, int clientId, const wxString& name)
-    : mNameText(wxGetEmptyString())
+ClientDialog::ClientDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit, int clientId, const wxString& name)
+    : pLogger(logger)
+    , mNameText(wxGetEmptyString())
     , mEmployerId(-1)
     , bIsEdit(isEdit)
     , mClientId(clientId)
@@ -162,11 +163,11 @@ void ClientDialog::FillControls()
     try {
         employers = dbService.get_employers();
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured on get_employers() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     for (auto employer : employers) {
-        pEmployerChoiceCtrl->Append(employer.employer_name, (void*) employer.employer_id);
+        pEmployerChoiceCtrl->Append(employer.employer_name, util::IntToVoidPointer(employer.employer_id));
     }
 }
 
@@ -177,7 +178,7 @@ void ClientDialog::DataToControls()
     try {
         client = dbService.get_client_by_id(mClientId);
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured on get_client_by_id() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     pNameCtrl->SetValue(client.client_name);
@@ -231,7 +232,7 @@ bool ClientDialog::AreControlsEmpty()
 void ClientDialog::OnSave(wxCommandEvent & event)
 {
     mNameText = pNameCtrl->GetValue();
-    mEmployerId = (int) pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
+    mEmployerId = util::VoidPointerToInt(pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()));
 
     bool isValid = Validate();
     if (!isValid) {
@@ -255,7 +256,7 @@ void ClientDialog::OnSave(wxCommandEvent & event)
             clientService.create_new_client(std::string(mNameText.ToUTF8()), mEmployerId);
         }
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured on client OnSave() - {0:d} : {1}", e.get_error_code(), e.what());
     }
     EndModal(ids::ID_SAVE);
 }
@@ -284,5 +285,4 @@ void ClientDialog::OnIsActiveCheck(wxCommandEvent& event)
         pEmployerChoiceCtrl->Disable();
     }
 }
-
 }

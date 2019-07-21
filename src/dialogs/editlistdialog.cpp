@@ -109,7 +109,7 @@ void EditListDialog::OnItemDoubleClick(wxListEvent& event)
     }
     case dialog_type::Client:
     {
-        ClientDialog editClient(this, true, id);
+        ClientDialog editClient(this, pLogger, true, id);
         editClient.ShowModal();
         break;
     }
