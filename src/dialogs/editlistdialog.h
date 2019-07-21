@@ -21,6 +21,8 @@
 
 #include <wx/wx.h>
 #include <wx/listctrl.h>
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
 
 #include "../services/db_service.h"
 
@@ -96,7 +98,7 @@ class EditListDialog final : public wxDialog
 {
 public:
     EditListDialog() = default;
-    explicit EditListDialog(wxWindow* parent, dialog_type dialogType, const wxString& name = wxT("EditListDialog"));
+    explicit EditListDialog(wxWindow* parent, dialog_type dialogType, std::shared_ptr<spdlog::logger> logger, const wxString& name = wxT("EditListDialog"));
     virtual ~EditListDialog();
 
 private:
@@ -112,6 +114,7 @@ private:
 
     void SetStrategy();
 
+    std::shared_ptr<spdlog::logger> pLogger;
     wxListCtrl* pListCtrl;
     Strategy* mStrategy;
     dialog_type mType;

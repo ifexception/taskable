@@ -37,8 +37,9 @@ wxBEGIN_EVENT_TABLE(EditListDialog, wxDialog)
 EVT_LIST_ITEM_ACTIVATED(EditListDialog::IDC_LIST, EditListDialog::OnItemDoubleClick)
 wxEND_EVENT_TABLE()
 
-EditListDialog::EditListDialog(wxWindow* parent, dialog_type dialogType, const wxString& name)
+EditListDialog::EditListDialog(wxWindow* parent, dialog_type dialogType, std::shared_ptr<spdlog::logger> logger, const wxString& name)
     : mType(dialogType)
+    , pLogger(logger)
     , mStrategy(nullptr)
 {
     SetStrategy();
@@ -120,13 +121,14 @@ void EditListDialog::OnItemDoubleClick(wxListEvent& event)
     }
     case dialog_type::Category:
     {
-        CategoryDialog editCategory(this, true, id);
+        CategoryDialog editCategory(this, pLogger, true, id);
         editCategory.ShowModal();
         break;
     }
     default:
         break;
     }
+
     EndDialog(wxID_OK);
 }
 
