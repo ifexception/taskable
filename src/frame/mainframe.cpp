@@ -64,8 +64,9 @@ EVT_ICONIZE(MainFrame::OnIconize)
 EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 wxEND_EVENT_TABLE()
 
-MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, const wxString& name)
+MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger, const wxString& name)
     : wxFrame(nullptr, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(700, 500), wxDEFAULT_FRAME_STYLE, name)
+    , pLogger(logger)
     , pConfig(config)
 { }
 
@@ -241,7 +242,7 @@ void MainFrame::DataToControls()
     try {
         taskDurations = dbService.get_task_hours_by_id(dateString);
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured on get_task_hours_by_id() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     wxTimeSpan totalDuration;
@@ -389,6 +390,7 @@ void MainFrame::RefreshItems(wxDateTime date)
         detailedTasks = dbService.get_all_task_items_by_date(std::string(dateString.ToUTF8()));
     } catch (const db::database_exception& e) {
         wxLogError(wxString::Format("Error %d", e.get_error_code()));
+        pLogger->error("Error occured on get_all_task_items_by_date() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     int listIndex = 0;

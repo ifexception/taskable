@@ -25,6 +25,8 @@
 #include <wx/listctrl.h>
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
 
 #include "../config/configuration.h"
 
@@ -35,7 +37,7 @@ class TaskBarIcon;
 class MainFrame : public wxFrame
 {
 public:
-    MainFrame(std::shared_ptr<cfg::Configuration> config, const wxString& name = wxT("MainFrame"));
+    MainFrame(std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger, const wxString& name = wxT("MainFrame"));
     MainFrame(const MainFrame&) = delete;
     virtual ~MainFrame();
 
@@ -77,6 +79,7 @@ private:
     wxListCtrl* pListCtrl;
     wxStatusBar* pStatusBar;
     TaskBarIcon* pTaskBarIcon;
+    std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
 
     enum

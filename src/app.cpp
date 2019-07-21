@@ -56,7 +56,7 @@ bool App::OnInit()
         return false;
     }
 
-    auto frame = new frame::MainFrame(pConfig);
+    auto frame = new frame::MainFrame(pConfig, pLogger);
 
     bool isInstalled = IsInstalled();
     if (!isInstalled) {
@@ -113,11 +113,13 @@ bool App::InitializeLogging()
 
     return true;
 }
+
 bool App::DatabaseFileExists()
 {
     bool dbFileExists = wxFileExists(wxT("tasks-tracker.db")); // FIXME: remove hardcoded string
     return dbFileExists;
 }
+
 bool App::IsInstalled()
 {
     wxRegKey key(wxRegKey::HKLM, "SOFTWARE\\TasksTracker");
