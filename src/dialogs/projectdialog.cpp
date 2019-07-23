@@ -33,14 +33,15 @@ namespace app::dialog
 wxIMPLEMENT_DYNAMIC_CLASS(ProjectDialog, wxDialog)
 
 wxBEGIN_EVENT_TABLE(ProjectDialog, wxDialog)
-    EVT_BUTTON(ids::ID_SAVE, ProjectDialog::OnSave)
-    EVT_BUTTON(wxID_CANCEL, ProjectDialog::OnCancel)
-    EVT_CHOICE(ProjectDialog::IDC_EMPLOYERCHOICE, ProjectDialog::OnEmployerSelect)
-    EVT_CHECKBOX(ProjectDialog::IDC_ISACTIVE, ProjectDialog::OnIsActiveCheck)
+EVT_BUTTON(ids::ID_SAVE, ProjectDialog::OnSave)
+EVT_BUTTON(wxID_CANCEL, ProjectDialog::OnCancel)
+EVT_CHOICE(ProjectDialog::IDC_EMPLOYERCHOICE, ProjectDialog::OnEmployerSelect)
+EVT_CHECKBOX(ProjectDialog::IDC_ISACTIVE, ProjectDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
-ProjectDialog::ProjectDialog(wxWindow* parent, bool isEdit, int projectId, const wxString& name)
-    : mNameText(wxGetEmptyString())
+ProjectDialog::ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit, int projectId, const wxString& name)
+    : pLogger(logger)
+    , mNameText(wxGetEmptyString())
     , mDisplayNameText(wxGetEmptyString())
     , mEmployerId(-1)
     , mClientId(-1)
@@ -185,11 +186,11 @@ void ProjectDialog::FillControls()
     try {
         employers = dbService.get_employers();
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured in get_employers() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     for (auto employer : employers) {
-        pEmployerChoiceCtrl->Append(employer.employer_name, (void*) employer.employer_id);
+        pEmployerChoiceCtrl->Append(employer.employer_name, util::IntToVoidPointer(employer.employer_id));
     }
 }
 
@@ -201,7 +202,7 @@ void ProjectDialog::DataToControls()
     try {
         project = dbService.get_project_by_id(mProjectId);
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured in get_project_by_id() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     pNameCtrl->SetValue(project.project_name);
@@ -216,11 +217,11 @@ void ProjectDialog::DataToControls()
             services::db_service clientService;
             clients = clientService.get_clients_by_employer_id(project.employer_id);
         } catch (const db::database_exception& e) {
-            // TODO Log exception
+            pLogger->error("Error occured in get_clients_by_employer_id() - {0:d} : {1}", e.get_error_code(), e.what());
         }
 
         for (auto client : clients) {
-            pClientChoiceCtrl->Append(client.client_name, (void*) client.client_id);
+            pClientChoiceCtrl->Append(client.client_name, util::IntToVoidPointer(client.client_id));
         }
 
         pClientChoiceCtrl->SetSelection(0);
@@ -299,17 +300,17 @@ void ProjectDialog::OnEmployerSelect(wxCommandEvent& event)
 {
     pClientChoiceCtrl->Clear();
     pClientChoiceCtrl->AppendString(wxT("Select a client"));
-    int employerId = (int) event.GetClientData(); // FIXME: loss of precision -> convert to intptr_t and then to int
+    int employerId = util::VoidPointerToInt(event.GetClientData());
     std::vector<models::client> clients;
     try {
         services::db_service clientService;
         clients = clientService.get_clients_by_employer_id(employerId);
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured in get_clients_by_employer_id() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     for (auto client : clients) {
-        pClientChoiceCtrl->Append(client.client_name, (void*) client.client_id);
+        pClientChoiceCtrl->Append(client.client_name, util::IntToVoidPointer(client.client_id));
     }
 
     pClientChoiceCtrl->SetSelection(0);
@@ -323,8 +324,8 @@ void ProjectDialog::OnSave(wxCommandEvent& event)
     mNameText = pNameCtrl->GetValue();
     mDisplayNameText = pDisplayNameCtrl->GetValue();
 
-    mEmployerId = (int) pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
-    mClientId = (int) pClientChoiceCtrl->GetClientData(pClientChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
+    mEmployerId = util::VoidPointerToInt(pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()));
+    mClientId = util::VoidPointerToInt(pClientChoiceCtrl->GetClientData(pClientChoiceCtrl->GetSelection()));
 
     bool isValid = Validate();
     if (!isValid) {
@@ -356,7 +357,7 @@ void ProjectDialog::OnSave(wxCommandEvent& event)
             }
         }
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured in project OnSave() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     EndModal(ids::ID_SAVE);

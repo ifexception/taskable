@@ -308,7 +308,7 @@ void MainFrame::OnNewClient(wxCommandEvent& event)
 
 void MainFrame::OnNewProject(wxCommandEvent& event)
 {
-    dialog::ProjectDialog newProject(this);
+    dialog::ProjectDialog newProject(this, pLogger);
     newProject.ShowModal();
 }
 

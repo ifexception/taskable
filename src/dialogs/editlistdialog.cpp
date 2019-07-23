@@ -115,7 +115,7 @@ void EditListDialog::OnItemDoubleClick(wxListEvent& event)
     }
     case dialog_type::Project:
     {
-        ProjectDialog editProject(this, true, id);
+        ProjectDialog editProject(this, pLogger, true, id);
         editProject.ShowModal();
         break;
     }

@@ -19,7 +19,11 @@
 
 #pragma once
 
+#include <memory>
+
 #include <wx/wx.h>
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
 
 namespace app::dialog
 {
@@ -27,7 +31,7 @@ class ProjectDialog final : public wxDialog
 {
 public:
     ProjectDialog() = default;
-    explicit ProjectDialog(wxWindow* parent, bool isEdit = false, int projectId = 0, const wxString& name = "ProjectDialog");
+    explicit ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit = false, int projectId = 0, const wxString& name = "ProjectDialog");
     virtual ~ProjectDialog() = default;
 
 private:
@@ -48,6 +52,7 @@ private:
     void OnCancel(wxCommandEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
 
+    std::shared_ptr<spdlog::logger> pLogger;
     wxTextCtrl* pNameCtrl;
     wxTextCtrl* pDisplayNameCtrl;
     wxChoice* pEmployerChoiceCtrl;
