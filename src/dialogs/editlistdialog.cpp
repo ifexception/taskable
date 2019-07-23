@@ -103,7 +103,7 @@ void EditListDialog::OnItemDoubleClick(wxListEvent& event)
     switch (mType) {
     case dialog_type::Employer:
     {
-        EmployerDialog editEmployer(this, true, id);
+        EmployerDialog editEmployer(this, pLogger, true, id);
         editEmployer.ShowModal();
         break;
     }

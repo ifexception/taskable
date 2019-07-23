@@ -19,7 +19,11 @@
 
 #pragma once
 
+#include <memory>
+
 #include <wx/wx.h>
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
 
 namespace app::dialog
 {
@@ -27,7 +31,7 @@ class EmployerDialog final : public wxDialog
 {
 public:
     EmployerDialog() = default;
-    explicit EmployerDialog(wxWindow* parent, bool isEdit = false, int employerId = 0, const wxString& name = "EmployerDialog");
+    explicit EmployerDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit = false, int employerId = 0, const wxString& name = "EmployerDialog");
     virtual ~EmployerDialog() = default;
 
 private:
@@ -46,6 +50,7 @@ private:
     void OnCancel(wxCommandEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
 
+    std::shared_ptr<spdlog::logger> pLogger;
     wxTextCtrl* pEmployerCtrl;
     wxCheckBox* pIsActiveCtrl;
     wxStaticText* pDateCreatedTextCtrl;

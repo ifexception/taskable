@@ -38,8 +38,9 @@ EVT_BUTTON(wxID_CANCEL, EmployerDialog::OnCancel)
 EVT_CHECKBOX(EmployerDialog::IDC_ISACTIVE, EmployerDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
-EmployerDialog::EmployerDialog(wxWindow* parent, bool isEdit, int employerId, const wxString& name)
-    : mNameText(wxGetEmptyString())
+EmployerDialog::EmployerDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit, int employerId, const wxString& name)
+    : pLogger(logger)
+    , mNameText(wxGetEmptyString())
     , bIsEdit(isEdit)
     , mEmployerId(employerId)
 {
@@ -151,7 +152,7 @@ void EmployerDialog::DataToControls()
     try {
         employer = dbService.get_employer(mEmployerId);
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured in get_employer() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     pEmployerCtrl->SetValue(employer.employer_name);
@@ -213,13 +214,13 @@ void EmployerDialog::OnSave(wxCommandEvent& event)
             dbService.update_employer(employer);
         }
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            dbService.delete_employer(mEmployerId); // TODO need to add date_modified
+            dbService.delete_employer(mEmployerId, util::UnixTimestamp());
         }
         if (!bIsEdit) {
             dbService.create_new_employer(std::string(mNameText.ToUTF8()));
         }
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured in employer OnSave() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     EndModal(ids::ID_SAVE);

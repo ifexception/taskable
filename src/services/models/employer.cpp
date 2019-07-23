@@ -25,5 +25,5 @@ const std::string employer::createNewEmployer = "INSERT INTO employers (name, is
 const std::string employer::getEmployers = "SELECT * FROM employers WHERE is_active = 1;";
 const std::string employer::getEmployer = "SELECT * FROM employers WHERE employer_id = ?";
 const std::string employer::updateEmployer = "UPDATE employers SET name = ?, date_modified_utc = ? WHERE employer_id = ?";
-const std::string employer::deleteEmployer = "UPDATE employers SET is_active = 0 WHERE employer_id = ?";
+const std::string employer::deleteEmployer = "UPDATE employers SET is_active = 0, date_modified_utc = ? WHERE employer_id = ?";
 }

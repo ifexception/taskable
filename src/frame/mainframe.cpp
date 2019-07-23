@@ -296,7 +296,7 @@ void MainFrame::OnNewTask(wxCommandEvent& event)
 
 void MainFrame::OnNewEmployer(wxCommandEvent& event)
 {
-    dialog::EmployerDialog newEmployer(this);
+    dialog::EmployerDialog newEmployer(this, pLogger);
     newEmployer.ShowModal();
 }
 

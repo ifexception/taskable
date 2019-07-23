@@ -197,10 +197,10 @@ void db_service::update_employer(models::employer employer)
     command.execute();
 }
 
-void db_service::delete_employer(const int employerId)
+void db_service::delete_employer(const int employerId, const int dateModified)
 {
     db::command command(*db_connection::get_instance().get_database(), models::employer::deleteEmployer);
-    command.binder() << employerId;
+    command.binder() << dateModified << employerId;
     command.execute();
 }
 

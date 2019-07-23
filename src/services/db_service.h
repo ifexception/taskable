@@ -53,7 +53,7 @@ struct db_service
 
     void update_employer(models::employer employer);
 
-    void delete_employer(const int employerId);
+    void delete_employer(const int employerId, const int dateModified);
 
     void create_new_client(const std::string& name, const int employerId);
 
