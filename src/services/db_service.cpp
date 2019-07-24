@@ -495,7 +495,7 @@ std::vector<models::detailed_task> db_service::get_all_task_items_by_date(const 
         db::column column(query.get_handle());
         models::detailed_task detailedTask;
 
-        detailedTask.task_detail_id = column.get<int>(0);
+        detailedTask.task_item_id = column.get<int>(0);
         detailedTask.task_date = column.get<std::string>(1);
         detailedTask.start_time = column.get<std::string>(2);
         detailedTask.end_time = column.get<std::string>(3);

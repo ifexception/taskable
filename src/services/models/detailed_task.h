@@ -28,7 +28,7 @@ struct detailed_task
     detailed_task() = default;
     ~detailed_task() = default;
 
-    int task_detail_id;
+    int task_item_id;
     std::string project_name;
     std::string task_date;
     std::string start_time;

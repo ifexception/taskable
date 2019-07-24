@@ -19,7 +19,11 @@
 
 #pragma once
 
+#include <memory>
+
 #include <wx/wx.h>
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
 
 class wxTimePickerCtrl;
 class wxDateEvent;
@@ -30,8 +34,8 @@ class TaskItemDialog : public wxDialog
 {
 public:
     TaskItemDialog() = delete;
-    explicit TaskItemDialog(wxWindow* parent, bool isEdit = false, int taskDetailId = 0, const wxString& name = wxT("TaskItemDialog"));
-    explicit TaskItemDialog(wxWindow* parent, wxDateTime startTime, wxDateTime endTime, const wxString& name = wxT("TaskItemDialog"));
+    explicit TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit = false, int taskDetailId = 0, const wxString& name = wxT("TaskItemDialog"));
+    explicit TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, wxDateTime startTime, wxDateTime endTime, const wxString& name = wxT("TaskItemDialog"));
     virtual ~TaskItemDialog() = default;
 
 private:
@@ -66,6 +70,7 @@ private:
     bool bIsEdit;
     int mTaskDetailId;
 
+    std::shared_ptr<spdlog::logger> pLogger;
     wxWindow* pParent;
 
     wxChoice* pProjectChoiceCtrl;

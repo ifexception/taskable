@@ -22,6 +22,8 @@
 #include <memory>
 
 #include <wx/wx.h>
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
 
 #include "../config/configuration.h"
 
@@ -31,7 +33,7 @@ class TimedTaskDialog : public wxDialog
 {
 public:
     TimedTaskDialog() = delete;
-    explicit TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, const wxString& name = wxT("TimedTaskDialog"));
+    explicit TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger, const wxString& name = wxT("TimedTaskDialog"));
     virtual ~TimedTaskDialog() = default;
 
     void Launch();
@@ -48,6 +50,7 @@ private:
     void OnHideWindow(wxTimerEvent& event);
     void OnStop(wxCommandEvent& event);
 
+    std::shared_ptr<spdlog::logger> pLogger;
     wxWindow* pParent;
     wxStaticText* pElapsedTimeText;
     wxButton* pStartButton;

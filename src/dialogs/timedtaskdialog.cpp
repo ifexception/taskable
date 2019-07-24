@@ -37,8 +37,9 @@ EVT_TIMER(TimedTaskDialog::IDC_HIDE_WINDOW_TIMER, TimedTaskDialog::OnHideWindow)
 EVT_BUTTON(TimedTaskDialog::IDC_STOP, TimedTaskDialog::OnStop)
 wxEND_EVENT_TABLE()
 
-TimedTaskDialog::TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, const wxString& name)
-    : pParent(parent)
+TimedTaskDialog::TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger, const wxString& name)
+    : pLogger(logger)
+    , pParent(parent)
     , pElapsedTimeText(nullptr)
     , pElapsedTimer(std::make_unique<wxTimer>(this, IDC_ELAPSED_TIMER))
     , pNotificationTimer(std::make_unique<wxTimer>(this, IDC__NOTIFICATION_TIMER))
@@ -140,7 +141,7 @@ void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
     pStopButton->Disable();
     //pStartButton->Enable();
 
-    dialog::TaskItemDialog newTask(this, mStartTime, mEndTime);
+    dialog::TaskItemDialog newTask(this, pLogger, mStartTime, mEndTime);
     newTask.ShowModal();
 
     EndModal(wxID_OK);

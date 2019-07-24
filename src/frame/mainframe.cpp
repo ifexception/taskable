@@ -90,7 +90,7 @@ bool MainFrame::CreateFrame()
     bool success = Create();
     SetMinClientSize(wxSize(640, 480));
     SetIcon(common::GetProgramIcon());
-    pTaskBarIcon = new TaskBarIcon(this, pConfig);
+    pTaskBarIcon = new TaskBarIcon(this, pConfig, pLogger);
     if (pConfig->IsShowInTray()) {
         pTaskBarIcon->SetTaskBarIcon();
     }
@@ -290,7 +290,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
 
 void MainFrame::OnNewTask(wxCommandEvent& event)
 {
-    dialog::TaskItemDialog newTask(this);
+    dialog::TaskItemDialog newTask(this, pLogger);
     newTask.ShowModal();
 }
 
@@ -352,7 +352,7 @@ void MainFrame::OnTaskInserted(wxCommandEvent& event)
 void MainFrame::OnItemDoubleClick(wxListEvent& event)
 {
     int taskDetailId = event.GetData();
-    dialog::TaskItemDialog editTask(this, true, taskDetailId);
+    dialog::TaskItemDialog editTask(this, pLogger, true, taskDetailId);
     editTask.ShowModal();
 }
 
@@ -371,7 +371,7 @@ void MainFrame::OnSettings(wxCommandEvent& event)
 
 void MainFrame::OnNewTimedTask(wxCommandEvent& event)
 {
-    dialog::TimedTaskDialog timedTask(this, pConfig);
+    dialog::TimedTaskDialog timedTask(this, pConfig, pLogger);
     timedTask.Launch();
 }
 
@@ -403,7 +403,7 @@ void MainFrame::RefreshItems(wxDateTime date)
         pListCtrl->SetItem(listIndex, columnIndex++, task.duration);
         pListCtrl->SetItem(listIndex, columnIndex++, task.category_name);
         pListCtrl->SetItem(listIndex, columnIndex++, task.description);
-        pListCtrl->SetItemPtrData(listIndex, task.task_detail_id);
+        pListCtrl->SetItemPtrData(listIndex, task.task_item_id);
         columnIndex = 0;
     }
 }

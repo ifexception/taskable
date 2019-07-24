@@ -21,6 +21,8 @@
 
 #include <wx/wx.h>
 #include <wx/taskbar.h>
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
 
 #include "../config/configuration.h"
 
@@ -29,7 +31,7 @@ namespace app::frame
 class TaskBarIcon : public wxTaskBarIcon
 {
 public:
-    TaskBarIcon(wxFrame* parent, std::shared_ptr<cfg::Configuration> config);
+    TaskBarIcon(wxFrame* parent, std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger);
     virtual ~TaskBarIcon() = default;
 
     void SetTaskBarIcon();
@@ -45,6 +47,7 @@ private:
     void OnLeftButtonDown(wxTaskBarIconEvent& event);
 
     wxFrame* pParent;
+    std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
 
     enum

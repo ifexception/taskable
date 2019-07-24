@@ -34,8 +34,9 @@ wxBEGIN_EVENT_TABLE(TaskBarIcon, wxTaskBarIcon)
     EVT_TASKBAR_LEFT_DOWN(TaskBarIcon::OnLeftButtonDown)
 wxEND_EVENT_TABLE()
 
-TaskBarIcon::TaskBarIcon(wxFrame* parent, std::shared_ptr<cfg::Configuration> config)
+TaskBarIcon::TaskBarIcon(wxFrame* parent, std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger)
     : pParent(parent)
+    , pLogger(logger)
     , pConfig(config)
 { }
 
@@ -59,7 +60,7 @@ wxMenu* TaskBarIcon::CreatePopupMenu()
 
 void TaskBarIcon::OnNewTask(wxCommandEvent& WXUNUSED(event))
 {
-    dialog::TaskItemDialog newTask(pParent);
+    dialog::TaskItemDialog newTask(pParent, pLogger);
     newTask.ShowModal();
 }
 

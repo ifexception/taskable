@@ -41,8 +41,9 @@ EVT_TIME_CHANGED(TaskItemDialog::IDC_ENDTIME, TaskItemDialog::OnEndTimeChange)
 EVT_CHECKBOX(TaskItemDialog::IDC_ISACTIVE, TaskItemDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
-TaskItemDialog::TaskItemDialog(wxWindow* parent, bool isEdit, int taskDetailId, const wxString& name)
-    : mTaskDate(wxGetEmptyString())
+TaskItemDialog::TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit, int taskDetailId, const wxString& name)
+    : pLogger(logger)
+    , mTaskDate(wxGetEmptyString())
     , bIsEdit(isEdit)
     , mTaskDetailId(taskDetailId)
     , mProjectId(-1)
@@ -64,8 +65,9 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent, bool isEdit, int taskDetailId, 
     bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
-TaskItemDialog::TaskItemDialog(wxWindow* parent, wxDateTime startTime, wxDateTime endTime, const wxString& name)
-    : mTaskDate(wxGetEmptyString())
+TaskItemDialog::TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, wxDateTime startTime, wxDateTime endTime, const wxString& name)
+    : pLogger(logger)
+    , mTaskDate(wxGetEmptyString())
     , bIsEdit(false)
     , mTaskDetailId(0)
     , mProjectId(-1)
@@ -245,11 +247,11 @@ void TaskItemDialog::FillControls()
     try {
         projects = dbService.get_projects();
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured in get_projects() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     for (auto project : projects) {
-        pProjectChoiceCtrl->Append(project.display_name, (void*)project.project_id);
+        pProjectChoiceCtrl->Append(project.display_name, util::IntToVoidPointer(project.project_id));
     }
 }
 
@@ -260,7 +262,7 @@ void TaskItemDialog::DataToControls()
     try {
         taskDetail = dbService.get_task_item_by_id(mTaskDetailId);
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured in get_task_item_by_id() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     pProjectChoiceCtrl->SetStringSelection(taskDetail.project_name);
@@ -305,7 +307,7 @@ int TaskItemDialog::GetTaskId()
     try {
         taskId = dbService.create_or_get_task_id(mTaskDate, mProjectId);
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured in create_or_get_task_id() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     return taskId;
@@ -375,7 +377,7 @@ void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
     pCategoryChoiceCtrl->Clear();
     pCategoryChoiceCtrl->AppendString(wxT("Select a category"));
     pCategoryChoiceCtrl->SetSelection(0);
-    int projectId = (int)event.GetClientData(); // FIXME: loss of precision -> convert to intptr_t and then to int
+    int projectId = util::VoidPointerToInt(event.GetClientData());
 
     FillCategoryControl(projectId);
 }
@@ -420,11 +422,11 @@ void TaskItemDialog::OnIsActiveCheck(wxCommandEvent& event)
 
 void TaskItemDialog::OnSave(wxCommandEvent& event)
 {
-    mProjectId = (int)pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
+    mProjectId = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
     mStartTime = pStartTimeCtrl->GetValue();
     mEndTime = pEndTimeCtrl->GetValue();
     mDurationText = pDurationCtrl->GetLabelText();
-    mCategoryId = (int)pCategoryChoiceCtrl->GetClientData(pCategoryChoiceCtrl->GetSelection()); // FIXME: loss of precision -> convert to intptr_t and then to int
+    mCategoryId = util::VoidPointerToInt(pCategoryChoiceCtrl->GetClientData(pCategoryChoiceCtrl->GetSelection()));
     mDescriptionText = pDescriptionCtrl->GetValue();
 
     auto validationSuccess = Validate();
@@ -455,7 +457,7 @@ void TaskItemDialog::OnSave(wxCommandEvent& event)
             dbService.create_new_task_item(mProjectId, taskId, std::string(startTime.ToUTF8()), std::string(endTime.ToUTF8()), std::string(mDurationText.ToUTF8()), mCategoryId, std::string(mDescriptionText.ToUTF8()));
         }
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured in task_item OnSave() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     OnTaskSaved(event);
@@ -498,7 +500,7 @@ void TaskItemDialog::FillCategoryControl(int projectId)
         services::db_service dbService;
         categories = dbService.get_categories_by_project_id(projectId);
     } catch (const db::database_exception& e) {
-        // TODO Log exception
+        pLogger->error("Error occured in get_categories_by_project_id() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     for (auto category : categories) {
