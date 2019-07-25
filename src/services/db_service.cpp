@@ -485,29 +485,29 @@ void db_service::create_new_task_item(const int projectId, const int taskId, con
     command.execute();
 }
 
-std::vector<models::detailed_task> db_service::get_all_task_items_by_date(const std::string& date)
+std::vector<models::task_item> db_service::get_all_task_items_by_date(const std::string& date)
 {
     db::query query(*db_connection::get_instance().get_database(), models::task_item::getAllTaskItemsByDate);
     query.bind(1, date, db::copy_options::NoCopy);
 
-    std::vector<models::detailed_task> detailedTasks;
+    std::vector<models::task_item> taskItems;
     while (query.run()) {
         db::column column(query.get_handle());
-        models::detailed_task detailedTask;
+        models::task_item taskItem;
 
-        detailedTask.task_item_id = column.get<int>(0);
-        detailedTask.task_date = column.get<std::string>(1);
-        detailedTask.start_time = column.get<std::string>(2);
-        detailedTask.end_time = column.get<std::string>(3);
-        detailedTask.duration = column.get<std::string>(4);
-        detailedTask.description = column.get<std::string>(5);
-        detailedTask.category_name = column.get<std::string>(6);
-        detailedTask.project_name = column.get<std::string>(7);
+        taskItem.task_item_id = column.get<int>(0);
+        taskItem.task_date = column.get<std::string>(1);
+        taskItem.start_time = column.get<std::string>(2);
+        taskItem.end_time = column.get<std::string>(3);
+        taskItem.duration = column.get<std::string>(4);
+        taskItem.description = column.get<std::string>(5);
+        taskItem.category_name = column.get<std::string>(6);
+        taskItem.project_name = column.get<std::string>(7);
 
-        detailedTasks.push_back(detailedTask);
+        taskItems.push_back(taskItem);
     }
 
-    return detailedTasks;
+    return taskItems;
 }
 
 models::task_item db_service::get_task_item_by_id(const int taskId)
@@ -520,7 +520,7 @@ models::task_item db_service::get_task_item_by_id(const int taskId)
     db::column column(query.get_handle());
     models::task_item taskDetail;
 
-    taskDetail.task_detail_id = column.get<int>(0);
+    taskDetail.task_item_id = column.get<int>(0);
     taskDetail.project_id = column.get<int>(1);
     taskDetail.project_name = column.get<std::string>(2);
     taskDetail.start_time = column.get<std::string>(3);
@@ -540,15 +540,15 @@ void db_service::update_task_item(models::task_item task)
 {
     db::command command(*db_connection::get_instance().get_database(), models::task_item::updateTaskItem);
 
-    command.binder() << task.start_time << task.end_time << task.duration << task.description << task.date_modified_utc << task.project_id << task.category_id << task.task_detail_id;
+    command.binder() << task.start_time << task.end_time << task.duration << task.description << task.date_modified_utc << task.project_id << task.category_id << task.task_item_id;
     command.execute();
 }
 
-void db_service::delete_task_item(const int taskId)
+void db_service::delete_task_item(const int taskId, const int dateModified)
 {
     db::command command(*db_connection::get_instance().get_database(), models::task_item::deleteTaskItem);
 
-    command.binder() << taskId;
+    command.binder() << dateModified << taskId;
     command.execute();
 }
 

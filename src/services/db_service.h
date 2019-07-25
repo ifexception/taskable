@@ -26,7 +26,6 @@
 #include "models/client.h"
 #include "models/project.h"
 #include "models/category.h"
-#include "models/detailed_task.h"
 #include "models/task_item.h"
 
 namespace app::services
@@ -93,13 +92,13 @@ struct db_service
 
     void create_new_task_item(const int projectId, const int taskId, const std::string& startTime, const std::string& endTime, const std::string& duration, const int categoryId, const std::string& description);
 
-    std::vector<models::detailed_task> get_all_task_items_by_date(const std::string& date);
+    std::vector<models::task_item> get_all_task_items_by_date(const std::string& date);
 
     models::task_item get_task_item_by_id(const int taskId);
 
     void update_task_item(models::task_item task);
 
-    void delete_task_item(const int taskId);
+    void delete_task_item(const int taskId, const int dateModified);
 
     std::vector<std::string> get_task_hours_by_id(const std::string& date);
 };
