@@ -31,8 +31,6 @@
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(CategoryDialog, wxDialog);
-
 wxBEGIN_EVENT_TABLE(CategoryDialog, wxDialog)
 EVT_BUTTON(ids::ID_SAVE, CategoryDialog::OnSave)
 EVT_BUTTON(wxID_CANCEL, CategoryDialog::OnCancel)
@@ -234,18 +232,6 @@ bool CategoryDialog::Validate()
         return false;
     }
 
-    if (mDescriptionText.empty()) {
-        auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Description"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
-    }
-
-    if (mDescriptionText.length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Description"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
-    }
-
     if (mDescriptionText.length() > 255) {
         auto message = wxString::Format(Constants::Messages::TooLong, wxT("Description"));
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
@@ -257,7 +243,7 @@ bool CategoryDialog::Validate()
 
 bool CategoryDialog::AreControlsEmpty()
 {
-    bool isEmpty = (mProjectChoiceId == -1 || mProjectChoiceId == 0) && mNameText.empty() && mDescriptionText.empty();
+    bool isEmpty = (mProjectChoiceId == -1 || mProjectChoiceId == 0) && mNameText.empty();
     return isEmpty;
 }
 
@@ -278,7 +264,7 @@ void CategoryDialog::OnSave(wxCommandEvent& event)
             models::category category;
             category.category_id = mCategoryId;
             category.category_name = std::string(mNameText.ToUTF8());
-            category.description = std::string(mNameText.ToUTF8());
+            category.description = std::string(mDescriptionText.ToUTF8());
             category.project_id = mProjectChoiceId;
             category.date_modified_utc = util::UnixTimestamp();
             dbService.update_category(category);

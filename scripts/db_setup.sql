@@ -56,7 +56,7 @@ CREATE TABLE categories
 (
     category_id INTEGER PRIMARY KEY NOT NULL,
     name TEXT NOT NULL,
-    description TEXT NOT NULL,
+    description TEXT NULL,
     date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     is_active INTEGER NOT NULL,

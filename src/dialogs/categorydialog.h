@@ -35,7 +35,6 @@ public:
     virtual ~CategoryDialog() = default;
 
 private:
-    wxDECLARE_DYNAMIC_CLASS(CategoryDialog);
     wxDECLARE_EVENT_TABLE();
 
     bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
