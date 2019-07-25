@@ -335,6 +335,7 @@ void AddProjectPage::OnWizardCancel(wxWizardEvent& event)
 }
 
 wxBEGIN_EVENT_TABLE(AddCategoriesPage, wxWizardPageSimple)
+EVT_WIZARD_CANCEL(wxID_ANY, AddCategoriesPage::OnWizardCancel)
 wxEND_EVENT_TABLE()
 
 AddCategoriesPage::AddCategoriesPage(SetupWizard* parent)
@@ -382,10 +383,6 @@ bool AddCategoriesPage::TransferDataFromWindow()
     }
 
     const wxString description = pDescriptionCtrl->GetValue().Trim();
-    if (description.empty()) {
-        wxMessageBox(wxT("An description is required"), wxT("TasksTracker"), wxOK | wxICON_ERROR, this);
-        return false;
-    }
 
     pParent->SetCategory(category);
     pParent->SetDescription(description);
