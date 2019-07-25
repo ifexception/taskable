@@ -28,9 +28,10 @@ struct task_item
     task_item() = default;
     ~task_item() = default;
 
-    int task_detail_id;
+    int task_item_id;
     int project_id;
     std::string project_name;
+    std::string task_date;
     std::string start_time;
     std::string end_time;
     std::string duration;

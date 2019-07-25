@@ -21,8 +21,12 @@
 //  Contact:
 //    szymonwelgus at gmail dot com
 
+#include <memory>
+
 #include <wx/textctrl.h>
 #include <wx/wizard.h>
+#define FMT_HEADER_ONLY
+#include <spdlog/spdlog.h>
 
 namespace app::wizard
 {
@@ -30,7 +34,7 @@ class SetupWizard final : public wxWizard
 {
 public:
     SetupWizard() = default;
-    explicit SetupWizard(wxFrame* frame);
+    explicit SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger);
     virtual ~SetupWizard() = default;
 
     bool Run();
@@ -47,8 +51,9 @@ public:
 
 private:
     void CreateDatabaseFile();
-    void SetUpDatabase();
+    bool SetUpDatabase();
 
+    std::shared_ptr<spdlog::logger> pLogger;
     wxWizardPageSimple* pPage1;
 
     wxString mEmployer;

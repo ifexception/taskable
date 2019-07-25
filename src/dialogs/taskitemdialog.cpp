@@ -45,7 +45,7 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger>
     : pLogger(logger)
     , mTaskDate(wxGetEmptyString())
     , bIsEdit(isEdit)
-    , mTaskDetailId(taskDetailId)
+    , mTaskItemId(taskDetailId)
     , mProjectId(-1)
     , mStartTime()
     , mEndTime()
@@ -69,7 +69,7 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger>
     : pLogger(logger)
     , mTaskDate(wxGetEmptyString())
     , bIsEdit(false)
-    , mTaskDetailId(0)
+    , mTaskItemId(0)
     , mProjectId(-1)
     , mStartTime(startTime)
     , mEndTime(endTime)
@@ -258,38 +258,38 @@ void TaskItemDialog::FillControls()
 void TaskItemDialog::DataToControls()
 {
     services::db_service dbService;
-    models::task_item taskDetail;
+    models::task_item taskItem;
     try {
-        taskDetail = dbService.get_task_item_by_id(mTaskDetailId);
+        taskItem = dbService.get_task_item_by_id(mTaskItemId);
     } catch (const db::database_exception& e) {
         pLogger->error("Error occured in get_task_item_by_id() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
-    pProjectChoiceCtrl->SetStringSelection(taskDetail.project_name);
+    pProjectChoiceCtrl->SetStringSelection(taskItem.project_name);
     wxDateTime startTime;
-    startTime.ParseISOTime(taskDetail.start_time);
+    startTime.ParseISOTime(taskItem.start_time);
     pStartTimeCtrl->SetValue(startTime);
 
     wxDateTime endTime;
-    endTime.ParseISOTime(taskDetail.end_time);
+    endTime.ParseISOTime(taskItem.end_time);
     pEndTimeCtrl->SetValue(endTime);
 
-    pDurationCtrl->SetLabel(taskDetail.duration);
+    pDurationCtrl->SetLabel(taskItem.duration);
 
-    FillCategoryControl(taskDetail.project_id);
-    pCategoryChoiceCtrl->SetStringSelection(taskDetail.category_name);
+    FillCategoryControl(taskItem.project_id);
+    pCategoryChoiceCtrl->SetStringSelection(taskItem.category_name);
 
-    pDescriptionCtrl->SetValue(taskDetail.description);
+    pDescriptionCtrl->SetValue(taskItem.description);
 
-    wxString dateCreatedString = util::ConvertUnixTimestampToString(taskDetail.date_created_utc);
+    wxString dateCreatedString = util::ConvertUnixTimestampToString(taskItem.date_created_utc);
     wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
     pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
 
-    wxString dateUpdatedString = util::ConvertUnixTimestampToString(taskDetail.date_modified_utc);
+    wxString dateUpdatedString = util::ConvertUnixTimestampToString(taskItem.date_modified_utc);
     wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
     pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
 
-    pIsActiveCtrl->SetValue(taskDetail.is_active);
+    pIsActiveCtrl->SetValue(taskItem.is_active);
 }
 
 void TaskItemDialog::SetValuesToControls()
@@ -441,18 +441,18 @@ void TaskItemDialog::OnSave(wxCommandEvent& event)
         wxString startTime = mStartTime.FormatISOTime();
         wxString endTime = mEndTime.FormatISOTime();
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
-            models::task_item taskDetail;
-            taskDetail.task_detail_id = mTaskDetailId;
-            taskDetail.start_time = startTime;
-            taskDetail.end_time = endTime;
-            taskDetail.duration = mDurationText;
-            taskDetail.description = std::string(mDescriptionText.ToUTF8());
-            taskDetail.date_modified_utc = util::UnixTimestamp();
-            taskDetail.project_id = mProjectId;
-            taskDetail.category_id = mCategoryId;
-            dbService.update_task_item(taskDetail);
+            models::task_item taskItem;
+            taskItem.task_item_id = mTaskItemId;
+            taskItem.start_time = startTime;
+            taskItem.end_time = endTime;
+            taskItem.duration = mDurationText;
+            taskItem.description = std::string(mDescriptionText.ToUTF8());
+            taskItem.date_modified_utc = util::UnixTimestamp();
+            taskItem.project_id = mProjectId;
+            taskItem.category_id = mCategoryId;
+            dbService.update_task_item(taskItem);
         } else if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            dbService.delete_task_item(mTaskDetailId);
+            dbService.delete_task_item(mTaskItemId, util::UnixTimestamp());
         } else {
             dbService.create_new_task_item(mProjectId, taskId, std::string(startTime.ToUTF8()), std::string(endTime.ToUTF8()), std::string(mDurationText.ToUTF8()), mCategoryId, std::string(mDescriptionText.ToUTF8()));
         }

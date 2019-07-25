@@ -79,7 +79,7 @@ MainFrame::~MainFrame()
 
 bool MainFrame::RunWizard()
 {
-    auto wizard = new wizard::SetupWizard(this);
+    auto wizard = new wizard::SetupWizard(this, pLogger);
     wizard->CenterOnParent();
     bool wizardSetupSuccess = wizard->Run();
     return wizardSetupSuccess;
@@ -113,8 +113,8 @@ void MainFrame::CreateControls()
 
     /* File Menu Control */
     wxMenu* fileMenu = new wxMenu();
-    fileMenu->Append(ids::ID_NEW_TASK, wxT("New &Task...\tCtrl-N"), wxT("Create new task"));
-    fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("&Timed Task...\tCtrl-Q"), wxT("Create new timed task"));
+    fileMenu->Append(ids::ID_NEW_TASK, wxT("New &Task...\tCtrl-N"), wxT("Create new taskItem"));
+    fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("&Timed Task...\tCtrl-Q"), wxT("Create new timed taskItem"));
     fileMenu->Append(ids::ID_NEW_EMPLOYER, wxT("New &Employer"), wxT("Create new employer"));
     fileMenu->Append(ids::ID_NEW_CLIENT, wxT("New &Client"), wxT("Create new client"));
     fileMenu->Append(ids::ID_NEW_PROJECT, wxT("New &Project"), wxT("Create new project"));
@@ -177,7 +177,7 @@ void MainFrame::CreateControls()
     utilSizer->Add(pDatePickerCtrl, common::sizers::ControlDefault);
 
     pTotalHoursText = new wxStaticText(utilPanel, IDC_HOURS_TEXT, wxT("Total Hours: %d"));
-    pTotalHoursText->SetToolTip(wxT("Indicates the total hours spent on a given task for today"));
+    pTotalHoursText->SetToolTip(wxT("Indicates the total hours spent on a given taskItem for today"));
     utilSizer->AddStretchSpacer();
     utilSizer->Add(pTotalHoursText, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
@@ -384,26 +384,25 @@ void MainFrame::OnDateChanged(wxDateEvent& event)
 void MainFrame::RefreshItems(wxDateTime date)
 {
     wxString dateString = date.FormatISODate();
-    std::vector<models::detailed_task> detailedTasks;
+    std::vector<models::task_item> taskItems;
     try {
         services::db_service dbService;
-        detailedTasks = dbService.get_all_task_items_by_date(std::string(dateString.ToUTF8()));
+        taskItems = dbService.get_all_task_items_by_date(std::string(dateString.ToUTF8()));
     } catch (const db::database_exception& e) {
-        wxLogError(wxString::Format("Error %d", e.get_error_code()));
         pLogger->error("Error occured on get_all_task_items_by_date() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     int listIndex = 0;
     int columnIndex = 0;
-    for (auto task : detailedTasks) {
-        listIndex = pListCtrl->InsertItem(columnIndex++, task.project_name);
-        pListCtrl->SetItem(listIndex, columnIndex++, task.task_date);
-        pListCtrl->SetItem(listIndex, columnIndex++, task.start_time);
-        pListCtrl->SetItem(listIndex, columnIndex++, task.end_time);
-        pListCtrl->SetItem(listIndex, columnIndex++, task.duration);
-        pListCtrl->SetItem(listIndex, columnIndex++, task.category_name);
-        pListCtrl->SetItem(listIndex, columnIndex++, task.description);
-        pListCtrl->SetItemPtrData(listIndex, task.task_item_id);
+    for (auto taskItem : taskItems) {
+        listIndex = pListCtrl->InsertItem(columnIndex++, taskItem.project_name);
+        pListCtrl->SetItem(listIndex, columnIndex++, taskItem.task_date);
+        pListCtrl->SetItem(listIndex, columnIndex++, taskItem.start_time);
+        pListCtrl->SetItem(listIndex, columnIndex++, taskItem.end_time);
+        pListCtrl->SetItem(listIndex, columnIndex++, taskItem.duration);
+        pListCtrl->SetItem(listIndex, columnIndex++, taskItem.category_name);
+        pListCtrl->SetItem(listIndex, columnIndex++, taskItem.description);
+        pListCtrl->SetItemPtrData(listIndex, taskItem.task_item_id);
         columnIndex = 0;
     }
 }

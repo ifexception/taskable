@@ -68,7 +68,7 @@ private:
 
     wxString mTaskDate;
     bool bIsEdit;
-    int mTaskDetailId;
+    int mTaskItemId;
 
     std::shared_ptr<spdlog::logger> pLogger;
     wxWindow* pParent;
