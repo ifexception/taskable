@@ -72,45 +72,8 @@ bool SetupWizard::Run()
             return false;
         }
 
-        services::db_service dbService;
-        int employerId = 0;
-        try {
-            dbService.create_new_employer(std::string(mEmployer.ToUTF8()));
-            employerId = dbService.get_last_insert_rowid();
-        } catch (const db::database_exception& e) {
-            pLogger->error("Error occured on create_new_employer() - {0:d} : {1}", e.get_error_code(), e.what());
-            return false;
-        }
-
-        int clientId = 0;
-        if (!mClient.empty()) {
-            try {
-                dbService.create_new_client(std::string(mClient.ToUTF8()), employerId);
-                clientId = dbService.get_last_insert_rowid();
-            } catch (const db::database_exception& e) {
-                pLogger->error("Error occured on create_new_client() - {0:d} : {1}", e.get_error_code(), e.what());
-                return false;
-            }
-        }
-
-        int projectId = 0;
-        try {
-            bool isAssociatedWithClient = clientId != 0;
-            if (isAssociatedWithClient) {
-                dbService.create_new_project(std::string(mProject.ToUTF8()), std::string(mDisplayName.ToUTF8()), employerId, &clientId);
-            } else {
-                dbService.create_new_project(std::string(mProject.ToUTF8()), std::string(mDisplayName.ToUTF8()), employerId, nullptr);
-            }
-            projectId = dbService.get_last_insert_rowid();
-        } catch (const db::database_exception& e) {
-            pLogger->error("Error occured on create_new_project() - {0:d} : {1}", e.get_error_code(), e.what());
-            return false;
-        }
-
-        try {
-            dbService.create_new_category(projectId, std::string(mCategory.ToUTF8()), std::string(mDescription.ToUTF8()));
-        } catch (const db::database_exception& e) {
-            pLogger->error("Error occured on create_new_category() - {0:d} : {1}", e.get_error_code(), e.what());
+        success = SetUpEntities();
+        if (!success) {
             return false;
         }
 
@@ -186,6 +149,52 @@ bool SetupWizard::SetUpDatabase()
         dbService.create_task_items_table();
     } catch (const db::database_exception& e) {
         pLogger->error("Error occured on create_X_table() - {0:d} : {1}", e.get_error_code(), e.what());
+        return false;
+    }
+    return true;
+}
+
+bool SetupWizard::SetUpEntities()
+{
+    services::db_service dbService;
+    int employerId = 0;
+    try {
+        dbService.create_new_employer(std::string(mEmployer.ToUTF8()));
+        employerId = dbService.get_last_insert_rowid();
+    } catch (const db::database_exception& e) {
+        pLogger->error("Error occured on create_new_employer() - {0:d} : {1}", e.get_error_code(), e.what());
+        return false;
+    }
+
+    int clientId = 0;
+    if (!mClient.empty()) {
+        try {
+            dbService.create_new_client(std::string(mClient.ToUTF8()), employerId);
+            clientId = dbService.get_last_insert_rowid();
+        } catch (const db::database_exception& e) {
+            pLogger->error("Error occured on create_new_client() - {0:d} : {1}", e.get_error_code(), e.what());
+            return false;
+        }
+    }
+
+    int projectId = 0;
+    try {
+        bool isAssociatedWithClient = clientId != 0;
+        if (isAssociatedWithClient) {
+            dbService.create_new_project(std::string(mProject.ToUTF8()), std::string(mDisplayName.ToUTF8()), employerId, &clientId);
+        } else {
+            dbService.create_new_project(std::string(mProject.ToUTF8()), std::string(mDisplayName.ToUTF8()), employerId, nullptr);
+        }
+        projectId = dbService.get_last_insert_rowid();
+    } catch (const db::database_exception& e) {
+        pLogger->error("Error occured on create_new_project() - {0:d} : {1}", e.get_error_code(), e.what());
+        return false;
+    }
+
+    try {
+        dbService.create_new_category(projectId, std::string(mCategory.ToUTF8()), std::string(mDescription.ToUTF8()));
+    } catch (const db::database_exception& e) {
+        pLogger->error("Error occured on create_new_category() - {0:d} : {1}", e.get_error_code(), e.what());
         return false;
     }
     return true;

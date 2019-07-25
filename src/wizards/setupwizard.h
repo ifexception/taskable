@@ -52,6 +52,7 @@ public:
 private:
     void CreateDatabaseFile();
     bool SetUpDatabase();
+    bool SetUpEntities();
 
     std::shared_ptr<spdlog::logger> pLogger;
     wxWizardPageSimple* pPage1;
