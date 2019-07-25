@@ -65,7 +65,10 @@ bool App::OnInit()
             return false;
         }
 
-        ConfigureRegistry();
+        bool result = ConfigureRegistry();
+        if (!result) {
+            return false;
+        }
     }
 
     bool dbFileExists = DatabaseFileExists();
@@ -132,11 +135,18 @@ bool App::IsInstalled()
     return false;
 }
 
-void App::ConfigureRegistry()
+bool App::ConfigureRegistry()
 {
     wxRegKey key(wxRegKey::HKLM, "SOFTWARE\\TasksTracker");
-    key.Create();
-    key.SetValue("Installed", 1);
+    bool result = key.Create();
+    if (!result) {
+        return false;
+    }
+    result = key.SetValue("Installed", 1);
+    if (!result) {
+        return false;
+    }
+    return true;
 }
 } // namespace app
 
