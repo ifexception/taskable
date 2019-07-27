@@ -343,7 +343,7 @@ models::project db_service::get_project_by_id(const int projectId)
     project.is_active = column.get<int>(5);
     project.employer_id = column.get<int>(6);
     project.employer_name = column.get<std::string>(7);
-    if (column.get_type(7) == db::column_type::Null) {
+    if (column.get_type(8) == db::column_type::Null) {
         project.client_name = "";
     } else {
         project.client_name = column.get<std::string>(8);
