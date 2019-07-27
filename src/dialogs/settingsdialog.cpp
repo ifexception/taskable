@@ -98,12 +98,12 @@ void SettingsDialog::CreateControls()
     pShowInTray = new wxCheckBox(panel, IDC_SHOW_IN_TRAY, wxT("Show in tray"));
     panelSizer->Add(pShowInTray, common::sizers::ControlDefault);
 
-    // TODO Indent the below two controls with an offset to the right
+    // TODO Indent the below two controls with an offset to the left
     pMinimizeToTray = new wxCheckBox(panel, IDC_MINIMIZE_TO_TRAY, wxT("Minimize application to Windows tray"));
-    panelSizer->Add(pMinimizeToTray, common::sizers::ControlDefault);
+    panelSizer->Add(pMinimizeToTray, 0, wxLEFT | wxBOTTOM, 10);
 
     pCloseToTray = new wxCheckBox(panel, IDC_CLOSE_TO_TRAY, wxT("Close application to Windows tray"));
-    panelSizer->Add(pCloseToTray, common::sizers::ControlDefault);
+    panelSizer->Add(pCloseToTray, 0, wxLEFT, 10);
     trayGridSizer->Add(panel, common::sizers::ControlDefault);
 
     pShowBalloonNotifications = new wxCheckBox(traySettingsPanel, IDC_SHOW_BALLOON_NOTIFICATIONS, wxT("Show balloon notifications"));
@@ -181,13 +181,13 @@ void SettingsDialog::CreateControls()
     auto buttonPanel = new wxPanel(this, wxID_STATIC);
     auto buttonPanelSizer = new wxBoxSizer(wxHORIZONTAL);
     buttonPanel->SetSizer(buttonPanelSizer);
-    mainSizer->Add(buttonPanel, wxSizerFlags(wxSizerFlags().Border(wxALL, 5)).Center());
+    mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
-    auto okButton = new wxButton(buttonPanel, wxID_OK, wxT("&Ok"));
+    auto okButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
     auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
-    buttonPanelSizer->Add(okButton, wxSizerFlags().Border(wxALL, 5));
-    buttonPanelSizer->Add(cancelButton, wxSizerFlags().Border(wxALL, 5));
+    buttonPanelSizer->Add(okButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
 }
 
 void SettingsDialog::FillControls()
