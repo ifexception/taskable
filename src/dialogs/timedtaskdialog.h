@@ -26,6 +26,7 @@
 #include <spdlog/spdlog.h>
 
 #include "../config/configuration.h"
+#include "../services/taskstateservice.h"
 
 namespace app::dialog
 {
@@ -33,7 +34,7 @@ class TimedTaskDialog : public wxDialog
 {
 public:
     TimedTaskDialog() = delete;
-    explicit TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger, const wxString& name = wxT("TimedTaskDialog"));
+    explicit TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<services::TaskStateService> taskState, const wxString& name = wxT("TimedTaskDialog"));
     virtual ~TimedTaskDialog() = default;
 
     void Launch();
@@ -63,9 +64,11 @@ private:
     std::unique_ptr<wxTimer> pNotificationTimer;
     std::unique_ptr<wxTimer> pHideWindowTimer;
     std::shared_ptr<cfg::Configuration> pConfig;
+    std::shared_ptr<services::TaskStateService> pTaskState;
 
     wxDateTime mStartTime;
     wxDateTime mEndTime;
+    bool bWasTaskPaused;
 
     enum
     {

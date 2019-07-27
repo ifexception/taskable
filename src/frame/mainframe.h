@@ -29,6 +29,7 @@
 #include <spdlog/spdlog.h>
 
 #include "../config/configuration.h"
+#include "../services/taskstateservice.h"
 
 namespace app::frame
 {
@@ -81,6 +82,7 @@ private:
     TaskBarIcon* pTaskBarIcon;
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
+    std::shared_ptr<services::TaskStateService> pTaskState;
 
     enum
     {

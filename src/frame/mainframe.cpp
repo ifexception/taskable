@@ -68,12 +68,13 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, std::shared_ptr
     : wxFrame(nullptr, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(700, 500), wxDEFAULT_FRAME_STYLE, name)
     , pLogger(logger)
     , pConfig(config)
+    , pTaskState(std::make_shared<services::TaskStateService>())
 { }
 
 MainFrame::~MainFrame()
 {
     if (pTaskBarIcon != nullptr) {
-        delete pTaskBarIcon;
+        delete pTaskBarIcon; // TODO Wrap TaskBarIcon in a std::unique_ptr
     }
 }
 
@@ -239,16 +240,23 @@ void MainFrame::DataToControls()
     services::db_service dbService;
     auto dateNow = wxDateTime::Now();
     auto dateString = dateNow.FormatISODate();
+
     try {
         taskDurations = dbService.get_task_hours_by_id(dateString);
     } catch (const db::database_exception& e) {
-        pLogger->error("Error occured on get_task_hours_by_id() - {0:d} : {1}", e.get_error_code(), e.what());
+        pLogger->error("Error occured on get_task_hours_by_id() - {0:d} : {1}",
+            e.get_error_code(),
+            e.what());
     }
 
     wxTimeSpan totalDuration;
     for (auto duration : taskDurations) {
         std::vector<std::string> durationSplit = util::lib::split(duration, ':');
-        wxTimeSpan currentDuration(std::atol(durationSplit[0].c_str()), std::atol(durationSplit[1].c_str()), (wxLongLong)std::atoll(durationSplit[2].c_str()));
+
+        wxTimeSpan currentDuration(std::atol(durationSplit[0].c_str()),
+            std::atol(durationSplit[1].c_str()),
+            (wxLongLong)std::atoll(durationSplit[2].c_str()));
+
         totalDuration += currentDuration;
     }
 
@@ -263,7 +271,8 @@ void MainFrame::OnAbout(wxCommandEvent& event)
     aboutInfo.SetIcon(common::GetProgramIcon());
     aboutInfo.SetName(wxT("TasksTracker"));
     aboutInfo.SetVersion(wxString::Format("%d.%d.%d", TASKS_TRACKER_MAJOR, TASKS_TRACKER_MINOR, TASKS_TRACKER_PATCH));
-    aboutInfo.SetDescription(wxT("A desktop application to help you manage how you've spent your time on tasks during the day\n by tracking the time you've spent on those tasks throughout the day"));
+    aboutInfo.SetDescription(wxT("A desktop application to help you manage how you've spent your time on tasks during the day\n"
+        " by tracking the time you've spent on those tasks throughout the day"));
     aboutInfo.SetCopyright("(C) 2018-2019");
     aboutInfo.SetWebSite(wxT("https://github.com/ifexception/wx-tasks-tracker"));
     aboutInfo.SetLicence(common::GetLicense());
@@ -274,13 +283,18 @@ void MainFrame::OnAbout(wxCommandEvent& event)
 
 void MainFrame::OnClose(wxCloseEvent& event)
 {
-    if (pConfig->IsConfirmOnExit() && event.CanVeto()) {
-        int ret = wxMessageBox(wxT("Are you sure to exit the application?"), wxT("Tasks Tracker"), wxICON_QUESTION | wxYES_NO);
+    if (pConfig->IsConfirmOnExit() &&
+        event.CanVeto()) {
+        int ret = wxMessageBox(wxT("Are you sure to exit the application?"),
+            wxT("Tasks Tracker"),
+            wxICON_QUESTION | wxYES_NO);
         if (ret == wxNO) {
             event.Veto();
             return;
         }
-    } else if (pConfig->IsCloseToTray() && pConfig->IsShowInTray() && event.CanVeto()) {
+    } else if (pConfig->IsCloseToTray() &&
+        pConfig->IsShowInTray() &&
+        event.CanVeto()) {
         Hide();
         MSWGetTaskBarButton()->Hide();
         return;
@@ -371,7 +385,7 @@ void MainFrame::OnSettings(wxCommandEvent& event)
 
 void MainFrame::OnNewTimedTask(wxCommandEvent& event)
 {
-    dialog::TimedTaskDialog timedTask(this, pConfig, pLogger);
+    dialog::TimedTaskDialog timedTask(this, pConfig, pLogger, pTaskState);
     timedTask.Launch();
 }
 
