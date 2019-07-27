@@ -147,7 +147,7 @@ void SettingsDialog::CreateControls()
     auto timedTaskGridSizer = new wxFlexGridSizer(2, 10, 10);
     timedTaskPanel->SetSizer(timedTaskGridSizer);
 
-    auto hideWindowTimeText = new wxStaticText(timedTaskPanel, wxID_ANY, wxT("Hide Window"));
+    auto hideWindowTimeText = new wxStaticText(timedTaskPanel, wxID_ANY, wxT("Hide Window (s)"));
     timedTaskGridSizer->Add(hideWindowTimeText, common::sizers::ControlDefault);
 
     wxArrayString hideWindowTimeChoices;
@@ -160,7 +160,7 @@ void SettingsDialog::CreateControls()
     pHideWindowTimeChoice->SetToolTip(wxT("Hide the timed task after X amount of seconds"));
     timedTaskGridSizer->Add(pHideWindowTimeChoice, common::sizers::ControlDefault);
 
-    auto notificationTimeText = new wxStaticText(timedTaskPanel, wxID_ANY, wxT("Notifications Interval"));
+    auto notificationTimeText = new wxStaticText(timedTaskPanel, wxID_ANY, wxT("Notifications Interval (m)"));
     timedTaskGridSizer->Add(notificationTimeText, common::sizers::ControlDefault);
 
     wxArrayString notificationTimeChoices;
