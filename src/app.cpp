@@ -125,7 +125,7 @@ bool App::DatabaseFileExists()
 
 bool App::IsInstalled()
 {
-    wxRegKey key(wxRegKey::HKLM, "SOFTWARE\\TasksTracker");
+    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\TasksTracker");
 
     if (key.Exists()) {
         long value = -1;
@@ -137,13 +137,12 @@ bool App::IsInstalled()
 
 bool App::ConfigureRegistry()
 {
-    wxRegKey key(wxRegKey::HKLM, "SOFTWARE\\TasksTracker");
+    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\TasksTracker");
     bool result = key.Create();
-    if (!result) {
-        return false;
-    }
     result = key.SetValue("Installed", 1);
     if (!result) {
+        pLogger->critical("Unable to set registry");
+        wxMessageBox(wxT("This application requires you to run it as a Administrator"), wxT("Error"), wxOK_DEFAULT | wxICON_EXCLAMATION);
         return false;
     }
     return true;
