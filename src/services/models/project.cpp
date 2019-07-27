@@ -32,7 +32,7 @@ const std::string project::getProjects = "SELECT projects.project_id, "
                                          "clients.name AS client_name "
                                          "FROM projects "
                                          "INNER JOIN employers ON projects.employer_id = employers.employer_id "
-                                         "INNER JOIN clients ON projects.client_id = clients.client_id "
+                                         "LEFT JOIN clients ON projects.client_id = clients.client_id "
                                          "WHERE projects.is_active = 1";
 const std::string project::getProjectById = "SELECT projects.project_id, "
                                             "projects.name AS project_name, "
@@ -45,7 +45,7 @@ const std::string project::getProjectById = "SELECT projects.project_id, "
                                             "clients.name AS client_name "
                                             "FROM projects "
                                             "INNER JOIN employers ON projects.employer_id = employers.employer_id "
-                                            "INNER JOIN clients ON projects.client_id = clients.client_id "
+                                            "LEFT JOIN clients ON projects.client_id = clients.client_id "
                                             "WHERE projects.project_id = ?";
 const std::string project::updateProject = "UPDATE projects SET name = ?, display_name = ?, date_modified_utc = ?, employer_id = ?, client_id = ?";
 const std::string project::deleteProject = "UPDATE projects SET is_active = 0, date_modified_utc = ? WHERE project_id = ?";
