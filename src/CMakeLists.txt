@@ -40,6 +40,7 @@ set (SRC
     "services/models/task_item.cpp"
     "services/db_connection.cpp"
     "services/db_service.cpp"
+    "services/taskstateservice.cpp"
     "app.cpp"
     "frame/mainframe.cpp"
     "frame/taskbaricon.cpp"

@@ -34,6 +34,8 @@ wxBEGIN_EVENT_TABLE(TimedTaskDialog, wxDialog)
 EVT_TIMER(TimedTaskDialog::IDC__NOTIFICATION_TIMER, TimedTaskDialog::OnTimer)
 EVT_TIMER(TimedTaskDialog::IDC_ELAPSED_TIMER, TimedTaskDialog::OnElapsedTimeUpdate)
 EVT_TIMER(TimedTaskDialog::IDC_HIDE_WINDOW_TIMER, TimedTaskDialog::OnHideWindow)
+EVT_BUTTON(TimedTaskDialog::IDC_START, TimedTaskDialog::OnStart)
+EVT_BUTTON(TimedTaskDialog::IDC_PAUSE, TimedTaskDialog::OnPause)
 EVT_BUTTON(TimedTaskDialog::IDC_STOP, TimedTaskDialog::OnStop)
 wxEND_EVENT_TABLE()
 
@@ -94,6 +96,9 @@ void TimedTaskDialog::CreateControls()
     pElapsedTimeText->SetFont(font);
     sizer->Add(pElapsedTimeText, common::sizers::ControlCenter);
 
+    pStartNewTask = new wxCheckBox(mainPanel, IDC_START_NEW_TASK_CHECK, wxT("Start new task when pausing current task"));
+    sizer->Add(pStartNewTask, common::sizers::ControlDefault);
+
     /* Horizontal Line*/
     auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
     mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
@@ -105,9 +110,11 @@ void TimedTaskDialog::CreateControls()
     mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
     pStartButton = new wxButton(buttonPanel, IDC_START, wxT("St&art"));
+    pPauseButton = new wxButton(buttonPanel, IDC_PAUSE, wxT("&Pause"));
     pStopButton = new wxButton(buttonPanel, IDC_STOP, wxT("&Stop"));
 
     buttonPanelSizer->Add(pStartButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(pPauseButton, common::sizers::ControlDefault);
     buttonPanelSizer->Add(pStopButton, common::sizers::ControlDefault);
 }
 
@@ -133,13 +140,31 @@ void TimedTaskDialog::OnHideWindow(wxTimerEvent& WXUNUSED(event))
     pHideWindowTimer->Stop();
 }
 
+void TimedTaskDialog::OnStart(wxCommandEvent& event)
+{ }
+
+void TimedTaskDialog::OnPause(wxCommandEvent& event)
+{
+    pStopButton->Disable();
+    pStartButton->Enable();
+
+    if (pStartNewTask->IsChecked()) {
+        // TODO Handle starting new task
+    } else {
+        // Push the current start and end time
+        // Wait
+        auto now = wxDateTime::Now();
+        auto x = now - mEndTime;
+    }
+}
+
 void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 {
     mEndTime = wxDateTime::Now();
     pNotificationTimer->Stop();
     pElapsedTimer->Stop();
     pStopButton->Disable();
-    //pStartButton->Enable();
+    pPauseButton->Disable();
 
     dialog::TaskItemDialog newTask(this, pLogger, mStartTime, mEndTime);
     newTask.ShowModal();

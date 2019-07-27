@@ -48,12 +48,16 @@ private:
     void OnElapsedTimeUpdate(wxTimerEvent& event);
     void OnTimer(wxTimerEvent& event);
     void OnHideWindow(wxTimerEvent& event);
+    void OnStart(wxCommandEvent& event);
+    void OnPause(wxCommandEvent& event);
     void OnStop(wxCommandEvent& event);
 
     std::shared_ptr<spdlog::logger> pLogger;
     wxWindow* pParent;
     wxStaticText* pElapsedTimeText;
+    wxCheckBox* pStartNewTask;
     wxButton* pStartButton;
+    wxButton* pPauseButton;
     wxButton* pStopButton;
     std::unique_ptr<wxTimer> pElapsedTimer;
     std::unique_ptr<wxTimer> pNotificationTimer;
@@ -66,10 +70,12 @@ private:
     enum
     {
         IDC_ELAPSED = wxID_HIGHEST + 1,
+        IDC_START_NEW_TASK_CHECK,
         IDC_ELAPSED_TIMER,
         IDC__NOTIFICATION_TIMER,
         IDC_HIDE_WINDOW_TIMER,
         IDC_START,
+        IDC_PAUSE,
         IDC_STOP,
     };
 };
