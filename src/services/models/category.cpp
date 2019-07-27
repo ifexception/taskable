@@ -29,7 +29,7 @@ const std::string category::getCategoryById = "SELECT categories.category_id, "
                                               "categories.date_created_utc, "
                                               "categories.date_modified_utc, "
                                               "categories.is_active, "
-                                              "projects.name AS project_name "
+                                              "projects.display_name AS project_name "
                                               "FROM categories "
                                               "INNER JOIN projects ON categories.project_id = projects.project_id "
                                               "WHERE categories.category_id = ?";
