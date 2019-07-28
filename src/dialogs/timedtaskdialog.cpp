@@ -178,6 +178,7 @@ void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 
     if (bWasTaskPaused) {
         auto durationOfTask = pTaskState->GetAccumulatedTime();
+        wxLogDebug(durationOfTask.Format());
         // TODO Pass duration
     } else {
         dialog::TaskItemDialog newTask(this, pLogger, mStartTime, mEndTime);
