@@ -30,15 +30,12 @@ class TaskStateService
 {
 public:
     TaskStateService();
-    TaskStateService(bool startedNewTask);
     ~TaskStateService() = default;
 
     void PushTimes(wxDateTime startTime, wxDateTime endTime);
     wxTimeSpan GetAccumulatedTime();
 
 private:
-    bool bStartedNewTask;
-
     std::stack<std::tuple<wxDateTime, wxDateTime>> mTimeStack;
 };
 }

@@ -283,8 +283,8 @@ void MainFrame::OnAbout(wxCommandEvent& event)
 
 void MainFrame::OnClose(wxCloseEvent& event)
 {
-    if (pConfig->IsConfirmOnExit() &&
-        event.CanVeto()) {
+    if (pConfig->IsConfirmOnExit()
+        && event.CanVeto()) {
         int ret = wxMessageBox(wxT("Are you sure to exit the application?"),
             wxT("Tasks Tracker"),
             wxICON_QUESTION | wxYES_NO);
@@ -292,9 +292,9 @@ void MainFrame::OnClose(wxCloseEvent& event)
             event.Veto();
             return;
         }
-    } else if (pConfig->IsCloseToTray() &&
-        pConfig->IsShowInTray() &&
-        event.CanVeto()) {
+    } else if (pConfig->IsCloseToTray()
+        && pConfig->IsShowInTray()
+        && event.CanVeto()) {
         Hide();
         MSWGetTaskBarButton()->Hide();
         return;
@@ -372,7 +372,9 @@ void MainFrame::OnItemDoubleClick(wxListEvent& event)
 
 void MainFrame::OnIconize(wxIconizeEvent& event)
 {
-    if (event.IsIconized() && pConfig->IsShowInTray() && pConfig->IsMinimizeToTray()) {
+    if (event.IsIconized()
+        && pConfig->IsShowInTray()
+        && pConfig->IsMinimizeToTray()) {
         MSWGetTaskBarButton()->Hide();
     }
 }
@@ -403,7 +405,9 @@ void MainFrame::RefreshItems(wxDateTime date)
         services::db_service dbService;
         taskItems = dbService.get_all_task_items_by_date(std::string(dateString.ToUTF8()));
     } catch (const db::database_exception& e) {
-        pLogger->error("Error occured on get_all_task_items_by_date() - {0:d} : {1}", e.get_error_code(), e.what());
+        pLogger->error("Error occured on get_all_task_items_by_date() - {0:d} : {1}",
+            e.get_error_code(),
+            e.what());
     }
 
     int listIndex = 0;

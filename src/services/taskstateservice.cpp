@@ -22,13 +22,7 @@
 namespace app::services
 {
 TaskStateService::TaskStateService()
-    : bStartedNewTask(false)
-    , mTimeStack()
-{ }
-
-TaskStateService::TaskStateService(bool startedNewTask)
-    : bStartedNewTask(startedNewTask)
-    , mTimeStack()
+    : mTimeStack()
 { }
 
 void TaskStateService::PushTimes(wxDateTime startTime, wxDateTime endTime)

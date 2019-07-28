@@ -157,11 +157,11 @@ void TimedTaskDialog::OnPause(wxCommandEvent& event)
     pNotificationTimer->Stop();
     pElapsedTimer->Stop();
     bWasTaskPaused = true;
+    mEndTime = wxDateTime::Now();
 
     if (pStartNewTask->IsChecked()) {
         // TODO Handle starting new task
     } else {
-        mEndTime = wxDateTime::Now();
         pTaskState->PushTimes(mStartTime, mEndTime);
     }
 }
