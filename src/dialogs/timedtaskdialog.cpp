@@ -148,6 +148,8 @@ void TimedTaskDialog::OnStart(wxCommandEvent& event)
     mStartTime = wxDateTime::Now();
     pNotificationTimer->Start();
     pElapsedTimer->Start();
+    pStopButton->Enable();
+    pStartButton->Disable();
 }
 
 void TimedTaskDialog::OnPause(wxCommandEvent& event)
