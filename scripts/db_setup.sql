@@ -70,8 +70,8 @@ CREATE TABLE categories
 CREATE TABLE task_items
 (
     task_item_id INTEGER PRIMARY KEY NOT NULL,
-    start_time TEXT NOT NULL,
-    end_time TEXT NOT NULL,
+    start_time TEXT NULL,
+    end_time TEXT NULL,
     duration TEXT NOT NULL,
     description TEXT NOT NULL,
     date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
