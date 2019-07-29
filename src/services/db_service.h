@@ -88,7 +88,7 @@ struct db_service
 
     void delete_category(const int categoryId, const int dateModified);
 
-    int create_or_get_task_id(const std::string& date, const int projectId);
+    int create_or_get_task_id(const std::string& date);
 
     void create_new_task_item(const int projectId, const int taskId, const std::string& startTime, const std::string& endTime, const std::string& duration, const int categoryId, const std::string& description);
 

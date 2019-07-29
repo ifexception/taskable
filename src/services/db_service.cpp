@@ -459,7 +459,7 @@ void db_service::delete_category(const int categoryId, const int dateModified)
     command.execute();
 }
 
-int db_service::create_or_get_task_id(const std::string& date, const int projectId)
+int db_service::create_or_get_task_id(const std::string& date)
 {
     db::query query(*db_connection::get_instance().get_database(), models::task::getTaskId);
     query.bind(1, date, db::copy_options::NoCopy);
@@ -468,7 +468,7 @@ int db_service::create_or_get_task_id(const std::string& date, const int project
     db::column column(query.get_handle());
     if (column.get_type(0) == db::column_type::Null) {
         db::command command(*db_connection::get_instance().get_database(), models::task::createTask);
-        command.binder() << date << projectId;
+        command.binder() << date;
         command.execute();
         taskId = (int) db_connection::get_instance().get_database()->get_last_rowid();
     } else {

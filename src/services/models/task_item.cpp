@@ -55,7 +55,7 @@ const std::string task_item::updateTaskItem = "UPDATE task_items SET start_time 
 const std::string task_item::deleteTaskItem = "UPDATE task_items SET is_active = 0, date_modified_utc = ? WHERE task_item_id = ?";
 
 const std::string task::getTaskId = "SELECT task_id FROM tasks WHERE task_date = ?";
-const std::string task::createTask = "INSERT INTO tasks (task_date, is_active, project_id) VALUES (?, 1, ?)";
+const std::string task::createTask = "INSERT INTO tasks (task_date, is_active) VALUES (?, 1)";
 const std::string task::getTaskHoursById = "SELECT task_items.duration "
                                            "FROM task_items "
                                            "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
