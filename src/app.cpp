@@ -142,7 +142,12 @@ bool App::IsInstalled()
 
 bool App::ConfigureRegistry()
 {
+#if _DEBUG
+    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\TasksTrackerd");
+#else
     wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\TasksTracker");
+#endif // _DEBUG
+
     bool result = key.Create();
 #if _DEBUG
     result = key.SetValue("Installedd", 1);
