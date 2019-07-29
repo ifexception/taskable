@@ -125,7 +125,11 @@ bool App::DatabaseFileExists()
 
 bool App::IsInstalled()
 {
+#if _DEBUG
+    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\TasksTrackerd");
+#else
     wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\TasksTracker");
+#endif // _DEBUG
 
     if (key.Exists()) {
         long value = -1;
