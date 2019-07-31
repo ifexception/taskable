@@ -73,6 +73,7 @@ private:
     void OnNewTimedTask(wxCommandEvent& event);
     void OnDateChanged(wxDateEvent& event);
 
+    void CalculateTotalTime();
     void RefreshItems(wxDateTime date = wxDateTime::Now());
 
     wxDatePickerCtrl* pDatePickerCtrl;

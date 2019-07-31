@@ -28,6 +28,8 @@
 class wxTimePickerCtrl;
 class wxDateEvent;
 
+wxDECLARE_EVENT(TASK_INSERTED, wxCommandEvent);
+
 namespace app::dialog
 {
 class TaskItemDialog : public wxDialog
@@ -64,7 +66,7 @@ private:
     void OnIsActiveCheck(wxCommandEvent& event);
     void OnSave(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
-    void OnTaskSaved(wxCommandEvent& event);
+    void OnTaskSaved();
 
     void CaclulateTimeDiff(wxDateTime start, wxDateTime end);
     void FillCategoryControl(int projectId);

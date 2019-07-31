@@ -30,6 +30,8 @@
 #include "../services/db_service.h"
 #include "../db/database_exception.h"
 
+wxDEFINE_EVENT(TASK_INSERTED, wxCommandEvent);
+
 namespace app::dialog
 {
 wxBEGIN_EVENT_TABLE(TaskItemDialog, wxDialog)
@@ -308,10 +310,7 @@ void TaskItemDialog::DataToControls()
 
     pProjectChoiceCtrl->SetStringSelection(taskItem.project_name);
 
-    if (bIsPausableTask) {
-        pStartTimeCtrl->Disable();
-        pEndTimeCtrl->Disable();
-    } else {
+    if (!bIsPausableTask) {
         wxDateTime startTime;
         startTime.ParseISOTime(taskItem.start_time);
         pStartTimeCtrl->SetValue(startTime);
@@ -359,7 +358,7 @@ int TaskItemDialog::GetTaskId()
     services::db_service dbService;
     int taskId = 0;
     try {
-        taskId = dbService.create_or_get_task_id(mTaskDate, mProjectId);
+        taskId = dbService.create_or_get_task_id(mTaskDate);
     } catch (const db::database_exception& e) {
         pLogger->error("Error occured in create_or_get_task_id() - {0:d} : {1}", e.get_error_code(), e.what());
     }
@@ -396,10 +395,21 @@ bool TaskItemDialog::Validate()
         }
     }
 
-    auto isDescriptionInvalid = mDescriptionText.length() > 2048 || mDescriptionText.length() < 4 ||
-        mDescriptionText.empty();
-    if (isDescriptionInvalid) {
-        wxMessageBox(wxT("Description is invalid"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    if (mDescriptionText.empty()) {
+        auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Task description"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    if (mDescriptionText.length() < 2) {
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Task description"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    if (mDescriptionText.length() > 255) {
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Task description"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
 
@@ -420,12 +430,19 @@ bool TaskItemDialog::Validate()
 
 bool TaskItemDialog::AreControlsEmpty()
 {
-    bool isEmpty = (mProjectId == 0 || mProjectId == -1) &&
-        mStartTime == wxDefaultDateTime &&
-        mEndTime == wxDefaultDateTime &&
-        (mCategoryId == 0 || mCategoryId == -1) &&
-        mDescriptionText.empty();
-    return isEmpty;
+    if (bIsPausableTask) {
+        bool isEmpty = (mProjectId == 0 || mProjectId == -1) &&
+            (mCategoryId == 0 || mCategoryId == -1) &&
+            mDescriptionText.empty();
+        return isEmpty;
+    } else {
+        bool isEmpty = (mProjectId == 0 || mProjectId == -1) &&
+            mStartTime == wxDefaultDateTime &&
+            mEndTime == wxDefaultDateTime &&
+            (mCategoryId == 0 || mCategoryId == -1) &&
+            mDescriptionText.empty();
+        return isEmpty;
+    }
 }
 
 void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
@@ -496,18 +513,22 @@ void TaskItemDialog::OnSave(wxCommandEvent& event)
 
     services::db_service dbService;
     try {
-        wxString startTime = mStartTime.FormatISOTime();
-        wxString endTime = mEndTime.FormatISOTime();
+        wxString startTime;
+        wxString endTime;
+
+        if (bIsPausableTask) {
+            startTime = wxT("");
+            endTime = wxT("");
+        } else {
+            startTime = mStartTime.FormatISOTime();
+            endTime = mEndTime.FormatISOTime();
+        }
+
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
             models::task_item taskItem;
             taskItem.task_item_id = mTaskItemId;
-            if (bIsPausableTask) {
-                taskItem.start_time = std::string("");
-                taskItem.end_time = std::string("");
-            } else {
-                taskItem.start_time = startTime;
-                taskItem.end_time = endTime;
-            }
+            taskItem.start_time = startTime;
+            taskItem.end_time = endTime;
             taskItem.duration = mDurationText;
             taskItem.description = std::string(mDescriptionText.ToUTF8());
             taskItem.date_modified_utc = util::UnixTimestamp();
@@ -523,7 +544,7 @@ void TaskItemDialog::OnSave(wxCommandEvent& event)
         pLogger->error("Error occured in task_item OnSave() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
-    OnTaskSaved(event);
+    OnTaskSaved();
 
     EndModal(ids::ID_SAVE);
 }
@@ -542,11 +563,10 @@ void TaskItemDialog::OnCancel(wxCommandEvent& event)
     }
 }
 
-void TaskItemDialog::OnTaskSaved(wxCommandEvent& event)
+void TaskItemDialog::OnTaskSaved()
 {
-    wxCommandEvent eventForParent(ids::ID_TASK_INSERTED);
-    eventForParent.SetEventObject(this);
-    pParent->ProcessWindowEvent(eventForParent);
+    wxCommandEvent taskInsertedEvent(TASK_INSERTED);
+    wxPostEvent(pParent, taskInsertedEvent);
 }
 
 void TaskItemDialog::CaclulateTimeDiff(wxDateTime start, wxDateTime end)
@@ -567,7 +587,7 @@ void TaskItemDialog::FillCategoryControl(int projectId)
     }
 
     for (auto category : categories) {
-        pCategoryChoiceCtrl->Append(category.category_name, (void*)category.category_id);
+        pCategoryChoiceCtrl->Append(category.category_name, util::IntToVoidPointer(category.category_id));
     }
 
     if (!pCategoryChoiceCtrl->IsEnabled()) {

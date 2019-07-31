@@ -59,7 +59,7 @@ EVT_MENU(ids::ID_EDIT_CATEGORY, MainFrame::OnEditCategory)
 EVT_MENU(ids::ID_SETTINGS, MainFrame::OnSettings)
 EVT_MENU(ids::ID_NEW_TIMED_TASK, MainFrame::OnNewTimedTask)
 EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
-EVT_COMMAND(MainFrame::IDC_LIST, ids::ID_TASK_INSERTED, MainFrame::OnTaskInserted)
+EVT_COMMAND(wxID_ANY, TASK_INSERTED, MainFrame::OnTaskInserted)
 EVT_ICONIZE(MainFrame::OnIconize)
 EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 wxEND_EVENT_TABLE()
@@ -116,6 +116,7 @@ void MainFrame::CreateControls()
     wxMenu* fileMenu = new wxMenu();
     fileMenu->Append(ids::ID_NEW_TASK, wxT("New &Task...\tCtrl-N"), wxT("Create new task"));
     fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("&Timed Task...\tCtrl-Q"), wxT("Create new timed task"));
+    fileMenu->AppendSeparator();
     fileMenu->Append(ids::ID_NEW_EMPLOYER, wxT("New &Employer"), wxT("Create new employer"));
     fileMenu->Append(ids::ID_NEW_CLIENT, wxT("New &Client"), wxT("Create new client"));
     fileMenu->Append(ids::ID_NEW_PROJECT, wxT("New &Project"), wxT("Create new project"));
@@ -236,32 +237,7 @@ void MainFrame::CreateControls()
 
 void MainFrame::DataToControls()
 {
-    std::vector<std::string> taskDurations;
-    services::db_service dbService;
-    auto dateNow = wxDateTime::Now();
-    auto dateString = dateNow.FormatISODate();
-
-    try {
-        taskDurations = dbService.get_task_hours_by_id(dateString);
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured on get_task_hours_by_id() - {0:d} : {1}",
-            e.get_error_code(),
-            e.what());
-    }
-
-    wxTimeSpan totalDuration;
-    for (auto duration : taskDurations) {
-        std::vector<std::string> durationSplit = util::lib::split(duration, ':');
-
-        wxTimeSpan currentDuration(std::atol(durationSplit[0].c_str()),
-            std::atol(durationSplit[1].c_str()),
-            (wxLongLong)std::atoll(durationSplit[2].c_str()));
-
-        totalDuration += currentDuration;
-    }
-
-    pTotalHoursText->SetLabel(totalDuration.Format(Constants::TotalHours));
-
+    CalculateTotalTime();
     RefreshItems();
 }
 
@@ -359,7 +335,7 @@ void MainFrame::OnEditCategory(wxCommandEvent& event)
 void MainFrame::OnTaskInserted(wxCommandEvent& event)
 {
     pListCtrl->DeleteAllItems();
-
+    CalculateTotalTime();
     RefreshItems();
 }
 
@@ -395,6 +371,35 @@ void MainFrame::OnDateChanged(wxDateEvent& event)
 {
     auto date = event.GetDate();
     RefreshItems(date);
+}
+
+void MainFrame::CalculateTotalTime()
+{
+    std::vector<std::string> taskDurations;
+    services::db_service dbService;
+    auto dateNow = wxDateTime::Now();
+    auto dateString = dateNow.FormatISODate();
+
+    try {
+        taskDurations = dbService.get_task_hours_by_id(dateString);
+    } catch (const db::database_exception& e) {
+        pLogger->error("Error occured on get_task_hours_by_id() - {0:d} : {1}",
+            e.get_error_code(),
+            e.what());
+    }
+
+    wxTimeSpan totalDuration;
+    for (auto duration : taskDurations) {
+        std::vector<std::string> durationSplit = util::lib::split(duration, ':');
+
+        wxTimeSpan currentDuration(std::atol(durationSplit[0].c_str()),
+            std::atol(durationSplit[1].c_str()),
+            (wxLongLong)std::atoll(durationSplit[2].c_str()));
+
+        totalDuration += currentDuration;
+    }
+
+    pTotalHoursText->SetLabel(totalDuration.Format(Constants::TotalHours));
 }
 
 void MainFrame::RefreshItems(wxDateTime date)

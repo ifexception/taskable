@@ -143,19 +143,21 @@ void TimedTaskDialog::OnHideWindow(wxTimerEvent& WXUNUSED(event))
     pHideWindowTimer->Stop();
 }
 
-void TimedTaskDialog::OnStart(wxCommandEvent& event)
+void TimedTaskDialog::OnStart(wxCommandEvent& WXUNUSED(event))
 {
     mStartTime = wxDateTime::Now();
     pNotificationTimer->Start();
     pElapsedTimer->Start();
     pStopButton->Enable();
     pStartButton->Disable();
+    pPauseButton->Enable();
 }
 
-void TimedTaskDialog::OnPause(wxCommandEvent& event)
+void TimedTaskDialog::OnPause(wxCommandEvent& WXUNUSED(event))
 {
-    pStopButton->Disable();
     pStartButton->Enable();
+    pPauseButton->Disable();
+    pStartNewTask->Disable();
     pNotificationTimer->Stop();
     pElapsedTimer->Stop();
     bWasTaskPaused = true;
@@ -175,13 +177,17 @@ void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
     pElapsedTimer->Stop();
     pStopButton->Disable();
     pPauseButton->Disable();
+    pStartButton->Disable();
 
     if (bWasTaskPaused) {
+        pTaskState->PushTimes(mStartTime, mEndTime);
         auto durationOfTask = pTaskState->GetAccumulatedTime();
         wxLogDebug(durationOfTask.Format());
-        // TODO Pass duration
+
+        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, durationOfTask);
+        newTask.ShowModal();
     } else {
-        dialog::TaskItemDialog newTask(this, pLogger, mStartTime, mEndTime);
+        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, mStartTime, mEndTime);
         newTask.ShowModal();
     }
 
