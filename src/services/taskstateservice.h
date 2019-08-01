@@ -33,6 +33,7 @@ public:
     ~TaskStateService() = default;
 
     void PushTimes(wxDateTime startTime, wxDateTime endTime);
+    void Clear();
     wxTimeSpan GetAccumulatedTime();
 
 private:

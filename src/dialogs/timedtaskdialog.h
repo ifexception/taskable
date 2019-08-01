@@ -52,14 +52,17 @@ private:
     void OnStart(wxCommandEvent& event);
     void OnPause(wxCommandEvent& event);
     void OnStop(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
 
     std::shared_ptr<spdlog::logger> pLogger;
     wxWindow* pParent;
     wxStaticText* pElapsedTimeText;
+    wxStaticText* pAccumulatedTimeText;
     wxCheckBox* pStartNewTask;
     wxButton* pStartButton;
     wxButton* pPauseButton;
     wxButton* pStopButton;
+    wxButton* pCancelButton;
     std::unique_ptr<wxTimer> pElapsedTimer;
     std::unique_ptr<wxTimer> pNotificationTimer;
     std::unique_ptr<wxTimer> pHideWindowTimer;
@@ -73,6 +76,7 @@ private:
     enum
     {
         IDC_ELAPSED = wxID_HIGHEST + 1,
+        IDC_ACCUMULATED_TIME,
         IDC_START_NEW_TASK_CHECK,
         IDC_ELAPSED_TIMER,
         IDC__NOTIFICATION_TIMER,
@@ -80,6 +84,7 @@ private:
         IDC_START,
         IDC_PAUSE,
         IDC_STOP,
+        IDC_CANCEL
     };
 };
 } // app::dialog

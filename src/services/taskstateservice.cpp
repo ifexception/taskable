@@ -31,6 +31,13 @@ void TaskStateService::PushTimes(wxDateTime startTime, wxDateTime endTime)
     mTimeStack.push(tuple);
 }
 
+void TaskStateService::Clear()
+{
+    while (!mTimeStack.empty()) {
+        mTimeStack.pop();
+    }
+}
+
 wxTimeSpan TaskStateService::GetAccumulatedTime()
 {
     wxTimeSpan accumulated;

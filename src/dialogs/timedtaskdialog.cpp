@@ -30,6 +30,7 @@
 namespace app::dialog
 {
 static const wxString ElapsedTimeText = wxT("Elapsed Time: %s");
+static const wxString AccumulatedTimeText = wxT("Time accumulated thus far: %s");
 
 wxBEGIN_EVENT_TABLE(TimedTaskDialog, wxDialog)
 EVT_TIMER(TimedTaskDialog::IDC__NOTIFICATION_TIMER, TimedTaskDialog::OnTimer)
@@ -62,7 +63,9 @@ void TimedTaskDialog::Launch()
     pElapsedTimer->Start(1000/*milliseconds*/);
     pNotificationTimer->Start(util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval()));
 
-    pHideWindowTimer->Start(util::SecondsToMilliseconds(pConfig->GetHideWindowTimerInterval()), true);
+    if (pConfig->IsMinimizeTimedTaskWindow()) {
+        pHideWindowTimer->Start(util::SecondsToMilliseconds(pConfig->GetHideWindowTimerInterval()), true);
+    }
     pStartButton->Disable();
     wxDialog::ShowModal();
 }
@@ -99,6 +102,12 @@ void TimedTaskDialog::CreateControls()
     pElapsedTimeText->SetFont(font);
     sizer->Add(pElapsedTimeText, common::sizers::ControlCenter);
 
+    pAccumulatedTimeText = new wxStaticText(mainPanel, IDC_ACCUMULATED_TIME, wxT("Time accumulatedthus far: 00:00:00"));
+    auto font2 = pAccumulatedTimeText->GetFont();
+    font2.SetPointSize(8);
+    pAccumulatedTimeText->SetFont(font2);
+    sizer->Add(pAccumulatedTimeText, common::sizers::ControlRight);
+
     pStartNewTask = new wxCheckBox(mainPanel, IDC_START_NEW_TASK_CHECK, wxT("Start new task when pausing current task"));
     sizer->Add(pStartNewTask, common::sizers::ControlDefault);
 
@@ -115,10 +124,12 @@ void TimedTaskDialog::CreateControls()
     pStartButton = new wxButton(buttonPanel, IDC_START, wxT("St&art"));
     pPauseButton = new wxButton(buttonPanel, IDC_PAUSE, wxT("&Pause"));
     pStopButton = new wxButton(buttonPanel, IDC_STOP, wxT("&Stop"));
+    pCancelButton = new wxButton(buttonPanel, IDC_CANCEL, wxT("&Cancel"));
 
     buttonPanelSizer->Add(pStartButton, common::sizers::ControlDefault);
     buttonPanelSizer->Add(pPauseButton, common::sizers::ControlDefault);
     buttonPanelSizer->Add(pStopButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(pCancelButton, common::sizers::ControlDefault);
 }
 
 void TimedTaskDialog::OnElapsedTimeUpdate(wxTimerEvent& WXUNUSED(event))
@@ -163,12 +174,18 @@ void TimedTaskDialog::OnPause(wxCommandEvent& WXUNUSED(event))
     bWasTaskPaused = true;
     mEndTime = wxDateTime::Now();
 
+    auto accumulatedTimeThusFar = pTaskState->GetAccumulatedTime();
+    pAccumulatedTimeText->SetLabel(wxString::Format(AccumulatedTimeText, accumulatedTimeThusFar.Format()));
+
     if (pStartNewTask->IsChecked()) {
         // TODO Handle starting new task
     } else {
         pTaskState->PushTimes(mStartTime, mEndTime);
     }
 }
+
+// TODO: Handle a cancel action
+// TODO: Handle cancel when task is paused
 
 void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 {
@@ -181,8 +198,11 @@ void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 
     if (bWasTaskPaused) {
         pTaskState->PushTimes(mStartTime, mEndTime);
+
+        auto accumulatedTimeThusFar = pTaskState->GetAccumulatedTime();
+        pAccumulatedTimeText->SetLabel(wxString::Format(AccumulatedTimeText, accumulatedTimeThusFar.Format()));
+
         auto durationOfTask = pTaskState->GetAccumulatedTime();
-        wxLogDebug(durationOfTask.Format());
 
         dialog::TaskItemDialog newTask(this->GetParent(), pLogger, durationOfTask);
         newTask.ShowModal();
@@ -192,6 +212,12 @@ void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
     }
 
     EndModal(wxID_OK);
+}
+
+void TimedTaskDialog::OnCancel(wxCommandEvent& event)
+{
+    pTaskState->Clear();
+    EndModal(wxID_CANCEL);
 }
 
 } // app::dialog
