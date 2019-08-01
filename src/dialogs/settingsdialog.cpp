@@ -25,11 +25,10 @@
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(SettingsDialog, wxDialog);
-
 wxBEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
     EVT_CHECKBOX(IDC_BACKUP_DATABASE, SettingsDialog::OnBackupDatabaseCheck)
     EVT_CHECKBOX(IDC_SHOW_IN_TRAY, SettingsDialog::OnShowInTrayCheck)
+    EVT_CHECKBOX(IDC_CLOSE_TIMED_TASK_WINDOW, SettingsDialog::OnMinimizeTimedTaskWindowCheck)
     EVT_BUTTON(IDC_BACKUP_PATH_BUTTON, SettingsDialog::OnOpenDirectory)
     EVT_BUTTON(wxID_OK, SettingsDialog::OnOk)
     EVT_BUTTON(wxID_CANCEL, SettingsDialog::OnCancel)
@@ -147,6 +146,12 @@ void SettingsDialog::CreateControls()
     auto timedTaskGridSizer = new wxFlexGridSizer(2, 10, 10);
     timedTaskPanel->SetSizer(timedTaskGridSizer);
 
+    pMinimizeTimedTaskWindow = new wxCheckBox(timedTaskPanel, IDC_CLOSE_TIMED_TASK_WINDOW, wxT("Minimize Timed Task Window"));
+    timedTaskGridSizer->Add(pMinimizeTimedTaskWindow, common::sizers::ControlDefault);
+
+    auto minimizeTimedTaskGridFiller = new wxStaticText(timedTaskPanel, wxID_ANY, wxT(""));
+    timedTaskGridSizer->Add(minimizeTimedTaskGridFiller, common::sizers::ControlDefault);
+
     auto hideWindowTimeText = new wxStaticText(timedTaskPanel, wxID_ANY, wxT("Hide Window (s)"));
     timedTaskGridSizer->Add(hideWindowTimeText, common::sizers::ControlDefault);
 
@@ -185,6 +190,7 @@ void SettingsDialog::CreateControls()
 
     auto okButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
     auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
+    cancelButton->SetFocus();
 
     buttonPanelSizer->Add(okButton, common::sizers::ControlDefault);
     buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
@@ -196,8 +202,7 @@ void SettingsDialog::FillControls()
     pStartWithWindows->SetValue(pConfig->IsStartOnBoot());
 
     pShowInTray->SetValue(pConfig->IsShowInTray());
-    bool enabled = pShowInTray->GetValue();
-    if (enabled) {
+    if (pConfig->IsShowInTray()) {
         pMinimizeToTray->Enable();
         pCloseToTray->Enable();
     } else {
@@ -212,10 +217,14 @@ void SettingsDialog::FillControls()
     pBackupDatabase->SetValue(pConfig->IsBackupEnabled());
     pBackupPath->SetValue(pConfig->GetBackupPath());
 
-    enabled = pBackupDatabase->GetValue();
-    if (!enabled) {
+    if (!pBackupDatabase->GetValue()) {
         pBackupPath->Disable();
         pBrowseBackupPath->Disable();
+    }
+
+    pMinimizeTimedTaskWindow->SetValue(pConfig->IsMinimizeTimedTaskWindow());
+    if (!pConfig->IsMinimizeTimedTaskWindow()) {
+        pHideWindowTimeChoice->Disable();
     }
 
     pHideWindowTimeChoice->SetStringSelection(std::to_string(pConfig->GetHideWindowTimerInterval()));
@@ -235,6 +244,7 @@ void SettingsDialog::OnOk(wxCommandEvent& WXUNUSED(event))
     pConfig->SetBackupEnabled(pBackupDatabase->GetValue());
     pConfig->SetBackupPath(pBackupPath->GetValue());
 
+    pConfig->SetMinimizeTimedTaskWindow(pMinimizeTimedTaskWindow->GetValue());
     pConfig->SetHideWindowTimerInterval(std::stoi(pHideWindowTimeChoice->GetStringSelection().ToStdString()));
     pConfig->SetNotificationTimerInterval(std::stoi(pNotificationTimeChoice->GetStringSelection().ToStdString()));
 
@@ -272,6 +282,15 @@ void SettingsDialog::OnShowInTrayCheck(wxCommandEvent & event)
     } else {
         pMinimizeToTray->Disable();
         pCloseToTray->Disable();
+    }
+}
+
+void SettingsDialog::OnMinimizeTimedTaskWindowCheck(wxCommandEvent& event)
+{
+    if (event.IsChecked()) {
+        pHideWindowTimeChoice->Enable();
+    } else {
+        pHideWindowTimeChoice->Disable();
     }
 }
 

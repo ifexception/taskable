@@ -35,7 +35,6 @@ public:
     virtual ~SettingsDialog() = default;
 
 private:
-    wxDECLARE_DYNAMIC_CLASS(SettingsDialog);
     wxDECLARE_EVENT_TABLE();
 
     bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
@@ -46,6 +45,7 @@ private:
     void OnCancel(wxCommandEvent& event);
     void OnBackupDatabaseCheck(wxCommandEvent& event);
     void OnShowInTrayCheck(wxCommandEvent& event);
+    void OnMinimizeTimedTaskWindowCheck(wxCommandEvent& event);
     void OnOpenDirectory(wxCommandEvent& event);
 
     wxCheckBox* pDialogOnExit;
@@ -60,6 +60,7 @@ private:
     wxTextCtrl* pBackupPath;
     wxButton* pBrowseBackupPath;
 
+    wxCheckBox* pMinimizeTimedTaskWindow;
     wxChoice* pHideWindowTimeChoice;
     wxChoice* pNotificationTimeChoice;
 
@@ -76,6 +77,7 @@ private:
         IDC_BACKUP_DATABASE,
         IDC_BACKUP_PATH,
         IDC_BACKUP_PATH_BUTTON,
+        IDC_CLOSE_TIMED_TASK_WINDOW,
         IDC_HIDE_WINDOW_TIME_CHOICE,
         IDC_NOTIFICATION_TIME_CHOICE
     };
