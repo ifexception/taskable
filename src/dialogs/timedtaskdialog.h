@@ -37,6 +37,7 @@ class TimedTaskDialog : public wxDialog
 public:
     TimedTaskDialog() = delete;
     explicit TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<services::TaskStateService> taskState, const wxString& name = wxT("TimedTaskDialog"));
+    explicit TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<services::TaskStateService> taskState, bool hasPendingPausedTask, const wxString& name = wxT("TimedTaskDialog"));
     virtual ~TimedTaskDialog() = default;
 
     void Launch();
@@ -76,6 +77,7 @@ private:
     wxDateTime mStartTime;
     wxDateTime mEndTime;
     bool bWasTaskPaused;
+    bool bHasPendingPausedTask;
 
     enum
     {

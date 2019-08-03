@@ -380,13 +380,16 @@ void MainFrame::OnDateChanged(wxDateEvent& event)
 void MainFrame::OnNewTimedTaskFromPausedTask(wxCommandEvent& event)
 {
     bHasPendingTaskToResume = true;
-    pTaskStorage->Store(pTaskState); // check if EndModal generates a CloseEvent
+    pTaskStorage->Store(pTaskState);
     pTaskState->Clear();
-    dialog::TimedTaskDialog timedTask(this, pConfig, pLogger, pTaskState);
+    dialog::TimedTaskDialog timedTask(this, pConfig, pLogger, pTaskState, true);
     timedTask.Launch();
 
-    //dialog::TimedTaskDialog timedPausedTask(this, pConfig, pLogger, pTaskState);
-    //timedPausedTask.LaunchInPausedState();
+    pTaskState->Clear();
+    pTaskStorage->Restore(pTaskState);
+
+    dialog::TimedTaskDialog timedPausedTask(this, pConfig, pLogger, pTaskState);
+    timedPausedTask.LaunchInPausedState();
 }
 
 void MainFrame::CalculateTotalTime()
