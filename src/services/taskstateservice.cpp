@@ -19,6 +19,8 @@
 
 #include "taskstateservice.h"
 
+#include <cassert>
+
 namespace app::services
 {
 TaskStateService::TaskStateService()
@@ -53,5 +55,11 @@ wxTimeSpan TaskStateService::GetAccumulatedTime()
 std::stack<std::tuple<wxDateTime, wxDateTime>> TaskStateService::Copy()
 {
     return mTimeStack;
+}
+
+void TaskStateService::Set(std::stack<std::tuple<wxDateTime, wxDateTime>> timeStack)
+{
+    assert(mTimeStack.empty());
+    mTimeStack = timeStack;
 }
 }

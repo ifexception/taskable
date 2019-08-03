@@ -28,6 +28,11 @@ void app::services::TaskStorage::Store(std::shared_ptr<TaskStateService> taskSta
     mTimeStack = taskState->Copy();
 }
 
+void app::services::TaskStorage::Restore(std::shared_ptr<TaskStateService> taskState)
+{
+    taskState->Set(mTimeStack);
+}
+
 void app::services::TaskStorage::Clear()
 {
     while (!mTimeStack.empty()) {

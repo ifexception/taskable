@@ -33,6 +33,7 @@ struct TaskStorage
     ~TaskStorage() = default;
 
     void Store(std::shared_ptr<TaskStateService> taskState);
+    void Restore(std::shared_ptr<TaskStateService> taskState);
     void Clear();
 
     std::stack<std::tuple<wxDateTime, wxDateTime>> mTimeStack;
