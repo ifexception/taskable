@@ -33,6 +33,7 @@ static const wxString ElapsedTimeText = wxT("Elapsed Time: %s");
 static const wxString AccumulatedTimeText = wxT("Time accumulated thus far: %s");
 
 wxBEGIN_EVENT_TABLE(TimedTaskDialog, wxDialog)
+EVT_CLOSE(TimedTaskDialog::OnClose)
 EVT_TIMER(TimedTaskDialog::IDC__NOTIFICATION_TIMER, TimedTaskDialog::OnTimer)
 EVT_TIMER(TimedTaskDialog::IDC_ELAPSED_TIMER, TimedTaskDialog::OnElapsedTimeUpdate)
 EVT_TIMER(TimedTaskDialog::IDC_HIDE_WINDOW_TIMER, TimedTaskDialog::OnHideWindow)
@@ -218,6 +219,11 @@ void TimedTaskDialog::OnCancel(wxCommandEvent& event)
 {
     pTaskState->Clear();
     EndModal(wxID_CANCEL);
+}
+
+void TimedTaskDialog::OnClose(wxCloseEvent& event)
+{
+    pTaskState->Clear();
 }
 
 } // app::dialog

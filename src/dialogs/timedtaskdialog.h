@@ -53,6 +53,7 @@ private:
     void OnPause(wxCommandEvent& event);
     void OnStop(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
+    void OnClose(wxCloseEvent& event);
 
     std::shared_ptr<spdlog::logger> pLogger;
     wxWindow* pParent;
