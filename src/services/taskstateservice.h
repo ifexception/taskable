@@ -36,6 +36,8 @@ public:
     void Clear();
     wxTimeSpan GetAccumulatedTime();
 
+    std::stack<std::tuple<wxDateTime, wxDateTime>> Copy();
+
 private:
     std::stack<std::tuple<wxDateTime, wxDateTime>> mTimeStack;
 };

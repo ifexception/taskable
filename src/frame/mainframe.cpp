@@ -69,6 +69,7 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, std::shared_ptr
     , pLogger(logger)
     , pConfig(config)
     , pTaskState(std::make_shared<services::TaskStateService>())
+    , pTaskStorage(std::make_unique<services::TaskStorage>())
 { }
 
 MainFrame::~MainFrame()

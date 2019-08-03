@@ -30,6 +30,7 @@
 
 #include "../config/configuration.h"
 #include "../services/taskstateservice.h"
+#include "../services/taskstorageservice.h"
 
 namespace app::frame
 {
@@ -84,6 +85,7 @@ private:
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<services::TaskStateService> pTaskState;
+    std::unique_ptr<services::TaskStorage> pTaskStorage;
 
     enum
     {

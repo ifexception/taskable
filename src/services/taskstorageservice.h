@@ -17,41 +17,24 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#pragma once
+
+#include <memory>
+#include <stack>
+#include <tuple>
+
 #include "taskstateservice.h"
 
 namespace app::services
 {
-TaskStateService::TaskStateService()
-    : mTimeStack()
-{ }
-
-void TaskStateService::PushTimes(wxDateTime startTime, wxDateTime endTime)
+struct TaskStorage
 {
-    auto tuple = std::make_tuple(startTime, endTime);
-    mTimeStack.push(tuple);
-}
+    TaskStorage();
+    ~TaskStorage() = default;
 
-void TaskStateService::Clear()
-{
-    while (!mTimeStack.empty()) {
-        mTimeStack.pop();
-    }
-}
+    void Store(std::shared_ptr<TaskStateService> taskState);
+    void Clear();
 
-wxTimeSpan TaskStateService::GetAccumulatedTime()
-{
-    wxTimeSpan accumulated;
-    while (!mTimeStack.empty()) {
-        auto [startTime, endTime] = mTimeStack.top();
-        auto difference = endTime - startTime;
-        accumulated += difference;
-        mTimeStack.pop();
-    }
-    return accumulated;
-}
-
-std::stack<std::tuple<wxDateTime, wxDateTime>> TaskStateService::Copy()
-{
-    return mTimeStack;
-}
+    std::stack<std::tuple<wxDateTime, wxDateTime>> mTimeStack;
+};
 }

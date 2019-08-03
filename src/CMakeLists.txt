@@ -41,6 +41,7 @@ set (SRC
     "services/db_connection.cpp"
     "services/db_service.cpp"
     "services/taskstateservice.cpp"
+    "services/taskstorageservice.cpp"
     "app.cpp"
     "frame/mainframe.cpp"
     "frame/taskbaricon.cpp"
