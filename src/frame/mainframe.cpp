@@ -60,6 +60,7 @@ EVT_MENU(ids::ID_SETTINGS, MainFrame::OnSettings)
 EVT_MENU(ids::ID_NEW_TIMED_TASK, MainFrame::OnNewTimedTask)
 EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
 EVT_COMMAND(wxID_ANY, TASK_INSERTED, MainFrame::OnTaskInserted)
+EVT_COMMAND(wxID_ANY, START_NEW_TIMED_TASK, MainFrame::OnNewTimedTaskFromPausedTask)
 EVT_ICONIZE(MainFrame::OnIconize)
 EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 wxEND_EVENT_TABLE()
@@ -70,6 +71,7 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, std::shared_ptr
     , pConfig(config)
     , pTaskState(std::make_shared<services::TaskStateService>())
     , pTaskStorage(std::make_unique<services::TaskStorage>())
+    , bHasPendingTaskToResume(false)
 { }
 
 MainFrame::~MainFrame()
@@ -371,7 +373,20 @@ void MainFrame::OnNewTimedTask(wxCommandEvent& event)
 void MainFrame::OnDateChanged(wxDateEvent& event)
 {
     auto date = event.GetDate();
+    CalculateTotalTime();
     RefreshItems(date);
+}
+
+void MainFrame::OnNewTimedTaskFromPausedTask(wxCommandEvent& event)
+{
+    bHasPendingTaskToResume = true;
+    pTaskStorage->Store(pTaskState); // check if EndModal generates a CloseEvent
+    pTaskState->Clear();
+    dialog::TimedTaskDialog timedTask(this, pConfig, pLogger, pTaskState);
+    timedTask.Launch();
+
+    //dialog::TimedTaskDialog timedPausedTask(this, pConfig, pLogger, pTaskState);
+    //timedPausedTask.LaunchInPausedState();
 }
 
 void MainFrame::CalculateTotalTime()

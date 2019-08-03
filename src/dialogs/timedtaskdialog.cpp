@@ -27,6 +27,8 @@
 #include "../services/taskstateservice.h"
 #include "taskitemdialog.h"
 
+wxDEFINE_EVENT(START_NEW_TIMED_TASK, wxCommandEvent);
+
 namespace app::dialog
 {
 static const wxString ElapsedTimeText = wxT("Elapsed Time: %s");
@@ -163,6 +165,7 @@ void TimedTaskDialog::OnStart(wxCommandEvent& WXUNUSED(event))
     pStopButton->Enable();
     pStartButton->Disable();
     pPauseButton->Enable();
+    pStartNewTask->Enable();
 }
 
 void TimedTaskDialog::OnPause(wxCommandEvent& WXUNUSED(event))
@@ -177,16 +180,14 @@ void TimedTaskDialog::OnPause(wxCommandEvent& WXUNUSED(event))
 
     auto accumulatedTimeThusFar = pTaskState->GetAccumulatedTime();
     pAccumulatedTimeText->SetLabel(wxString::Format(AccumulatedTimeText, accumulatedTimeThusFar.Format()));
+    pTaskState->PushTimes(mStartTime, mEndTime);
 
     if (pStartNewTask->IsChecked()) {
-        // TODO Handle starting new task
-    } else {
-        pTaskState->PushTimes(mStartTime, mEndTime);
+        wxCommandEvent startNewTimedTask(START_NEW_TIMED_TASK);
+        wxPostEvent(pParent, startNewTimedTask);
+        EndModal(wxID_OK);
     }
 }
-
-// TODO: Handle a cancel action
-// TODO: Handle cancel when task is paused
 
 void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 {

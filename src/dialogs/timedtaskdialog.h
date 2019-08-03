@@ -28,6 +28,8 @@
 #include "../config/configuration.h"
 #include "../services/taskstateservice.h"
 
+wxDECLARE_EVENT(START_NEW_TIMED_TASK, wxCommandEvent);
+
 namespace app::dialog
 {
 class TimedTaskDialog : public wxDialog
@@ -38,6 +40,7 @@ public:
     virtual ~TimedTaskDialog() = default;
 
     void Launch();
+    void LaunchInPausedState();
 
 private:
     wxDECLARE_EVENT_TABLE();

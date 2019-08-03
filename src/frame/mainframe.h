@@ -73,6 +73,7 @@ private:
     void OnSettings(wxCommandEvent& event);
     void OnNewTimedTask(wxCommandEvent& event);
     void OnDateChanged(wxDateEvent& event);
+    void OnNewTimedTaskFromPausedTask(wxCommandEvent& event);
 
     void CalculateTotalTime();
     void RefreshItems(wxDateTime date = wxDateTime::Now());
@@ -86,6 +87,7 @@ private:
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<services::TaskStateService> pTaskState;
     std::unique_ptr<services::TaskStorage> pTaskStorage;
+    bool bHasPendingTaskToResume;
 
     enum
     {
