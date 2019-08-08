@@ -79,6 +79,9 @@ MainFrame::~MainFrame()
     if (pTaskBarIcon != nullptr) {
         delete pTaskBarIcon; // TODO Wrap TaskBarIcon in a std::unique_ptr
     }
+
+    pTaskState->mTimes.clear();
+    pTaskStorage->mTimes.clear();
 }
 
 bool MainFrame::RunWizard()
@@ -372,8 +375,11 @@ void MainFrame::OnNewTimedTask(wxCommandEvent& event)
 
 void MainFrame::OnDateChanged(wxDateEvent& event)
 {
-    auto date = event.GetDate();
+    pListCtrl->DeleteAllItems();
+
     CalculateTotalTime();
+
+    auto date = event.GetDate();
     RefreshItems(date);
 }
 
@@ -381,11 +387,11 @@ void MainFrame::OnNewTimedTaskFromPausedTask(wxCommandEvent& event)
 {
     bHasPendingTaskToResume = true;
     pTaskStorage->Store(pTaskState);
-    pTaskState->Clear();
+    pTaskState->mTimes.clear();
     dialog::TimedTaskDialog timedTask(this, pConfig, pLogger, pTaskState, true);
     timedTask.Launch();
 
-    pTaskState->Clear();
+    pTaskState->mTimes.clear();
     pTaskStorage->Restore(pTaskState);
 
     dialog::TimedTaskDialog timedPausedTask(this, pConfig, pLogger, pTaskState);

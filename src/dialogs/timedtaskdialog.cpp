@@ -74,7 +74,10 @@ TimedTaskDialog::TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configur
     , mStartTime()
     , bWasTaskPaused(false)
     , bHasPendingPausedTask(hasPendingPausedTask)
-{ }
+{
+    long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
+    Create(parent, wxID_ANY, wxT("Timed Task"), wxDefaultPosition, wxSize(320, 240), style, name);
+}
 
 void TimedTaskDialog::Launch()
 {
@@ -214,9 +217,9 @@ void TimedTaskDialog::OnPause(wxCommandEvent& WXUNUSED(event))
     bWasTaskPaused = true;
     mEndTime = wxDateTime::Now();
 
+    pTaskState->PushTimes(mStartTime, mEndTime);
     auto accumulatedTimeThusFar = pTaskState->GetAccumulatedTime();
     pAccumulatedTimeText->SetLabel(wxString::Format(AccumulatedTimeText, accumulatedTimeThusFar.Format()));
-    pTaskState->PushTimes(mStartTime, mEndTime);
 
     if (pStartNewTask->IsChecked()) {
         wxCommandEvent startNewTimedTask(START_NEW_TIMED_TASK);
@@ -255,13 +258,14 @@ void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 
 void TimedTaskDialog::OnCancel(wxCommandEvent& event)
 {
-    pTaskState->Clear();
+    //pTaskState->Clear();
     EndModal(wxID_CANCEL);
 }
 
 void TimedTaskDialog::OnClose(wxCloseEvent& event)
 {
-    pTaskState->Clear();
+    //pTaskState->Clear();
+    EndModal(wxID_CLOSE);
 }
 
 } // app::dialog

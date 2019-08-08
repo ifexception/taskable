@@ -19,27 +19,22 @@
 
 #pragma once
 
-#include <stack>
 #include <tuple>
+#include <vector>
 
 #include <wx/wx.h>
 
 namespace app::services
 {
-class TaskStateService
+struct TaskStateService
 {
 public:
     TaskStateService();
     ~TaskStateService() = default;
 
     void PushTimes(wxDateTime startTime, wxDateTime endTime);
-    void Clear();
     wxTimeSpan GetAccumulatedTime();
 
-    std::stack<std::tuple<wxDateTime, wxDateTime>> Copy();
-    void Set(std::stack<std::tuple<wxDateTime, wxDateTime>> timeStack);
-
-private:
-    std::stack<std::tuple<wxDateTime, wxDateTime>> mTimeStack;
+    std::vector<std::tuple<wxDateTime, wxDateTime>> mTimes;
 };
 }

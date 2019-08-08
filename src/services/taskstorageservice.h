@@ -20,8 +20,8 @@
 #pragma once
 
 #include <memory>
-#include <stack>
 #include <tuple>
+#include <vector>
 
 #include "taskstateservice.h"
 
@@ -34,8 +34,7 @@ struct TaskStorage
 
     void Store(std::shared_ptr<TaskStateService> taskState);
     void Restore(std::shared_ptr<TaskStateService> taskState);
-    void Clear();
 
-    std::stack<std::tuple<wxDateTime, wxDateTime>> mTimeStack;
+    std::vector<std::tuple<wxDateTime, wxDateTime>> mTimes;
 };
 }

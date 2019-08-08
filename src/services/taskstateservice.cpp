@@ -24,42 +24,24 @@
 namespace app::services
 {
 TaskStateService::TaskStateService()
-    : mTimeStack()
+    : mTimes()
 { }
 
 void TaskStateService::PushTimes(wxDateTime startTime, wxDateTime endTime)
 {
     auto tuple = std::make_tuple(startTime, endTime);
-    mTimeStack.push(tuple);
-}
-
-void TaskStateService::Clear()
-{
-    while (!mTimeStack.empty()) {
-        mTimeStack.pop();
-    }
+    mTimes.push_back(tuple);
 }
 
 wxTimeSpan TaskStateService::GetAccumulatedTime()
 {
     wxTimeSpan accumulated;
-    while (!mTimeStack.empty()) {
-        auto [startTime, endTime] = mTimeStack.top();
+    for (int i = 0; i < mTimes.size(); i++) {
+        auto [startTime, endTime] = mTimes[i];
         auto difference = endTime - startTime;
         accumulated += difference;
-        mTimeStack.pop();
     }
+
     return accumulated;
-}
-
-std::stack<std::tuple<wxDateTime, wxDateTime>> TaskStateService::Copy()
-{
-    return mTimeStack;
-}
-
-void TaskStateService::Set(std::stack<std::tuple<wxDateTime, wxDateTime>> timeStack)
-{
-    assert(mTimeStack.empty());
-    mTimeStack = timeStack;
 }
 }
