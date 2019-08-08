@@ -194,6 +194,7 @@ void TimedTaskDialog::OnHideWindow(wxTimerEvent& WXUNUSED(event))
 
 void TimedTaskDialog::OnStart(wxCommandEvent& WXUNUSED(event))
 {
+    bIsPaused = false;
     mStartTime = wxDateTime::Now();
     pNotificationTimer->Start();
     pElapsedTimer->Start();
@@ -216,6 +217,7 @@ void TimedTaskDialog::OnPause(wxCommandEvent& WXUNUSED(event))
     pElapsedTimer->Stop();
     bWasTaskPaused = true;
     mEndTime = wxDateTime::Now();
+    bIsPaused = true;
 
     pTaskState->PushTimes(mStartTime, mEndTime);
     auto accumulatedTimeThusFar = pTaskState->GetAccumulatedTime();
@@ -230,6 +232,7 @@ void TimedTaskDialog::OnPause(wxCommandEvent& WXUNUSED(event))
 
 void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 {
+    // TODO Handle case when coming from Pause -> Stop
     mEndTime = wxDateTime::Now();
     pNotificationTimer->Stop();
     pElapsedTimer->Stop();
@@ -239,7 +242,9 @@ void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
     pStartNewTask->Disable();
 
     if (bWasTaskPaused) {
-        pTaskState->PushTimes(mStartTime, mEndTime);
+        if (!bIsPaused) {
+            pTaskState->PushTimes(mStartTime, mEndTime);
+        }
 
         auto accumulatedTimeThusFar = pTaskState->GetAccumulatedTime();
         pAccumulatedTimeText->SetLabel(wxString::Format(AccumulatedTimeText, accumulatedTimeThusFar.Format()));

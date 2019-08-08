@@ -76,6 +76,7 @@ private:
 
     wxDateTime mStartTime;
     wxDateTime mEndTime;
+    bool bIsPaused;
     bool bWasTaskPaused;
     bool bHasPendingPausedTask;
 
