@@ -275,13 +275,13 @@ void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 
 void TimedTaskDialog::OnCancel(wxCommandEvent& event)
 {
-    //pTaskState->Clear();
+    pTaskState->mTimes.clear();
     EndModal(wxID_CANCEL);
 }
 
 void TimedTaskDialog::OnClose(wxCloseEvent& event)
 {
-    //pTaskState->Clear();
+    pTaskState->mTimes.clear();
     EndModal(wxID_CLOSE);
 }
 

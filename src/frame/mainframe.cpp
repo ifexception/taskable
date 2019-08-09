@@ -382,9 +382,9 @@ void MainFrame::OnDateChanged(wxDateEvent& event)
 
 void MainFrame::OnNewTimedTaskFromPausedTask(wxCommandEvent& event)
 {
-    bHasPendingTaskToResume = true;
     pTaskStorage->Store(pTaskState);
     pTaskState->mTimes.clear();
+
     dialog::TimedTaskDialog timedTask(this, pConfig, pLogger, pTaskState, true);
     timedTask.Launch();
 
@@ -393,6 +393,8 @@ void MainFrame::OnNewTimedTaskFromPausedTask(wxCommandEvent& event)
 
     dialog::TimedTaskDialog timedPausedTask(this, pConfig, pLogger, pTaskState);
     timedPausedTask.LaunchInPausedState();
+
+    pTaskStorage->mTimes.clear();
 }
 
 void MainFrame::CalculateTotalTime()
