@@ -45,7 +45,11 @@ EVT_BUTTON(TimedTaskDialog::IDC_STOP, TimedTaskDialog::OnStop)
 EVT_BUTTON(TimedTaskDialog::IDC_CANCEL, TimedTaskDialog::OnCancel)
 wxEND_EVENT_TABLE()
 
-TimedTaskDialog::TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<services::TaskStateService> taskState, const wxString& name)
+TimedTaskDialog::TimedTaskDialog(wxWindow* parent,
+    std::shared_ptr<cfg::Configuration> config,
+    std::shared_ptr<spdlog::logger> logger,
+    std::shared_ptr<services::TaskStateService> taskState,
+    const wxString& name)
     : pLogger(logger)
     , pParent(parent)
     , pElapsedTimeText(nullptr)
@@ -62,7 +66,12 @@ TimedTaskDialog::TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configur
     Create(parent, wxID_ANY, wxT("Timed Task"), wxDefaultPosition, wxSize(320, 240), style, name);
 }
 
-TimedTaskDialog::TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<services::TaskStateService> taskState, bool hasPendingPausedTask, const wxString& name)
+TimedTaskDialog::TimedTaskDialog(wxWindow* parent,
+    std::shared_ptr<cfg::Configuration> config,
+    std::shared_ptr<spdlog::logger> logger,
+    std::shared_ptr<services::TaskStateService> taskState,
+    bool hasPendingPausedTask,
+    const wxString& name)
     : pLogger(logger)
     , pParent(parent)
     , pElapsedTimeText(nullptr)
@@ -88,10 +97,12 @@ void TimedTaskDialog::Launch()
     if (pConfig->IsMinimizeTimedTaskWindow()) {
         pHideWindowTimer->Start(util::SecondsToMilliseconds(pConfig->GetHideWindowTimerInterval()), true);
     }
+
     pStartButton->Disable();
     if (bHasPendingPausedTask) {
         pStartNewTask->Disable();
     }
+
     wxDialog::ShowModal();
 }
 
@@ -196,8 +207,10 @@ void TimedTaskDialog::OnStart(wxCommandEvent& WXUNUSED(event))
 {
     bIsPaused = false;
     mStartTime = wxDateTime::Now();
-    pNotificationTimer->Start();
-    pElapsedTimer->Start();
+
+    pElapsedTimer->Start(1000/*milliseconds*/);
+    pNotificationTimer->Start(util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval()));
+
     pStopButton->Enable();
     pStartButton->Disable();
     pPauseButton->Enable();
@@ -232,7 +245,6 @@ void TimedTaskDialog::OnPause(wxCommandEvent& WXUNUSED(event))
 
 void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 {
-    // TODO Handle case when coming from Pause -> Stop
     mEndTime = wxDateTime::Now();
     pNotificationTimer->Stop();
     pElapsedTimer->Stop();

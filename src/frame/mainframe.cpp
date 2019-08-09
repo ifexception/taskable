@@ -79,9 +79,6 @@ MainFrame::~MainFrame()
     if (pTaskBarIcon != nullptr) {
         delete pTaskBarIcon; // TODO Wrap TaskBarIcon in a std::unique_ptr
     }
-
-    pTaskState->mTimes.clear();
-    pTaskStorage->mTimes.clear();
 }
 
 bool MainFrame::RunWizard()
