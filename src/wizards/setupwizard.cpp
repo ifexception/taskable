@@ -33,7 +33,12 @@
 namespace app::wizard
 {
 SetupWizard::SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger)
-    : wxWizard(frame, wxID_ANY, wxT("Setup Wizard"), wxBitmap(tasks_tracker_service), wxDefaultPosition, wxDEFAULT_DIALOG_STYLE)
+    : wxWizard(frame,
+          wxID_ANY,
+          wxT("Setup Wizard"),
+          wxBitmap(tasks_tracker_service),
+          wxDefaultPosition,
+          wxDEFAULT_DIALOG_STYLE)
     , pLogger(logger)
     , pPage1(nullptr)
     , mEmployer(wxGetEmptyString())
@@ -42,9 +47,10 @@ SetupWizard::SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger)
 {
     pPage1 = new wxWizardPageSimple(this);
 
-    wxString introWizardMessage = wxT("This wizard will help you get started with Tasks Tracker.\n"
-        "The next few pages will setup a employer, a client (which is optional), a project and a category.\n "
-        "Please press \"Next\" to begin the process.");
+    wxString introWizardMessage =
+        wxT("This wizard will help you get started with Tasks Tracker.\n"
+            "The next few pages will setup a employer, a client (which is optional), a project and a category.\n "
+            "Please press \"Next\" to begin the process.");
 
     new wxStaticText(pPage1, wxID_ANY, introWizardMessage);
 
@@ -181,9 +187,11 @@ bool SetupWizard::SetUpEntities()
     try {
         bool isAssociatedWithClient = clientId != 0;
         if (isAssociatedWithClient) {
-            dbService.create_new_project(std::string(mProject.ToUTF8()), std::string(mDisplayName.ToUTF8()), employerId, &clientId);
+            dbService.create_new_project(
+                std::string(mProject.ToUTF8()), std::string(mDisplayName.ToUTF8()), employerId, &clientId);
         } else {
-            dbService.create_new_project(std::string(mProject.ToUTF8()), std::string(mDisplayName.ToUTF8()), employerId, nullptr);
+            dbService.create_new_project(
+                std::string(mProject.ToUTF8()), std::string(mDisplayName.ToUTF8()), employerId, nullptr);
         }
         projectId = dbService.get_last_insert_rowid();
     } catch (const db::database_exception& e) {
@@ -200,9 +208,11 @@ bool SetupWizard::SetUpEntities()
     return true;
 }
 
+// clang-format off
 wxBEGIN_EVENT_TABLE(AddEmployerAndClientPage, wxWizardPageSimple)
     EVT_WIZARD_CANCEL(wxID_ANY, AddEmployerAndClientPage::OnWizardCancel)
 wxEND_EVENT_TABLE()
+// clang-format on
 
 AddEmployerAndClientPage::AddEmployerAndClientPage(SetupWizard* parent)
     : wxWizardPageSimple(parent)
@@ -216,8 +226,9 @@ AddEmployerAndClientPage::AddEmployerAndClientPage(SetupWizard* parent)
     pEmployerCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), 0);
     sizer->Add(pEmployerCtrl, 0, wxALL, 5);
 
-    wxString employerHelpMessage = wxT("Specify a descriptive employer name.\n"
-        "An employer is whoever you work for and under who all data will be grouped under");
+    wxString employerHelpMessage =
+        wxT("Specify a descriptive employer name.\n"
+            "An employer is whoever you work for and under who all data will be grouped under");
     auto employerHelpText = new wxStaticText(this, wxID_ANY, employerHelpMessage);
     sizer->Add(employerHelpText, 0, wxALL, 5);
 
@@ -227,15 +238,17 @@ AddEmployerAndClientPage::AddEmployerAndClientPage(SetupWizard* parent)
     pClientCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), 0);
     sizer->Add(pClientCtrl, 0, wxALL, 5);
 
-    wxString clientHelpMessage = wxT("Specify a descriptive name for a client.\n"
-        "If your employer has multiple clients and you work with them then you can add a client\n"
-        "A client is, however, optional and can be safely skipped if you do not deal with clients");
+    wxString clientHelpMessage =
+        wxT("Specify a descriptive name for a client.\n"
+            "If your employer has multiple clients and you work with them then you can add a client\n"
+            "A client is, however, optional and can be safely skipped if you do not deal with clients");
     auto clientHelpText = new wxStaticText(this, wxID_ANY, clientHelpMessage);
     sizer->Add(clientHelpText, 0, wxALL, 5);
 
     SetSizer(sizer);
     sizer->Fit(this);
 }
+
 bool AddEmployerAndClientPage::TransferDataFromWindow()
 {
     const wxString employer = pEmployerCtrl->GetValue().Trim();
@@ -254,15 +267,19 @@ bool AddEmployerAndClientPage::TransferDataFromWindow()
 
 void AddEmployerAndClientPage::OnWizardCancel(wxWizardEvent& event)
 {
-    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"), wxT("Tasks Tracker Wizard"), wxICON_QUESTION | wxYES_NO);
+    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"),
+        wxT("Tasks Tracker Wizard"),
+        wxICON_QUESTION | wxYES_NO);
     if (userResponse == wxNO) {
         event.Veto();
     }
 }
 
+// clang-format off
 wxBEGIN_EVENT_TABLE(AddProjectPage, wxWizardPageSimple)
     EVT_WIZARD_CANCEL(wxID_ANY, AddProjectPage::OnWizardCancel)
 wxEND_EVENT_TABLE()
+// clang-format on
 
 AddProjectPage::AddProjectPage(SetupWizard* parent)
     : wxWizardPageSimple(parent)
@@ -272,7 +289,8 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
 
     wxString infoMessage = wxGetEmptyString();
     if (!pParent->GetClient().empty()) {
-        infoMessage = wxString::Format("Add a project for employer: %s and client: %s", pParent->GetEmployer(), pParent->GetClient());
+        infoMessage = wxString::Format(
+            "Add a project for employer: %s and client: %s", pParent->GetEmployer(), pParent->GetClient());
     } else {
         infoMessage = wxString::Format("Add a project for employer: %s", pParent->GetEmployer());
     }
@@ -287,7 +305,8 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
     sizer->Add(pNameCtrl, 0, wxALL, 5);
 
     wxString projectNameHelpMessage = wxT("Specify a descriptive project name.\n"
-        "A project is a undertaking of a business for a client or for itself carried out individually or in a group to achieve a business goal");
+                                          "A project is a undertaking of a business for a client or for itself carried "
+                                          "out individually or in a group to achieve a business goal");
     auto projectNameHelpText = new wxStaticText(this, wxID_ANY, projectNameHelpMessage);
     sizer->Add(projectNameHelpText, 0, wxALL, 5);
 
@@ -298,7 +317,8 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
     sizer->Add(pDisplayNameCtrl, 0, wxALL, 5);
 
     wxString displayNameHelpMessage = wxT("Specify a shortened version of the project name.\n"
-        "Similar to a project name, a display name is merely a shortened version of the project name to aid in readability, identification and display");
+                                          "Similar to a project name, a display name is merely a shortened version of "
+                                          "the project name to aid in readability, identification and display");
     auto displayNameHelpText = new wxStaticText(this, wxID_ANY, displayNameHelpMessage);
     sizer->Add(displayNameHelpText, 0, wxALL, 5);
 
@@ -328,15 +348,19 @@ bool AddProjectPage::TransferDataFromWindow()
 
 void AddProjectPage::OnWizardCancel(wxWizardEvent& event)
 {
-    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"), wxT("Tasks Tracker Wizard"), wxICON_QUESTION | wxYES_NO);
+    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"),
+        wxT("Tasks Tracker Wizard"),
+        wxICON_QUESTION | wxYES_NO);
     if (userResponse == wxNO) {
         event.Veto();
     }
 }
 
+// clang-format off
 wxBEGIN_EVENT_TABLE(AddCategoriesPage, wxWizardPageSimple)
 EVT_WIZARD_CANCEL(wxID_ANY, AddCategoriesPage::OnWizardCancel)
 wxEND_EVENT_TABLE()
+// clang-format on
 
 AddCategoriesPage::AddCategoriesPage(SetupWizard* parent)
     : wxWizardPageSimple(parent)
@@ -354,8 +378,9 @@ AddCategoriesPage::AddCategoriesPage(SetupWizard* parent)
     pNameCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), 0);
     sizer->Add(pNameCtrl, 0, wxALL, 5);
 
-    wxString categoryNameHelpMessage = wxT("Specify a category for the project.\n"
-        "A category is the specific type of task you worked on or did for said project, e.g. \"meetings\"");
+    wxString categoryNameHelpMessage =
+        wxT("Specify a category for the project.\n"
+            "A category is the specific type of task you worked on or did for said project, e.g. \"meetings\"");
     auto categoryNameHelpText = new wxStaticText(this, wxID_ANY, categoryNameHelpMessage);
     sizer->Add(categoryNameHelpText, 0, wxALL, 5);
 
@@ -366,7 +391,8 @@ AddCategoriesPage::AddCategoriesPage(SetupWizard* parent)
     sizer->Add(pDescriptionCtrl, 0, wxALL, 5);
 
     wxString descriptionHelpMessage = wxT("Specify a description for the above category.\n"
-        "A description for the category helps you create a distinction between similar categories for different projects");
+                                          "A description for the category helps you create a distinction between "
+                                          "similar categories for different projects");
     auto descriptionHelpText = new wxStaticText(this, wxID_ANY, descriptionHelpMessage);
     sizer->Add(descriptionHelpText, 0, wxALL, 5);
 
@@ -392,9 +418,11 @@ bool AddCategoriesPage::TransferDataFromWindow()
 
 void AddCategoriesPage::OnWizardCancel(wxWizardEvent& event)
 {
-    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"), wxT("Tasks Tracker Wizard"), wxICON_QUESTION | wxYES_NO);
+    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"),
+        wxT("Tasks Tracker Wizard"),
+        wxICON_QUESTION | wxYES_NO);
     if (userResponse == wxNO) {
         event.Veto();
     }
 }
-}
+} // namespace app::wizard

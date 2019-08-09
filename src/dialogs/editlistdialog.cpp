@@ -31,13 +31,16 @@
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(EditListDialog, wxDialog);
-
+// clang-format off
 wxBEGIN_EVENT_TABLE(EditListDialog, wxDialog)
 EVT_LIST_ITEM_ACTIVATED(EditListDialog::IDC_LIST, EditListDialog::OnItemDoubleClick)
 wxEND_EVENT_TABLE()
+// clang-format on
 
-EditListDialog::EditListDialog(wxWindow* parent, dialog_type dialogType, std::shared_ptr<spdlog::logger> logger, const wxString& name)
+EditListDialog::EditListDialog(wxWindow* parent,
+    dialog_type dialogType,
+    std::shared_ptr<spdlog::logger> logger,
+    const wxString& name)
     : mType(dialogType)
     , pLogger(logger)
     , mStrategy(nullptr)
@@ -56,7 +59,13 @@ EditListDialog::~EditListDialog()
     }
 }
 
-bool EditListDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
+bool EditListDialog::Create(wxWindow* parent,
+    wxWindowID windowId,
+    const wxString& title,
+    const wxPoint& position,
+    const wxSize& size,
+    long style,
+    const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
     if (created) {
@@ -85,7 +94,8 @@ void EditListDialog::CreateControls()
     auto sizer = new wxBoxSizer(wxHORIZONTAL);
     panel->SetSizer(sizer);
 
-    pListCtrl = new wxListCtrl(panel, IDC_LIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
+    long style = wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES;
+    pListCtrl = new wxListCtrl(panel, IDC_LIST, wxDefaultPosition, wxDefaultSize, style);
     sizer->Add(pListCtrl, 1, wxEXPAND | wxALL, 5);
 
     mStrategy->CreateControl(pListCtrl);
@@ -101,26 +111,22 @@ void EditListDialog::OnItemDoubleClick(wxListEvent& event)
     int id = event.GetData();
 
     switch (mType) {
-    case dialog_type::Employer:
-    {
+    case dialog_type::Employer: {
         EmployerDialog editEmployer(this, pLogger, true, id);
         editEmployer.ShowModal();
         break;
     }
-    case dialog_type::Client:
-    {
+    case dialog_type::Client: {
         ClientDialog editClient(this, pLogger, true, id);
         editClient.ShowModal();
         break;
     }
-    case dialog_type::Project:
-    {
+    case dialog_type::Project: {
         ProjectDialog editProject(this, pLogger, true, id);
         editProject.ShowModal();
         break;
     }
-    case dialog_type::Category:
-    {
+    case dialog_type::Category: {
         CategoryDialog editCategory(this, pLogger, true, id);
         editCategory.ShowModal();
         break;
@@ -158,7 +164,8 @@ void EditListDialog::SetStrategy()
 
 Strategy::Strategy()
     : dbService()
-{ }
+{
+}
 
 void EmployerStrategy::CreateControl(wxListCtrl* control)
 {
@@ -364,4 +371,4 @@ wxSize CategoryStrategy::GetSize()
     return wxSize(360, 260);
 }
 
-}
+} // namespace app::dialog

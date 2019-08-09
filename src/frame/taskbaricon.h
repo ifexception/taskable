@@ -50,10 +50,6 @@ private:
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
 
-    enum
-    {
-        ID_ADD_TASK = wxID_HIGHEST + 1,
-        ID_SETTINGS
-    };
+    enum { ID_ADD_TASK = wxID_HIGHEST + 1, ID_SETTINGS };
 };
-}
+} // namespace app::frame

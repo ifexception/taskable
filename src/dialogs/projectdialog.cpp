@@ -30,16 +30,20 @@
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(ProjectDialog, wxDialog)
-
+// clang-format off
 wxBEGIN_EVENT_TABLE(ProjectDialog, wxDialog)
 EVT_BUTTON(ids::ID_SAVE, ProjectDialog::OnSave)
 EVT_BUTTON(wxID_CANCEL, ProjectDialog::OnCancel)
 EVT_CHOICE(ProjectDialog::IDC_EMPLOYERCHOICE, ProjectDialog::OnEmployerSelect)
 EVT_CHECKBOX(ProjectDialog::IDC_ISACTIVE, ProjectDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
+// clang-format on
 
-ProjectDialog::ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit, int projectId, const wxString& name)
+ProjectDialog::ProjectDialog(wxWindow* parent,
+    std::shared_ptr<spdlog::logger> logger,
+    bool isEdit,
+    int projectId,
+    const wxString& name)
     : pLogger(logger)
     , mNameText(wxGetEmptyString())
     , mDisplayNameText(wxGetEmptyString())
@@ -61,7 +65,13 @@ ProjectDialog::ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> l
     Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
-bool ProjectDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
+bool ProjectDialog::Create(wxWindow* parent,
+    wxWindowID windowId,
+    const wxString& title,
+    const wxPoint& position,
+    const wxSize& size,
+    long style,
+    const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
 
@@ -108,7 +118,14 @@ void ProjectDialog::CreateControls()
     auto projectName = new wxStaticText(projectDetailsPanel, wxID_STATIC, wxT("Name"));
     taskFlexGridSizer->Add(projectName, common::sizers::ControlCenterVertical);
 
-    pNameCtrl = new wxTextCtrl(projectDetailsPanel, wxID_STATIC, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT, wxDefaultValidator, wxT("project_name_ctrl"));
+    pNameCtrl = new wxTextCtrl(projectDetailsPanel,
+        wxID_STATIC,
+        wxGetEmptyString(),
+        wxDefaultPosition,
+        wxSize(150, -1),
+        wxTE_LEFT,
+        wxDefaultValidator,
+        wxT("project_name_ctrl"));
     pNameCtrl->SetToolTip(wxT("Enter a name for the project"));
     taskFlexGridSizer->Add(pNameCtrl, common::sizers::ControlDefault);
 
@@ -116,7 +133,14 @@ void ProjectDialog::CreateControls()
     auto projectDisplayName = new wxStaticText(projectDetailsPanel, wxID_STATIC, wxT("Display Name"));
     taskFlexGridSizer->Add(projectDisplayName, common::sizers::ControlCenterVertical);
 
-    pDisplayNameCtrl = new wxTextCtrl(projectDetailsPanel, wxID_STATIC, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT, wxDefaultValidator, wxT("project_display_name_ctrl"));
+    pDisplayNameCtrl = new wxTextCtrl(projectDetailsPanel,
+        wxID_STATIC,
+        wxGetEmptyString(),
+        wxDefaultPosition,
+        wxSize(150, -1),
+        wxTE_LEFT,
+        wxDefaultValidator,
+        wxT("project_display_name_ctrl"));
     pDisplayNameCtrl->SetToolTip(wxT("Enter a shortened, convenient display name for the project"));
     taskFlexGridSizer->Add(pDisplayNameCtrl, common::sizers::ControlDefault);
 
@@ -163,7 +187,8 @@ void ProjectDialog::CreateControls()
     }
 
     /* Horizontal Line*/
-    auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("project_details_static_line"));
+    auto separation_line = new wxStaticLine(
+        this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("project_details_static_line"));
     mainSizer->Add(separation_line, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
@@ -285,7 +310,6 @@ bool ProjectDialog::Validate()
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
-    // TODO: A client is optional, should check for it?
 
     return true;
 }
@@ -351,9 +375,11 @@ void ProjectDialog::OnSave(wxCommandEvent& event)
         }
         if (!bIsEdit) {
             if (mClientId == -1 || mClientId == 0) {
-                dbService.create_new_project(std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerId, nullptr);
+                dbService.create_new_project(
+                    std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerId, nullptr);
             } else {
-                dbService.create_new_project(std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerId, &mClientId);
+                dbService.create_new_project(
+                    std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerId, &mClientId);
             }
         }
     } catch (const db::database_exception& e) {
@@ -367,7 +393,6 @@ void ProjectDialog::OnCancel(wxCommandEvent& event)
 {
     bool areControlsEmpty = AreControlsEmpty();
     if (!areControlsEmpty) {
-
         int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
         if (answer == wxYES) {
             EndModal(wxID_CANCEL);
@@ -390,4 +415,4 @@ void ProjectDialog::OnIsActiveCheck(wxCommandEvent& event)
         pClientChoiceCtrl->Disable();
     }
 }
-}
+} // namespace app::dialog

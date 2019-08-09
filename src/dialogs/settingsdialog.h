@@ -31,13 +31,21 @@ class SettingsDialog : public wxDialog
 {
 public:
     SettingsDialog() = default;
-    explicit SettingsDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, const wxString& name = wxT("SettingsDialog"));
+    explicit SettingsDialog(wxWindow* parent,
+        std::shared_ptr<cfg::Configuration> config,
+        const wxString& name = wxT("SettingsDialog"));
     virtual ~SettingsDialog() = default;
 
 private:
     wxDECLARE_EVENT_TABLE();
 
-    bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
+    bool Create(wxWindow* parent,
+        wxWindowID windowId,
+        const wxString& title,
+        const wxPoint& position,
+        const wxSize& size,
+        long style,
+        const wxString& name);
     void CreateControls();
     void FillControls();
 
@@ -66,8 +74,7 @@ private:
 
     std::shared_ptr<cfg::Configuration> pConfig;
 
-    enum
-    {
+    enum {
         IDC_DIALOG_EXIT = 1,
         IDC_START_WITH_WINDOWS,
         IDC_SHOW_IN_TRAY,
@@ -82,4 +89,4 @@ private:
         IDC_NOTIFICATION_TIME_CHOICE
     };
 };
-}
+} // namespace app::dialog

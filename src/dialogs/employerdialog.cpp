@@ -30,15 +30,19 @@
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(EmployerDialog, wxDialog);
-
+// clang-format off
 wxBEGIN_EVENT_TABLE(EmployerDialog, wxDialog)
 EVT_BUTTON(ids::ID_SAVE, EmployerDialog::OnSave)
 EVT_BUTTON(wxID_CANCEL, EmployerDialog::OnCancel)
 EVT_CHECKBOX(EmployerDialog::IDC_ISACTIVE, EmployerDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
+// clang-format on
 
-EmployerDialog::EmployerDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit, int employerId, const wxString& name)
+EmployerDialog::EmployerDialog(wxWindow* parent,
+    std::shared_ptr<spdlog::logger> logger,
+    bool isEdit,
+    int employerId,
+    const wxString& name)
     : pLogger(logger)
     , mNameText(wxGetEmptyString())
     , bIsEdit(isEdit)
@@ -59,7 +63,13 @@ EmployerDialog::EmployerDialog(wxWindow* parent, std::shared_ptr<spdlog::logger>
     SetMinClientSize(wxSize(MIN_WIDTH, MIN_HEIGHT));
 }
 
-bool EmployerDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
+bool EmployerDialog::Create(wxWindow* parent,
+    wxWindowID windowId,
+    const wxString& title,
+    const wxPoint& point,
+    const wxSize& size,
+    long style,
+    const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
     if (created) {
@@ -104,7 +114,14 @@ void EmployerDialog::CreateControls()
     auto employerName = new wxStaticText(employerDetailsPanel, wxID_STATIC, wxT("Name"));
     taskFlexGridSizer->Add(employerName, common::sizers::ControlCenterVertical);
 
-    pEmployerCtrl = new wxTextCtrl(employerDetailsPanel, wxID_STATIC, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT, wxDefaultValidator, wxT("employer_name_ctrl"));
+    pEmployerCtrl = new wxTextCtrl(employerDetailsPanel,
+        wxID_STATIC,
+        wxGetEmptyString(),
+        wxDefaultPosition,
+        wxSize(150, -1),
+        wxTE_LEFT,
+        wxDefaultValidator,
+        wxT("employer_name_ctrl"));
     taskFlexGridSizer->Add(pEmployerCtrl, common::sizers::ControlDefault);
 
     if (bIsEdit) {
@@ -129,7 +146,8 @@ void EmployerDialog::CreateControls()
     }
 
     /* Horizontal Line*/
-    auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("new_task_static_line"));
+    auto separation_line = new wxStaticLine(
+        this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("new_task_static_line"));
     mainSizer->Add(separation_line, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
@@ -187,6 +205,7 @@ bool EmployerDialog::Validate()
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
+
     return true;
 }
 
@@ -230,9 +249,7 @@ void EmployerDialog::OnCancel(wxCommandEvent& event)
 {
     bool areControlsEmpty = AreControlsEmpty();
     if (!areControlsEmpty) {
-
-        int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"),
-            wxYES_NO | wxICON_QUESTION);
+        int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
         if (answer == wxYES) {
             EndModal(wxID_CANCEL);
         }
@@ -249,4 +266,4 @@ void EmployerDialog::OnIsActiveCheck(wxCommandEvent& event)
         pEmployerCtrl->Disable();
     }
 }
-}
+} // namespace app::dialog

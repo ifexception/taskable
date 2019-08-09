@@ -21,7 +21,8 @@
 
 app::services::TaskStorage::TaskStorage()
     : mTimes()
-{ }
+{
+}
 
 void app::services::TaskStorage::Store(std::shared_ptr<TaskStateService> taskState)
 {

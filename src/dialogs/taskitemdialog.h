@@ -36,18 +36,47 @@ class TaskItemDialog : public wxDialog
 {
 public:
     TaskItemDialog() = delete;
-    explicit TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit = false, int taskDetailId = 0, const wxString& name = wxT("TaskItemDialog"));
-    explicit TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, wxTimeSpan duration, const wxString& name = wxT("TaskItemDialog"));
-    explicit TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, wxDateTime startTime, wxDateTime endTime, const wxString& name = wxT("TaskItemDialog"));
+    explicit TaskItemDialog(wxWindow* parent,
+        std::shared_ptr<spdlog::logger> logger,
+        bool isEdit = false,
+        int taskDetailId = 0,
+        const wxString& name = wxT("TaskItemDialog"));
+    explicit TaskItemDialog(wxWindow* parent,
+        std::shared_ptr<spdlog::logger> logger,
+        wxTimeSpan duration,
+        const wxString& name = wxT("TaskItemDialog"));
+    explicit TaskItemDialog(wxWindow* parent,
+        std::shared_ptr<spdlog::logger> logger,
+        wxDateTime startTime,
+        wxDateTime endTime,
+        const wxString& name = wxT("TaskItemDialog"));
     virtual ~TaskItemDialog() = default;
 
 private:
     wxDECLARE_EVENT_TABLE();
 
-    bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name);
+    bool Create(wxWindow* parent,
+        wxWindowID windowId,
+        const wxString& title,
+        const wxPoint& point,
+        const wxSize& size,
+        long style,
+        const wxString& name);
 
-    bool CreateWithParam(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name);
-    bool CreateWithParams(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name);
+    bool CreateWithParam(wxWindow* parent,
+        wxWindowID windowId,
+        const wxString& title,
+        const wxPoint& point,
+        const wxSize& size,
+        long style,
+        const wxString& name);
+    bool CreateWithParams(wxWindow* parent,
+        wxWindowID windowId,
+        const wxString& title,
+        const wxPoint& point,
+        const wxSize& size,
+        long style,
+        const wxString& name);
 
     void CreateControls();
     void FillControls();
@@ -99,8 +128,7 @@ private:
 
     bool bIsPausableTask;
 
-    enum
-    {
+    enum {
         IDC_PROJECTCHOICE,
         IDC_STARTTIME,
         IDC_ENDTIME,

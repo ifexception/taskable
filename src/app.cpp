@@ -33,16 +33,18 @@ namespace app
 App::App()
     : pInstanceChecker(std::make_unique<wxSingleInstanceChecker>())
     , pConfig(std::make_shared<cfg::Configuration>())
-{ }
+{
+}
 
-App::~App()
-{ }
+App::~App() {}
 
 bool App::OnInit()
 {
     bool isInstanceAlreadyRunning = pInstanceChecker->IsAnotherRunning();
     if (isInstanceAlreadyRunning) {
-        wxMessageBox(wxT("Another instance of the application is already running."), wxT("Tasks Tracker"), wxOK_DEFAULT | wxICON_WARNING);
+        wxMessageBox(wxT("Another instance of the application is already running."),
+            wxT("Tasks Tracker"),
+            wxOK_DEFAULT | wxICON_WARNING);
         return false;
     }
 
@@ -101,8 +103,8 @@ bool App::InitializeLogging()
     spdlog::set_level(spdlog::level::warn);
 #endif
 
-    std::string logDirectory = std::string(Constants::LogsDirectory) + std::string("/") +
-        std::string(Constants::LogsFilename);
+    std::string logDirectory =
+        std::string(Constants::LogsDirectory) + std::string("/") + std::string(Constants::LogsFilename);
     spdlog::flush_every(std::chrono::seconds(3));
     try {
         pLogger = spdlog::daily_logger_st(Constants::LoggerName, logDirectory);
@@ -160,7 +162,9 @@ bool App::ConfigureRegistry()
 #endif // _DEBUG
     if (!result) {
         pLogger->critical("Unable to set registry");
-        wxMessageBox(wxT("This application requires you to run it as a Administrator"), wxT("Error"), wxOK_DEFAULT | wxICON_EXCLAMATION);
+        wxMessageBox(wxT("This application requires you to run it as a Administrator"),
+            wxT("Error"),
+            wxOK_DEFAULT | wxICON_EXCLAMATION);
         return false;
     }
     return true;

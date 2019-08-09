@@ -27,18 +27,23 @@
 
 namespace app::frame
 {
+// clang-format off
 wxBEGIN_EVENT_TABLE(TaskBarIcon, wxTaskBarIcon)
     EVT_MENU(TaskBarIcon::ID_ADD_TASK, TaskBarIcon::OnNewTask)
     EVT_MENU(TaskBarIcon::ID_SETTINGS, TaskBarIcon::OnSettings)
     EVT_MENU(wxID_EXIT, TaskBarIcon::OnExit)
     EVT_TASKBAR_LEFT_DOWN(TaskBarIcon::OnLeftButtonDown)
 wxEND_EVENT_TABLE()
+// clang-format on
 
-TaskBarIcon::TaskBarIcon(wxFrame* parent, std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger)
+TaskBarIcon::TaskBarIcon(wxFrame* parent,
+    std::shared_ptr<cfg::Configuration> config,
+    std::shared_ptr<spdlog::logger> logger)
     : pParent(parent)
     , pLogger(logger)
     , pConfig(config)
-{ }
+{
+}
 
 void TaskBarIcon::SetTaskBarIcon()
 {
@@ -83,4 +88,4 @@ void TaskBarIcon::OnLeftButtonDown(wxTaskBarIconEvent& WXUNUSED(event))
     pParent->Show();
 }
 
-}
+} // namespace app::frame

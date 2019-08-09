@@ -30,15 +30,19 @@
 
 namespace app::dialog
 {
-wxIMPLEMENT_DYNAMIC_CLASS(ClientDialog, wxDialog);
-
+// clang-format off
 wxBEGIN_EVENT_TABLE(ClientDialog, wxDialog)
-    EVT_BUTTON(ids::ID_SAVE, ClientDialog::OnSave)
-    EVT_BUTTON(wxID_CANCEL, ClientDialog::OnCancel)
-    EVT_CHECKBOX(ClientDialog::IDC_ISACTIVE, ClientDialog::OnIsActiveCheck)
+EVT_BUTTON(ids::ID_SAVE, ClientDialog::OnSave)
+EVT_BUTTON(wxID_CANCEL, ClientDialog::OnCancel)
+EVT_CHECKBOX(ClientDialog::IDC_ISACTIVE, ClientDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
+// clang-format on
 
-ClientDialog::ClientDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit, int clientId, const wxString& name)
+ClientDialog::ClientDialog(wxWindow* parent,
+    std::shared_ptr<spdlog::logger> logger,
+    bool isEdit,
+    int clientId,
+    const wxString& name)
     : pLogger(logger)
     , mNameText(wxGetEmptyString())
     , mEmployerId(-1)
@@ -59,7 +63,13 @@ ClientDialog::ClientDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> log
     Create(parent, wxID_ANY, title, wxDefaultPosition, size, style, name);
 }
 
-bool ClientDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
+bool ClientDialog::Create(wxWindow* parent,
+    wxWindowID windowId,
+    const wxString& title,
+    const wxPoint& position,
+    const wxSize& size,
+    long style,
+    const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
 
@@ -106,7 +116,14 @@ void ClientDialog::CreateControls()
     auto clientNameText = new wxStaticText(clientDetailsPanel, wxID_STATIC, wxT("Name"));
     taskFlexGridSizer->Add(clientNameText, common::sizers::ControlCenterVertical);
 
-    pNameCtrl = new wxTextCtrl(clientDetailsPanel, IDC_NAME, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT, wxDefaultValidator, wxT("client_name_ctrl"));
+    pNameCtrl = new wxTextCtrl(clientDetailsPanel,
+        IDC_NAME,
+        wxGetEmptyString(),
+        wxDefaultPosition,
+        wxSize(150, -1),
+        wxTE_LEFT,
+        wxDefaultValidator,
+        wxT("client_name_ctrl"));
     pNameCtrl->SetToolTip(wxT("Enter a name for the client"));
     taskFlexGridSizer->Add(pNameCtrl, common::sizers::ControlDefault);
 
@@ -114,7 +131,8 @@ void ClientDialog::CreateControls()
     auto employerNameText = new wxStaticText(clientDetailsPanel, wxID_STATIC, wxT("Employer"));
     taskFlexGridSizer->Add(employerNameText, common::sizers::ControlCenterVertical);
 
-    pEmployerChoiceCtrl = new wxComboBox(clientDetailsPanel, IDC_EMPLOYER, wxT("Select a employer"), wxDefaultPosition, wxDefaultSize);
+    pEmployerChoiceCtrl =
+        new wxComboBox(clientDetailsPanel, IDC_EMPLOYER, wxT("Select a employer"), wxDefaultPosition, wxDefaultSize);
     pEmployerChoiceCtrl->SetToolTip(wxT("Select a employer to associate the client with"));
     taskFlexGridSizer->Add(pEmployerChoiceCtrl, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
@@ -140,7 +158,8 @@ void ClientDialog::CreateControls()
     }
 
     /* Horizontal Line*/
-    auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("new_task_static_line"));
+    auto separationLine = new wxStaticLine(
+        this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("new_task_static_line"));
     mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
@@ -229,7 +248,7 @@ bool ClientDialog::AreControlsEmpty()
     return isEmpty;
 }
 
-void ClientDialog::OnSave(wxCommandEvent & event)
+void ClientDialog::OnSave(wxCommandEvent& event)
 {
     mNameText = pNameCtrl->GetValue();
     mEmployerId = util::VoidPointerToInt(pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()));
@@ -265,8 +284,7 @@ void ClientDialog::OnCancel(wxCommandEvent& event)
 {
     bool areControlsEmpty = AreControlsEmpty();
     if (!areControlsEmpty) {
-        int answer = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Confirm"),
-            wxYES_NO | wxICON_QUESTION);
+        int answer = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
         if (answer == wxYES) {
             EndModal(wxID_CANCEL);
         }
@@ -285,4 +303,4 @@ void ClientDialog::OnIsActiveCheck(wxCommandEvent& event)
         pEmployerChoiceCtrl->Disable();
     }
 }
-}
+} // namespace app::dialog

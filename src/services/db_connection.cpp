@@ -42,4 +42,4 @@ db_connection::db_connection()
 {
     pDatabase = new db::database("tasks-tracker.db", mPermission);
 }
-}
+} // namespace app::services

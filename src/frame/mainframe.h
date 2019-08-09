@@ -39,7 +39,9 @@ class TaskBarIcon;
 class MainFrame : public wxFrame
 {
 public:
-    MainFrame(std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger, const wxString& name = wxT("MainFrame"));
+    MainFrame(std::shared_ptr<cfg::Configuration> config,
+        std::shared_ptr<spdlog::logger> logger,
+        const wxString& name = wxT("MainFrame"));
     MainFrame(const MainFrame&) = delete;
     virtual ~MainFrame();
 
@@ -89,11 +91,6 @@ private:
     std::unique_ptr<services::TaskStorage> pTaskStorage;
     bool bHasPendingTaskToResume;
 
-    enum
-    {
-        IDC_GO_TO_DATE = wxID_HIGHEST + 1,
-        IDC_HOURS_TEXT,
-        IDC_LIST
-    };
+    enum { IDC_GO_TO_DATE = wxID_HIGHEST + 1, IDC_HOURS_TEXT, IDC_LIST };
 };
 } // namespace app::frame

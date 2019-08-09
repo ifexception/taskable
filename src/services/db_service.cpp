@@ -31,13 +31,13 @@ void db_service::create_employers_table()
 {
     // TODO Move sql queries out db_service
     const std::string query = "CREATE TABLE employers"
-        "("
-        "    employer_id INTEGER PRIMARY KEY NOT NULL,"
-        "    name TEXT NOT NULL,"
-        "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "    is_active INTEGER NOT NULL"
-        ");";
+                              "("
+                              "    employer_id INTEGER PRIMARY KEY NOT NULL,"
+                              "    name TEXT NOT NULL,"
+                              "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    is_active INTEGER NOT NULL"
+                              ");";
 
     db::command command(*db_connection::get_instance().get_database(), query);
     command.execute();
@@ -46,15 +46,15 @@ void db_service::create_employers_table()
 void db_service::create_clients_table()
 {
     const std::string query = "CREATE TABLE clients"
-        "("
-        "    client_id INTEGER PRIMARY KEY NOT NULL,"
-        "    name TEXT NOT NULL,"
-        "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "    is_active INTEGER NOT NULL,"
-        "    employer_id INTEGER NOT NULL,"
-        "    FOREIGN KEY (employer_id) REFERENCES employers(employer_id)"
-        ");";
+                              "("
+                              "    client_id INTEGER PRIMARY KEY NOT NULL,"
+                              "    name TEXT NOT NULL,"
+                              "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    is_active INTEGER NOT NULL,"
+                              "    employer_id INTEGER NOT NULL,"
+                              "    FOREIGN KEY (employer_id) REFERENCES employers(employer_id)"
+                              ");";
 
     db::command command(*db_connection::get_instance().get_database(), query);
     command.execute();
@@ -63,18 +63,18 @@ void db_service::create_clients_table()
 void db_service::create_projects_table()
 {
     const std::string query = "CREATE TABLE projects"
-        "("
-        "    project_id INTEGER PRIMARY KEY NOT NULL,"
-        "    name TEXT NOT NULL UNIQUE,"
-        "    display_name TEXT NOT NULL,"
-        "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "    is_active INTEGER NOT NULL,"
-        "    employer_id INTEGER NOT NULL,"
-        "    client_id INTEGER NULL,"
-        "    FOREIGN KEY (employer_id) REFERENCES employers(employer_id),"
-        "    FOREIGN KEY (client_id) REFERENCES clients(client_id)"
-        ");";
+                              "("
+                              "    project_id INTEGER PRIMARY KEY NOT NULL,"
+                              "    name TEXT NOT NULL UNIQUE,"
+                              "    display_name TEXT NOT NULL,"
+                              "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    is_active INTEGER NOT NULL,"
+                              "    employer_id INTEGER NOT NULL,"
+                              "    client_id INTEGER NULL,"
+                              "    FOREIGN KEY (employer_id) REFERENCES employers(employer_id),"
+                              "    FOREIGN KEY (client_id) REFERENCES clients(client_id)"
+                              ");";
 
     db::command command(*db_connection::get_instance().get_database(), query);
     command.execute();
@@ -83,16 +83,16 @@ void db_service::create_projects_table()
 void db_service::create_categories_table()
 {
     const std::string query = "CREATE TABLE categories"
-        "("
-        "    category_id INTEGER PRIMARY KEY NOT NULL,"
-        "    name TEXT NOT NULL,"
-        "    description TEXT NULL,"
-        "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "    is_active INTEGER NOT NULL,"
-        "    project_id INTEGER NOT NULL,"
-        "    FOREIGN KEY (project_id) REFERENCES projects(project_id)"
-        ");";
+                              "("
+                              "    category_id INTEGER PRIMARY KEY NOT NULL,"
+                              "    name TEXT NOT NULL,"
+                              "    description TEXT NULL,"
+                              "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    is_active INTEGER NOT NULL,"
+                              "    project_id INTEGER NOT NULL,"
+                              "    FOREIGN KEY (project_id) REFERENCES projects(project_id)"
+                              ");";
 
     db::command command(*db_connection::get_instance().get_database(), query);
     command.execute();
@@ -101,13 +101,13 @@ void db_service::create_categories_table()
 void db_service::create_tasks_table()
 {
     const std::string query = "CREATE TABLE tasks"
-        "("
-        "    task_id INTEGER PRIMARY KEY NOT NULL,"
-        "    task_date TEXT NOT NULL UNIQUE,"
-        "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "    is_active INTEGER NOT NULL"
-        ");";
+                              "("
+                              "    task_id INTEGER PRIMARY KEY NOT NULL,"
+                              "    task_date TEXT NOT NULL UNIQUE,"
+                              "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    is_active INTEGER NOT NULL"
+                              ");";
 
     db::command command(*db_connection::get_instance().get_database(), query);
     command.execute();
@@ -116,22 +116,22 @@ void db_service::create_tasks_table()
 void db_service::create_task_items_table()
 {
     const std::string query = "CREATE TABLE task_items"
-        "("
-        "    task_item_id INTEGER PRIMARY KEY NOT NULL,"
-        "    start_time TEXT NULL,"
-        "    end_time TEXT NULL,"
-        "    duration TEXT NOT NULL,"
-        "    description TEXT NOT NULL,"
-        "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-        "    is_active INTEGER NOT NULL,"
-        "    project_id INTEGER NOT NULL,"
-        "    task_id INTEGER NOT NULL,"
-        "    category_id INTEGER NOT NULL,"
-        "    FOREIGN KEY (project_id) REFERENCES projects(project_id),"
-        "    FOREIGN KEY (task_id) REFERENCES tasks(task_id),"
-        "    FOREIGN KEY (category_id) REFERENCES categories(category_id)"
-        ");";
+                              "("
+                              "    task_item_id INTEGER PRIMARY KEY NOT NULL,"
+                              "    start_time TEXT NULL,"
+                              "    end_time TEXT NULL,"
+                              "    duration TEXT NOT NULL,"
+                              "    description TEXT NOT NULL,"
+                              "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    is_active INTEGER NOT NULL,"
+                              "    project_id INTEGER NOT NULL,"
+                              "    task_id INTEGER NOT NULL,"
+                              "    category_id INTEGER NOT NULL,"
+                              "    FOREIGN KEY (project_id) REFERENCES projects(project_id),"
+                              "    FOREIGN KEY (task_id) REFERENCES tasks(task_id),"
+                              "    FOREIGN KEY (category_id) REFERENCES categories(category_id)"
+                              ");";
 
     db::command command(*db_connection::get_instance().get_database(), query);
     command.execute();
@@ -287,11 +287,14 @@ void db_service::delete_client(const int clientId, const int dateModified)
     command.execute();
 }
 
-void db_service::create_new_project(const std::string& name, const std::string& displayName, const int employerId, const int* clientId)
+void db_service::create_new_project(const std::string& name,
+    const std::string& displayName,
+    const int employerId,
+    const int* clientId)
 {
     db::command command(*db_connection::get_instance().get_database(), models::project::createNewProject);
     if (clientId == nullptr) {
-        command.binder() << name << displayName << employerId << ( void*) 0;
+        command.binder() << name << displayName << employerId << (void*) 0;
     } else {
         command.binder() << name << displayName << employerId << *clientId;
     }
@@ -314,7 +317,7 @@ std::vector<models::project> db_service::get_projects()
         project.date_created_utc = column.get<int>(3);
         project.date_modified_utc = column.get<int>(4);
         project.is_active = column.get<int>(5);
-        project.employer_name = column.get < std::string >(6);
+        project.employer_name = column.get<std::string>(6);
         if (column.get_type(7) == db::column_type::Null) {
             project.client_name = "";
         } else {
@@ -356,7 +359,7 @@ void db_service::update_project(models::project project)
 {
     db::command command(*db_connection::get_instance().get_database(), models::project::updateProject);
     if (project.client_id == 0) {
-        command.binder() << project.project_name << project.display_name << project.employer_id << ( void*) 0;
+        command.binder() << project.project_name << project.display_name << project.employer_id << (void*) 0;
     } else {
         command.binder() << project.project_name << project.display_name << project.employer_id << project.client_id;
     }
@@ -448,7 +451,8 @@ std::vector<models::category> db_service::get_categories()
 void db_service::update_category(models::category category)
 {
     db::command command(*db_connection::get_instance().get_database(), models::category::updateCategory);
-    command.binder() << category.category_name << category.description << category.project_id << category.date_modified_utc;
+    command.binder() << category.category_name << category.description << category.project_id
+                     << category.date_modified_utc;
     command.execute();
 }
 
@@ -478,7 +482,13 @@ int db_service::create_or_get_task_id(const std::string& date)
     return taskId;
 }
 
-void db_service::create_new_task_item(const int projectId, const int taskId, const std::string& startTime, const std::string& endTime, const std::string& duration, const int categoryId, const std::string& description)
+void db_service::create_new_task_item(const int projectId,
+    const int taskId,
+    const std::string& startTime,
+    const std::string& endTime,
+    const std::string& duration,
+    const int categoryId,
+    const std::string& description)
 {
     db::command command(*db_connection::get_instance().get_database(), models::task_item::createNewTaskItem);
     command.binder() << startTime << endTime << duration << description << projectId << taskId << categoryId;
@@ -540,7 +550,8 @@ void db_service::update_task_item(models::task_item task)
 {
     db::command command(*db_connection::get_instance().get_database(), models::task_item::updateTaskItem);
 
-    command.binder() << task.start_time << task.end_time << task.duration << task.description << task.date_modified_utc << task.project_id << task.category_id << task.task_item_id;
+    command.binder() << task.start_time << task.end_time << task.duration << task.description << task.date_modified_utc
+                     << task.project_id << task.category_id << task.task_item_id;
     command.execute();
 }
 

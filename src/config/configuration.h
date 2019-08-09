@@ -95,4 +95,4 @@ void Configuration::Set(const wxString& group, const wxString& key, T value)
     pConfig->Write(key, value);
     pConfig->SetPath("/");
 }
-}
+} // namespace app::cfg

@@ -34,6 +34,7 @@ wxDEFINE_EVENT(TASK_INSERTED, wxCommandEvent);
 
 namespace app::dialog
 {
+// clang-format off
 wxBEGIN_EVENT_TABLE(TaskItemDialog, wxDialog)
 EVT_BUTTON(ids::ID_SAVE, TaskItemDialog::OnSave)
 EVT_BUTTON(wxID_CANCEL, TaskItemDialog::OnCancel)
@@ -42,8 +43,13 @@ EVT_TIME_CHANGED(TaskItemDialog::IDC_STARTTIME, TaskItemDialog::OnStartTimeChang
 EVT_TIME_CHANGED(TaskItemDialog::IDC_ENDTIME, TaskItemDialog::OnEndTimeChange)
 EVT_CHECKBOX(TaskItemDialog::IDC_ISACTIVE, TaskItemDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
+// clang-format on
 
-TaskItemDialog::TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit, int taskDetailId, const wxString& name)
+TaskItemDialog::TaskItemDialog(wxWindow* parent,
+    std::shared_ptr<spdlog::logger> logger,
+    bool isEdit,
+    int taskDetailId,
+    const wxString& name)
     : pLogger(logger)
     , mTaskDate(wxGetEmptyString())
     , bIsEdit(isEdit)
@@ -66,10 +72,14 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger>
         title = wxT("Add Task");
         size.Set(395, 488);
     }
-    bool success = Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    bool success =
+        Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
-TaskItemDialog::TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, wxTimeSpan duration, const wxString& name)
+TaskItemDialog::TaskItemDialog(wxWindow* parent,
+    std::shared_ptr<spdlog::logger> logger,
+    wxTimeSpan duration,
+    const wxString& name)
     : pLogger(logger)
     , mTaskDate(wxGetEmptyString())
     , bIsEdit(false)
@@ -84,10 +94,20 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger>
     , mDuration(duration)
     , bIsPausableTask(true)
 {
-    CreateWithParam(pParent, wxID_ANY, wxT("Add Task"), wxDefaultPosition, wxSize(395, 488), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    CreateWithParam(pParent,
+        wxID_ANY,
+        wxT("Add Task"),
+        wxDefaultPosition,
+        wxSize(395, 488),
+        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        name);
 }
 
-TaskItemDialog::TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, wxDateTime startTime, wxDateTime endTime, const wxString& name)
+TaskItemDialog::TaskItemDialog(wxWindow* parent,
+    std::shared_ptr<spdlog::logger> logger,
+    wxDateTime startTime,
+    wxDateTime endTime,
+    const wxString& name)
     : pLogger(logger)
     , mTaskDate(wxGetEmptyString())
     , bIsEdit(false)
@@ -101,10 +121,22 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent, std::shared_ptr<spdlog::logger>
     , pParent(parent)
     , bIsPausableTask(false)
 {
-    CreateWithParams(pParent, wxID_ANY, wxT("Add Task"), wxDefaultPosition, wxSize(395, 488), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    CreateWithParams(pParent,
+        wxID_ANY,
+        wxT("Add Task"),
+        wxDefaultPosition,
+        wxSize(395, 488),
+        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        name);
 }
 
-bool TaskItemDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
+bool TaskItemDialog::Create(wxWindow* parent,
+    wxWindowID windowId,
+    const wxString& title,
+    const wxPoint& point,
+    const wxSize& size,
+    long style,
+    const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
 
@@ -125,7 +157,13 @@ bool TaskItemDialog::Create(wxWindow* parent, wxWindowID windowId, const wxStrin
     return created;
 }
 
-bool TaskItemDialog::CreateWithParam(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
+bool TaskItemDialog::CreateWithParam(wxWindow* parent,
+    wxWindowID windowId,
+    const wxString& title,
+    const wxPoint& point,
+    const wxSize& size,
+    long style,
+    const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
 
@@ -144,7 +182,13 @@ bool TaskItemDialog::CreateWithParam(wxWindow* parent, wxWindowID windowId, cons
     return created;
 }
 
-bool TaskItemDialog::CreateWithParams(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& point, const wxSize& size, long style, const wxString& name)
+bool TaskItemDialog::CreateWithParams(wxWindow* parent,
+    wxWindowID windowId,
+    const wxString& title,
+    const wxPoint& point,
+    const wxSize& size,
+    long style,
+    const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
 
@@ -201,7 +245,8 @@ void TaskItemDialog::CreateControls()
     auto taskStartTime = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Start Time"));
     taskFlexGridSizer->Add(taskStartTime, common::sizers::ControlCenterVertical);
 
-    pStartTimeCtrl = new wxTimePickerCtrl(taskDetailsPanel, IDC_STARTTIME, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1));
+    pStartTimeCtrl =
+        new wxTimePickerCtrl(taskDetailsPanel, IDC_STARTTIME, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1));
     pStartTimeCtrl->SetToolTip(wxT("Enter the time the task started"));
     taskFlexGridSizer->Add(pStartTimeCtrl, common::sizers::ControlDefault);
 
@@ -209,7 +254,8 @@ void TaskItemDialog::CreateControls()
     auto taskEndTime = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("End Time"));
     taskFlexGridSizer->Add(taskEndTime, common::sizers::ControlCenterVertical);
 
-    pEndTimeCtrl = new wxTimePickerCtrl(taskDetailsPanel, IDC_ENDTIME, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1));
+    pEndTimeCtrl =
+        new wxTimePickerCtrl(taskDetailsPanel, IDC_ENDTIME, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1));
     pEndTimeCtrl->SetToolTip(wxT("Enter the time the task ended"));
     taskFlexGridSizer->Add(pEndTimeCtrl, common::sizers::ControlDefault);
 
@@ -247,7 +293,8 @@ void TaskItemDialog::CreateControls()
     auto descriptionFiller = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT(""));
     taskFlexGridSizer->Add(descriptionFiller, common::sizers::ControlDefault);
 
-    pDescriptionCtrl = new wxTextCtrl(this, IDC_DESCRIPTION, wxGetEmptyString(), wxDefaultPosition, wxSize(320, 180), wxTE_MULTILINE);
+    pDescriptionCtrl =
+        new wxTextCtrl(this, IDC_DESCRIPTION, wxGetEmptyString(), wxDefaultPosition, wxSize(320, 180), wxTE_MULTILINE);
     pDescriptionCtrl->SetToolTip(wxT("Enter a description for the task"));
     detailsBoxSizer->Add(pDescriptionCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
@@ -371,13 +418,17 @@ bool TaskItemDialog::Validate()
     if (!bIsPausableTask) {
         auto isStartAheadOfEnd = mStartTime.IsLaterThan(mEndTime);
         if (isStartAheadOfEnd) {
-            wxMessageBox(wxT("A task cannot be started after the time it has ended"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+            wxMessageBox(wxT("A task cannot be started after the time it has ended"),
+                wxT("Validation failure"),
+                wxOK | wxICON_EXCLAMATION);
             return false;
         }
 
         auto isEndBeforeStart = mEndTime.IsEarlierThan(mStartTime);
         if (isEndBeforeStart) {
-            wxMessageBox(wxT("A task cannot end before the time it has started"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+            wxMessageBox(wxT("A task cannot end before the time it has started"),
+                wxT("Validation failure"),
+                wxOK | wxICON_EXCLAMATION);
             return false;
         }
 
@@ -390,7 +441,8 @@ bool TaskItemDialog::Validate()
         auto taskTimeSpan = mEndTime - mStartTime;
         auto isTaskLessThan5Minutes = taskTimeSpan.IsShorterThan(wxTimeSpan::Minutes(5));
         if (isTaskLessThan5Minutes) {
-            wxMessageBox(wxT("A task cannot be less than 5 minutes long"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+            wxMessageBox(
+                wxT("A task cannot be less than 5 minutes long"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
             return false;
         }
     }
@@ -431,16 +483,13 @@ bool TaskItemDialog::Validate()
 bool TaskItemDialog::AreControlsEmpty()
 {
     if (bIsPausableTask) {
-        bool isEmpty = (mProjectId == 0 || mProjectId == -1) &&
-            (mCategoryId == 0 || mCategoryId == -1) &&
-            mDescriptionText.empty();
+        bool isEmpty = (mProjectId == 0 || mProjectId == -1) && (mCategoryId == 0 || mCategoryId == -1) &&
+                       mDescriptionText.empty();
         return isEmpty;
     } else {
-        bool isEmpty = (mProjectId == 0 || mProjectId == -1) &&
-            mStartTime == wxDefaultDateTime &&
-            mEndTime == wxDefaultDateTime &&
-            (mCategoryId == 0 || mCategoryId == -1) &&
-            mDescriptionText.empty();
+        bool isEmpty = (mProjectId == 0 || mProjectId == -1) && mStartTime == wxDefaultDateTime &&
+                       mEndTime == wxDefaultDateTime && (mCategoryId == 0 || mCategoryId == -1) &&
+                       mDescriptionText.empty();
         return isEmpty;
     }
 }
@@ -538,7 +587,13 @@ void TaskItemDialog::OnSave(wxCommandEvent& event)
         } else if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
             dbService.delete_task_item(mTaskItemId, util::UnixTimestamp());
         } else {
-            dbService.create_new_task_item(mProjectId, taskId, std::string(startTime.ToUTF8()), std::string(endTime.ToUTF8()), std::string(mDurationText.ToUTF8()), mCategoryId, std::string(mDescriptionText.ToUTF8()));
+            dbService.create_new_task_item(mProjectId,
+                taskId,
+                std::string(startTime.ToUTF8()),
+                std::string(endTime.ToUTF8()),
+                std::string(mDurationText.ToUTF8()),
+                mCategoryId,
+                std::string(mDescriptionText.ToUTF8()));
         }
     } catch (const db::database_exception& e) {
         pLogger->error("Error occured in task_item OnSave() - {0:d} : {1}", e.get_error_code(), e.what());
@@ -553,7 +608,6 @@ void TaskItemDialog::OnCancel(wxCommandEvent& event)
 {
     bool areControlsEmpty = AreControlsEmpty();
     if (!areControlsEmpty) {
-
         int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
         if (answer == wxYES) {
             EndModal(wxID_CANCEL);

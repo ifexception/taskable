@@ -149,4 +149,4 @@ void Configuration::SetNotificationTimerInterval(int value)
 {
     Set<int>(wxT("settings"), wxT("notificationTimer"), value);
 }
-}
+} // namespace app::cfg

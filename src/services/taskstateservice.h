@@ -37,4 +37,4 @@ public:
 
     std::vector<std::tuple<wxDateTime, wxDateTime>> mTimes;
 };
-}
+} // namespace app::services

@@ -28,13 +28,7 @@
 
 namespace app::dialog
 {
-enum class dialog_type
-{
-    Employer,
-    Client,
-    Project,
-    Category
-};
+enum class dialog_type { Employer, Client, Project, Category };
 
 struct Strategy
 {
@@ -97,15 +91,23 @@ public:
 class EditListDialog final : public wxDialog
 {
 public:
-    EditListDialog() = default;
-    explicit EditListDialog(wxWindow* parent, dialog_type dialogType, std::shared_ptr<spdlog::logger> logger, const wxString& name = wxT("EditListDialog"));
+    EditListDialog() = delete;
+    explicit EditListDialog(wxWindow* parent,
+        dialog_type dialogType,
+        std::shared_ptr<spdlog::logger> logger,
+        const wxString& name = wxT("EditListDialog"));
     virtual ~EditListDialog();
 
 private:
-    wxDECLARE_DYNAMIC_CLASS(EditListDialog);
     wxDECLARE_EVENT_TABLE();
 
-    bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
+    bool Create(wxWindow* parent,
+        wxWindowID windowId,
+        const wxString& title,
+        const wxPoint& position,
+        const wxSize& size,
+        long style,
+        const wxString& name);
 
     void CreateControls();
     void DataToControls();
@@ -119,9 +121,6 @@ private:
     Strategy* mStrategy;
     dialog_type mType;
 
-    enum
-    {
-        IDC_LIST
-    };
+    enum { IDC_LIST };
 };
-}
+} // namespace app::dialog

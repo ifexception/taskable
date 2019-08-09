@@ -31,14 +31,23 @@ class ProjectDialog final : public wxDialog
 {
 public:
     ProjectDialog() = default;
-    explicit ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit = false, int projectId = 0, const wxString& name = "ProjectDialog");
+    explicit ProjectDialog(wxWindow* parent,
+        std::shared_ptr<spdlog::logger> logger,
+        bool isEdit = false,
+        int projectId = 0,
+        const wxString& name = "ProjectDialog");
     virtual ~ProjectDialog() = default;
 
 private:
-    wxDECLARE_DYNAMIC_CLASS(ProjectDialog);
     wxDECLARE_EVENT_TABLE();
 
-    bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
+    bool Create(wxWindow* parent,
+        wxWindowID windowId,
+        const wxString& title,
+        const wxPoint& position,
+        const wxSize& size,
+        long style,
+        const wxString& name);
 
     void CreateControls();
     void FillControls();
@@ -68,13 +77,6 @@ private:
     int mProjectId;
     bool bIsEdit;
 
-    enum
-    {
-        IDC_NAME,
-        IDC_DISPLAYNAME,
-        IDC_EMPLOYERCHOICE,
-        IDC_CLIENTCHOICE,
-        IDC_ISACTIVE
-    };
+    enum { IDC_NAME, IDC_DISPLAYNAME, IDC_EMPLOYERCHOICE, IDC_CLIENTCHOICE, IDC_ISACTIVE };
 };
 } // namespace app::dialog

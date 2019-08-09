@@ -31,13 +31,19 @@
 
 namespace app::dialog
 {
+// clang-format off
 wxBEGIN_EVENT_TABLE(CategoryDialog, wxDialog)
 EVT_BUTTON(ids::ID_SAVE, CategoryDialog::OnSave)
 EVT_BUTTON(wxID_CANCEL, CategoryDialog::OnCancel)
 EVT_CHECKBOX(CategoryDialog::IDC_ISACTIVE, CategoryDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
+// clang-format on
 
-CategoryDialog::CategoryDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit, int categoryId, const wxString& name)
+CategoryDialog::CategoryDialog(wxWindow* parent,
+    std::shared_ptr<spdlog::logger> logger,
+    bool isEdit,
+    int categoryId,
+    const wxString& name)
     : pLogger(logger)
     , mProjectChoiceId(-1)
     , mNameText(wxGetEmptyString())
@@ -58,7 +64,13 @@ CategoryDialog::CategoryDialog(wxWindow* parent, std::shared_ptr<spdlog::logger>
     Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
 }
 
-bool CategoryDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
+bool CategoryDialog::Create(wxWindow* parent,
+    wxWindowID windowId,
+    const wxString& title,
+    const wxPoint& position,
+    const wxSize& size,
+    long style,
+    const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
     if (created) {
@@ -114,7 +126,14 @@ void CategoryDialog::CreateControls()
     auto nameText = new wxStaticText(categoryDetailsPanel, wxID_STATIC, wxT("Name"));
     flexGridSizer->Add(nameText, common::sizers::ControlCenterVertical);
 
-    pNameCtrl = new wxTextCtrl(categoryDetailsPanel, IDC_NAME, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT, wxDefaultValidator, wxT("category_name_ctrl"));
+    pNameCtrl = new wxTextCtrl(categoryDetailsPanel,
+        IDC_NAME,
+        wxGetEmptyString(),
+        wxDefaultPosition,
+        wxSize(150, -1),
+        wxTE_LEFT,
+        wxDefaultValidator,
+        wxT("category_name_ctrl"));
     pNameCtrl->SetToolTip(wxT("Enter a name for this category"));
     flexGridSizer->Add(pNameCtrl, common::sizers::ControlDefault);
 
@@ -131,7 +150,14 @@ void CategoryDialog::CreateControls()
     auto descriptionText = new wxStaticText(categoryDetailsPanel, wxID_STATIC, wxT("Description"));
     flexGridSizer->Add(descriptionText, common::sizers::ControlCenterVertical);
 
-    pDescriptionCtrl = new wxTextCtrl(this, IDC_DESCRIPTION, wxGetEmptyString(), wxDefaultPosition, wxSize(240, 160), wxTE_MULTILINE, wxDefaultValidator, wxT("category_description_ctrl"));
+    pDescriptionCtrl = new wxTextCtrl(this,
+        IDC_DESCRIPTION,
+        wxGetEmptyString(),
+        wxDefaultPosition,
+        wxSize(240, 160),
+        wxTE_MULTILINE,
+        wxDefaultValidator,
+        wxT("category_description_ctrl"));
     pDescriptionCtrl->SetToolTip(wxT("Enter a detailed description of a task category"));
     detailsBoxSizer->Add(pDescriptionCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
@@ -150,7 +176,8 @@ void CategoryDialog::CreateControls()
     }
 
     /* Horizontal Line*/
-    auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("category_static_line"));
+    auto separationLine = new wxStaticLine(
+        this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("category_static_line"));
     mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
@@ -273,7 +300,8 @@ void CategoryDialog::OnSave(wxCommandEvent& event)
             dbService.delete_category(mCategoryId, util::UnixTimestamp());
         }
         if (!bIsEdit) {
-            dbService.create_new_category(mProjectChoiceId, std::string(mNameText.ToUTF8()), std::string(mDescriptionText.ToUTF8()));
+            dbService.create_new_category(
+                mProjectChoiceId, std::string(mNameText.ToUTF8()), std::string(mDescriptionText.ToUTF8()));
         }
     } catch (const db::database_exception& e) {
         pLogger->error("Error occured in category OnSave() - {0:d} : {1}", e.get_error_code(), e.what());
@@ -286,9 +314,7 @@ void CategoryDialog::OnCancel(wxCommandEvent& event)
 {
     bool areControlsEmpty = AreControlsEmpty();
     if (!areControlsEmpty) {
-
-        int answer = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Confirm"),
-            wxYES_NO | wxICON_QUESTION);
+        int answer = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
         if (answer == wxYES) {
             EndModal(wxID_CANCEL);
         }

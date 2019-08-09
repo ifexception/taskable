@@ -25,7 +25,8 @@ namespace app::services
 {
 TaskStateService::TaskStateService()
     : mTimes()
-{ }
+{
+}
 
 void TaskStateService::PushTimes(wxDateTime startTime, wxDateTime endTime)
 {
@@ -44,4 +45,4 @@ wxTimeSpan TaskStateService::GetAccumulatedTime()
 
     return accumulated;
 }
-}
+} // namespace app::services

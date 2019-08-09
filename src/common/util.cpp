@@ -27,15 +27,6 @@
 
 namespace app::util
 {
-std::vector<char> ReadFile(const std::string& file)
-{
-    std::ifstream cfgFile(file.c_str());
-    std::vector<char> buffer(std::istreambuf_iterator<char>{cfgFile}, std::istreambuf_iterator<char>());
-    buffer.push_back('\0');
-
-    return buffer;
-}
-
 wxString ConvertUnixTimestampToString(int timestamp)
 {
     time_t time = static_cast<time_t>(timestamp);

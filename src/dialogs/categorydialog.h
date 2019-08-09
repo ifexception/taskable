@@ -31,13 +31,23 @@ class CategoryDialog : public wxDialog
 {
 public:
     CategoryDialog() = default;
-    explicit CategoryDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit = false, int categoryId = 0, const wxString& name = "CategoryDialog");
+    explicit CategoryDialog(wxWindow* parent,
+        std::shared_ptr<spdlog::logger> logger,
+        bool isEdit = false,
+        int categoryId = 0,
+        const wxString& name = "CategoryDialog");
     virtual ~CategoryDialog() = default;
 
 private:
     wxDECLARE_EVENT_TABLE();
 
-    bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
+    bool Create(wxWindow* parent,
+        wxWindowID windowId,
+        const wxString& title,
+        const wxPoint& position,
+        const wxSize& size,
+        long style,
+        const wxString& name);
     void CreateControls();
     void FillControls();
     void DataToControls();
@@ -45,8 +55,8 @@ private:
     bool Validate();
     bool AreControlsEmpty();
 
-    void OnSave(wxCommandEvent &event);
-    void OnCancel(wxCommandEvent &event);
+    void OnSave(wxCommandEvent& event);
+    void OnCancel(wxCommandEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
 
     std::shared_ptr<spdlog::logger> pLogger;
@@ -64,12 +74,6 @@ private:
     bool bIsEdit;
     int mCategoryId;
 
-    enum
-    {
-        IDC_PROJECTCHOICE,
-        IDC_NAME,
-        IDC_DESCRIPTION,
-        IDC_ISACTIVE
-    };
+    enum { IDC_PROJECTCHOICE, IDC_NAME, IDC_DESCRIPTION, IDC_ISACTIVE };
 };
-} // app::dialog
+} // namespace app::dialog

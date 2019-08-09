@@ -25,7 +25,7 @@ namespace app::services
 {
 class db_connection
 {
-  public:
+public:
     static db_connection& get_instance();
 
     ~db_connection();
@@ -35,7 +35,7 @@ class db_connection
 
     db::database* get_database();
 
-  private:
+private:
     db_connection();
 
     db::permission mPermission;

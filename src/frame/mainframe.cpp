@@ -44,6 +44,7 @@
 
 namespace app::frame
 {
+// clang-format off
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 EVT_CLOSE(MainFrame::OnClose)
 EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
@@ -64,15 +65,19 @@ EVT_COMMAND(wxID_ANY, START_NEW_TIMED_TASK, MainFrame::OnNewTimedTaskFromPausedT
 EVT_ICONIZE(MainFrame::OnIconize)
 EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 wxEND_EVENT_TABLE()
+// clang-format on
 
-MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger, const wxString& name)
+MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
+    std::shared_ptr<spdlog::logger> logger,
+    const wxString& name)
     : wxFrame(nullptr, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(700, 500), wxDEFAULT_FRAME_STYLE, name)
     , pLogger(logger)
     , pConfig(config)
     , pTaskState(std::make_shared<services::TaskStateService>())
     , pTaskStorage(std::make_unique<services::TaskStorage>())
     , bHasPendingTaskToResume(false)
-{ }
+{
+}
 
 MainFrame::~MainFrame()
 {
@@ -154,10 +159,10 @@ void MainFrame::CreateControls()
 
     /* Accelerator Table */
     wxAcceleratorEntry entries[4];
-    entries[0].Set(wxACCEL_CTRL, (int)'N', ids::ID_NEW_TASK);
-    entries[1].Set(wxACCEL_CTRL, (int)'P', ids::ID_SETTINGS);
-    entries[2].Set(wxACCEL_CTRL, (int)'H', wxID_ABOUT);
-    entries[3].Set(wxACCEL_CTRL, (int)'Q', ids::ID_NEW_TIMED_TASK);
+    entries[0].Set(wxACCEL_CTRL, (int) 'N', ids::ID_NEW_TASK);
+    entries[1].Set(wxACCEL_CTRL, (int) 'P', ids::ID_SETTINGS);
+    entries[2].Set(wxACCEL_CTRL, (int) 'H', wxID_ABOUT);
+    entries[3].Set(wxACCEL_CTRL, (int) 'Q', ids::ID_NEW_TIMED_TASK);
 
     wxAcceleratorTable table(ARRAYSIZE(entries), entries);
     SetAcceleratorTable(table);
@@ -177,7 +182,8 @@ void MainFrame::CreateControls()
     const auto& flags = common::sizers::ControlCenterVertical;
     utilSizer->Add(gotoText, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
-    pDatePickerCtrl = new wxDatePickerCtrl(utilPanel, IDC_GO_TO_DATE, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1), wxDP_DROPDOWN);
+    pDatePickerCtrl = new wxDatePickerCtrl(
+        utilPanel, IDC_GO_TO_DATE, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1), wxDP_DROPDOWN);
     pDatePickerCtrl->SetToolTip(wxT("Select a date to navigate to"));
     utilSizer->Add(pDatePickerCtrl, common::sizers::ControlDefault);
 
@@ -192,7 +198,8 @@ void MainFrame::CreateControls()
     auto listSizer = new wxBoxSizer(wxHORIZONTAL);
     listPanel->SetSizer(listSizer);
 
-    pListCtrl = new wxListCtrl(listPanel, IDC_LIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
+    pListCtrl = new wxListCtrl(
+        listPanel, IDC_LIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES);
     pListCtrl->SetFocus();
     listSizer->Add(pListCtrl, 1, wxEXPAND | wxALL, 5);
 
@@ -250,8 +257,9 @@ void MainFrame::OnAbout(wxCommandEvent& event)
     aboutInfo.SetIcon(common::GetProgramIcon());
     aboutInfo.SetName(wxT("TasksTracker"));
     aboutInfo.SetVersion(wxString::Format("%d.%d.%d", TASKS_TRACKER_MAJOR, TASKS_TRACKER_MINOR, TASKS_TRACKER_PATCH));
-    aboutInfo.SetDescription(wxT("A desktop application to help you manage how you've spent your time on tasks during the day\n"
-        " by tracking the time you've spent on those tasks throughout the day"));
+    aboutInfo.SetDescription(
+        wxT("A desktop application to help you manage how you've spent your time on tasks during the day\n"
+            " by tracking the time you've spent on those tasks throughout the day"));
     aboutInfo.SetCopyright("(C) 2018-2019");
     aboutInfo.SetWebSite(wxT("https://github.com/ifexception/wx-tasks-tracker"));
     aboutInfo.SetLicence(common::GetLicense());
@@ -262,18 +270,14 @@ void MainFrame::OnAbout(wxCommandEvent& event)
 
 void MainFrame::OnClose(wxCloseEvent& event)
 {
-    if (pConfig->IsConfirmOnExit()
-        && event.CanVeto()) {
-        int ret = wxMessageBox(wxT("Are you sure to exit the application?"),
-            wxT("Tasks Tracker"),
-            wxICON_QUESTION | wxYES_NO);
+    if (pConfig->IsConfirmOnExit() && event.CanVeto()) {
+        int ret = wxMessageBox(
+            wxT("Are you sure to exit the application?"), wxT("Tasks Tracker"), wxICON_QUESTION | wxYES_NO);
         if (ret == wxNO) {
             event.Veto();
             return;
         }
-    } else if (pConfig->IsCloseToTray()
-        && pConfig->IsShowInTray()
-        && event.CanVeto()) {
+    } else if (pConfig->IsCloseToTray() && pConfig->IsShowInTray() && event.CanVeto()) {
         Hide();
         MSWGetTaskBarButton()->Hide();
         return;
@@ -351,9 +355,7 @@ void MainFrame::OnItemDoubleClick(wxListEvent& event)
 
 void MainFrame::OnIconize(wxIconizeEvent& event)
 {
-    if (event.IsIconized()
-        && pConfig->IsShowInTray()
-        && pConfig->IsMinimizeToTray()) {
+    if (event.IsIconized() && pConfig->IsShowInTray() && pConfig->IsMinimizeToTray()) {
         MSWGetTaskBarButton()->Hide();
     }
 }
@@ -407,9 +409,7 @@ void MainFrame::CalculateTotalTime()
     try {
         taskDurations = dbService.get_task_hours_by_id(dateString);
     } catch (const db::database_exception& e) {
-        pLogger->error("Error occured on get_task_hours_by_id() - {0:d} : {1}",
-            e.get_error_code(),
-            e.what());
+        pLogger->error("Error occured on get_task_hours_by_id() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     wxTimeSpan totalDuration;
@@ -418,7 +418,7 @@ void MainFrame::CalculateTotalTime()
 
         wxTimeSpan currentDuration(std::atol(durationSplit[0].c_str()),
             std::atol(durationSplit[1].c_str()),
-            (wxLongLong)std::atoll(durationSplit[2].c_str()));
+            (wxLongLong) std::atoll(durationSplit[2].c_str()));
 
         totalDuration += currentDuration;
     }
@@ -434,9 +434,7 @@ void MainFrame::RefreshItems(wxDateTime date)
         services::db_service dbService;
         taskItems = dbService.get_all_task_items_by_date(std::string(dateString.ToUTF8()));
     } catch (const db::database_exception& e) {
-        pLogger->error("Error occured on get_all_task_items_by_date() - {0:d} : {1}",
-            e.get_error_code(),
-            e.what());
+        pLogger->error("Error occured on get_all_task_items_by_date() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     int listIndex = 0;

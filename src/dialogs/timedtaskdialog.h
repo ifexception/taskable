@@ -36,8 +36,17 @@ class TimedTaskDialog : public wxDialog
 {
 public:
     TimedTaskDialog() = delete;
-    explicit TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<services::TaskStateService> taskState, const wxString& name = wxT("TimedTaskDialog"));
-    explicit TimedTaskDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<services::TaskStateService> taskState, bool hasPendingPausedTask, const wxString& name = wxT("TimedTaskDialog"));
+    explicit TimedTaskDialog(wxWindow* parent,
+        std::shared_ptr<cfg::Configuration> config,
+        std::shared_ptr<spdlog::logger> logger,
+        std::shared_ptr<services::TaskStateService> taskState,
+        const wxString& name = wxT("TimedTaskDialog"));
+    explicit TimedTaskDialog(wxWindow* parent,
+        std::shared_ptr<cfg::Configuration> config,
+        std::shared_ptr<spdlog::logger> logger,
+        std::shared_ptr<services::TaskStateService> taskState,
+        bool hasPendingPausedTask,
+        const wxString& name = wxT("TimedTaskDialog"));
     virtual ~TimedTaskDialog() = default;
 
     void Launch();
@@ -46,7 +55,13 @@ public:
 private:
     wxDECLARE_EVENT_TABLE();
 
-    bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
+    bool Create(wxWindow* parent,
+        wxWindowID windowId,
+        const wxString& title,
+        const wxPoint& position,
+        const wxSize& size,
+        long style,
+        const wxString& name);
 
     void CreateControls();
 
@@ -80,8 +95,7 @@ private:
     bool bWasTaskPaused;
     bool bHasPendingPausedTask;
 
-    enum
-    {
+    enum {
         IDC_ELAPSED = wxID_HIGHEST + 1,
         IDC_ACCUMULATED_TIME,
         IDC_START_NEW_TASK_CHECK,
@@ -94,4 +108,4 @@ private:
         IDC_CANCEL
     };
 };
-} // app::dialog
+} // namespace app::dialog

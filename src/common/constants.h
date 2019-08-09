@@ -18,7 +18,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-
 #pragma once
 
 #include <string>
@@ -33,7 +32,6 @@ static const char* TotalHours = "Total Hours %H:%M:%S";
 
 namespace Titles
 {
-
 }
 
 namespace Messages
@@ -42,12 +40,12 @@ static const char* SelectionRequired = "A %s selection is required!";
 static const char* IsEmpty = "%s is required. Please provide a value";
 static const char* TooShort = "%s provided is too short. Minimum length is %d";
 static const char* TooLong = "%s provided is too long. Maximum length is %d";
-}
+} // namespace Messages
 
 namespace Info
 {
 static std::string LoggerInitialized = "Logger initialized.";
-} // Info
+} // namespace Info
 
 namespace Error
 {
@@ -67,4 +65,4 @@ static std::string StatementInitialization = "Error initializing sqlite statemen
 static std::string NoRowToGet = "No row to get a column from. Run() was not called, or returned false.";
 
 } // namespace Error
-} // namespace app::db::Constants
+} // namespace app::Constants

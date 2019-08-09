@@ -38,13 +38,13 @@ namespace app
 {
 class App : public wxApp
 {
-  public:
+public:
     App();
     virtual ~App();
 
     bool OnInit() override;
 
-  private:
+private:
     bool CreateLogsDirectory();
     bool InitializeLogging();
     bool DatabaseFileExists();

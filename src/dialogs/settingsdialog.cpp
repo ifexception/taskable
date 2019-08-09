@@ -25,6 +25,7 @@
 
 namespace app::dialog
 {
+// clang-format off
 wxBEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
     EVT_CHECKBOX(IDC_BACKUP_DATABASE, SettingsDialog::OnBackupDatabaseCheck)
     EVT_CHECKBOX(IDC_SHOW_IN_TRAY, SettingsDialog::OnShowInTrayCheck)
@@ -33,6 +34,7 @@ wxBEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
     EVT_BUTTON(wxID_OK, SettingsDialog::OnOk)
     EVT_BUTTON(wxID_CANCEL, SettingsDialog::OnCancel)
 wxEND_EVENT_TABLE()
+// clang-format on
 
 SettingsDialog::SettingsDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, const wxString& name)
     : pConfig(config)
@@ -42,7 +44,13 @@ SettingsDialog::SettingsDialog(wxWindow* parent, std::shared_ptr<cfg::Configurat
     SetMinClientSize(wxSize(480, 320));
 }
 
-bool SettingsDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
+bool SettingsDialog::Create(wxWindow* parent,
+    wxWindowID windowId,
+    const wxString& title,
+    const wxPoint& position,
+    const wxSize& size,
+    long style,
+    const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
     if (created) {
@@ -105,7 +113,8 @@ void SettingsDialog::CreateControls()
     panelSizer->Add(pCloseToTray, 0, wxLEFT, 10);
     trayGridSizer->Add(panel, common::sizers::ControlDefault);
 
-    pShowBalloonNotifications = new wxCheckBox(traySettingsPanel, IDC_SHOW_BALLOON_NOTIFICATIONS, wxT("Show balloon notifications"));
+    pShowBalloonNotifications = // TODO Remove this config option
+        new wxCheckBox(traySettingsPanel, IDC_SHOW_BALLOON_NOTIFICATIONS, wxT("Show balloon notifications"));
     trayGridSizer->Add(pShowBalloonNotifications, common::sizers::ControlDefault);
 
     /* Database Settings Panel */
@@ -128,7 +137,8 @@ void SettingsDialog::CreateControls()
     auto backUpLocationText = new wxStaticText(databasePanel, wxID_ANY, wxT("Path"));
     gridSizer->Add(backUpLocationText, common::sizers::ControlCenter);
 
-    pBackupPath = new wxTextCtrl(databasePanel, IDC_BACKUP_PATH, wxGetEmptyString(), wxDefaultPosition, wxSize(256, -1), 0);
+    pBackupPath =
+        new wxTextCtrl(databasePanel, IDC_BACKUP_PATH, wxGetEmptyString(), wxDefaultPosition, wxSize(256, -1), 0);
     pBackupPath->SetEditable(false);
     gridSizer->Add(pBackupPath, common::sizers::ControlDefault);
 
@@ -146,7 +156,8 @@ void SettingsDialog::CreateControls()
     auto timedTaskGridSizer = new wxFlexGridSizer(2, 10, 10);
     timedTaskPanel->SetSizer(timedTaskGridSizer);
 
-    pMinimizeTimedTaskWindow = new wxCheckBox(timedTaskPanel, IDC_CLOSE_TIMED_TASK_WINDOW, wxT("Minimize Timed Task Window"));
+    pMinimizeTimedTaskWindow =
+        new wxCheckBox(timedTaskPanel, IDC_CLOSE_TIMED_TASK_WINDOW, wxT("Minimize Timed Task Window"));
     timedTaskGridSizer->Add(pMinimizeTimedTaskWindow, common::sizers::ControlDefault);
 
     auto minimizeTimedTaskGridFiller = new wxStaticText(timedTaskPanel, wxID_ANY, wxT(""));
@@ -161,7 +172,8 @@ void SettingsDialog::CreateControls()
     hideWindowTimeChoices.Add("3");
     hideWindowTimeChoices.Add("4");
     hideWindowTimeChoices.Add("5");
-    pHideWindowTimeChoice = new wxChoice(timedTaskPanel, IDC_HIDE_WINDOW_TIME_CHOICE, wxDefaultPosition, wxSize(150, -1), hideWindowTimeChoices);
+    pHideWindowTimeChoice = new wxChoice(
+        timedTaskPanel, IDC_HIDE_WINDOW_TIME_CHOICE, wxDefaultPosition, wxSize(150, -1), hideWindowTimeChoices);
     pHideWindowTimeChoice->SetToolTip(wxT("Hide the timed task after X amount of seconds"));
     timedTaskGridSizer->Add(pHideWindowTimeChoice, common::sizers::ControlDefault);
 
@@ -174,12 +186,14 @@ void SettingsDialog::CreateControls()
     notificationTimeChoices.Add("30");
     notificationTimeChoices.Add("45");
     notificationTimeChoices.Add("60");
-    pNotificationTimeChoice = new wxChoice(timedTaskPanel, IDC_NOTIFICATION_TIME_CHOICE, wxDefaultPosition, wxSize(150, -1), notificationTimeChoices);
+    pNotificationTimeChoice = new wxChoice(
+        timedTaskPanel, IDC_NOTIFICATION_TIME_CHOICE, wxDefaultPosition, wxSize(150, -1), notificationTimeChoices);
     pNotificationTimeChoice->SetToolTip(wxT("Select a interval in minutes for timed task notification update"));
     timedTaskGridSizer->Add(pNotificationTimeChoice, common::sizers::ControlDefault);
 
     /* Horizontal Line*/
-    auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("settings_static_line"));
+    auto separationLine = new wxStaticLine(
+        this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("settings_static_line"));
     mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
@@ -255,7 +269,9 @@ void SettingsDialog::OnOk(wxCommandEvent& WXUNUSED(event))
 
 void SettingsDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
 {
-    int ret = wxMessageBox(wxT("Are you sure you want to exit?\nAny changes you've made will be lost."), wxT("Tasks Tracker"), wxYES_NO | wxICON_QUESTION);
+    int ret = wxMessageBox(wxT("Are you sure you want to exit?\nAny changes you've made will be lost."),
+        wxT("Tasks Tracker"),
+        wxYES_NO | wxICON_QUESTION);
     if (ret == wxNO) {
         return;
     }
@@ -274,7 +290,7 @@ void SettingsDialog::OnBackupDatabaseCheck(wxCommandEvent& event)
     }
 }
 
-void SettingsDialog::OnShowInTrayCheck(wxCommandEvent & event)
+void SettingsDialog::OnShowInTrayCheck(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
         pMinimizeToTray->Enable();
@@ -296,7 +312,8 @@ void SettingsDialog::OnMinimizeTimedTaskWindowCheck(wxCommandEvent& event)
 
 void SettingsDialog::OnOpenDirectory(wxCommandEvent& WXUNUSED(event))
 {
-    auto openDirDialog = new wxDirDialog(this, wxT("Select a Backup directory"), wxEmptyString, wxDD_DEFAULT_STYLE, wxDefaultPosition);
+    auto openDirDialog =
+        new wxDirDialog(this, wxT("Select a Backup directory"), wxEmptyString, wxDD_DEFAULT_STYLE, wxDefaultPosition);
     auto res = openDirDialog->ShowModal();
     if (res == wxID_OK) {
         auto fileLocation = openDirDialog->GetPath(); // TODO: append file name with bak extension
@@ -305,4 +322,4 @@ void SettingsDialog::OnOpenDirectory(wxCommandEvent& WXUNUSED(event))
     }
     openDirDialog->Destroy();
 }
-}
+} // namespace app::dialog

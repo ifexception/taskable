@@ -66,7 +66,10 @@ struct db_service
 
     void delete_client(const int clientId, const int dateModified);
 
-    void create_new_project(const std::string& name, const std::string& displayName, const int employerId, const int* clientId);
+    void create_new_project(const std::string& name,
+        const std::string& displayName,
+        const int employerId,
+        const int* clientId);
 
     std::vector<models::project> get_projects();
 
@@ -90,7 +93,13 @@ struct db_service
 
     int create_or_get_task_id(const std::string& date);
 
-    void create_new_task_item(const int projectId, const int taskId, const std::string& startTime, const std::string& endTime, const std::string& duration, const int categoryId, const std::string& description);
+    void create_new_task_item(const int projectId,
+        const int taskId,
+        const std::string& startTime,
+        const std::string& endTime,
+        const std::string& duration,
+        const int categoryId,
+        const std::string& description);
 
     std::vector<models::task_item> get_all_task_items_by_date(const std::string& date);
 
@@ -102,4 +111,4 @@ struct db_service
 
     std::vector<std::string> get_task_hours_by_id(const std::string& date);
 };
-}
+} // namespace app::services

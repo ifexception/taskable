@@ -23,8 +23,7 @@
 
 namespace app::ids
 {
-enum class MenuIds : int
-{
+enum class MenuIds : int {
     NewEmployerId = 1,
     NewClientId = 2,
     NewProjectId = 3,
@@ -51,16 +50,10 @@ static const int ID_EDIT_PROJECT = static_cast<int>(MenuIds::EditProjectId);
 static const int ID_EDIT_CATEGORY = static_cast<int>(MenuIds::EditCategoryId);
 static const int ID_SETTINGS = static_cast<int>(MenuIds::SettingsId);
 
-enum class Events : int
-{
-    ID_SAVE = wxID_HIGHEST + 1,
-    ID_TASK_INSERTED,
-    ID_START_PAUSE,
-    ID_STOP
-};
+enum class Events : int { ID_SAVE = wxID_HIGHEST + 1, ID_TASK_INSERTED, ID_START_PAUSE, ID_STOP };
 
 static const int ID_SAVE = static_cast<int>(Events::ID_SAVE);
 static const int ID_TASK_INSERTED = static_cast<int>(Events::ID_TASK_INSERTED);
 static const int ID_START_PAUSE = static_cast<int>(Events::ID_START_PAUSE);
 static const int ID_STOP = static_cast<int>(Events::ID_STOP);
-}
+} // namespace app::ids

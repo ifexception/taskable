@@ -121,4 +121,4 @@ private:
     wxTextCtrl* pNameCtrl;
     wxTextCtrl* pDescriptionCtrl;
 };
-} // app::wizard
+} // namespace app::wizard

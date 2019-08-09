@@ -34,6 +34,7 @@ namespace app::dialog
 static const wxString ElapsedTimeText = wxT("Elapsed Time: %s");
 static const wxString AccumulatedTimeText = wxT("Time accumulated thus far: %s");
 
+// clang-format off
 wxBEGIN_EVENT_TABLE(TimedTaskDialog, wxDialog)
 EVT_CLOSE(TimedTaskDialog::OnClose)
 EVT_TIMER(TimedTaskDialog::IDC__NOTIFICATION_TIMER, TimedTaskDialog::OnTimer)
@@ -44,6 +45,7 @@ EVT_BUTTON(TimedTaskDialog::IDC_PAUSE, TimedTaskDialog::OnPause)
 EVT_BUTTON(TimedTaskDialog::IDC_STOP, TimedTaskDialog::OnStop)
 EVT_BUTTON(TimedTaskDialog::IDC_CANCEL, TimedTaskDialog::OnCancel)
 wxEND_EVENT_TABLE()
+// clang-format on
 
 TimedTaskDialog::TimedTaskDialog(wxWindow* parent,
     std::shared_ptr<cfg::Configuration> config,
@@ -91,7 +93,7 @@ TimedTaskDialog::TimedTaskDialog(wxWindow* parent,
 void TimedTaskDialog::Launch()
 {
     mStartTime = wxDateTime::Now();
-    pElapsedTimer->Start(1000/*milliseconds*/);
+    pElapsedTimer->Start(1000 /*milliseconds*/);
     pNotificationTimer->Start(util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval()));
 
     if (pConfig->IsMinimizeTimedTaskWindow()) {
@@ -119,7 +121,13 @@ void TimedTaskDialog::LaunchInPausedState()
     wxDialog::ShowModal();
 }
 
-bool TimedTaskDialog::Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name)
+bool TimedTaskDialog::Create(wxWindow* parent,
+    wxWindowID windowId,
+    const wxString& title,
+    const wxPoint& position,
+    const wxSize& size,
+    long style,
+    const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
     if (created) {
@@ -157,7 +165,8 @@ void TimedTaskDialog::CreateControls()
     pAccumulatedTimeText->SetFont(font2);
     sizer->Add(pAccumulatedTimeText, common::sizers::ControlRight);
 
-    pStartNewTask = new wxCheckBox(mainPanel, IDC_START_NEW_TASK_CHECK, wxT("Start new task when pausing current task"));
+    pStartNewTask =
+        new wxCheckBox(mainPanel, IDC_START_NEW_TASK_CHECK, wxT("Start new task when pausing current task"));
     sizer->Add(pStartNewTask, common::sizers::ControlDefault);
 
     /* Horizontal Line*/
@@ -208,7 +217,7 @@ void TimedTaskDialog::OnStart(wxCommandEvent& WXUNUSED(event))
     bIsPaused = false;
     mStartTime = wxDateTime::Now();
 
-    pElapsedTimer->Start(1000/*milliseconds*/);
+    pElapsedTimer->Start(1000 /*milliseconds*/);
     pNotificationTimer->Start(util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval()));
 
     pStopButton->Enable();
@@ -285,4 +294,4 @@ void TimedTaskDialog::OnClose(wxCloseEvent& event)
     EndModal(wxID_CLOSE);
 }
 
-} // app::dialog
+} // namespace app::dialog

@@ -29,16 +29,25 @@ namespace app::dialog
 {
 class ClientDialog : public wxDialog
 {
-    wxDECLARE_DYNAMIC_CLASS(ClientDialog);
-    wxDECLARE_EVENT_TABLE();
-
 public:
-    ClientDialog() = default;
-    explicit ClientDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, bool isEdit = false, int clientId = 0, const wxString& name = "ClientDialog");
+    ClientDialog() = delete;
+    explicit ClientDialog(wxWindow* parent,
+        std::shared_ptr<spdlog::logger> logger,
+        bool isEdit = false,
+        int clientId = 0,
+        const wxString& name = wxT("ClientDialog"));
     virtual ~ClientDialog() = default;
 
 private:
-    bool Create(wxWindow* parent, wxWindowID windowId, const wxString& title, const wxPoint& position, const wxSize& size, long style, const wxString& name);
+    wxDECLARE_EVENT_TABLE();
+
+    bool Create(wxWindow* parent,
+        wxWindowID windowId,
+        const wxString& title,
+        const wxPoint& position,
+        const wxSize& size,
+        long style,
+        const wxString& name);
     void CreateControls();
     void FillControls();
     void DataToControls();
@@ -62,11 +71,6 @@ private:
     bool bIsEdit;
     int mClientId;
 
-    enum
-    {
-        IDC_NAME,
-        IDC_EMPLOYER,
-        IDC_ISACTIVE
-    };
+    enum { IDC_NAME, IDC_EMPLOYER, IDC_ISACTIVE };
 };
 } // namespace app::dialog
