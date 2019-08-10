@@ -146,16 +146,16 @@ void EditListDialog::SetStrategy()
 
     switch (mType) {
     case dialog_type::Employer:
-        mStrategy = new EmployerStrategy();
+        mStrategy = new EmployerStrategy(pLogger);
         break;
     case dialog_type::Client:
-        mStrategy = new ClientStrategy();
+        mStrategy = new ClientStrategy(pLogger);
         break;
     case dialog_type::Project:
-        mStrategy = new ProjectStrategy();
+        mStrategy = new ProjectStrategy(pLogger);
         break;
     case dialog_type::Category:
-        mStrategy = new CategoryStrategy();
+        mStrategy = new CategoryStrategy(pLogger);
         break;
     default:
         break;
@@ -166,6 +166,10 @@ Strategy::Strategy()
     : dbService()
 {
 }
+
+EmployerStrategy::EmployerStrategy(std::shared_ptr<spdlog::logger> logger)
+    : pLogger(logger)
+{}
 
 void EmployerStrategy::CreateControl(wxListCtrl* control)
 {
@@ -191,8 +195,8 @@ void EmployerStrategy::DataToControl(wxListCtrl* control)
     std::vector<models::employer> employers;
     try {
         employers = dbService.get_employers();
-    } catch (const db::database_exception&) {
-        // TODO Log error
+    } catch (const db::database_exception& e) {
+        pLogger->error("Error occured in get_employers() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     int listIndex = 0;
@@ -210,6 +214,10 @@ wxSize EmployerStrategy::GetSize()
 {
     return wxSize(320, 260);
 }
+
+ClientStrategy::ClientStrategy(std::shared_ptr<spdlog::logger> logger)
+    : pLogger(logger)
+{}
 
 void ClientStrategy::CreateControl(wxListCtrl* control)
 {
@@ -241,8 +249,8 @@ void ClientStrategy::DataToControl(wxListCtrl* control)
     std::vector<models::client> clients;
     try {
         clients = dbService.get_clients();
-    } catch (const db::database_exception&) {
-        // TODO Log error
+    } catch (const db::database_exception& e) {
+        pLogger->error("Error occured in get_clients() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     int listIndex = 0;
@@ -261,6 +269,10 @@ wxSize ClientStrategy::GetSize()
 {
     return wxSize(360, 260);
 }
+
+ProjectStrategy::ProjectStrategy(std::shared_ptr<spdlog::logger> logger)
+    : pLogger(logger)
+{}
 
 void ProjectStrategy::CreateControl(wxListCtrl* control)
 {
@@ -298,8 +310,8 @@ void ProjectStrategy::DataToControl(wxListCtrl* control)
     std::vector<models::project> projects;
     try {
         projects = dbService.get_projects();
-    } catch (const db::database_exception&) {
-        // TODO Log error
+    } catch (const db::database_exception& e) {
+        pLogger->error("Error occured in get_projects() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     int listIndex = 0;
@@ -319,6 +331,10 @@ wxSize ProjectStrategy::GetSize()
 {
     return wxSize(400, 260);
 }
+
+CategoryStrategy::CategoryStrategy(std::shared_ptr<spdlog::logger> logger)
+    : pLogger(logger)
+{}
 
 void CategoryStrategy::CreateControl(wxListCtrl* control)
 {
@@ -350,8 +366,8 @@ void CategoryStrategy::DataToControl(wxListCtrl* control)
     std::vector<models::category> categories;
     try {
         categories = dbService.get_categories();
-    } catch (const db::database_exception&) {
-        // TODO Log error
+    } catch (const db::database_exception& e) {
+        pLogger->error("Error occured in get_categories() - {0:d} : {1}", e.get_error_code(), e.what());
     }
 
     int listIndex = 0;

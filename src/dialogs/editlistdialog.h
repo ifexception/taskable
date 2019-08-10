@@ -47,45 +47,57 @@ protected:
 struct EmployerStrategy final : public Strategy
 {
 public:
-    EmployerStrategy() = default;
+    EmployerStrategy(std::shared_ptr<spdlog::logger> logger);
     virtual ~EmployerStrategy() = default;
 
     void CreateControl(wxListCtrl* control) override;
     void DataToControl(wxListCtrl* control) override;
     wxSize GetSize() override;
+
+private:
+    std::shared_ptr<spdlog::logger> pLogger;
 };
 
 struct ClientStrategy final : public Strategy
 {
 public:
-    ClientStrategy() = default;
+    ClientStrategy(std::shared_ptr<spdlog::logger> logger);
     virtual ~ClientStrategy() = default;
 
     void CreateControl(wxListCtrl* control) override;
     void DataToControl(wxListCtrl* control) override;
     wxSize GetSize() override;
+
+private:
+    std::shared_ptr<spdlog::logger> pLogger;
 };
 
 struct ProjectStrategy final : public Strategy
 {
 public:
-    ProjectStrategy() = default;
+    ProjectStrategy(std::shared_ptr<spdlog::logger> logger);
     virtual ~ProjectStrategy() = default;
 
     void CreateControl(wxListCtrl* control) override;
     void DataToControl(wxListCtrl* control) override;
     wxSize GetSize() override;
+
+private:
+    std::shared_ptr<spdlog::logger> pLogger;
 };
 
 struct CategoryStrategy final : public Strategy
 {
 public:
-    CategoryStrategy() = default;
+    CategoryStrategy(std::shared_ptr<spdlog::logger> logger);
     virtual ~CategoryStrategy() = default;
 
     void CreateControl(wxListCtrl* control) override;
     void DataToControl(wxListCtrl* control) override;
     wxSize GetSize() override;
+
+private:
+    std::shared_ptr<spdlog::logger> pLogger;
 };
 
 class EditListDialog final : public wxDialog
