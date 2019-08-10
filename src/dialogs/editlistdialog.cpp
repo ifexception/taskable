@@ -26,7 +26,6 @@
 
 #include "../common/common.h"
 #include "../common/util.h"
-#include "../magic_enum/magic_enum.h"
 #include "../db/database_exception.h"
 
 namespace app::dialog
@@ -46,10 +45,9 @@ EditListDialog::EditListDialog(wxWindow* parent,
     , mStrategy(nullptr)
 {
     SetStrategy();
-    auto enumName = magic_enum::enum_name(mType);
-    std::string nameStr = std::string(enumName);
+    std::string title = MapEnumToValue();
     long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
-    bool success = Create(parent, wxID_ANY, wxString(nameStr), wxDefaultPosition, mStrategy->GetSize(), style, name);
+    bool success = Create(parent, wxID_ANY, wxString(title), wxDefaultPosition, mStrategy->GetSize(), style, name);
 }
 
 EditListDialog::~EditListDialog()
@@ -162,6 +160,22 @@ void EditListDialog::SetStrategy()
     }
 }
 
+std::string EditListDialog::MapEnumToValue()
+{
+    switch (mType) {
+    case dialog_type::Employer:
+        return "Employer";
+    case dialog_type::Client:
+        return "Client";
+    case dialog_type::Project:
+        return "Project";
+    case dialog_type::Category:
+        return "Category";
+    default:
+        return "";
+    }
+}
+
 Strategy::Strategy()
     : dbService()
 {
@@ -169,7 +183,8 @@ Strategy::Strategy()
 
 EmployerStrategy::EmployerStrategy(std::shared_ptr<spdlog::logger> logger)
     : pLogger(logger)
-{}
+{
+}
 
 void EmployerStrategy::CreateControl(wxListCtrl* control)
 {
@@ -217,7 +232,8 @@ wxSize EmployerStrategy::GetSize()
 
 ClientStrategy::ClientStrategy(std::shared_ptr<spdlog::logger> logger)
     : pLogger(logger)
-{}
+{
+}
 
 void ClientStrategy::CreateControl(wxListCtrl* control)
 {
@@ -272,7 +288,8 @@ wxSize ClientStrategy::GetSize()
 
 ProjectStrategy::ProjectStrategy(std::shared_ptr<spdlog::logger> logger)
     : pLogger(logger)
-{}
+{
+}
 
 void ProjectStrategy::CreateControl(wxListCtrl* control)
 {
@@ -334,7 +351,8 @@ wxSize ProjectStrategy::GetSize()
 
 CategoryStrategy::CategoryStrategy(std::shared_ptr<spdlog::logger> logger)
     : pLogger(logger)
-{}
+{
+}
 
 void CategoryStrategy::CreateControl(wxListCtrl* control)
 {

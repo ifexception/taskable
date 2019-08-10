@@ -128,6 +128,8 @@ private:
 
     void SetStrategy();
 
+    std::string MapEnumToValue();
+
     std::shared_ptr<spdlog::logger> pLogger;
     wxListCtrl* pListCtrl;
     Strategy* mStrategy;
