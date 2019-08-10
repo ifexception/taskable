@@ -48,9 +48,6 @@ public:
     bool IsCloseToTray() const;
     void SetCloseToTray(bool value);
 
-    bool IsShowBalloonNotifications() const;
-    void SetShowBalloonNotifications(bool value);
-
     bool IsBackupEnabled() const;
     void SetBackupEnabled(bool value);
 

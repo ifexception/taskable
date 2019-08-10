@@ -62,7 +62,6 @@ private:
     wxCheckBox* pShowInTray;
     wxCheckBox* pMinimizeToTray;
     wxCheckBox* pCloseToTray;
-    wxCheckBox* pShowBalloonNotifications;
 
     wxCheckBox* pBackupDatabase;
     wxTextCtrl* pBackupPath;

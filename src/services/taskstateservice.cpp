@@ -37,7 +37,7 @@ void TaskStateService::PushTimes(wxDateTime startTime, wxDateTime endTime)
 wxTimeSpan TaskStateService::GetAccumulatedTime()
 {
     wxTimeSpan accumulated;
-    for (int i = 0; i < mTimes.size(); i++) {
+    for (size_t i = 0; i < mTimes.size(); i++) {
         auto [startTime, endTime] = mTimes[i];
         auto difference = endTime - startTime;
         accumulated += difference;

@@ -90,16 +90,6 @@ void Configuration::SetCloseToTray(bool value)
     Set<bool>(wxT("settings"), wxT("closeToTray"), value);
 }
 
-bool Configuration::IsShowBalloonNotifications() const
-{
-    return Get<bool>(wxT("settings"), wxT("showBalloonNotifications"));
-}
-
-void Configuration::SetShowBalloonNotifications(bool value)
-{
-    Set<bool>(wxT("settings"), wxT("showBalloonNotifications"), value);
-}
-
 bool Configuration::IsBackupEnabled() const
 {
     return Get<bool>(wxT("settings"), wxT("backupEnabled"));

@@ -105,17 +105,12 @@ void SettingsDialog::CreateControls()
     pShowInTray = new wxCheckBox(panel, IDC_SHOW_IN_TRAY, wxT("Show in tray"));
     panelSizer->Add(pShowInTray, common::sizers::ControlDefault);
 
-    // TODO Indent the below two controls with an offset to the left
     pMinimizeToTray = new wxCheckBox(panel, IDC_MINIMIZE_TO_TRAY, wxT("Minimize application to Windows tray"));
     panelSizer->Add(pMinimizeToTray, 0, wxLEFT | wxBOTTOM, 10);
 
     pCloseToTray = new wxCheckBox(panel, IDC_CLOSE_TO_TRAY, wxT("Close application to Windows tray"));
     panelSizer->Add(pCloseToTray, 0, wxLEFT, 10);
     trayGridSizer->Add(panel, common::sizers::ControlDefault);
-
-    pShowBalloonNotifications = // TODO Remove this config option
-        new wxCheckBox(traySettingsPanel, IDC_SHOW_BALLOON_NOTIFICATIONS, wxT("Show balloon notifications"));
-    trayGridSizer->Add(pShowBalloonNotifications, common::sizers::ControlDefault);
 
     /* Database Settings Panel */
     auto databaseSettingsBox = new wxStaticBox(this, wxID_ANY, wxT("Database"));
@@ -226,7 +221,6 @@ void SettingsDialog::FillControls()
 
     pMinimizeToTray->SetValue(pConfig->IsMinimizeToTray());
     pCloseToTray->SetValue(pConfig->IsCloseToTray());
-    pShowBalloonNotifications->SetValue(pConfig->IsShowBalloonNotifications());
 
     pBackupDatabase->SetValue(pConfig->IsBackupEnabled());
     pBackupPath->SetValue(pConfig->GetBackupPath());
@@ -253,7 +247,6 @@ void SettingsDialog::OnOk(wxCommandEvent& WXUNUSED(event))
     pConfig->SetShowInTray(pShowInTray->GetValue());
     pConfig->SetMinimizeToTray(pMinimizeToTray->GetValue());
     pConfig->SetCloseToTray(pCloseToTray->GetValue());
-    pConfig->SetShowBalloonNotifications(pShowBalloonNotifications->GetValue());
 
     pConfig->SetBackupEnabled(pBackupDatabase->GetValue());
     pConfig->SetBackupPath(pBackupPath->GetValue());
