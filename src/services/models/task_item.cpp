@@ -21,44 +21,95 @@
 
 namespace app::models
 {
-const std::string task_item::createNewTaskItem = "INSERT INTO task_items (start_time, end_time, duration, description, is_active, project_id, task_id, category_id) VALUES (?, ?, ?, ?, 1, ?, ?, ?)";
-const std::string task_item::getAllTaskItemsByDate = "SELECT task_items.task_item_id, tasks.task_date, "
-                                                     "task_items.start_time, "
-                                                     "task_items.end_time, "
-                                                     "task_items.duration, "
-                                                     "task_items.description as description, "
-                                                     "categories.name as category_name, "
-                                                     "projects.display_name as project_name "
-                                                     "FROM task_items "
-                                                     "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
-                                                     "INNER JOIN categories ON task_items.category_id = categories.category_id "
-                                                     "INNER JOIN projects ON task_items.project_id = projects.project_id "
-                                                     "WHERE task_date = ?";
-const std::string task_item::getTaskItemById = "SELECT task_items.task_item_id, "
-                                               "projects.project_id,"
-                                               "projects.display_name as project_name, "
-                                               "task_items.start_time, "
-                                               "task_items.end_time, "
-                                               "task_items.duration, "
-                                               "categories.category_id, "
-                                               "categories.name as category_name, "
-                                               "task_items.description as description, "
-                                               "task_items.date_created_utc, "
-                                               "task_items.date_modified_utc, "
-                                               "task_items.is_active "
-                                               "FROM task_items "
-                                               "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
-                                               "INNER JOIN categories ON task_items.category_id = categories.category_id "
-                                               "INNER JOIN projects ON task_items.project_id = projects.project_id "
-                                               "WHERE task_item_id = ?";
-const std::string task_item::updateTaskItem = "UPDATE task_items SET start_time = ?, end_time = ?, duration = ?, description = ?, date_modified_utc = ?, project_id = ?, category_id = ? WHERE task_item_id = ?";
-const std::string task_item::deleteTaskItem = "UPDATE task_items SET is_active = 0, date_modified_utc = ? WHERE task_item_id = ?";
+const std::string task_item::createNewTaskItem =
+    "INSERT INTO task_items (start_time, end_time, duration, description, is_active, project_id, task_id, category_id) "
+    "VALUES (?, ?, ?, ?, 1, ?, ?, ?)";
+const std::string task_item::getAllTaskItemsByDate =
+    "SELECT task_items.task_item_id, tasks.task_date, "
+    "task_items.start_time, "
+    "task_items.end_time, "
+    "task_items.duration, "
+    "task_items.description as description, "
+    "categories.name as category_name, "
+    "projects.display_name as project_name "
+    "FROM task_items "
+    "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
+    "INNER JOIN categories ON task_items.category_id = categories.category_id "
+    "INNER JOIN projects ON task_items.project_id = projects.project_id "
+    "WHERE task_date = ?";
+const std::string task_item::getTaskItemById =
+    "SELECT task_items.task_item_id, "
+    "projects.project_id,"
+    "projects.display_name as project_name, "
+    "task_items.start_time, "
+    "task_items.end_time, "
+    "task_items.duration, "
+    "categories.category_id, "
+    "categories.name as category_name, "
+    "task_items.description as description, "
+    "task_items.date_created_utc, "
+    "task_items.date_modified_utc, "
+    "task_items.is_active "
+    "FROM task_items "
+    "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
+    "INNER JOIN categories ON task_items.category_id = categories.category_id "
+    "INNER JOIN projects ON task_items.project_id = projects.project_id "
+    "WHERE task_item_id = ?";
+const std::string task_item::updateTaskItem =
+    "UPDATE task_items SET start_time = ?, end_time = ?, duration = ?, description = ?, date_modified_utc = ?, "
+    "project_id = ?, category_id = ? WHERE task_item_id = ?";
+const std::string task_item::deleteTaskItem =
+    "UPDATE task_items SET is_active = 0, date_modified_utc = ? WHERE task_item_id = ?";
 
 const std::string task::getTaskId = "SELECT task_id FROM tasks WHERE task_date = ?";
 const std::string task::createTask = "INSERT INTO tasks (task_date, is_active) VALUES (?, 1)";
 const std::string task::getTaskHoursById = "SELECT task_items.duration "
                                            "FROM task_items "
                                            "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
-                                           "WHERE task_date = ?"
-;
+                                           "WHERE task_date = ?";
+task_item::task_item(int taskItemId,
+    std::string taskDate,
+    std::string startTime,
+    std::string endTime,
+    std::string duration,
+    std::string description,
+    std::string categoryName,
+    std::string projectName)
+    : task_item_id(taskItemId)
+    , task_date(taskDate)
+    , start_time(startTime)
+    , end_time(endTime)
+    , duration(duration)
+    , description(description)
+    , category_name(categoryName)
+    , project_name(project_name)
+{
 }
+
+task_item::task_item(int taskItemId,
+    int projectId,
+    std::string projectName,
+    std::string startTime,
+    std::string endTime,
+    std::string duration,
+    int categoryId,
+    std::string categoryName,
+    std::string description,
+    int dateCreatedUtc,
+    int dateModifiedUtc,
+    int isActive)
+    : task_item_id(taskItemId)
+    , project_id(projectId)
+    , project_name(projectName)
+    , start_time(startTime)
+    , end_time(endTime)
+    , duration(duration)
+    , category_id(categoryId)
+    , category_name(categoryName)
+    , description(description)
+    , date_created_utc(dateCreatedUtc)
+    , date_modified_utc(dateModifiedUtc)
+    , is_active(isActive)
+{
+}
+} // namespace app::models

@@ -26,6 +26,23 @@ namespace app::models
 struct project
 {
     project() = default;
+    explicit project(int projectId,
+        std::string projectName,
+        std::string displayName,
+        int dateCreatedUtc,
+        int dateModifiedUtc,
+        int isActive,
+        std::string employerName,
+        std::string clientName);
+    explicit project(int projectId,
+        std::string projectName,
+        std::string displayName,
+        int dateCreatedUtc,
+        int dateModifiedUtc,
+        int isActive,
+        int employerId,
+        std::string employerName,
+        std::string clientName);
     ~project() = default;
 
     int project_id;

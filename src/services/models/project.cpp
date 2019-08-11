@@ -49,4 +49,43 @@ const std::string project::getProjectById = "SELECT projects.project_id, "
                                             "WHERE projects.project_id = ?";
 const std::string project::updateProject = "UPDATE projects SET name = ?, display_name = ?, date_modified_utc = ?, employer_id = ?, client_id = ?";
 const std::string project::deleteProject = "UPDATE projects SET is_active = 0, date_modified_utc = ? WHERE project_id = ?";
+
+project::project(int projectId,
+    std::string projectName,
+    std::string displayName,
+    int dateCreatedUtc,
+    int dateModifiedUtc,
+    int isActive,
+    std::string employerName,
+    std::string clientName)
+    : project_id(projectId)
+    , project_name(projectName)
+    , display_name(displayName)
+    , date_created_utc(dateCreatedUtc)
+    , date_modified_utc(dateModifiedUtc)
+    , is_active(isActive)
+    , employer_name(employerName)
+    , client_name(clientName)
+{
 }
+project::project(int projectId,
+    std::string projectName,
+    std::string displayName,
+    int dateCreatedUtc,
+    int dateModifiedUtc,
+    int isActive,
+    int employerId,
+    std::string employerName,
+    std::string clientName)
+    : project_id(projectId)
+    , project_name(projectName)
+    , display_name(displayName)
+    , date_created_utc(dateCreatedUtc)
+    , date_modified_utc(dateModifiedUtc)
+    , is_active(isActive)
+    , employer_id(employerId)
+    , employer_name(employerName)
+    , client_name(clientName)
+{
+}
+} // namespace app::models

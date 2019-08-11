@@ -23,10 +23,10 @@
 
 #include "setupwizard.h"
 
+#include <sqlite_modern_cpp/errors.h>
 #include <wx/wx.h>
 #include <wx/file.h>
 
-#include "../db/database_exception.h"
 #include "../services/db_service.h"
 #include "../../res/icons8-service-64.xpm"
 
@@ -69,7 +69,6 @@ bool SetupWizard::Run()
 {
     auto wizardSuccess = wxWizard::RunWizard(pPage1);
     if (wizardSuccess) {
-        // TODO with upgrade to SqliteModernCpp use a transaction here
         wxStopWatch stopWatch;
         stopWatch.Start();
         CreateDatabaseFile();
@@ -142,6 +141,15 @@ void SetupWizard::CreateDatabaseFile()
     file.Create(databaseFilename);
 }
 
+void SetupWizard::DeleteDatabaseFile()
+{
+    const wxString& databaseFilename = wxT("tasks-tracker.db");
+    wxFile file;
+    if (wxFileExists(databaseFilename)) {
+        wxRemoveFile(databaseFilename);
+    }
+}
+
 bool SetupWizard::SetUpDatabase()
 {
     services::db_service dbService;
@@ -153,8 +161,8 @@ bool SetupWizard::SetUpDatabase()
         dbService.create_categories_table();
         dbService.create_tasks_table();
         dbService.create_task_items_table();
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured on create_X_table() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured on create_X_table() - {0:d} : {1}", e.get_code(), e.what());
         return false;
     }
     return true;
@@ -167,8 +175,8 @@ bool SetupWizard::SetUpEntities()
     try {
         dbService.create_new_employer(std::string(mEmployer.ToUTF8()));
         employerId = dbService.get_last_insert_rowid();
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured on create_new_employer() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured on create_new_employer() - {0:d} : {1}", e.get_code(), e.what());
         return false;
     }
 
@@ -177,8 +185,8 @@ bool SetupWizard::SetUpEntities()
         try {
             dbService.create_new_client(std::string(mClient.ToUTF8()), employerId);
             clientId = dbService.get_last_insert_rowid();
-        } catch (const db::database_exception& e) {
-            pLogger->error("Error occured on create_new_client() - {0:d} : {1}", e.get_error_code(), e.what());
+        } catch (const sqlite::sqlite_exception& e) {
+            pLogger->error("Error occured on create_new_client() - {0:d} : {1}", e.get_code(), e.what());
             return false;
         }
     }
@@ -194,15 +202,15 @@ bool SetupWizard::SetUpEntities()
                 std::string(mProject.ToUTF8()), std::string(mDisplayName.ToUTF8()), employerId, nullptr);
         }
         projectId = dbService.get_last_insert_rowid();
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured on create_new_project() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured on create_new_project() - {0:d} : {1}", e.get_code(), e.what());
         return false;
     }
 
     try {
         dbService.create_new_category(projectId, std::string(mCategory.ToUTF8()), std::string(mDescription.ToUTF8()));
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured on create_new_category() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured on create_new_category() - {0:d} : {1}", e.get_code(), e.what());
         return false;
     }
     return true;

@@ -24,6 +24,17 @@ namespace app::models
 const std::string employer::createNewEmployer = "INSERT INTO employers (name, is_active) VALUES (?, 1);";
 const std::string employer::getEmployers = "SELECT * FROM employers WHERE is_active = 1;";
 const std::string employer::getEmployer = "SELECT * FROM employers WHERE employer_id = ?";
-const std::string employer::updateEmployer = "UPDATE employers SET name = ?, date_modified_utc = ? WHERE employer_id = ?";
-const std::string employer::deleteEmployer = "UPDATE employers SET is_active = 0, date_modified_utc = ? WHERE employer_id = ?";
+const std::string employer::updateEmployer =
+    "UPDATE employers SET name = ?, date_modified_utc = ? WHERE employer_id = ?";
+const std::string employer::deleteEmployer =
+    "UPDATE employers SET is_active = 0, date_modified_utc = ? WHERE employer_id = ?";
+
+employer::employer(int employerId, std::string employerName, int dateCreatedUtc, int dateModifiedUtc, int isActive)
+    : employer_id(employerId)
+    , employer_name(employerName)
+    , date_created_utc(dateCreatedUtc)
+    , date_modified_utc(dateModifiedUtc)
+    , is_active(isActive)
+{
 }
+} // namespace app::models

@@ -43,4 +43,34 @@ const std::string client::getClientById = "SELECT clients.client_id, "
                                           "WHERE clients.client_id = ?";
 const std::string client::updateClient = "UPDATE clients SET name = ?, date_modified_utc = ?, employer_id = ? WHERE client_id = ?";
 const std::string client::deleteClient = "UPDATE clients SET is_active = 0, date_modified_utc = ? WHERE client_id = ?";
+
+client::client(int clientId,
+    std::string clientName,
+    int dateCreatedUtc,
+    int dateModifiedUtc,
+    int isActive,
+    int employerId)
+    : client_id(clientId)
+    , client_name(clientName)
+    , date_created_utc(dateCreatedUtc)
+    , date_modified_utc(dateModifiedUtc)
+    , is_active(isActive)
+    , employer_id(employerId)
+{
 }
+
+client::client(int clientId,
+    std::string clientName,
+    int dateCreatedUtc,
+    int dateModifiedUtc,
+    int isActive,
+    std::string employerName)
+    : client_id(clientId)
+    , client_name(clientName)
+    , date_created_utc(dateCreatedUtc)
+    , date_modified_utc(dateModifiedUtc)
+    , is_active(isActive)
+    , employer_name(employerName)
+{
+}
+} // namespace app::models

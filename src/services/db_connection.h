@@ -19,26 +19,24 @@
 
 #pragma once
 
-#include "../db/database.h"
-
+#include <sqlite_modern_cpp.h>
 namespace app::services
 {
-class db_connection
+class db_connection final
 {
 public:
     static db_connection& get_instance();
 
-    ~db_connection();
+    ~db_connection() = default;
 
     db_connection(const db_connection&) = delete;
     db_connection& operator=(const db_connection&) = delete;
 
-    db::database* get_database();
+    sqlite::database get_handle();
 
 private:
     db_connection();
 
-    db::permission mPermission;
-    db::database* pDatabase;
+    sqlite::database mDatabase;
 };
 } // namespace app::services

@@ -19,13 +19,13 @@
 
 #include "clientdialog.h"
 
+#include <sqlite_modern_cpp/errors.h>
 #include <wx/statline.h>
 
 #include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
 #include "../common/util.h"
-#include "../db/database_exception.h"
 #include "../services/db_service.h"
 
 namespace app::dialog
@@ -181,8 +181,8 @@ void ClientDialog::FillControls()
     std::vector<models::employer> employers;
     try {
         employers = dbService.get_employers();
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured on get_employers() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured on get_employers() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (auto employer : employers) {
@@ -196,8 +196,8 @@ void ClientDialog::DataToControls()
     models::client client;
     try {
         client = dbService.get_client_by_id(mClientId);
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured on get_client_by_id() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured on get_client_by_id() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     pNameCtrl->SetValue(client.client_name);
@@ -274,8 +274,8 @@ void ClientDialog::OnSave(wxCommandEvent& event)
         if (!bIsEdit) {
             clientService.create_new_client(std::string(mNameText.ToUTF8()), mEmployerId);
         }
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured on client OnSave() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured on client OnSave() - {0:d} : {1}", e.get_code(), e.what());
     }
     EndModal(ids::ID_SAVE);
 }
