@@ -41,7 +41,8 @@ const std::string client::getClientById = "SELECT clients.client_id, "
                                           "FROM clients "
                                           "INNER JOIN employers ON clients.employer_id = employers.employer_id "
                                           "WHERE clients.client_id = ?";
-const std::string client::updateClient = "UPDATE clients SET name = ?, date_modified_utc = ?, employer_id = ? WHERE client_id = ?";
+const std::string client::updateClient =
+    "UPDATE clients SET name = ?, date_modified_utc = ?, employer_id = ? WHERE client_id = ?";
 const std::string client::deleteClient = "UPDATE clients SET is_active = 0, date_modified_utc = ? WHERE client_id = ?";
 
 client::client(int clientId,

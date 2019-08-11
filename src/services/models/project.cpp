@@ -21,7 +21,8 @@
 
 namespace app::models
 {
-const std::string project::createNewProject = "INSERT INTO projects(name, display_name, is_active, employer_id, client_id) VALUES(? , ? , 1, ? , ? )";
+const std::string project::createNewProject =
+    "INSERT INTO projects(name, display_name, is_active, employer_id, client_id) VALUES(? , ? , 1, ? , ? )";
 const std::string project::getProjects = "SELECT projects.project_id, "
                                          "projects.name AS project_name, "
                                          "projects.display_name, "
@@ -47,8 +48,10 @@ const std::string project::getProjectById = "SELECT projects.project_id, "
                                             "INNER JOIN employers ON projects.employer_id = employers.employer_id "
                                             "LEFT JOIN clients ON projects.client_id = clients.client_id "
                                             "WHERE projects.project_id = ?";
-const std::string project::updateProject = "UPDATE projects SET name = ?, display_name = ?, date_modified_utc = ?, employer_id = ?, client_id = ?";
-const std::string project::deleteProject = "UPDATE projects SET is_active = 0, date_modified_utc = ? WHERE project_id = ?";
+const std::string project::updateProject =
+    "UPDATE projects SET name = ?, display_name = ?, date_modified_utc = ?, employer_id = ?, client_id = ?";
+const std::string project::deleteProject =
+    "UPDATE projects SET is_active = 0, date_modified_utc = ? WHERE project_id = ?";
 
 project::project(int projectId,
     std::string projectName,
