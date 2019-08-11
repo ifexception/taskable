@@ -74,11 +74,13 @@ bool SetupWizard::Run()
         CreateDatabaseFile();
         bool success = SetUpDatabase();
         if (!success) {
+            DeleteDatabaseFile();
             return false;
         }
 
         success = SetUpEntities();
         if (!success) {
+            DeleteDatabaseFile();
             return false;
         }
 
