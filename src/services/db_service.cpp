@@ -521,7 +521,7 @@ std::vector<models::task_item> db_service::get_all_task_items_by_date(const std:
            std::string duration,
            std::string description,
            std::string categoryName,
-           std::string projectName){
+           std::string projectName) {
            models::task_item taskItem(taskItemId,
                taskDate,
                startTime != nullptr ? *startTime : "",

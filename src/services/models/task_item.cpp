@@ -82,7 +82,7 @@ task_item::task_item(int taskItemId,
     , duration(duration)
     , description(description)
     , category_name(categoryName)
-    , project_name(project_name)
+    , project_name(projectName)
 {
 }
 
