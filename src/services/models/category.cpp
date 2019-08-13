@@ -21,7 +21,8 @@
 
 namespace app::models
 {
-const std::string category::createNewCategory = "INSERT INTO categories (name, description, is_active, project_id) VALUES (?, ?, 1, ?)";
+const std::string category::createNewCategory =
+    "INSERT INTO categories (name, description, is_active, project_id) VALUES (?, ?, 1, ?)";
 const std::string category::getCategoriesByProjectId = "SELECT * FROM categories WHERE project_id = ?";
 const std::string category::getCategoryById = "SELECT categories.category_id, "
                                               "categories.name AS category_name, "
@@ -43,6 +44,42 @@ const std::string category::getCategories = "SELECT categories.category_id, "
                                             "FROM categories "
                                             "INNER JOIN projects ON categories.project_id = projects.project_id "
                                             "WHERE categories.is_active = 1";
-const std::string category::updateCategory = "UPDATE categories SET name = ?, description = ?, project_id = ?, date_modified_utc = ? WHERE category_id = ?";
-const std::string category::deleteCategory = "UPDATE categories SET is_active = 0, date_modified_utc = ? WHERE category_id = ?";
+const std::string category::updateCategory =
+    "UPDATE categories SET name = ?, description = ?, project_id = ?, date_modified_utc = ? WHERE category_id = ?";
+const std::string category::deleteCategory =
+    "UPDATE categories SET is_active = 0, date_modified_utc = ? WHERE category_id = ?";
+
+category::category(int categoryId,
+    std::string categoryName,
+    std::string description,
+    int dateCreatedUtc,
+    int dateModifiedUtc,
+    int isActive,
+    int projectId)
+    : category_id(categoryId)
+    , category_name(categoryName)
+    , description(description)
+    , date_created_utc(dateCreatedUtc)
+    , date_modified_utc(dateModifiedUtc)
+    , is_active(isActive)
+    , project_id(projectId)
+{
 }
+
+category::category(int categoryId,
+    std::string categoryName,
+    std::string description,
+    int dateCreatedUtc,
+    int dateModifiedUtc,
+    int isActive,
+    std::string projectName)
+    : category_id(categoryId)
+    , category_name(categoryName)
+    , description(description)
+    , date_created_utc(dateCreatedUtc)
+    , date_modified_utc(dateModifiedUtc)
+    , is_active(isActive)
+    , project_name(projectName)
+{
+}
+} // namespace app::models

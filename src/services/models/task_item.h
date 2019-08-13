@@ -26,6 +26,26 @@ namespace app::models
 struct task_item
 {
     task_item() = default;
+    explicit task_item(int taskItemId,
+        std::string taskDate,
+        std::string startTime,
+        std::string endTime,
+        std::string duration,
+        std::string description,
+        std::string categoryName,
+        std::string projectName);
+    explicit task_item(int taskItemId,
+        int projectId,
+        std::string projectName,
+        std::string startTime,
+        std::string endTime,
+        std::string duration,
+        int categoryId,
+        std::string categoryName,
+        std::string description,
+        int dateCreatedUtc,
+        int dateModifiedUtc,
+        int isActive);
     ~task_item() = default;
 
     int task_item_id;

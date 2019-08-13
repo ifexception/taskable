@@ -19,6 +19,7 @@
 
 #include "taskitemdialog.h"
 
+#include <sqlite_modern_cpp/errors.h>
 #include <wx/timectrl.h>
 #include <wx/dateevt.h>
 #include <wx/statline.h>
@@ -28,7 +29,6 @@
 #include "../common/ids.h"
 #include "../common/util.h"
 #include "../services/db_service.h"
-#include "../db/database_exception.h"
 
 wxDEFINE_EVENT(TASK_INSERTED, wxCommandEvent);
 
@@ -336,8 +336,8 @@ void TaskItemDialog::FillControls()
     services::db_service dbService;
     try {
         projects = dbService.get_projects();
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured in get_projects() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in get_projects() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (auto project : projects) {
@@ -351,8 +351,8 @@ void TaskItemDialog::DataToControls()
     models::task_item taskItem;
     try {
         taskItem = dbService.get_task_item_by_id(mTaskItemId);
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured in get_task_item_by_id() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in get_task_item_by_id() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     pProjectChoiceCtrl->SetStringSelection(taskItem.project_name);
@@ -406,8 +406,8 @@ int TaskItemDialog::GetTaskId()
     int taskId = 0;
     try {
         taskId = dbService.create_or_get_task_id(mTaskDate);
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured in create_or_get_task_id() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in create_or_get_task_id() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     return taskId;
@@ -595,8 +595,8 @@ void TaskItemDialog::OnSave(wxCommandEvent& event)
                 mCategoryId,
                 std::string(mDescriptionText.ToUTF8()));
         }
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured in task_item OnSave() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in task_item OnSave() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     OnTaskSaved();
@@ -636,8 +636,8 @@ void TaskItemDialog::FillCategoryControl(int projectId)
     try {
         services::db_service dbService;
         categories = dbService.get_categories_by_project_id(projectId);
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured in get_categories_by_project_id() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in get_categories_by_project_id() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (auto category : categories) {

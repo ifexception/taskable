@@ -51,6 +51,7 @@ public:
 
 private:
     void CreateDatabaseFile();
+    void DeleteDatabaseFile();
     bool SetUpDatabase();
     bool SetUpEntities();
 

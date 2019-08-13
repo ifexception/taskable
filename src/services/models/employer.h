@@ -26,6 +26,7 @@ namespace app::models
 struct employer
 {
     employer() = default;
+    explicit employer(int employerId, std::string employerName, int dateCreatedUtc, int dateModifiedUtc, int isActive);
     ~employer() = default;
 
     int employer_id;
@@ -40,4 +41,4 @@ struct employer
     static const std::string updateEmployer;
     static const std::string deleteEmployer;
 };
-}
+} // namespace app::models

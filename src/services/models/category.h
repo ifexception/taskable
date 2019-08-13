@@ -26,6 +26,20 @@ namespace app::models
 struct category
 {
     category() = default;
+    explicit category(int categoryId,
+        std::string categoryName,
+        std::string description,
+        int dateCreatedUtc,
+        int dateModifiedUtc,
+        int isActive,
+        int projectId);
+    explicit category(int categoryId,
+        std::string categoryName,
+        std::string description,
+        int dateCreatedUtc,
+        int dateModifiedUtc,
+        int isActive,
+        std::string projectName);
     ~category() = default;
 
     int category_id;

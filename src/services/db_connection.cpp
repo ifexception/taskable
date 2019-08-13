@@ -27,19 +27,14 @@ db_connection& db_connection::get_instance()
     return instance;
 }
 
-db_connection::~db_connection()
+sqlite::database db_connection::get_handle()
 {
-    delete pDatabase;
-}
-
-db::database* db_connection::get_database()
-{
-    return pDatabase;
+    return mDatabase;
 }
 
 db_connection::db_connection()
-    : mPermission(db::permission::ReadWrite)
+    : mDatabase("tasks-tracker.db",
+          sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 })
 {
-    pDatabase = new db::database("tasks-tracker.db", mPermission);
 }
 } // namespace app::services

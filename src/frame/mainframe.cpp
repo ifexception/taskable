@@ -21,6 +21,7 @@
 
 #include <vector>
 
+#include <sqlite_modern_cpp/errors.h>
 #include <wx/aboutdlg.h>
 #include <wx/taskbarbutton.h>
 
@@ -38,7 +39,6 @@
 #include "../dialogs/settingsdialog.h"
 #include "../dialogs/timedtaskdialog.h"
 #include "../services/db_service.h"
-#include "../db/database_exception.h"
 #include "../wizards/setupwizard.h"
 #include "taskbaricon.h"
 
@@ -408,8 +408,8 @@ void MainFrame::CalculateTotalTime()
 
     try {
         taskDurations = dbService.get_task_hours_by_id(dateString);
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured on get_task_hours_by_id() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured on get_task_hours_by_id() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     wxTimeSpan totalDuration;
@@ -433,8 +433,8 @@ void MainFrame::RefreshItems(wxDateTime date)
     try {
         services::db_service dbService;
         taskItems = dbService.get_all_task_items_by_date(std::string(dateString.ToUTF8()));
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured on get_all_task_items_by_date() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured on get_all_task_items_by_date() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     int listIndex = 0;

@@ -21,7 +21,8 @@
 
 namespace app::models
 {
-const std::string project::createNewProject = "INSERT INTO projects(name, display_name, is_active, employer_id, client_id) VALUES(? , ? , 1, ? , ? )";
+const std::string project::createNewProject =
+    "INSERT INTO projects(name, display_name, is_active, employer_id, client_id) VALUES(? , ? , 1, ? , ? )";
 const std::string project::getProjects = "SELECT projects.project_id, "
                                          "projects.name AS project_name, "
                                          "projects.display_name, "
@@ -47,6 +48,47 @@ const std::string project::getProjectById = "SELECT projects.project_id, "
                                             "INNER JOIN employers ON projects.employer_id = employers.employer_id "
                                             "LEFT JOIN clients ON projects.client_id = clients.client_id "
                                             "WHERE projects.project_id = ?";
-const std::string project::updateProject = "UPDATE projects SET name = ?, display_name = ?, date_modified_utc = ?, employer_id = ?, client_id = ?";
-const std::string project::deleteProject = "UPDATE projects SET is_active = 0, date_modified_utc = ? WHERE project_id = ?";
+const std::string project::updateProject =
+    "UPDATE projects SET name = ?, display_name = ?, date_modified_utc = ?, employer_id = ?, client_id = ?";
+const std::string project::deleteProject =
+    "UPDATE projects SET is_active = 0, date_modified_utc = ? WHERE project_id = ?";
+
+project::project(int projectId,
+    std::string projectName,
+    std::string displayName,
+    int dateCreatedUtc,
+    int dateModifiedUtc,
+    int isActive,
+    std::string employerName,
+    std::string clientName)
+    : project_id(projectId)
+    , project_name(projectName)
+    , display_name(displayName)
+    , date_created_utc(dateCreatedUtc)
+    , date_modified_utc(dateModifiedUtc)
+    , is_active(isActive)
+    , employer_name(employerName)
+    , client_name(clientName)
+{
 }
+project::project(int projectId,
+    std::string projectName,
+    std::string displayName,
+    int dateCreatedUtc,
+    int dateModifiedUtc,
+    int isActive,
+    int employerId,
+    std::string employerName,
+    std::string clientName)
+    : project_id(projectId)
+    , project_name(projectName)
+    , display_name(displayName)
+    , date_created_utc(dateCreatedUtc)
+    , date_modified_utc(dateModifiedUtc)
+    , is_active(isActive)
+    , employer_id(employerId)
+    , employer_name(employerName)
+    , client_name(clientName)
+{
+}
+} // namespace app::models

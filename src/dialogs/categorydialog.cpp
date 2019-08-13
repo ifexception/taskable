@@ -20,13 +20,14 @@
 #include "categorydialog.h"
 
 #include <vector>
+
+#include <sqlite_modern_cpp/errors.h>
 #include <wx/statline.h>
 
 #include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
 #include "../common/util.h"
-#include "../db/database_exception.h"
 #include "../services/db_service.h"
 
 namespace app::dialog
@@ -199,8 +200,8 @@ void CategoryDialog::FillControls()
     try {
         services::db_service dbService;
         projects = dbService.get_projects();
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured in get_projects() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in get_projects() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (auto p : projects) {
@@ -214,8 +215,8 @@ void CategoryDialog::DataToControls()
     models::category category;
     try {
         category = dbService.get_category_by_id(mCategoryId);
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured in get_category_by_id() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in get_category_by_id() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     pProjectChoiceCtrl->SetStringSelection(category.project_name);
@@ -303,8 +304,8 @@ void CategoryDialog::OnSave(wxCommandEvent& event)
             dbService.create_new_category(
                 mProjectChoiceId, std::string(mNameText.ToUTF8()), std::string(mDescriptionText.ToUTF8()));
         }
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured in category OnSave() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in category OnSave() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     EndModal(ids::ID_SAVE);

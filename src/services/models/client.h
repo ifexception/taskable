@@ -26,6 +26,18 @@ namespace app::models
 struct client
 {
     client() = default;
+    explicit client(int clientId,
+        std::string clientName,
+        int dateCreatedUtc,
+        int dateModifiedUtc,
+        int isActive,
+        int employerId);
+    explicit client(int clientId,
+        std::string clientName,
+        int dateCreatedUtc,
+        int dateModifiedUtc,
+        int isActive,
+        std::string employerName);
     ~client() = default;
 
     int client_id;

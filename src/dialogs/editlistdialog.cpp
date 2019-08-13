@@ -19,6 +19,8 @@
 
 #include "editlistdialog.h"
 
+#include <sqlite_modern_cpp/errors.h>
+
 #include "employerdialog.h"
 #include "clientdialog.h"
 #include "projectdialog.h"
@@ -26,7 +28,6 @@
 
 #include "../common/common.h"
 #include "../common/util.h"
-#include "../db/database_exception.h"
 
 namespace app::dialog
 {
@@ -210,8 +211,8 @@ void EmployerStrategy::DataToControl(wxListCtrl* control)
     std::vector<models::employer> employers;
     try {
         employers = dbService.get_employers();
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured in get_employers() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in get_employers() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     int listIndex = 0;
@@ -265,8 +266,8 @@ void ClientStrategy::DataToControl(wxListCtrl* control)
     std::vector<models::client> clients;
     try {
         clients = dbService.get_clients();
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured in get_clients() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in get_clients() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     int listIndex = 0;
@@ -327,8 +328,8 @@ void ProjectStrategy::DataToControl(wxListCtrl* control)
     std::vector<models::project> projects;
     try {
         projects = dbService.get_projects();
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured in get_projects() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in get_projects() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     int listIndex = 0;
@@ -384,8 +385,8 @@ void CategoryStrategy::DataToControl(wxListCtrl* control)
     std::vector<models::category> categories;
     try {
         categories = dbService.get_categories();
-    } catch (const db::database_exception& e) {
-        pLogger->error("Error occured in get_categories() - {0:d} : {1}", e.get_error_code(), e.what());
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in get_categories() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     int listIndex = 0;
