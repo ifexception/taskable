@@ -23,6 +23,7 @@
 
 #include <sqlite_modern_cpp/errors.h>
 #include <wx/aboutdlg.h>
+#include <wx/clipbrd.h>
 #include <wx/taskbarbutton.h>
 
 #include "../common/constants.h"
@@ -62,6 +63,7 @@ EVT_MENU(ids::ID_SETTINGS, MainFrame::OnSettings)
 EVT_MENU(ids::ID_NEW_TIMED_TASK, MainFrame::OnNewTimedTask)
 EVT_MENU(ids::ID_CHECK_FOR_UPDATE, MainFrame::OnCheckForUpdate)
 EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
+EVT_LIST_ITEM_RIGHT_CLICK(MainFrame::IDC_LIST, MainFrame::OnItemRightClick)
 EVT_COMMAND(wxID_ANY, TASK_INSERTED, MainFrame::OnTaskInserted)
 EVT_COMMAND(wxID_ANY, START_NEW_TIMED_TASK, MainFrame::OnNewTimedTaskFromPausedTask)
 EVT_ICONIZE(MainFrame::OnIconize)
@@ -355,6 +357,22 @@ void MainFrame::OnItemDoubleClick(wxListEvent& event)
     int taskDetailId = event.GetData();
     dialog::TaskItemDialog editTask(this, pLogger, true, taskDetailId);
     editTask.ShowModal();
+}
+
+void MainFrame::OnItemRightClick(wxListEvent& event)
+{
+    auto canOpen = wxTheClipboard->Open();
+    if (canOpen) {
+        auto item = event.GetItem();
+        wxListItem listItem;
+        listItem.m_itemId = item;
+        listItem.m_col = 6;
+        listItem.m_mask = wxLIST_MASK_TEXT;
+        pListCtrl->GetItem(listItem);
+
+        wxTheClipboard->SetData(new wxTextDataObject(listItem.GetText()));
+        wxTheClipboard->Close();
+    }
 }
 
 void MainFrame::OnIconize(wxIconizeEvent& event)
