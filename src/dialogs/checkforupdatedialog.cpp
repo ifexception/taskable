@@ -59,10 +59,7 @@ wxThread::ExitCode CheckForUpdateThread::Entry()
     std::string releasesApi = "/repos/ifexception/wx-tasks-tracker/releases/latest";
     std::string url = githubUrl + releasesApi;
 
-    wxLogDebug("About to make GET call");
     auto response = cpr::Get(cpr::Url{ url }, cpr::Header{ { "Accept", "application/vnd.github.v3+json" } });
-    wxString res(response.text);
-    wxLogDebug(res);
 
     if (response.status_code == 200) {
         auto jsonText = json::parse(response.text);
@@ -76,12 +73,10 @@ wxThread::ExitCode CheckForUpdateThread::Entry()
         }
     }
 
-    wxLogDebug("Completed thread work");
 
     auto event = new wxThreadEvent(CHECK_UPDATE_THREAD_COMPLETED);
     event->SetString(eventString);
     wxQueueEvent(pHandler, event);
-    wxLogDebug("Completed queueing event to handler");
 
     return (wxThread::ExitCode) 0;
 }
@@ -238,7 +233,6 @@ void CheckForUpdateDialog::OnCancel(wxCommandEvent& event)
 
 void CheckForUpdateDialog::OnThreadCompletion(wxThreadEvent& event)
 {
-    wxLogDebug("OnThreadCompletion");
     pOkButton->Enable();
     pGaugeCtrl->SetValue(100);
     auto eventString = event.GetString();
