@@ -92,7 +92,7 @@ bool App::CreateLogsDirectory()
         bool success = wxMkDir(logDirectory);
         return success;
     }
-    return true;
+    return logDirectoryExists;
 }
 
 bool App::InitializeLogging()
@@ -108,11 +108,10 @@ bool App::InitializeLogging()
     spdlog::flush_every(std::chrono::seconds(3));
     try {
         pLogger = spdlog::daily_logger_st(Constants::LoggerName, logDirectory);
-        pLogger->info(Constants::Info::LoggerInitialized);
     } catch (const spdlog::spdlog_ex& e) {
-        wxString error;
-        error.Printf(wxT("Error initializing logger: %s"), e.what());
-        wxMessageBox(error, wxT("Error"), wxOK_DEFAULT | wxICON_EXCLAMATION);
+        wxMessageBox(wxString::Format(wxT("Error initializing logger: %s"), e.what()),
+            wxT("Error"),
+            wxOK_DEFAULT | wxICON_EXCLAMATION);
         return false;
     }
 
