@@ -38,6 +38,7 @@
 #include "../dialogs/editlistdialog.h"
 #include "../dialogs/settingsdialog.h"
 #include "../dialogs/timedtaskdialog.h"
+#include "../dialogs/checkforupdatedialog.h"
 #include "../services/db_service.h"
 #include "../wizards/setupwizard.h"
 #include "taskbaricon.h"
@@ -59,14 +60,15 @@ EVT_MENU(ids::ID_EDIT_PROJECT, MainFrame::OnEditProject)
 EVT_MENU(ids::ID_EDIT_CATEGORY, MainFrame::OnEditCategory)
 EVT_MENU(ids::ID_SETTINGS, MainFrame::OnSettings)
 EVT_MENU(ids::ID_NEW_TIMED_TASK, MainFrame::OnNewTimedTask)
+EVT_MENU(ids::ID_CHECK_FOR_UPDATE, MainFrame::OnCheckForUpdate)
 EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
 EVT_COMMAND(wxID_ANY, TASK_INSERTED, MainFrame::OnTaskInserted)
 EVT_COMMAND(wxID_ANY, START_NEW_TIMED_TASK, MainFrame::OnNewTimedTaskFromPausedTask)
 EVT_ICONIZE(MainFrame::OnIconize)
 EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 wxEND_EVENT_TABLE()
-// clang-format on
 
+// clang-format on
 MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     const wxString& name)
@@ -147,6 +149,8 @@ void MainFrame::CreateControls()
     /* Help Menu Control */
     wxMenu* helpMenu = new wxMenu();
     helpMenu->Append(wxID_ABOUT);
+    helpMenu->Append(
+        ids::ID_CHECK_FOR_UPDATE, wxT("Check for update"), wxT("Check if a update is available for application"));
 
     /* Menu Bar */
     wxMenuBar* menuBar = new wxMenuBar();
@@ -397,6 +401,12 @@ void MainFrame::OnNewTimedTaskFromPausedTask(wxCommandEvent& event)
     timedPausedTask.LaunchInPausedState();
 
     pTaskStorage->mTimes.clear();
+}
+
+void MainFrame::OnCheckForUpdate(wxCommandEvent& event)
+{
+    dialog::CheckForUpdateDialog checkForUpdate(this);
+    checkForUpdate.LaunchModal();
 }
 
 void MainFrame::CalculateTotalTime()

@@ -20,6 +20,9 @@
 #pragma once
 
 #include <wx/sizer.h>
+#include <wx/string.h>
+
+#include "version.h"
 
 namespace app::common
 {
@@ -37,4 +40,6 @@ const wxSizerFlags ControlExpandProp = wxSizerFlags(ControlDefault).Align(wxEXPA
 extern const char** GetProgramIcon();
 
 std::string GetLicense();
+
+wxString GetVersion();
 } // namespace app::common
