@@ -370,7 +370,8 @@ void MainFrame::OnItemRightClick(wxListEvent& event)
         listItem.m_mask = wxLIST_MASK_TEXT;
         pListCtrl->GetItem(listItem);
 
-        wxTheClipboard->SetData(new wxTextDataObject(listItem.GetText()));
+        auto textData = new wxTextDataObject(listItem.GetText());
+        wxTheClipboard->SetData(textData);
         wxTheClipboard->Close();
     }
 }
