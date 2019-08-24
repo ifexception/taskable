@@ -76,6 +76,7 @@ private:
     void OnNewTimedTask(wxCommandEvent& event);
     void OnDateChanged(wxDateEvent& event);
     void OnNewTimedTaskFromPausedTask(wxCommandEvent& event);
+    void OnCheckForUpdate(wxCommandEvent& event);
 
     void CalculateTotalTime();
     void RefreshItems(wxDateTime date = wxDateTime::Now());

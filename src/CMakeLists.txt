@@ -12,10 +12,14 @@ message (STATUS "CMAKE_CONFIGURATION_TYPES:${CMAKE_CONFIGURATION_TYPES}")
 
 find_package (sqlite3 CONFIG REQUIRED)
 find_package (spdlog CONFIG REQUIRED)
+find_package(cpr CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 message (STATUS "sqlite3 found: ${sqlite3_FOUND}")
 message (STATUS "spdlog found: ${spdlog_FOUND}")
 message (STATUS "wxWidgets_FOUND: ${wxWidgets_FOUND}")
+message (STATUS "cpr_FOUND: ${cpr_FOUND}")
+message (STATUS "nlohmann_json_FOUND: ${nlohmann_json_FOUND}")
 
 set (SRC
     "common/ids.cpp"
@@ -43,6 +47,7 @@ set (SRC
     "dialogs/editlistdialog.cpp"
     "dialogs/settingsdialog.cpp"
     "dialogs/timedtaskdialog.cpp"
+    "dialogs/checkforupdatedialog.cpp"
     "wizards/setupwizard.cpp")
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
@@ -67,4 +72,6 @@ target_compile_definitions (${PROJECT_NAME} PUBLIC
 target_link_libraries (${PROJECT_NAME}
     ${wxWidgets_LIBRARIES}
     sqlite3
-    spdlog::spdlog)
+    spdlog::spdlog
+    cpr
+    nlohmann_json nlohmann_json::nlohmann_json)

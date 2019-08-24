@@ -35,6 +35,7 @@ enum class MenuIds : int {
     EditCategoryId = 9,
     SettingsId = 10,
     NewTimedTask = 11,
+    CheckForUpdate=12
 };
 
 static const int ID_NEW_TASK = static_cast<int>(ids::MenuIds::NewTaskId);
@@ -49,6 +50,8 @@ static const int ID_EDIT_CLIENT = static_cast<int>(MenuIds::EditClientId);
 static const int ID_EDIT_PROJECT = static_cast<int>(MenuIds::EditProjectId);
 static const int ID_EDIT_CATEGORY = static_cast<int>(MenuIds::EditCategoryId);
 static const int ID_SETTINGS = static_cast<int>(MenuIds::SettingsId);
+
+static const int ID_CHECK_FOR_UPDATE = static_cast<int>(MenuIds::CheckForUpdate);
 
 enum class Events : int { ID_SAVE = wxID_HIGHEST + 1, ID_TASK_INSERTED, ID_START_PAUSE, ID_STOP };
 
