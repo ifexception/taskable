@@ -138,7 +138,7 @@ void MainFrame::CreateControls()
 
     /* Edit Menu Control */
     auto editMenu = new wxMenu();
-    editMenu->Append(ids::ID_EDIT_EMPLOYER, wxT("Edit &Employers"), wxT("Select a employer to edit"));
+    editMenu->Append(ids::ID_EDIT_EMPLOYER, wxT("Edit &Employer"), wxT("Select a employer to edit"));
     editMenu->Append(ids::ID_EDIT_CLIENT, wxT("Edit &Client"), wxT("Select a client to edit"));
     editMenu->Append(ids::ID_EDIT_PROJECT, wxT("Edit &Project"), wxT("Select a project to edit"));
     editMenu->Append(ids::ID_EDIT_CATEGORY, wxT("Edit C&ategory"), wxT("Select a category to edit"));
