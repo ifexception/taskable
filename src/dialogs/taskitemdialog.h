@@ -97,7 +97,7 @@ private:
     void OnCancel(wxCommandEvent& event);
     void OnTaskSaved();
 
-    void CaclulateTimeDiff(wxDateTime start, wxDateTime end);
+    void CalculateTimeDiff(wxDateTime start, wxDateTime end);
     void FillCategoryControl(int projectId);
 
     wxString mTaskDate;

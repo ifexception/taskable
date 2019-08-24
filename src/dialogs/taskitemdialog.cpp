@@ -389,6 +389,8 @@ void TaskItemDialog::SetValuesToControls()
 {
     pStartTimeCtrl->SetValue(mStartTime);
     pEndTimeCtrl->SetValue(mEndTime);
+
+    CalculateTimeDiff(mStartTime, mEndTime);
 }
 
 void TaskItemDialog::SetValueToControl()
@@ -509,7 +511,7 @@ void TaskItemDialog::OnStartTimeChange(wxDateEvent& event)
     auto start = event.GetDate();
     auto end = pEndTimeCtrl->GetValue();
     if (end != wxDefaultDateTime) {
-        CaclulateTimeDiff(start, end);
+        CalculateTimeDiff(start, end);
     }
 }
 
@@ -519,7 +521,7 @@ void TaskItemDialog::OnEndTimeChange(wxDateEvent& event)
     auto start = pStartTimeCtrl->GetValue();
 
     if (start != wxDefaultDateTime) {
-        CaclulateTimeDiff(start, end);
+        CalculateTimeDiff(start, end);
     }
 }
 
@@ -623,7 +625,7 @@ void TaskItemDialog::OnTaskSaved()
     wxPostEvent(pParent, taskInsertedEvent);
 }
 
-void TaskItemDialog::CaclulateTimeDiff(wxDateTime start, wxDateTime end)
+void TaskItemDialog::CalculateTimeDiff(wxDateTime start, wxDateTime end)
 {
     auto diff = end.Subtract(start);
     auto formated = diff.Format(wxT("%H:%M:%S"));
