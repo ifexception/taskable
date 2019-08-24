@@ -182,6 +182,7 @@ void TimedTaskDialog::CreateControls()
     pStartButton = new wxButton(buttonPanel, IDC_START, wxT("St&art"));
     pPauseButton = new wxButton(buttonPanel, IDC_PAUSE, wxT("&Pause"));
     pStopButton = new wxButton(buttonPanel, IDC_STOP, wxT("&Stop"));
+    pStopButton->SetFocus();
     pCancelButton = new wxButton(buttonPanel, IDC_CANCEL, wxT("&Cancel"));
 
     buttonPanelSizer->Add(pStartButton, common::sizers::ControlDefault);
