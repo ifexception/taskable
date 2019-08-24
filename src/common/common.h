@@ -30,8 +30,9 @@ namespace sizers
 {
 const wxSizerFlags ControlDefault = wxSizerFlags().Border(wxALL, 5);
 const wxSizerFlags ControlCenter = wxSizerFlags(ControlDefault).Center();
+const wxSizerFlags ControlHorizontal = wxSizerFlags(ControlDefault).CenterHorizontal();
 const wxSizerFlags ControlCenterVertical = wxSizerFlags(ControlDefault).CenterVertical();
-const wxSizerFlags ControlRight = wxSizerFlags(ControlDefault).Align(wxALIGN_RIGHT);
+const wxSizerFlags ControlRight = wxSizerFlags(ControlDefault).Right();
 const wxSizerFlags ControlExpand = wxSizerFlags(ControlDefault).Expand();
 const wxSizerFlags ControlExpandProp = wxSizerFlags(ControlDefault).Align(wxEXPAND).Proportion(1);
 } // namespace sizers

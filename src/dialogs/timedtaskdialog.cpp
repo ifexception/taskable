@@ -150,20 +150,20 @@ void TimedTaskDialog::CreateControls()
     auto sizer = new wxBoxSizer(wxVERTICAL);
     auto mainPanel = new wxPanel(this, wxID_STATIC);
     mainPanel->SetSizer(sizer);
-    mainSizer->Add(mainPanel, common::sizers::ControlDefault);
+    mainSizer->Add(mainPanel, common::sizers::ControlExpand);
 
     /* Elapsed Time Text Control */
-    pElapsedTimeText = new wxStaticText(mainPanel, IDC_ELAPSED, ElapsedTimeText);
+    pElapsedTimeText = new wxStaticText(mainPanel, IDC_ELAPSED, wxT("Elapsed Time: 00:00:00"));
     auto font = pElapsedTimeText->GetFont();
     font.SetPointSize(16);
     pElapsedTimeText->SetFont(font);
-    sizer->Add(pElapsedTimeText, common::sizers::ControlCenter);
+    sizer->Add(pElapsedTimeText, common::sizers::ControlHorizontal);
 
-    pAccumulatedTimeText = new wxStaticText(mainPanel, IDC_ACCUMULATED_TIME, AccumulatedTimeText);
+    pAccumulatedTimeText = new wxStaticText(mainPanel, IDC_ACCUMULATED_TIME, wxT("Time accumulated thus far: 00:00:00"));
     auto font2 = pAccumulatedTimeText->GetFont();
     font2.SetPointSize(8);
     pAccumulatedTimeText->SetFont(font2);
-    sizer->Add(pAccumulatedTimeText, common::sizers::ControlRight);
+    sizer->Add(pAccumulatedTimeText, common::sizers::ControlHorizontal);
 
     pStartNewTask =
         new wxCheckBox(mainPanel, IDC_START_NEW_TASK_CHECK, wxT("Start new task when pausing current task"));
@@ -183,6 +183,7 @@ void TimedTaskDialog::CreateControls()
     pPauseButton = new wxButton(buttonPanel, IDC_PAUSE, wxT("&Pause"));
     pStopButton = new wxButton(buttonPanel, IDC_STOP, wxT("&Stop"));
     pStopButton->SetFocus();
+    pStopButton->SetDefault();
     pCancelButton = new wxButton(buttonPanel, IDC_CANCEL, wxT("&Cancel"));
 
     buttonPanelSizer->Add(pStartButton, common::sizers::ControlDefault);
