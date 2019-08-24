@@ -92,7 +92,6 @@ wxBEGIN_EVENT_TABLE(CheckForUpdateDialog, wxDialog)
     EVT_BUTTON(wxID_OK, CheckForUpdateDialog::OnOK)
     EVT_BUTTON(wxID_CANCEL, CheckForUpdateDialog::OnCancel)
     EVT_HYPERLINK(CheckForUpdateDialog::IDC_NEW_RELEASE_LINK, CheckForUpdateDialog::OnHyperLinkClicked)
-    EVT_THREAD(CHECK_UPDATE_THREAD_COMPLETED, CheckForUpdateDialog::OnThreadCompletion)
 wxEND_EVENT_TABLE()
 
 CheckForUpdateDialog::CheckForUpdateDialog(wxWindow* parent, const wxString& name)
@@ -105,6 +104,8 @@ CheckForUpdateDialog::CheckForUpdateDialog(wxWindow* parent, const wxString& nam
         wxSize(320, 240),
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
         name);
+
+    Bind(CHECK_UPDATE_THREAD_COMPLETED, &CheckForUpdateDialog::OnThreadCompletion, this);
 }
 
 void CheckForUpdateDialog::LaunchModal()
@@ -176,11 +177,12 @@ void CheckForUpdateDialog::CreateControls()
     buttonPanel->SetSizer(buttonPanelSizer);
     mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
-    auto okButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
+    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
+    pOkButton->Disable();
     auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
     cancelButton->SetFocus();
 
-    buttonPanelSizer->Add(okButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(pOkButton, common::sizers::ControlDefault);
     buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
 }
 
@@ -194,17 +196,7 @@ void CheckForUpdateDialog::StartThread()
     }
 }
 
-void CheckForUpdateDialog::OnHyperLinkClicked(wxHyperlinkEvent& event)
-{
-    wxLaunchDefaultBrowser(event.GetURL());
-}
-
-void CheckForUpdateDialog::OnOK(wxCommandEvent& event)
-{
-    EndModal(wxID_OK);
-}
-
-void CheckForUpdateDialog::OnCancel(wxCommandEvent& event)
+void CheckForUpdateDialog::ThreadCleanupProcedure()
 {
     {
         wxCriticalSectionLocker enter(mCriticalSection);
@@ -225,11 +217,29 @@ void CheckForUpdateDialog::OnCancel(wxCommandEvent& event)
         }
         wxThread::This()->Sleep(1);
     }
+
+    Destroy();
+}
+
+void CheckForUpdateDialog::OnHyperLinkClicked(wxHyperlinkEvent& event)
+{
+    wxLaunchDefaultBrowser(event.GetURL());
+}
+
+void CheckForUpdateDialog::OnOK(wxCommandEvent& event)
+{
+    EndModal(wxID_OK);
+}
+
+void CheckForUpdateDialog::OnCancel(wxCommandEvent& event)
+{
+    ThreadCleanupProcedure();
 }
 
 void CheckForUpdateDialog::OnThreadCompletion(wxThreadEvent& event)
 {
     wxLogDebug("OnThreadCompletion");
+    pOkButton->Enable();
     pGaugeCtrl->SetValue(100);
     auto eventString = event.GetString();
     if (!eventString.empty()) {
@@ -255,27 +265,7 @@ void CheckForUpdateDialog::OnThreadCompletion(wxThreadEvent& event)
 
 void CheckForUpdateDialog::OnClose(wxCloseEvent& event)
 {
-    {
-        wxCriticalSectionLocker enter(mCriticalSection);
-        if (pThread) {
-            auto ret = pThread->Delete();
-            if (ret != wxTHREAD_NO_ERROR) {
-                wxLogError("Cannot delete thread!");
-            }
-        }
-    }
-
-    while (1) {
-        {
-            wxCriticalSectionLocker enter(mCriticalSection);
-            if (!pThread) {
-                break;
-            }
-        }
-        wxThread::This()->Sleep(1);
-    }
-
-    Destroy();
+    ThreadCleanupProcedure();
 }
 
 } // namespace app::dialog

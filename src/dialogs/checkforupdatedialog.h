@@ -71,6 +71,8 @@ private:
 
     void StartThread();
 
+    void ThreadCleanupProcedure();
+
     void OnHyperLinkClicked(wxHyperlinkEvent& event);
     void OnOK(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
@@ -79,6 +81,7 @@ private:
 
     friend class CheckForUpdateThread;
 
+    wxButton* pOkButton;
     wxStaticText* pCheckingUpdateText;
     wxStaticText* pNewReleaseAvailable;
     wxHyperlinkCtrl* pNewReleaseLink;
