@@ -153,13 +153,13 @@ void TimedTaskDialog::CreateControls()
     mainSizer->Add(mainPanel, common::sizers::ControlDefault);
 
     /* Elapsed Time Text Control */
-    pElapsedTimeText = new wxStaticText(mainPanel, IDC_ELAPSED, wxT("Elapsed Time: 00:00:00"));
+    pElapsedTimeText = new wxStaticText(mainPanel, IDC_ELAPSED, ElapsedTimeText);
     auto font = pElapsedTimeText->GetFont();
     font.SetPointSize(16);
     pElapsedTimeText->SetFont(font);
     sizer->Add(pElapsedTimeText, common::sizers::ControlCenter);
 
-    pAccumulatedTimeText = new wxStaticText(mainPanel, IDC_ACCUMULATED_TIME, wxT("Time accumulatedthus far: 00:00:00"));
+    pAccumulatedTimeText = new wxStaticText(mainPanel, IDC_ACCUMULATED_TIME, AccumulatedTimeText);
     auto font2 = pAccumulatedTimeText->GetFont();
     font2.SetPointSize(8);
     pAccumulatedTimeText->SetFont(font2);
