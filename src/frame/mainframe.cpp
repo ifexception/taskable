@@ -380,9 +380,9 @@ void MainFrame::OnDateChanged(wxDateEvent& event)
 {
     pListCtrl->DeleteAllItems();
 
-    CalculateTotalTime();
-
     auto date = event.GetDate();
+
+    CalculateTotalTime(date);
     RefreshItems(date);
 }
 
@@ -409,12 +409,12 @@ void MainFrame::OnCheckForUpdate(wxCommandEvent& event)
     checkForUpdate.LaunchModal();
 }
 
-void MainFrame::CalculateTotalTime()
+void MainFrame::CalculateTotalTime(wxDateTime date)
 {
     std::vector<std::string> taskDurations;
     services::db_service dbService;
-    auto dateNow = wxDateTime::Now();
-    auto dateString = dateNow.FormatISODate();
+
+    auto dateString = date.FormatISODate();
 
     try {
         taskDurations = dbService.get_task_hours_by_id(dateString);
