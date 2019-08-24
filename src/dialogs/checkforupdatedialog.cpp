@@ -73,7 +73,6 @@ wxThread::ExitCode CheckForUpdateThread::Entry()
         }
     }
 
-
     auto event = new wxThreadEvent(CHECK_UPDATE_THREAD_COMPLETED);
     event->SetString(eventString);
     wxQueueEvent(pHandler, event);
