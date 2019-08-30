@@ -79,7 +79,7 @@ struct db_service
 
     void delete_project(const int projectId, const int dateModified);
 
-    void create_new_category(const int projectId, const std::string& name, const std::string& description);
+    void create_new_category(const int projectId, const std::string& name, int color, const std::string& description);
 
     std::vector<models::category> get_categories_by_project_id(const int projectId);
 

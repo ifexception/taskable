@@ -33,6 +33,7 @@ struct task_item
         std::string duration,
         std::string description,
         std::string categoryName,
+        int categoryColor,
         std::string projectName);
     explicit task_item(int taskItemId,
         int projectId,
@@ -57,6 +58,7 @@ struct task_item
     std::string duration;
     int category_id;
     std::string category_name;
+    int category_color;
     std::string description;
     int date_created_utc;
     int date_modified_utc;

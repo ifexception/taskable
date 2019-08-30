@@ -21,7 +21,7 @@
 
 #include "db_connection.h"
 
-//clang-format off
+// clang-format off
 
 namespace app::services
 {
@@ -84,6 +84,7 @@ void db_service::create_categories_table()
                               "    category_id INTEGER PRIMARY KEY NOT NULL,"
                               "    name TEXT NOT NULL,"
                               "    description TEXT NULL,"
+                              "    color INTEGER NOT NULL,"
                               "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
                               "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
                               "    is_active INTEGER NOT NULL,"
@@ -361,11 +362,12 @@ void db_service::delete_project(const int projectId, const int dateModified)
        << projectId;
 }
 
-void db_service::create_new_category(const int projectId, const std::string& name, const std::string& description)
+void db_service::create_new_category(const int projectId, const std::string& name, int color, const std::string& description)
 {
     auto db = db_connection::get_instance().get_handle();
     db << models::category::createNewCategory
        << name
+       << color
        << description
        << projectId;
 }
@@ -379,6 +381,7 @@ std::vector<models::category> db_service::get_categories_by_project_id(const int
        << projectId
        >> [&](int categoryId,
            std::string categoryName,
+           int color,
            std::unique_ptr<std::string> description,
            int dateCreatedUtc,
            int dateModifiedUtc,
@@ -386,6 +389,7 @@ std::vector<models::category> db_service::get_categories_by_project_id(const int
            int projectId) {
            models::category category(categoryId,
                categoryName,
+               color,
                description != nullptr ? *description : "",
                dateCreatedUtc,
                dateModifiedUtc,
@@ -406,6 +410,7 @@ models::category db_service::get_category_by_id(const int categoryId)
        << categoryId
        >> [&](int categoryId,
            std::string categoryName,
+           int color,
            std::unique_ptr<std::string> description,
            int dateCreatedUtc,
            int dateModifiedUtc,
@@ -413,6 +418,7 @@ models::category db_service::get_category_by_id(const int categoryId)
            std::string projectName) {
            category = models::category(categoryId,
                categoryName,
+               color,
                description != nullptr ? *description : "",
                dateCreatedUtc,
                dateModifiedUtc,
@@ -431,6 +437,7 @@ std::vector<models::category> db_service::get_categories()
     db << models::category::getCategories
        >> [&](int categoryId,
            std::string categoryName,
+           int color,
            std::unique_ptr<std::string> description,
            int dateCreatedUtc,
            int dateModifiedUtc,
@@ -438,6 +445,7 @@ std::vector<models::category> db_service::get_categories()
            std::string projectName) {
             models::category category(categoryId,
                    categoryName,
+                   color,
                    description != nullptr ? *description : "",
                    dateCreatedUtc,
                    dateModifiedUtc,
@@ -454,6 +462,7 @@ void db_service::update_category(models::category category)
     auto db = db_connection::get_instance().get_handle();
     db << models::category::updateCategory
        << category.category_name
+       << category.color
        << category.description
        << category.project_id
        << category.date_modified_utc;
@@ -521,6 +530,7 @@ std::vector<models::task_item> db_service::get_all_task_items_by_date(const std:
            std::string duration,
            std::string description,
            std::string categoryName,
+           int categoryColor,
            std::string projectName) {
            models::task_item taskItem(taskItemId,
                taskDate,
@@ -529,6 +539,7 @@ std::vector<models::task_item> db_service::get_all_task_items_by_date(const std:
                duration,
                description,
                categoryName,
+               categoryColor,
                projectName);
            taskItems.push_back(taskItem);
        };

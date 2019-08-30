@@ -85,7 +85,7 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
 
 MainFrame::~MainFrame()
 {
-    if (pTaskBarIcon != nullptr) {
+    if (pTaskBarIcon) {
         delete pTaskBarIcon; // TODO Wrap TaskBarIcon in a std::unique_ptr
     }
 }
@@ -476,7 +476,10 @@ void MainFrame::RefreshItems(wxDateTime date)
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem.duration);
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem.category_name);
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem.description);
+
+        pListCtrl->SetItemBackgroundColour(listIndex, wxColour(taskItem.category_color));
         pListCtrl->SetItemPtrData(listIndex, taskItem.task_item_id);
+
         columnIndex = 0;
     }
 }

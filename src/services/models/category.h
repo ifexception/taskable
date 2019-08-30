@@ -28,6 +28,7 @@ struct category
     category() = default;
     explicit category(int categoryId,
         std::string categoryName,
+        int color,
         std::string description,
         int dateCreatedUtc,
         int dateModifiedUtc,
@@ -35,6 +36,7 @@ struct category
         int projectId);
     explicit category(int categoryId,
         std::string categoryName,
+        int color,
         std::string description,
         int dateCreatedUtc,
         int dateModifiedUtc,
@@ -44,6 +46,7 @@ struct category
 
     int category_id;
     std::string category_name;
+    int color;
     std::string description;
     int date_created_utc;
     int date_modified_utc;

@@ -38,7 +38,6 @@ EVT_BUTTON(ids::ID_SAVE, CategoryDialog::OnSave)
 EVT_BUTTON(wxID_CANCEL, CategoryDialog::OnCancel)
 EVT_CHECKBOX(CategoryDialog::IDC_ISACTIVE, CategoryDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
-// clang-format on
 
 CategoryDialog::CategoryDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
@@ -51,6 +50,7 @@ CategoryDialog::CategoryDialog(wxWindow* parent,
     , mDescriptionText(wxGetEmptyString())
     , bIsEdit(isEdit)
     , mCategoryId(categoryId)
+// clang-format on
 {
     wxString title;
     wxSize size;
@@ -138,6 +138,12 @@ void CategoryDialog::CreateControls()
     pNameCtrl->SetToolTip(wxT("Enter a name for this category"));
     flexGridSizer->Add(pNameCtrl, common::sizers::ControlDefault);
 
+    auto colorPickerFiller = new wxStaticText(categoryDetailsPanel, wxID_ANY, wxT(""));
+    flexGridSizer->Add(colorPickerFiller, common::sizers::ControlDefault);
+
+    pColorPickerCtrl = new wxColourPickerCtrl(categoryDetailsPanel, IDC_COLOR);
+    flexGridSizer->Add(pColorPickerCtrl, common::sizers::ControlDefault);
+
     if (bIsEdit) {
         auto isActiveFiller = new wxStaticText(categoryDetailsPanel, wxID_STATIC, wxT(""));
         flexGridSizer->Add(isActiveFiller, common::sizers::ControlDefault);
@@ -221,6 +227,8 @@ void CategoryDialog::DataToControls()
 
     pProjectChoiceCtrl->SetStringSelection(category.project_name);
     pNameCtrl->SetValue(category.category_name);
+
+    pColorPickerCtrl->SetColour(wxColour(category.color));
     pDescriptionCtrl->SetValue(category.description);
 
     wxString dateCreatedString = util::ConvertUnixTimestampToString(category.date_created_utc);
@@ -279,6 +287,7 @@ void CategoryDialog::OnSave(wxCommandEvent& event)
 {
     mProjectChoiceId = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
     mNameText = pNameCtrl->GetValue();
+    mColor = pColorPickerCtrl->GetColour();
     mDescriptionText = pDescriptionCtrl->GetValue();
 
     bool isValid = Validate();
@@ -292,6 +301,7 @@ void CategoryDialog::OnSave(wxCommandEvent& event)
             models::category category;
             category.category_id = mCategoryId;
             category.category_name = std::string(mNameText.ToUTF8());
+            category.color = mColor.GetRGB();
             category.description = std::string(mDescriptionText.ToUTF8());
             category.project_id = mProjectChoiceId;
             category.date_modified_utc = util::UnixTimestamp();
@@ -301,8 +311,10 @@ void CategoryDialog::OnSave(wxCommandEvent& event)
             dbService.delete_category(mCategoryId, util::UnixTimestamp());
         }
         if (!bIsEdit) {
-            dbService.create_new_category(
-                mProjectChoiceId, std::string(mNameText.ToUTF8()), std::string(mDescriptionText.ToUTF8()));
+            dbService.create_new_category(mProjectChoiceId,
+                std::string(mNameText.ToUTF8()),
+                mColor.GetRGB(),
+                std::string(mDescriptionText.ToUTF8()));
         }
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in category OnSave() - {0:d} : {1}", e.get_code(), e.what());
@@ -337,4 +349,4 @@ void CategoryDialog::OnIsActiveCheck(wxCommandEvent& event)
     }
 }
 
-} // app::dialog
+} // namespace app::dialog

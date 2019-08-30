@@ -23,8 +23,10 @@
 
 #include <memory>
 
+#include <wx/clrpicker.h>
 #include <wx/textctrl.h>
 #include <wx/wizard.h>
+
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
@@ -47,6 +49,7 @@ public:
     void SetProject(const wxString& project);
     void SetProjectDisplayName(const wxString& project);
     void SetCategory(const wxString& category);
+    void SetCategoryColor(const wxColour& color);
     void SetDescription(const wxString& description);
 
 private:
@@ -63,6 +66,7 @@ private:
     wxString mProject;
     wxString mDisplayName;
     wxString mCategory;
+    wxColour mCategoryColor;
     wxString mDescription;
 };
 
@@ -120,6 +124,7 @@ private:
 
     SetupWizard* pParent;
     wxTextCtrl* pNameCtrl;
+    wxColourPickerCtrl* pColorPickerCtrl;
     wxTextCtrl* pDescriptionCtrl;
 };
 } // namespace app::wizard

@@ -22,6 +22,8 @@
 #include <memory>
 
 #include <wx/wx.h>
+#include <wx/clrpicker.h>
+
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
@@ -63,6 +65,7 @@ private:
 
     wxChoice* pProjectChoiceCtrl;
     wxTextCtrl* pNameCtrl;
+    wxColourPickerCtrl* pColorPickerCtrl;
     wxTextCtrl* pDescriptionCtrl;
     wxCheckBox* pIsActiveCtrl;
     wxStaticText* pDateCreatedTextCtrl;
@@ -70,10 +73,11 @@ private:
 
     int mProjectChoiceId;
     wxString mNameText;
+    wxColour mColor;
     wxString mDescriptionText;
     bool bIsEdit;
     int mCategoryId;
 
-    enum { IDC_PROJECTCHOICE, IDC_NAME, IDC_DESCRIPTION, IDC_ISACTIVE };
+    enum { IDC_PROJECTCHOICE, IDC_NAME, IDC_COLOR, IDC_DESCRIPTION, IDC_ISACTIVE };
 };
 } // namespace app::dialog

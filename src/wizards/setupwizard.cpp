@@ -131,6 +131,11 @@ void SetupWizard::SetCategory(const wxString& category)
     mCategory = category;
 }
 
+void SetupWizard::SetCategoryColor(const wxColour& color)
+{
+    mCategoryColor = color;
+}
+
 void SetupWizard::SetDescription(const wxString& description)
 {
     mDescription = description;
@@ -210,7 +215,8 @@ bool SetupWizard::SetUpEntities()
     }
 
     try {
-        dbService.create_new_category(projectId, std::string(mCategory.ToUTF8()), std::string(mDescription.ToUTF8()));
+        dbService.create_new_category(
+            projectId, std::string(mCategory.ToUTF8()), mCategoryColor.GetRGB(), std::string(mDescription.ToUTF8()));
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured on create_new_category() - {0:d} : {1}", e.get_code(), e.what());
         return false;
@@ -222,11 +228,11 @@ bool SetupWizard::SetUpEntities()
 wxBEGIN_EVENT_TABLE(AddEmployerAndClientPage, wxWizardPageSimple)
     EVT_WIZARD_CANCEL(wxID_ANY, AddEmployerAndClientPage::OnWizardCancel)
 wxEND_EVENT_TABLE()
-// clang-format on
 
 AddEmployerAndClientPage::AddEmployerAndClientPage(SetupWizard* parent)
     : wxWizardPageSimple(parent)
     , pParent(parent)
+// clang-format on
 {
     auto sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -289,11 +295,11 @@ void AddEmployerAndClientPage::OnWizardCancel(wxWizardEvent& event)
 wxBEGIN_EVENT_TABLE(AddProjectPage, wxWizardPageSimple)
     EVT_WIZARD_CANCEL(wxID_ANY, AddProjectPage::OnWizardCancel)
 wxEND_EVENT_TABLE()
-// clang-format on
 
 AddProjectPage::AddProjectPage(SetupWizard* parent)
     : wxWizardPageSimple(parent)
     , pParent(parent)
+// clang-format on
 {
     auto sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -370,11 +376,11 @@ void AddProjectPage::OnWizardCancel(wxWizardEvent& event)
 wxBEGIN_EVENT_TABLE(AddCategoriesPage, wxWizardPageSimple)
 EVT_WIZARD_CANCEL(wxID_ANY, AddCategoriesPage::OnWizardCancel)
 wxEND_EVENT_TABLE()
-// clang-format on
 
 AddCategoriesPage::AddCategoriesPage(SetupWizard* parent)
     : wxWizardPageSimple(parent)
     , pParent(parent)
+// clang-format on
 {
     auto sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -393,6 +399,18 @@ AddCategoriesPage::AddCategoriesPage(SetupWizard* parent)
             "A category is the specific type of task you worked on or did for said project, e.g. \"meetings\"");
     auto categoryNameHelpText = new wxStaticText(this, wxID_ANY, categoryNameHelpMessage);
     sizer->Add(categoryNameHelpText, 0, wxALL, 5);
+
+    auto colorText = new wxStaticText(this, wxID_ANY, wxT("Color"));
+    sizer->Add(colorText, 0, wxALL, 5);
+
+    pColorPickerCtrl = new wxColourPickerCtrl(this, wxID_ANY);
+    sizer->Add(pColorPickerCtrl, 0, wxALL, 5);
+
+    wxString categoryColorHelpMessage =
+        wxT("Select a color for this category.\n"
+            "Specifying a color helps you with easily identifying tasks on the main list view");
+    auto categoryColorHelpText = new wxStaticText(this, wxID_ANY, categoryColorHelpMessage);
+    sizer->Add(categoryColorHelpText, 0, wxALL, 5);
 
     auto descriptionText = new wxStaticText(this, wxID_ANY, wxT("Description:"));
     sizer->Add(descriptionText, 0, wxALL, 5);
@@ -418,9 +436,12 @@ bool AddCategoriesPage::TransferDataFromWindow()
         return false;
     }
 
+    const wxColour color = pColorPickerCtrl->GetColour();
+
     const wxString description = pDescriptionCtrl->GetValue().Trim();
 
     pParent->SetCategory(category);
+    pParent->SetCategoryColor(color);
     pParent->SetDescription(description);
 
     return true;

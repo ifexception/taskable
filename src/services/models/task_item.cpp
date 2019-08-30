@@ -31,6 +31,7 @@ const std::string task_item::getAllTaskItemsByDate =
     "task_items.duration, "
     "task_items.description as description, "
     "categories.name as category_name, "
+    "categories.color as category_color, "
     "projects.display_name as project_name "
     "FROM task_items "
     "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
@@ -74,6 +75,7 @@ task_item::task_item(int taskItemId,
     std::string duration,
     std::string description,
     std::string categoryName,
+    int categoryColor,
     std::string projectName)
     : task_item_id(taskItemId)
     , task_date(taskDate)
@@ -82,6 +84,7 @@ task_item::task_item(int taskItemId,
     , duration(duration)
     , description(description)
     , category_name(categoryName)
+    , category_color(categoryColor)
     , project_name(projectName)
 {
 }
