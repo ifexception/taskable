@@ -43,7 +43,6 @@ EVT_TIME_CHANGED(TaskItemDialog::IDC_STARTTIME, TaskItemDialog::OnStartTimeChang
 EVT_TIME_CHANGED(TaskItemDialog::IDC_ENDTIME, TaskItemDialog::OnEndTimeChange)
 EVT_CHECKBOX(TaskItemDialog::IDC_ISACTIVE, TaskItemDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
-// clang-format on
 
 TaskItemDialog::TaskItemDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
@@ -62,6 +61,7 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
     , mDescriptionText(wxGetEmptyString())
     , pParent(parent)
     , bIsPausableTask(false)
+// clang-format on
 {
     wxString title;
     wxSize size;
@@ -434,10 +434,13 @@ bool TaskItemDialog::Validate()
             return false;
         }
 
-        auto isEndTimeInTheFuture = mEndTime.IsLaterThan(wxDateTime::Now());
-        if (isEndTimeInTheFuture) {
-            wxMessageBox(wxT("A task cannot end in the future"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-            return false;
+        if (!bIsEdit) {
+            auto isEndTimeInTheFuture = mEndTime.IsLaterThan(wxDateTime::Now());
+            if (isEndTimeInTheFuture) {
+                wxMessageBox(
+                    wxT("A task cannot end in the future"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+                return false;
+            }
         }
 
         auto taskTimeSpan = mEndTime - mStartTime;
