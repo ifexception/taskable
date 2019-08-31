@@ -37,7 +37,6 @@ EVT_BUTTON(wxID_CANCEL, ProjectDialog::OnCancel)
 EVT_CHOICE(ProjectDialog::IDC_EMPLOYERCHOICE, ProjectDialog::OnEmployerSelect)
 EVT_CHECKBOX(ProjectDialog::IDC_ISACTIVE, ProjectDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
-// clang-format on
 
 ProjectDialog::ProjectDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
@@ -51,6 +50,7 @@ ProjectDialog::ProjectDialog(wxWindow* parent,
     , mClientId(-1)
     , mProjectId(projectId)
     , bIsEdit(isEdit)
+// clang-format on
 {
     wxString title;
     wxSize size;
@@ -333,13 +333,15 @@ void ProjectDialog::OnEmployerSelect(wxCommandEvent& event)
         pLogger->error("Error occured in get_clients_by_employer_id() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    for (auto client : clients) {
-        pClientChoiceCtrl->Append(client.client_name, util::IntToVoidPointer(client.client_id));
-    }
-
     pClientChoiceCtrl->SetSelection(0);
-    if (!pClientChoiceCtrl->IsEnabled()) {
-        pClientChoiceCtrl->Enable();
+    if (!clients.empty()) {
+        for (auto client : clients) {
+            pClientChoiceCtrl->Append(client.client_name, util::IntToVoidPointer(client.client_id));
+        }
+
+        if (!pClientChoiceCtrl->IsEnabled()) {
+            pClientChoiceCtrl->Enable();
+        }
     }
 }
 
