@@ -68,18 +68,20 @@ EVT_COMMAND(wxID_ANY, TASK_INSERTED, MainFrame::OnTaskInserted)
 EVT_COMMAND(wxID_ANY, START_NEW_TIMED_TASK, MainFrame::OnNewTimedTaskFromPausedTask)
 EVT_ICONIZE(MainFrame::OnIconize)
 EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
+EVT_SIZE(MainFrame::OnResize)
 wxEND_EVENT_TABLE()
 
-// clang-format on
 MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     const wxString& name)
-    : wxFrame(nullptr, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(700, 500), wxDEFAULT_FRAME_STYLE, name)
+    : wxFrame(nullptr, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(600, 500), wxDEFAULT_FRAME_STYLE, name)
     , pLogger(logger)
     , pConfig(config)
     , pTaskState(std::make_shared<services::TaskStateService>())
     , pTaskStorage(std::make_unique<services::TaskStorage>())
     , bHasPendingTaskToResume(false)
+    , bHasInitialized(false)
+// clang-format on
 {
 }
 
@@ -101,7 +103,7 @@ bool MainFrame::RunWizard()
 bool MainFrame::CreateFrame()
 {
     bool success = Create();
-    SetMinClientSize(wxSize(640, 480));
+    SetMinClientSize(wxSize(599, 499));
     SetIcon(common::GetProgramIcon());
     pTaskBarIcon = new TaskBarIcon(this, pConfig, pLogger);
     if (pConfig->IsShowInTray()) {
@@ -212,7 +214,6 @@ void MainFrame::CreateControls()
     wxListItem projectColumn;
     projectColumn.SetId(0);
     projectColumn.SetText(wxT("Project"));
-    projectColumn.SetWidth(90);
     pListCtrl->InsertColumn(0, projectColumn);
 
     wxListItem dateColumn;
@@ -223,31 +224,26 @@ void MainFrame::CreateControls()
     wxListItem startTimeColumn;
     startTimeColumn.SetId(2);
     startTimeColumn.SetText(wxT("Started"));
-    startTimeColumn.SetWidth(56);
     pListCtrl->InsertColumn(2, startTimeColumn);
 
     wxListItem endTimeColumn;
     endTimeColumn.SetId(3);
     endTimeColumn.SetText(wxT("Ended"));
-    endTimeColumn.SetWidth(56);
     pListCtrl->InsertColumn(3, endTimeColumn);
 
     wxListItem durationColumn;
     durationColumn.SetId(4);
     durationColumn.SetText(wxT("Duration"));
-    durationColumn.SetWidth(60);
     pListCtrl->InsertColumn(4, durationColumn);
 
     wxListItem categoryColumn;
     categoryColumn.SetId(5);
     categoryColumn.SetText(wxT("Category"));
-    categoryColumn.SetWidth(96);
     pListCtrl->InsertColumn(5, categoryColumn);
 
     wxListItem descriptionColumn;
     descriptionColumn.SetId(6);
     descriptionColumn.SetText(wxT("Description"));
-    descriptionColumn.SetWidth(214);
     pListCtrl->InsertColumn(6, descriptionColumn);
 }
 
@@ -426,6 +422,30 @@ void MainFrame::OnCheckForUpdate(wxCommandEvent& event)
 {
     dialog::CheckForUpdateDialog checkForUpdate(this);
     checkForUpdate.LaunchModal();
+}
+
+void MainFrame::OnResize(wxSizeEvent& event)
+{
+
+    auto frameSize = GetClientSize();
+
+    if (bHasInitialized) {
+        int width = frameSize.GetWidth();
+
+        pListCtrl->SetColumnWidth(0, width * 0.10);   // project
+        pListCtrl->SetColumnWidth(1, width * 0.11);   // task date
+        pListCtrl->SetColumnWidth(2, width * 0.09);   // start time
+        pListCtrl->SetColumnWidth(3, width * 0.09);   // end time
+        pListCtrl->SetColumnWidth(4, width * 0.10);   // duration
+        pListCtrl->SetColumnWidth(5, width * 0.12);   // category
+        pListCtrl->SetColumnWidth(6, width * 0.37);   // description
+    }
+
+    if (!bHasInitialized) {
+        bHasInitialized = true;
+    }
+
+    event.Skip();
 }
 
 void MainFrame::CalculateTotalTime(wxDateTime date)

@@ -78,6 +78,7 @@ private:
     void OnDateChanged(wxDateEvent& event);
     void OnNewTimedTaskFromPausedTask(wxCommandEvent& event);
     void OnCheckForUpdate(wxCommandEvent& event);
+    void OnResize(wxSizeEvent& event);
 
     void CalculateTotalTime(wxDateTime date = wxDateTime::Now());
     void RefreshItems(wxDateTime date = wxDateTime::Now());
@@ -92,6 +93,7 @@ private:
     std::shared_ptr<services::TaskStateService> pTaskState;
     std::unique_ptr<services::TaskStorage> pTaskStorage;
     bool bHasPendingTaskToResume;
+    bool bHasInitialized;
 
     enum { IDC_GO_TO_DATE = wxID_HIGHEST + 1, IDC_HOURS_TEXT, IDC_LIST };
 };
