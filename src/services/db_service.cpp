@@ -120,6 +120,7 @@ void db_service::create_task_items_table()
                               "    end_time TEXT NULL,"
                               "    duration TEXT NOT NULL,"
                               "    description TEXT NOT NULL,"
+                              "    billable INTEGER NOT NULL, "
                               "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
                               "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
                               "    is_active INTEGER NOT NULL,"
@@ -503,7 +504,8 @@ void db_service::create_new_task_item(const int projectId,
     const std::string& endTime,
     const std::string& duration,
     const int categoryId,
-    const std::string& description)
+    const std::string& description,
+    const int billable)
 {
     auto db = db_connection::get_instance().get_handle();
     db <<  models::task_item::createNewTaskItem
@@ -513,7 +515,8 @@ void db_service::create_new_task_item(const int projectId,
        << description
        << projectId
        << taskId
-       << categoryId;
+       << categoryId
+       << billable;
 }
 
 std::vector<models::task_item> db_service::get_all_task_items_by_date(const std::string& date)
@@ -563,6 +566,7 @@ models::task_item db_service::get_task_item_by_id(const int taskId)
            int categoryId,
            std::string categoryName,
            std::string description,
+           int billable,
            int dateCreatedUtc,
            int dateModifiedUtc,
            int isActive) {
@@ -575,6 +579,7 @@ models::task_item db_service::get_task_item_by_id(const int taskId)
                categoryId,
                categoryName,
                description,
+               billable,
                dateCreatedUtc,
                dateModifiedUtc,
                isActive);
@@ -591,6 +596,7 @@ void db_service::update_task_item(models::task_item task)
        << task.end_time
        << task.duration
        << task.description
+       << task.billable
        << task.date_modified_utc
        << task.project_id
        << task.category_id

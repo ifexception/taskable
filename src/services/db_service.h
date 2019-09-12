@@ -99,7 +99,8 @@ struct db_service
         const std::string& endTime,
         const std::string& duration,
         const int categoryId,
-        const std::string& description);
+        const std::string& description,
+        int billable);
 
     std::vector<models::task_item> get_all_task_items_by_date(const std::string& date);
 

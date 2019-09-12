@@ -75,6 +75,7 @@ CREATE TABLE task_items
     end_time TEXT NULL,
     duration TEXT NOT NULL,
     description TEXT NOT NULL,
+    billable INTEGER NOT NULL,
     date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     is_active INTEGER NOT NULL,

@@ -267,6 +267,14 @@ void TaskItemDialog::CreateControls()
     pDurationCtrl->SetToolTip(wxT("Elasped time for the task"));
     taskFlexGridSizer->Add(pDurationCtrl, common::sizers::ControlDefault);
 
+    /* Billable Checkbox Control */
+    auto billableFillerText = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT(""));
+    taskFlexGridSizer->Add(billableFillerText, common::sizers::ControlDefault);
+
+    pBillableCtrl = new wxCheckBox(taskDetailsPanel, IDC_BILLABLE, wxT("Billable"));
+    pBillableCtrl->SetToolTip(wxT("Set whether this task is billable or not"));
+    taskFlexGridSizer->Add(pBillableCtrl, common::sizers::ControlDefault);
+
     /* Task Category Dropdown Control */
     auto taskCategory = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Category"));
     taskFlexGridSizer->Add(taskCategory, common::sizers::ControlCenterVertical);
@@ -371,6 +379,8 @@ void TaskItemDialog::DataToControls()
 
     FillCategoryControl(taskItem.project_id);
     pCategoryChoiceCtrl->SetStringSelection(taskItem.category_name);
+
+    pBillableCtrl->SetValue(taskItem.billable);
 
     pDescriptionCtrl->SetValue(taskItem.description);
 
@@ -537,6 +547,7 @@ void TaskItemDialog::OnIsActiveCheck(wxCommandEvent& event)
             pEndTimeCtrl->Enable();
         }
         pDurationCtrl->Enable();
+        pBillableCtrl->Enable();
         pDescriptionCtrl->Enable();
         pCategoryChoiceCtrl->Enable();
     } else {
@@ -544,6 +555,7 @@ void TaskItemDialog::OnIsActiveCheck(wxCommandEvent& event)
         pStartTimeCtrl->Disable();
         pEndTimeCtrl->Disable();
         pDurationCtrl->Disable();
+        pBillableCtrl->Disable();
         pDescriptionCtrl->Disable();
         pCategoryChoiceCtrl->Disable();
     }
@@ -557,6 +569,7 @@ void TaskItemDialog::OnSave(wxCommandEvent& event)
     mDurationText = pDurationCtrl->GetLabelText();
     mCategoryId = util::VoidPointerToInt(pCategoryChoiceCtrl->GetClientData(pCategoryChoiceCtrl->GetSelection()));
     mDescriptionText = pDescriptionCtrl->GetValue();
+    bBillable = pBillableCtrl->GetValue();
 
     auto validationSuccess = Validate();
     if (!validationSuccess) {
@@ -585,6 +598,7 @@ void TaskItemDialog::OnSave(wxCommandEvent& event)
             taskItem.end_time = endTime;
             taskItem.duration = mDurationText;
             taskItem.description = std::string(mDescriptionText.ToUTF8());
+            taskItem.billable = bBillable;
             taskItem.date_modified_utc = util::UnixTimestamp();
             taskItem.project_id = mProjectId;
             taskItem.category_id = mCategoryId;
@@ -598,7 +612,8 @@ void TaskItemDialog::OnSave(wxCommandEvent& event)
                 std::string(endTime.ToUTF8()),
                 std::string(mDurationText.ToUTF8()),
                 mCategoryId,
-                std::string(mDescriptionText.ToUTF8()));
+                std::string(mDescriptionText.ToUTF8()),
+                bBillable);
         }
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in task_item OnSave() - {0:d} : {1}", e.get_code(), e.what());

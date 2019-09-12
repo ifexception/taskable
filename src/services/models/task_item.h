@@ -44,6 +44,7 @@ struct task_item
         int categoryId,
         std::string categoryName,
         std::string description,
+        int billable,
         int dateCreatedUtc,
         int dateModifiedUtc,
         int isActive);
@@ -60,6 +61,7 @@ struct task_item
     std::string category_name;
     int category_color;
     std::string description;
+    int billable;
     int date_created_utc;
     int date_modified_utc;
     int is_active;

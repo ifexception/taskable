@@ -70,6 +70,7 @@ private:
         const wxSize& size,
         long style,
         const wxString& name);
+
     bool CreateWithParams(wxWindow* parent,
         wxWindowID windowId,
         const wxString& title,
@@ -111,6 +112,7 @@ private:
     wxTimePickerCtrl* pStartTimeCtrl;
     wxTimePickerCtrl* pEndTimeCtrl;
     wxStaticText* pDurationCtrl;
+    wxCheckBox* pBillableCtrl;
     wxTextCtrl* pDescriptionCtrl;
     wxChoice* pCategoryChoiceCtrl;
     wxStaticText* pDateCreatedTextCtrl;
@@ -125,16 +127,18 @@ private:
     wxString mDurationText;
     int mCategoryId;
     wxString mDescriptionText;
+    bool bBillable;
 
     bool bIsPausableTask;
 
     enum {
-        IDC_PROJECTCHOICE,
+        IDC_PROJECTCHOICE = wxID_HIGHEST + 1,
         IDC_STARTTIME,
         IDC_ENDTIME,
         IDC_DURATION,
         IDC_CATEGORYCHOICE,
         IDC_DESCRIPTION,
+        IDC_BILLABLE,
         IDC_DATECREATED,
         IDC_DATEUPDATED,
         IDC_ISACTIVE
