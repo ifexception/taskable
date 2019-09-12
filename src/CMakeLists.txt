@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.8)
-project (wxTasksTracker)
+project (TasksTracker)
 
 if (MSVC)
     include (${CMAKE_MODULE_PATH}/FindwxWidgetsVcpkg.cmake)
@@ -37,6 +37,7 @@ set (SRC
     "services/taskstateservice.cpp"
     "services/taskstorageservice.cpp"
     "app.cpp"
+    "resources.rc"
     "frame/mainframe.cpp"
     "frame/taskbaricon.cpp"
     "dialogs/taskitemdialog.cpp"
