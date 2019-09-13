@@ -351,6 +351,12 @@ void TaskItemDialog::FillControls()
     for (auto project : projects) {
         pProjectChoiceCtrl->Append(project.display_name, util::IntToVoidPointer(project.project_id));
     }
+
+    wxDateTime timeWithZeroSeconds = wxDateTime::Now();
+    timeWithZeroSeconds.SetSecond(0);
+
+    pStartTimeCtrl->SetValue(timeWithZeroSeconds);
+    pEndTimeCtrl->SetValue(timeWithZeroSeconds);
 }
 
 void TaskItemDialog::DataToControls()
