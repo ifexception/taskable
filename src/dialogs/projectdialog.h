@@ -57,6 +57,7 @@ private:
     bool AreControlsEmpty();
 
     void OnEmployerSelect(wxCommandEvent& event);
+    void OnNameTextEntered(wxCommandEvent& event);
     void OnSave(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
@@ -77,6 +78,6 @@ private:
     int mProjectId;
     bool bIsEdit;
 
-    enum { IDC_NAME, IDC_DISPLAYNAME, IDC_EMPLOYERCHOICE, IDC_CLIENTCHOICE, IDC_ISACTIVE };
+    enum { IDC_NAME = wxID_HIGHEST + 1, IDC_DISPLAYNAME, IDC_EMPLOYERCHOICE, IDC_CLIENTCHOICE, IDC_ISACTIVE };
 };
 } // namespace app::dialog

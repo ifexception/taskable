@@ -36,6 +36,7 @@ EVT_BUTTON(ids::ID_SAVE, ProjectDialog::OnSave)
 EVT_BUTTON(wxID_CANCEL, ProjectDialog::OnCancel)
 EVT_CHOICE(ProjectDialog::IDC_EMPLOYERCHOICE, ProjectDialog::OnEmployerSelect)
 EVT_CHECKBOX(ProjectDialog::IDC_ISACTIVE, ProjectDialog::OnIsActiveCheck)
+EVT_TEXT(ProjectDialog::IDC_NAME, ProjectDialog::OnNameTextEntered)
 wxEND_EVENT_TABLE()
 
 ProjectDialog::ProjectDialog(wxWindow* parent,
@@ -119,7 +120,7 @@ void ProjectDialog::CreateControls()
     taskFlexGridSizer->Add(projectName, common::sizers::ControlCenterVertical);
 
     pNameCtrl = new wxTextCtrl(projectDetailsPanel,
-        wxID_STATIC,
+        IDC_NAME,
         wxGetEmptyString(),
         wxDefaultPosition,
         wxSize(150, -1),
@@ -134,7 +135,7 @@ void ProjectDialog::CreateControls()
     taskFlexGridSizer->Add(projectDisplayName, common::sizers::ControlCenterVertical);
 
     pDisplayNameCtrl = new wxTextCtrl(projectDetailsPanel,
-        wxID_STATIC,
+        IDC_DISPLAYNAME,
         wxGetEmptyString(),
         wxDefaultPosition,
         wxSize(150, -1),
@@ -230,7 +231,7 @@ void ProjectDialog::DataToControls()
         pLogger->error("Error occured in get_project_by_id() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    pNameCtrl->SetValue(project.project_name);
+    pNameCtrl->SetValue(project.project_name); // TODO use ChangeValue as SetValue generates a event
     pDisplayNameCtrl->SetValue(project.display_name);
     pEmployerChoiceCtrl->SetStringSelection(project.employer_name);
 
@@ -343,6 +344,12 @@ void ProjectDialog::OnEmployerSelect(wxCommandEvent& event)
             pClientChoiceCtrl->Enable();
         }
     }
+}
+
+void ProjectDialog::OnNameTextEntered(wxCommandEvent& WXUNUSED(event))
+{
+    auto currentNameText = pNameCtrl->GetValue();
+    pDisplayNameCtrl->SetValue(currentNameText);
 }
 
 void ProjectDialog::OnSave(wxCommandEvent& event)
