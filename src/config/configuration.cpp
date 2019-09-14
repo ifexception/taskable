@@ -19,6 +19,8 @@
 
 #include "configuration.h"
 
+#include "../common/util.h"
+
 namespace app::cfg
 {
 wxString Configuration::CFG_FILE = "tasks-tracker.ini";
@@ -139,4 +141,22 @@ void Configuration::SetNotificationTimerInterval(int value)
 {
     Set<int>(wxT("settings"), wxT("notificationTimer"), value);
 }
+
+wxSize Configuration::GetFrameSize() const
+{
+    auto dimensions = Get<wxString>(wxT("persistence"), wxT("dimensions"));
+    auto dimensionsSplit = util::lib::split(dimensions.ToStdString(), ',');
+    int w = std::stoi(dimensionsSplit[0]);
+    int h = std::stoi(dimensionsSplit[1]);
+    return wxSize(w, h);
+}
+
+void Configuration::SetFrameSize(const wxSize value)
+{
+    int w = value.GetWidth();
+    int h = value.GetHeight();
+    auto newSize = wxString::Format(wxT("%s,%s"), std::to_string(w), std::to_string(h));
+    Set<wxString>(wxT("persistence"), wxT("dimensions"), newSize);
+}
+
 } // namespace app::cfg

@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <wx/sizer.h>
 #include <wx/string.h>
 #include <wx/stdpaths.h>
 #include <wx/fileconf.h>
@@ -62,6 +63,10 @@ public:
 
     int GetNotificationTimerInterval() const;
     void SetNotificationTimerInterval(int value);
+
+    wxSize GetFrameSize() const;
+    void SetFrameSize(const wxSize value);
+
 
 private:
     static wxString CFG_FILE;

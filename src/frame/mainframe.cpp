@@ -87,6 +87,9 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
 
 MainFrame::~MainFrame()
 {
+    auto size = GetSize();
+    pConfig->SetFrameSize(size);
+
     if (pTaskBarIcon) {
         delete pTaskBarIcon; // TODO Wrap TaskBarIcon in a std::unique_ptr
     }
@@ -105,6 +108,10 @@ bool MainFrame::CreateFrame()
     bool success = Create();
     SetMinClientSize(wxSize(599, 499));
     SetIcon(common::GetProgramIcon());
+
+    auto configSize = pConfig->GetFrameSize();
+    SetSize(configSize);
+
     pTaskBarIcon = new TaskBarIcon(this, pConfig, pLogger);
     if (pConfig->IsShowInTray()) {
         pTaskBarIcon->SetTaskBarIcon();
