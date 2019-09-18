@@ -55,6 +55,7 @@ private:
     void OnShowInTrayCheck(wxCommandEvent& event);
     void OnMinimizeTimedTaskWindowCheck(wxCommandEvent& event);
     void OnOpenDirectory(wxCommandEvent& event);
+    void OnTimeRoundingCheck(wxCommandEvent& event);
 
     wxCheckBox* pDialogOnExit;
     wxCheckBox* pStartWithWindows;
@@ -71,10 +72,13 @@ private:
     wxChoice* pHideWindowTimeChoice;
     wxChoice* pNotificationTimeChoice;
 
+    wxCheckBox* pTimeRounding;
+    wxChoice* pRoundOffToChoice;
+
     std::shared_ptr<cfg::Configuration> pConfig;
 
     enum {
-        IDC_DIALOG_EXIT = 1,
+        IDC_DIALOG_EXIT = wxID_HIGHEST + 1,
         IDC_START_WITH_WINDOWS,
         IDC_SHOW_IN_TRAY,
         IDC_MINIMIZE_TO_TRAY,
@@ -85,7 +89,9 @@ private:
         IDC_BACKUP_PATH_BUTTON,
         IDC_CLOSE_TIMED_TASK_WINDOW,
         IDC_HIDE_WINDOW_TIME_CHOICE,
-        IDC_NOTIFICATION_TIME_CHOICE
+        IDC_NOTIFICATION_TIME_CHOICE,
+        IDC_ENABLE_TIME_ROUNDING,
+        IDC_ROUND_OFF_TO
     };
 };
 } // namespace app::dialog

@@ -30,14 +30,15 @@ wxBEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
     EVT_CHECKBOX(IDC_BACKUP_DATABASE, SettingsDialog::OnBackupDatabaseCheck)
     EVT_CHECKBOX(IDC_SHOW_IN_TRAY, SettingsDialog::OnShowInTrayCheck)
     EVT_CHECKBOX(IDC_CLOSE_TIMED_TASK_WINDOW, SettingsDialog::OnMinimizeTimedTaskWindowCheck)
+    EVT_CHECKBOX(IDC_ENABLE_TIME_ROUNDING, SettingsDialog::OnTimeRoundingCheck)
     EVT_BUTTON(IDC_BACKUP_PATH_BUTTON, SettingsDialog::OnOpenDirectory)
     EVT_BUTTON(wxID_OK, SettingsDialog::OnOk)
     EVT_BUTTON(wxID_CANCEL, SettingsDialog::OnCancel)
 wxEND_EVENT_TABLE()
-// clang-format on
 
 SettingsDialog::SettingsDialog(wxWindow* parent, std::shared_ptr<cfg::Configuration> config, const wxString& name)
-    : pConfig(config)
+: pConfig(config)
+// clang-format on
 {
     long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
     bool success = Create(parent, wxID_ANY, wxT("Settings"), wxDefaultPosition, wxSize(500, 320), style, name);
@@ -186,6 +187,35 @@ void SettingsDialog::CreateControls()
     pNotificationTimeChoice->SetToolTip(wxT("Select a interval in minutes for timed task notification update"));
     timedTaskGridSizer->Add(pNotificationTimeChoice, common::sizers::ControlDefault);
 
+    /* Task Item Settings */
+    auto taskItemSettingsBox = new wxStaticBox(this, wxID_ANY, wxT("Task Item"));
+    auto taskItemSettingsSizer = new wxStaticBoxSizer(taskItemSettingsBox, wxHORIZONTAL);
+    mainSizer->Add(taskItemSettingsSizer, common::sizers::ControlExpand);
+
+    auto taskItemPanel = new wxPanel(this, wxID_STATIC);
+    taskItemSettingsSizer->Add(taskItemPanel, common::sizers::ControlDefault);
+
+    auto taskItemGridSizer = new wxFlexGridSizer(2, 10, 10);
+    taskItemPanel->SetSizer(taskItemGridSizer);
+
+    pTimeRounding = new wxCheckBox(taskItemPanel, IDC_ENABLE_TIME_ROUNDING, wxT("Enable Time Rounding"));
+    taskItemGridSizer->Add(pTimeRounding, common::sizers::ControlDefault);
+
+    auto timeRoundingFiller = new wxStaticText(taskItemPanel, wxID_STATIC, wxT(""));
+    taskItemGridSizer->Add(timeRoundingFiller, common::sizers::ControlDefault);
+
+    auto timeToRoundText = new wxStaticText(taskItemPanel, wxID_ANY, wxT("Time to Round to (m)"));
+    taskItemGridSizer->Add(timeToRoundText, common::sizers::ControlDefault);
+
+    wxArrayString roundOffChoices;
+    roundOffChoices.Add(wxT("5"));
+    roundOffChoices.Add(wxT("10"));
+    roundOffChoices.Add(wxT("15"));
+    pRoundOffToChoice =
+        new wxChoice(taskItemPanel, IDC_ROUND_OFF_TO, wxDefaultPosition, wxSize(150, -1), roundOffChoices);
+    pRoundOffToChoice->SetToolTip(wxT("Select a interval in minutes to which time the application will round to"));
+    taskItemGridSizer->Add(pRoundOffToChoice, common::sizers::ControlDefault);
+
     /* Horizontal Line*/
     auto separationLine = new wxStaticLine(
         this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("settings_static_line"));
@@ -237,6 +267,13 @@ void SettingsDialog::FillControls()
 
     pHideWindowTimeChoice->SetStringSelection(std::to_string(pConfig->GetHideWindowTimerInterval()));
     pNotificationTimeChoice->SetStringSelection(std::to_string(pConfig->GetNotificationTimerInterval()));
+
+    pTimeRounding->SetValue(pConfig->IsTimeRoundingEnabled());
+    if (!pConfig->IsTimeRoundingEnabled()) {
+        pRoundOffToChoice->Disable();
+    }
+
+    pRoundOffToChoice->SetStringSelection(std::to_string(pConfig->GetTimeToRoundTo()));
 }
 
 void SettingsDialog::OnOk(wxCommandEvent& WXUNUSED(event))
@@ -254,6 +291,9 @@ void SettingsDialog::OnOk(wxCommandEvent& WXUNUSED(event))
     pConfig->SetMinimizeTimedTaskWindow(pMinimizeTimedTaskWindow->GetValue());
     pConfig->SetHideWindowTimerInterval(std::stoi(pHideWindowTimeChoice->GetStringSelection().ToStdString()));
     pConfig->SetNotificationTimerInterval(std::stoi(pNotificationTimeChoice->GetStringSelection().ToStdString()));
+
+    pConfig->SetTimeRounding(pTimeRounding->GetValue());
+    pConfig->SetTimeToRoundTo(std::stoi(pRoundOffToChoice->GetStringSelection().ToStdString()));
 
     pConfig->Save();
 
@@ -314,5 +354,14 @@ void SettingsDialog::OnOpenDirectory(wxCommandEvent& WXUNUSED(event))
         pBackupPath->SetToolTip(fileLocation);
     }
     openDirDialog->Destroy();
+}
+
+void SettingsDialog::OnTimeRoundingCheck(wxCommandEvent& event)
+{
+    if (event.IsChecked()) {
+        pRoundOffToChoice->Enable();
+    } else {
+        pRoundOffToChoice->Disable();
+    }
 }
 } // namespace app::dialog

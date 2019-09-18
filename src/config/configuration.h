@@ -67,6 +67,11 @@ public:
     wxSize GetFrameSize() const;
     void SetFrameSize(const wxSize value);
 
+    bool IsTimeRoundingEnabled() const;
+    void SetTimeRounding(const bool value);
+
+    int GetTimeToRoundTo() const;
+    void SetTimeToRoundTo(const int value);
 
 private:
     static wxString CFG_FILE;

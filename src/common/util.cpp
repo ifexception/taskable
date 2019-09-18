@@ -20,6 +20,7 @@
 #include "util.h"
 
 #include <chrono>
+#include <ctime>
 #include <fstream>
 #include <sstream>
 
@@ -34,6 +35,16 @@ wxString ConvertUnixTimestampToString(int timestamp)
     wxDateTime asDate(time);
     wxString dateString = asDate.FormatISOCombined();
     return dateString;
+}
+
+wxDateTime RoundToNearestInterval(wxDateTime value, int interval)
+{
+    auto seconds = value.GetTicks();
+    auto timeRoundToInterval = std::round((double)seconds / (interval * 60)) * (interval * 60);
+    std::time_t time = timeRoundToInterval;
+    wxDateTime roundedTime(time);
+    roundedTime.SetSecond(0);
+    return roundedTime;
 }
 
 int UnixTimestamp()

@@ -46,10 +46,12 @@ wxEND_EVENT_TABLE()
 
 TaskItemDialog::TaskItemDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
+    std::shared_ptr<cfg::Configuration> config,
     bool isEdit,
     int taskDetailId,
     const wxString& name)
     : pLogger(logger)
+    , pConfig(config)
     , mTaskDate(wxGetEmptyString())
     , bIsEdit(isEdit)
     , mTaskItemId(taskDetailId)
@@ -78,9 +80,11 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
 
 TaskItemDialog::TaskItemDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
+    std::shared_ptr<cfg::Configuration> config,
     wxTimeSpan duration,
     const wxString& name)
     : pLogger(logger)
+    , pConfig(config)
     , mTaskDate(wxGetEmptyString())
     , bIsEdit(false)
     , mTaskItemId(0)
@@ -105,10 +109,12 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
 
 TaskItemDialog::TaskItemDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
+    std::shared_ptr<cfg::Configuration> config,
     wxDateTime startTime,
     wxDateTime endTime,
     const wxString& name)
     : pLogger(logger)
+    , pConfig(config)
     , mTaskDate(wxGetEmptyString())
     , bIsEdit(false)
     , mTaskItemId(0)
@@ -311,7 +317,7 @@ void TaskItemDialog::CreateControls()
         pDateCreatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
         auto font = pDateCreatedTextCtrl->GetFont();
         font.MakeItalic();
-        font.SetPointSize(10);
+        font.SetPointSize(8);
         pDateCreatedTextCtrl->SetFont(font);
         detailsBoxSizer->Add(pDateCreatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
@@ -450,7 +456,7 @@ bool TaskItemDialog::Validate()
             return false;
         }
 
-        if (!bIsEdit) {
+        if (!bIsEdit && pConfig->IsTimeRoundingEnabled()) {
             auto isEndTimeInTheFuture = mEndTime.IsLaterThan(wxDateTime::Now());
             if (isEndTimeInTheFuture) {
                 wxMessageBox(
@@ -529,9 +535,14 @@ void TaskItemDialog::OnStartTimeChange(wxDateEvent& event)
 {
     auto start = event.GetDate();
     auto end = pEndTimeCtrl->GetValue();
-    if (end != wxDefaultDateTime) {
-        CalculateTimeDiff(start, end);
+
+    if (pConfig->IsTimeRoundingEnabled()) {
+        auto date = start;
+        auto roundedDate = util::RoundToNearestInterval(date, pConfig->GetTimeToRoundTo());
+        pStartTimeCtrl->SetValue(roundedDate);
     }
+
+    CalculateTimeDiff(start, end);
 }
 
 void TaskItemDialog::OnEndTimeChange(wxDateEvent& event)
@@ -539,9 +550,13 @@ void TaskItemDialog::OnEndTimeChange(wxDateEvent& event)
     auto end = event.GetDate();
     auto start = pStartTimeCtrl->GetValue();
 
-    if (start != wxDefaultDateTime) {
-        CalculateTimeDiff(start, end);
+    if (pConfig->IsTimeRoundingEnabled()) {
+        auto date = end;
+        auto roundedDate = util::RoundToNearestInterval(date, pConfig->GetTimeToRoundTo());
+        pEndTimeCtrl->SetValue(roundedDate);
     }
+
+    CalculateTimeDiff(start, end);
 }
 
 void TaskItemDialog::OnIsActiveCheck(wxCommandEvent& event)

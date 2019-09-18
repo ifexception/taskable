@@ -159,4 +159,24 @@ void Configuration::SetFrameSize(const wxSize value)
     Set<wxString>(wxT("persistence"), wxT("dimensions"), newSize);
 }
 
+bool Configuration::IsTimeRoundingEnabled() const
+{
+    return Get<bool>(wxT("settings"), wxT("timeRounding"));
+}
+
+void Configuration::SetTimeRounding(const bool value)
+{
+    Set<bool>(wxT("settings"), wxT("timeRounding"), value);
+}
+
+int Configuration::GetTimeToRoundTo() const
+{
+    return Get<int>(wxT("settings"), wxT("timeToRoundTo"));
+}
+
+void Configuration::SetTimeToRoundTo(const int value)
+{
+    Set<int>(wxT("settings"), wxT("timeToRoundTo"), value);
+}
+
 } // namespace app::cfg

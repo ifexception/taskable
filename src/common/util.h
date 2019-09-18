@@ -22,11 +22,14 @@
 #include <string>
 #include <vector>
 
+class wxDateTime;
 class wxString;
 
 namespace app::util
 {
 wxString ConvertUnixTimestampToString(int timestamp);
+
+wxDateTime RoundToNearestInterval(wxDateTime value, int interval);
 
 int UnixTimestamp();
 

@@ -274,10 +274,10 @@ void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 
         auto durationOfTask = pTaskState->GetAccumulatedTime();
 
-        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, durationOfTask);
+        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, durationOfTask);
         newTask.ShowModal();
     } else {
-        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, mStartTime, mEndTime);
+        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, mStartTime, mEndTime);
         newTask.ShowModal();
     }
 
