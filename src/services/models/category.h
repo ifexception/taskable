@@ -36,6 +36,13 @@ struct category
         int projectId);
     explicit category(int categoryId,
         std::string categoryName,
+        std::string description,
+        int dateCreatedUtc,
+        int dateModifiedUtc,
+        int isActive,
+        std::string projectName);
+    explicit category(int categoryId,
+        std::string categoryName,
         int color,
         std::string description,
         int dateCreatedUtc,

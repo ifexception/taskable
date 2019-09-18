@@ -41,7 +41,7 @@ const std::string category::getCategories = "SELECT categories.category_id, "
                                             "categories.date_created_utc, "
                                             "categories.date_modified_utc, "
                                             "categories.is_active, "
-                                            "projects.name AS project_name "
+                                            "projects.display_name AS project_name "
                                             "FROM categories "
                                             "INNER JOIN projects ON categories.project_id = projects.project_id "
                                             "WHERE categories.is_active = 1";
@@ -66,6 +66,23 @@ category::category(int categoryId,
     , date_modified_utc(dateModifiedUtc)
     , is_active(isActive)
     , project_id(projectId)
+{
+}
+
+category::category(int categoryId,
+    std::string categoryName,
+    std::string description,
+    int dateCreatedUtc,
+    int dateModifiedUtc,
+    int isActive,
+    std::string projectName)
+    : category_id(categoryId)
+    , category_name(categoryName)
+    , description(description)
+    , date_created_utc(dateCreatedUtc)
+    , date_modified_utc(dateModifiedUtc)
+    , is_active(isActive)
+    , project_name(projectName)
 {
 }
 

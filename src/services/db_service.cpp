@@ -438,7 +438,6 @@ std::vector<models::category> db_service::get_categories()
     db << models::category::getCategories
        >> [&](int categoryId,
            std::string categoryName,
-           int color,
            std::unique_ptr<std::string> description,
            int dateCreatedUtc,
            int dateModifiedUtc,
@@ -446,7 +445,6 @@ std::vector<models::category> db_service::get_categories()
            std::string projectName) {
             models::category category(categoryId,
                    categoryName,
-                   color,
                    description != nullptr ? *description : "",
                    dateCreatedUtc,
                    dateModifiedUtc,
@@ -513,10 +511,10 @@ void db_service::create_new_task_item(const int projectId,
        << endTime
        << duration
        << description
+       << billable
        << projectId
        << taskId
-       << categoryId
-       << billable;
+       << categoryId;
 }
 
 std::vector<models::task_item> db_service::get_all_task_items_by_date(const std::string& date)
