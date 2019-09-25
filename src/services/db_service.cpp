@@ -464,7 +464,8 @@ void db_service::update_category(models::category category)
        << category.color
        << category.description
        << category.project_id
-       << category.date_modified_utc;
+       << category.date_modified_utc
+       << category.category_id;
 }
 
 void db_service::delete_category(const int categoryId, const int dateModified)

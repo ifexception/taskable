@@ -22,8 +22,8 @@
 namespace app::models
 {
 const std::string task_item::createNewTaskItem = "INSERT INTO task_items (start_time, end_time, duration, description, "
-                                                 "billable, is_active, project_id, task_id, category_id) "
-                                                 "VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?)";
+                                                 "billable, project_id, task_id, category_id, is_active) "
+                                                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)";
 const std::string task_item::getAllTaskItemsByDate =
     "SELECT task_items.task_item_id, tasks.task_date, "
     "task_items.start_time, "
@@ -48,6 +48,7 @@ const std::string task_item::getTaskItemById =
     "categories.category_id, "
     "categories.name as category_name, "
     "task_items.description as description, "
+    "task_items.billable, "
     "task_items.date_created_utc, "
     "task_items.date_modified_utc, "
     "task_items.is_active "
