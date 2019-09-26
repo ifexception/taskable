@@ -134,7 +134,7 @@ void MainFrame::CreateControls()
     SetStatusText(wxString::Format("%d.%d.%d", TASKS_TRACKER_MAJOR, TASKS_TRACKER_MINOR, TASKS_TRACKER_PATCH), 1);
 
     /* File Menu Control */
-    wxMenu* fileMenu = new wxMenu();
+    auto fileMenu = new wxMenu();
     fileMenu->Append(ids::ID_NEW_TASK, wxT("New &Task...\tCtrl-N"), wxT("Create new task"));
     fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("&Timed Task...\tCtrl-Q"), wxT("Create new timed task"));
     fileMenu->AppendSeparator();
@@ -161,7 +161,7 @@ void MainFrame::CreateControls()
     wxMenu* helpMenu = new wxMenu();
     helpMenu->Append(wxID_ABOUT);
     helpMenu->Append(
-        ids::ID_CHECK_FOR_UPDATE, wxT("Check for update"), wxT("Check if a update is available for application"));
+        ids::ID_CHECK_FOR_UPDATE, wxT("Check for update"), wxT("Check if an update is available for application"));
 
     /* Menu Bar */
     wxMenuBar* menuBar = new wxMenuBar();

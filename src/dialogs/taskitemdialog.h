@@ -99,7 +99,7 @@ private:
     void OnStartTimeChange(wxDateEvent& event);
     void OnEndTimeChange(wxDateEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
-    void OnSave(wxCommandEvent& event);
+    void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnTaskSaved();
 

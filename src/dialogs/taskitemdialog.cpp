@@ -36,7 +36,7 @@ namespace app::dialog
 {
 // clang-format off
 wxBEGIN_EVENT_TABLE(TaskItemDialog, wxDialog)
-EVT_BUTTON(ids::ID_SAVE, TaskItemDialog::OnSave)
+EVT_BUTTON(wxID_OK, TaskItemDialog::OnOk)
 EVT_BUTTON(wxID_CANCEL, TaskItemDialog::OnCancel)
 EVT_CHOICE(TaskItemDialog::IDC_PROJECTCHOICE, TaskItemDialog::OnProjectChoice)
 EVT_TIME_CHANGED(TaskItemDialog::IDC_STARTTIME, TaskItemDialog::OnStartTimeChange)
@@ -292,10 +292,10 @@ void TaskItemDialog::CreateControls()
     taskFlexGridSizer->Add(pCategoryChoiceCtrl, common::sizers::ControlDefault);
 
     if (bIsEdit) {
+        /* Is Active Checkbox Control */
         auto isActiveFiller = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT(""));
         taskFlexGridSizer->Add(isActiveFiller, common::sizers::ControlDefault);
 
-        /* Is Active Checkbox Control */
         pIsActiveCtrl = new wxCheckBox(taskDetailsPanel, IDC_ISACTIVE, wxT("Is Active"));
         taskFlexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
     }
@@ -336,7 +336,7 @@ void TaskItemDialog::CreateControls()
     buttonPanel->SetSizer(buttonPanelSizer);
     mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
-    auto okButton = new wxButton(buttonPanel, ids::ID_SAVE, wxT("&Save"));
+    auto okButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
     auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
     buttonPanelSizer->Add(okButton, common::sizers::ControlDefault);
@@ -534,7 +534,6 @@ void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
 void TaskItemDialog::OnStartTimeChange(wxDateEvent& event)
 {
     auto start = event.GetDate();
-    auto end = pEndTimeCtrl->GetValue();
 
     if (pConfig->IsTimeRoundingEnabled()) {
         auto date = start;
@@ -542,13 +541,13 @@ void TaskItemDialog::OnStartTimeChange(wxDateEvent& event)
         pStartTimeCtrl->SetValue(roundedDate);
     }
 
+    auto end = pEndTimeCtrl->GetValue();
     CalculateTimeDiff(start, end);
 }
 
 void TaskItemDialog::OnEndTimeChange(wxDateEvent& event)
 {
     auto end = event.GetDate();
-    auto start = pStartTimeCtrl->GetValue();
 
     if (pConfig->IsTimeRoundingEnabled()) {
         auto date = end;
@@ -556,6 +555,7 @@ void TaskItemDialog::OnEndTimeChange(wxDateEvent& event)
         pEndTimeCtrl->SetValue(roundedDate);
     }
 
+    auto start = pStartTimeCtrl->GetValue();
     CalculateTimeDiff(start, end);
 }
 
@@ -582,7 +582,7 @@ void TaskItemDialog::OnIsActiveCheck(wxCommandEvent& event)
     }
 }
 
-void TaskItemDialog::OnSave(wxCommandEvent& event)
+void TaskItemDialog::OnOk(wxCommandEvent& event)
 {
     mProjectId = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
     mStartTime = pStartTimeCtrl->GetValue();
@@ -637,7 +637,7 @@ void TaskItemDialog::OnSave(wxCommandEvent& event)
                 bBillable);
         }
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in task_item OnSave() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in task_item OnOk() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     OnTaskSaved();
