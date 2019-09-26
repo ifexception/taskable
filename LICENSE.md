@@ -631,9 +631,9 @@ to attach them to the start of each source file to most effectively
 state the exclusion of warranty; and each file should have at least
 the "copyright" line and a pointer to where the full notice is found.
 
-    TimesheetsTracker is a desktop that aids you in tracking your
+    Tasks Tracker is a desktop that aids you in tracking your
     timesheets and seeing what work you have done.
-    Copyright (C) <2018>  <Szymon Welgus>
+    Copyright (C) <2019>  <Szymon Welgus>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

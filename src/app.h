@@ -1,7 +1,7 @@
-//  TimesheetsTracker is a desktop that aids you in tracking your timesheets
+//  Tasks Tracker is a desktop that aids you in tracking your timesheets
 //  and seeing what work you have done.
 //
-//  Copyright(C)<2018><Szymon Welgus>
+//  Copyright(C)<2019><Szymon Welgus>
 //
 //  This program is free software : you can redistribute it and /
 //  or modify it under the terms of the GNU General Public License as published
