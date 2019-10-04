@@ -17,14 +17,14 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "editlistdialog.h"
+#include "editlistdlg.h"
 
 #include <sqlite_modern_cpp/errors.h>
 
-#include "employerdialog.h"
-#include "clientdialog.h"
-#include "projectdialog.h"
-#include "categorydialog.h"
+#include "employerdlg.h"
+#include "clientdlg.h"
+#include "projectdlg.h"
+#include "categorydlg.h"
 
 #include "../common/common.h"
 #include "../common/util.h"

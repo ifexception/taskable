@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "projectdialog.h"
+#include "projectdlg.h"
 
 #include <sqlite_modern_cpp/errors.h>
 #include <wx/statline.h>

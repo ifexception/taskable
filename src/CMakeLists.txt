@@ -42,14 +42,14 @@ set (SRC
     "frame/mainframe.cpp"
     "frame/taskbaricon.cpp"
     "dialogs/taskitemdlg.cpp"
-    "dialogs/employerdialog.cpp"
-    "dialogs/clientdialog.cpp"
-    "dialogs/projectdialog.cpp"
-    "dialogs/categorydialog.cpp"
-    "dialogs/editlistdialog.cpp"
+    "dialogs/employerdlg.cpp"
+    "dialogs/clientdlg.cpp"
+    "dialogs/projectdlg.cpp"
+    "dialogs/categorydlg.cpp"
+    "dialogs/editlistdlg.cpp"
     "dialogs/settingsdialog.cpp"
     "dialogs/stopwatchtaskdlg.cpp"
-    "dialogs/checkforupdatedialog.cpp"
+    "dialogs/checkforupdatedlg.cpp"
     "wizards/setupwizard.cpp")
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
