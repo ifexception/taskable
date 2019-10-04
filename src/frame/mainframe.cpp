@@ -526,6 +526,7 @@ void MainFrame::RefreshItems(wxDateTime date)
         pListCtrl->SetItemPtrData(listIndex, (wxUIntPtr) data);
 
         columnIndex = 0;
+        taskItem.cleanup();
     }
 }
 } // namespace app::frame

@@ -69,6 +69,12 @@ struct task_item {
     int date_modified_utc;
     int is_active;
 
+    // This method exists to clean up memory as unfortunately the
+    // destructor runs too soon and deallocates the memory
+    // Might need to rethink how to make this work
+    // with sqlite_modern_cpp (04/10/2019)
+    void cleanup();
+
     static const std::string createNewTaskItem;
     static const std::string getAllTaskItemsByDate;
     static const std::string getTaskItemById;

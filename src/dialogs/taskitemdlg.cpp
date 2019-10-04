@@ -579,6 +579,7 @@ void TaskItemDialog::OnOk(wxCommandEvent& event)
         ProcessTaskItem(taskItem);
     }
 
+    taskItem.cleanup();
     GenerateTaskSavedEvent();
     EndModal(wxID_OK);
 }

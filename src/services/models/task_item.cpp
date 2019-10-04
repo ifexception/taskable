@@ -131,4 +131,14 @@ task_item::task_item(int taskItemId,
         end_time = new std::string(*endTime);
     }
 }
+
+void task_item::cleanup()
+{
+    if (start_time) {
+        delete start_time;
+    }
+    if (end_time) {
+        delete end_time;
+    }
+}
 } // namespace app::models
