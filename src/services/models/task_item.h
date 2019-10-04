@@ -19,27 +19,28 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 
 namespace app::models
 {
-struct task_item
-{
+struct task_item {
     task_item() = default;
     explicit task_item(int taskItemId,
         std::string taskDate,
-        std::string startTime,
-        std::string endTime,
+        std::unique_ptr<std::string> startTime,
+        std::unique_ptr<std::string> endTime,
         std::string duration,
         std::string description,
         std::string categoryName,
         int categoryColor,
-        std::string projectName);
+        std::string projectName,
+        int taskItemTypeId);
     explicit task_item(int taskItemId,
         int projectId,
         std::string projectName,
-        std::string startTime,
-        std::string endTime,
+        std::unique_ptr<std::string> startTime,
+        std::unique_ptr<std::string> endTime,
         std::string duration,
         int categoryId,
         std::string categoryName,
@@ -51,12 +52,14 @@ struct task_item
     ~task_item() = default;
 
     int task_item_id;
+    int task_id;
     int project_id;
     std::string project_name;
     std::string task_date;
-    std::string start_time;
-    std::string end_time;
+    std::string* start_time;
+    std::string* end_time;
     std::string duration;
+    int task_item_type_id;
     int category_id;
     std::string category_name;
     int category_color;
@@ -73,8 +76,7 @@ struct task_item
     static const std::string deleteTaskItem;
 };
 
-struct task
-{
+struct task {
     task() = default;
     ~task() = default;
 
@@ -82,4 +84,4 @@ struct task
     static const std::string createTask;
     static const std::string getTaskHoursById;
 };
-}
+} // namespace app::models

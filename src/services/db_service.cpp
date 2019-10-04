@@ -111,6 +111,18 @@ void db_service::create_tasks_table()
     db << query;
 }
 
+void db_service::create_task_item_types_table()
+{
+    const std::string query = "CREATE TABLE task_item_types"
+                              "("
+                              "    task_item_type_id INTEGER PRIMARY KEY NOT NULL,"
+                              "    name TEXT NOT NULL"
+                              ");";
+
+    auto db = db_connection::get_instance().get_handle();
+    db << query;
+}
+
 void db_service::create_task_items_table()
 {
     const std::string query = "CREATE TABLE task_items"
@@ -124,9 +136,11 @@ void db_service::create_task_items_table()
                               "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
                               "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
                               "    is_active INTEGER NOT NULL,"
+                              "    task_item_type_id INTEGER NOT NULL,"
                               "    project_id INTEGER NOT NULL,"
                               "    task_id INTEGER NOT NULL,"
                               "    category_id INTEGER NOT NULL,"
+                              "    FOREIGN KEY (task_item_type_id) REFERENCES task_item_types(task_item_type_id),"
                               "    FOREIGN KEY (project_id) REFERENCES projects(project_id),"
                               "    FOREIGN KEY (task_id) REFERENCES tasks(task_id),"
                               "    FOREIGN KEY (category_id) REFERENCES categories(category_id)"
@@ -134,6 +148,16 @@ void db_service::create_task_items_table()
 
     auto db = db_connection::get_instance().get_handle();
     db << query;
+}
+
+void db_service::seed_task_item_types_table()
+{
+    const std::string query1 = "INSERT INTO task_item_types (name) VALUES ('Entry');";
+    const std::string query2 = "INSERT INTO task_item_types (name) VALUES ('Timed');";
+
+    auto db = db_connection::get_instance().get_handle();
+    db << query1;
+    db << query2;
 }
 
 int db_service::get_last_insert_rowid()
@@ -497,25 +521,32 @@ int db_service::create_or_get_task_id(const std::string& date)
     return aTaskId;
 }
 
-void db_service::create_new_task_item(const int projectId,
-    const int taskId,
-    const std::string& startTime,
-    const std::string& endTime,
-    const std::string& duration,
-    const int categoryId,
-    const std::string& description,
-    const int billable)
+void db_service::create_new_task_item(const models::task_item& taskItem)
 {
     auto db = db_connection::get_instance().get_handle();
-    db <<  models::task_item::createNewTaskItem
-       << startTime
-       << endTime
-       << duration
-       << description
-       << billable
-       << projectId
-       << taskId
-       << categoryId;
+    if (taskItem.start_time == nullptr && taskItem.end_time == nullptr) {
+         db << models::task_item::createNewTaskItem
+            << nullptr
+            << nullptr
+            << taskItem.duration
+            << taskItem.description
+            << taskItem.billable
+            << taskItem.task_item_type_id
+            << taskItem.project_id
+            << taskItem.task_id
+            << taskItem.category_id;
+    } else {
+        db << models::task_item::createNewTaskItem
+           << *taskItem.start_time
+           << *taskItem.end_time
+           << taskItem.duration
+           << taskItem.description
+           << taskItem.billable
+           << taskItem.task_item_type_id
+           << taskItem.project_id
+           << taskItem.task_id
+           << taskItem.category_id;
+    }
 }
 
 std::vector<models::task_item> db_service::get_all_task_items_by_date(const std::string& date)
@@ -533,16 +564,18 @@ std::vector<models::task_item> db_service::get_all_task_items_by_date(const std:
            std::string description,
            std::string categoryName,
            int categoryColor,
-           std::string projectName) {
+           std::string projectName,
+           int taskItemTypeId) {
            models::task_item taskItem(taskItemId,
                taskDate,
-               startTime != nullptr ? *startTime : "",
-               endTime != nullptr ? *endTime : "",
+               std::move(startTime),
+               std::move(endTime),
                duration,
                description,
                categoryName,
                categoryColor,
-               projectName);
+               projectName,
+               taskItemTypeId);
            taskItems.push_back(taskItem);
        };
 
@@ -572,8 +605,8 @@ models::task_item db_service::get_task_item_by_id(const int taskId)
            taskItem = models::task_item(taskItemId,
                projectId,
                projectName,
-               startTime != nullptr ? *startTime : "",
-               endTime != nullptr ? *endTime : "",
+               std::move(startTime),
+               std::move(endTime),
                duration,
                categoryId,
                categoryName,
@@ -590,16 +623,30 @@ models::task_item db_service::get_task_item_by_id(const int taskId)
 void db_service::update_task_item(models::task_item task)
 {
     auto db = db_connection::get_instance().get_handle();
-    db << models::task_item::updateTaskItem
-       << task.start_time
-       << task.end_time
-       << task.duration
-       << task.description
-       << task.billable
-       << task.date_modified_utc
-       << task.project_id
-       << task.category_id
-       << task.task_item_id;
+    if (task.start_time == nullptr && task.end_time == nullptr) {
+         db << models::task_item::updateTaskItem
+            << nullptr
+            << nullptr
+            << task.duration
+            << task.description
+            << task.billable
+            << task.date_modified_utc
+            << task.project_id
+            << task.category_id
+            << task.task_item_id;
+    }
+    else {
+        db << models::task_item::updateTaskItem
+           << *task.start_time
+           << *task.end_time
+           << task.duration
+           << task.description
+           << task.billable
+           << task.date_modified_utc
+           << task.project_id
+           << task.category_id
+           << task.task_item_id;
+    }
 }
 
 void db_service::delete_task_item(const int taskId, const int dateModified)

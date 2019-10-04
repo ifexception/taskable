@@ -31,14 +31,14 @@
 #include "../common/ids.h"
 #include "../common/util.h"
 #include "../common/version.h"
-#include "../dialogs/taskitemdialog.h"
+#include "../dialogs/taskitemdlg.h"
 #include "../dialogs/employerdialog.h"
 #include "../dialogs/clientdialog.h"
 #include "../dialogs/projectdialog.h"
 #include "../dialogs/categorydialog.h"
 #include "../dialogs/editlistdialog.h"
 #include "../dialogs/settingsdialog.h"
-#include "../dialogs/timedtaskdialog.h"
+#include "../dialogs/stopwatchtaskdlg.h"
 #include "../dialogs/checkforupdatedialog.h"
 #include "../services/db_service.h"
 #include "../wizards/setupwizard.h"
@@ -50,7 +50,8 @@ namespace app::frame
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 EVT_CLOSE(MainFrame::OnClose)
 EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
-EVT_MENU(ids::ID_NEW_TASK, MainFrame::OnNewTask)
+EVT_MENU(ids::ID_NEW_ENTRY_TASK, MainFrame::OnNewEntryTask)
+EVT_MENU(ids::ID_NEW_TIMED_TASK, MainFrame::OnNewTimedTask)
 EVT_MENU(ids::ID_NEW_EMPLOYER, MainFrame::OnNewEmployer)
 EVT_MENU(ids::ID_NEW_PROJECT, MainFrame::OnNewProject)
 EVT_MENU(ids::ID_NEW_CLIENT, MainFrame::OnNewClient)
@@ -60,12 +61,12 @@ EVT_MENU(ids::ID_EDIT_CLIENT, MainFrame::OnEditClient)
 EVT_MENU(ids::ID_EDIT_PROJECT, MainFrame::OnEditProject)
 EVT_MENU(ids::ID_EDIT_CATEGORY, MainFrame::OnEditCategory)
 EVT_MENU(ids::ID_SETTINGS, MainFrame::OnSettings)
-EVT_MENU(ids::ID_NEW_TIMED_TASK, MainFrame::OnNewTimedTask)
+EVT_MENU(ids::ID_STOPWATCH_TASK, MainFrame::OnTaskStopwatch)
 EVT_MENU(ids::ID_CHECK_FOR_UPDATE, MainFrame::OnCheckForUpdate)
 EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
 EVT_LIST_ITEM_RIGHT_CLICK(MainFrame::IDC_LIST, MainFrame::OnItemRightClick)
 EVT_COMMAND(wxID_ANY, TASK_INSERTED, MainFrame::OnTaskInserted)
-EVT_COMMAND(wxID_ANY, START_NEW_TIMED_TASK, MainFrame::OnNewTimedTaskFromPausedTask)
+EVT_COMMAND(wxID_ANY, START_NEW_STOPWATCH_TASK, MainFrame::OnNewStopwatchTaskFromPausedStopwatchTask)
 EVT_ICONIZE(MainFrame::OnIconize)
 EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 EVT_SIZE(MainFrame::OnResize)
@@ -135,8 +136,10 @@ void MainFrame::CreateControls()
 
     /* File Menu Control */
     auto fileMenu = new wxMenu();
-    fileMenu->Append(ids::ID_NEW_TASK, wxT("New &Task...\tCtrl-N"), wxT("Create new task"));
-    fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("&Timed Task...\tCtrl-Q"), wxT("Create new timed task"));
+    fileMenu->Append(ids::ID_NEW_ENTRY_TASK, wxT("New Task &Entry...\tCtrl-N"), wxT("Create new task entry"));
+    fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("New &Timed Task...\tCtrl-T"), wxT("Create new timed task"));
+    fileMenu->AppendSeparator();
+    fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("Sto&pwatch Task...\tCtrl-Q"), wxT("Start task stopwatch"));
     fileMenu->AppendSeparator();
     fileMenu->Append(ids::ID_NEW_EMPLOYER, wxT("New &Employer"), wxT("Create new employer"));
     fileMenu->Append(ids::ID_NEW_CLIENT, wxT("New &Client"), wxT("Create new client"));
@@ -174,10 +177,11 @@ void MainFrame::CreateControls()
 
     /* Accelerator Table */
     wxAcceleratorEntry entries[4];
-    entries[0].Set(wxACCEL_CTRL, (int) 'N', ids::ID_NEW_TASK);
+    entries[0].Set(wxACCEL_CTRL, (int) 'N', ids::ID_NEW_ENTRY_TASK);
+    entries[0].Set(wxACCEL_CTRL, (int) 'T', ids::ID_NEW_TIMED_TASK);
     entries[1].Set(wxACCEL_CTRL, (int) 'P', ids::ID_SETTINGS);
     entries[2].Set(wxACCEL_CTRL, (int) 'H', wxID_ABOUT);
-    entries[3].Set(wxACCEL_CTRL, (int) 'Q', ids::ID_NEW_TIMED_TASK);
+    entries[3].Set(wxACCEL_CTRL, (int) 'Q', ids::ID_STOPWATCH_TASK);
 
     wxAcceleratorTable table(ARRAYSIZE(entries), entries);
     SetAcceleratorTable(table);
@@ -194,7 +198,6 @@ void MainFrame::CreateControls()
     utilPanel->SetSizer(utilSizer);
 
     auto gotoText = new wxStaticText(utilPanel, wxID_ANY, wxT("Go To"));
-    const auto& flags = common::sizers::ControlCenterVertical;
     utilSizer->Add(gotoText, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
     pDatePickerCtrl = new wxDatePickerCtrl(
@@ -294,10 +297,16 @@ void MainFrame::OnClose(wxCloseEvent& event)
     event.Skip();
 }
 
-void MainFrame::OnNewTask(wxCommandEvent& event)
+void MainFrame::OnNewEntryTask(wxCommandEvent& event)
 {
-    dialog::TaskItemDialog newTask(this, pLogger, pConfig);
-    newTask.ShowModal();
+    dialog::TaskItemDialog entryTask(this, pLogger, pConfig, dialog::TaskItemType::EntryTask);
+    entryTask.ShowModal();
+}
+
+void MainFrame::OnNewTimedTask(wxCommandEvent& event)
+{
+    dialog::TaskItemDialog timedTask(this, pLogger, pConfig, dialog::TaskItemType::TimedTask);
+    timedTask.ShowModal();
 }
 
 void MainFrame::OnNewEmployer(wxCommandEvent& event)
@@ -357,8 +366,14 @@ void MainFrame::OnTaskInserted(wxCommandEvent& event)
 
 void MainFrame::OnItemDoubleClick(wxListEvent& event)
 {
-    int taskDetailId = event.GetData();
-    dialog::TaskItemDialog editTask(this, pLogger, pConfig, true, taskDetailId);
+    unsigned int taskItemDataPtr = (unsigned int) event.GetData();
+    auto taskItemId = (taskItemDataPtr & 0x000000FF);
+    auto taskItemTypeId = (taskItemDataPtr & 0x0000FF00) >> 8;
+    dialog::TaskItemType type = static_cast<dialog::TaskItemType>(taskItemTypeId);
+    wxDateTime dateContext = pDatePickerCtrl->GetValue();
+
+    dialog::TaskItemDialog editTask(
+        this, pLogger, pConfig, type, true, taskItemId, dateContext);
     editTask.ShowModal();
 }
 
@@ -392,10 +407,10 @@ void MainFrame::OnSettings(wxCommandEvent& event)
     settings.ShowModal();
 }
 
-void MainFrame::OnNewTimedTask(wxCommandEvent& event)
+void MainFrame::OnTaskStopwatch(wxCommandEvent& event)
 {
-    dialog::TimedTaskDialog timedTask(this, pConfig, pLogger, pTaskState);
-    timedTask.Launch();
+    dialog::StopwatchTaskDialog stopwatchTask(this, pConfig, pLogger, pTaskState);
+    stopwatchTask.Launch();
 }
 
 void MainFrame::OnDateChanged(wxDateEvent& event)
@@ -408,19 +423,19 @@ void MainFrame::OnDateChanged(wxDateEvent& event)
     RefreshItems(date);
 }
 
-void MainFrame::OnNewTimedTaskFromPausedTask(wxCommandEvent& event)
+void MainFrame::OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event)
 {
     pTaskStorage->Store(pTaskState);
     pTaskState->mTimes.clear();
 
-    dialog::TimedTaskDialog timedTask(this, pConfig, pLogger, pTaskState, true);
-    timedTask.Launch();
+    dialog::StopwatchTaskDialog stopwatchTask(this, pConfig, pLogger, pTaskState, /* hasPendingPausedTask */ true);
+    stopwatchTask.Launch();
 
     pTaskState->mTimes.clear();
     pTaskStorage->Restore(pTaskState);
 
-    dialog::TimedTaskDialog timedPausedTask(this, pConfig, pLogger, pTaskState);
-    timedPausedTask.LaunchInPausedState();
+    dialog::StopwatchTaskDialog stopwatchPausedTask(this, pConfig, pLogger, pTaskState);
+    stopwatchPausedTask.LaunchInPausedState();
 
     pTaskStorage->mTimes.clear();
 }
@@ -433,19 +448,18 @@ void MainFrame::OnCheckForUpdate(wxCommandEvent& event)
 
 void MainFrame::OnResize(wxSizeEvent& event)
 {
-
     auto frameSize = GetClientSize();
 
     if (bHasInitialized) {
         int width = frameSize.GetWidth();
 
-        pListCtrl->SetColumnWidth(0, width * 0.10);   // project
-        pListCtrl->SetColumnWidth(1, width * 0.11);   // task date
-        pListCtrl->SetColumnWidth(2, width * 0.09);   // start time
-        pListCtrl->SetColumnWidth(3, width * 0.09);   // end time
-        pListCtrl->SetColumnWidth(4, width * 0.10);   // duration
-        pListCtrl->SetColumnWidth(5, width * 0.12);   // category
-        pListCtrl->SetColumnWidth(6, width * 0.37);   // description
+        pListCtrl->SetColumnWidth(0, width * 0.10); // project
+        pListCtrl->SetColumnWidth(1, width * 0.11); // task date
+        pListCtrl->SetColumnWidth(2, width * 0.09); // start time
+        pListCtrl->SetColumnWidth(3, width * 0.09); // end time
+        pListCtrl->SetColumnWidth(4, width * 0.10); // duration
+        pListCtrl->SetColumnWidth(5, width * 0.12); // category
+        pListCtrl->SetColumnWidth(6, width * 0.37); // description
     }
 
     if (!bHasInitialized) {
@@ -491,6 +505,7 @@ void MainFrame::RefreshItems(wxDateTime date)
         taskItems = dbService.get_all_task_items_by_date(std::string(dateString.ToUTF8()));
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured on get_all_task_items_by_date() - {0:d} : {1}", e.get_code(), e.what());
+        return;
     }
 
     int listIndex = 0;
@@ -498,14 +513,17 @@ void MainFrame::RefreshItems(wxDateTime date)
     for (auto taskItem : taskItems) {
         listIndex = pListCtrl->InsertItem(columnIndex++, taskItem.project_name);
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem.task_date);
-        pListCtrl->SetItem(listIndex, columnIndex++, taskItem.start_time);
-        pListCtrl->SetItem(listIndex, columnIndex++, taskItem.end_time);
+        pListCtrl->SetItem(listIndex, columnIndex++, wxGetEmptyString());
+        pListCtrl->SetItem(listIndex, columnIndex++, wxGetEmptyString());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem.duration);
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem.category_name);
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem.description);
 
         pListCtrl->SetItemBackgroundColour(listIndex, wxColour(taskItem.category_color));
-        pListCtrl->SetItemPtrData(listIndex, taskItem.task_item_id);
+        unsigned int data = 0;
+        data |= taskItem.task_item_id;
+        data |= (taskItem.task_item_type_id << 8);
+        pListCtrl->SetItemPtrData(listIndex, (wxUIntPtr) data);
 
         columnIndex = 0;
     }

@@ -41,7 +41,8 @@ private:
 
     wxMenu* CreatePopupMenu() override;
 
-    void OnNewTask(wxCommandEvent& event);
+    void OnNewEntryTask(wxCommandEvent& event);
+    void OnNewTimedTask(wxCommandEvent& event);
     void OnSettings(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnLeftButtonDown(wxTaskBarIconEvent& event);
@@ -50,6 +51,6 @@ private:
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
 
-    enum { ID_ADD_TASK = wxID_HIGHEST + 1, ID_SETTINGS };
+    enum { ID_ADD_ENTRY_TASK = wxID_HIGHEST + 1, ID_ADD_TIMED_TASK, ID_SETTINGS };
 };
 } // namespace app::frame

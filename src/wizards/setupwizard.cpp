@@ -167,11 +167,15 @@ bool SetupWizard::SetUpDatabase()
         dbService.create_projects_table();
         dbService.create_categories_table();
         dbService.create_tasks_table();
+        dbService.create_task_item_types_table();
         dbService.create_task_items_table();
+
+        dbService.seed_task_item_types_table();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured on create_X_table() - {0:d} : {1}", e.get_code(), e.what());
         return false;
     }
+
     return true;
 }
 

@@ -22,19 +22,19 @@
 #include <wx/taskbarbutton.h>
 
 #include "../common/common.h"
-#include "../dialogs/taskitemdialog.h"
+#include "../dialogs/taskitemdlg.h"
 #include "../dialogs/settingsdialog.h"
 
 namespace app::frame
 {
 // clang-format off
 wxBEGIN_EVENT_TABLE(TaskBarIcon, wxTaskBarIcon)
-    EVT_MENU(TaskBarIcon::ID_ADD_TASK, TaskBarIcon::OnNewTask)
+    EVT_MENU(TaskBarIcon::ID_ADD_ENTRY_TASK, TaskBarIcon::OnNewEntryTask)
+    EVT_MENU(TaskBarIcon::ID_ADD_TIMED_TASK, TaskBarIcon::OnNewTimedTask)
     EVT_MENU(TaskBarIcon::ID_SETTINGS, TaskBarIcon::OnSettings)
     EVT_MENU(wxID_EXIT, TaskBarIcon::OnExit)
     EVT_TASKBAR_LEFT_DOWN(TaskBarIcon::OnLeftButtonDown)
 wxEND_EVENT_TABLE()
-// clang-format on
 
 TaskBarIcon::TaskBarIcon(wxFrame* parent,
     std::shared_ptr<cfg::Configuration> config,
@@ -42,6 +42,7 @@ TaskBarIcon::TaskBarIcon(wxFrame* parent,
     : pParent(parent)
     , pLogger(logger)
     , pConfig(config)
+// clang-format on
 {
 }
 
@@ -54,7 +55,8 @@ wxMenu* TaskBarIcon::CreatePopupMenu()
 {
     auto menu = new wxMenu();
 
-    menu->Append(ID_ADD_TASK, wxT("Add Task"));
+    menu->Append(ID_ADD_ENTRY_TASK, wxT("Add Task Entry"));
+    menu->Append(ID_ADD_TIMED_TASK, wxT("Add Timed Task"));
     menu->AppendSeparator();
     menu->Append(ID_SETTINGS, wxT("Settings"));
     menu->AppendSeparator();
@@ -63,10 +65,16 @@ wxMenu* TaskBarIcon::CreatePopupMenu()
     return menu;
 }
 
-void TaskBarIcon::OnNewTask(wxCommandEvent& WXUNUSED(event))
+void TaskBarIcon::OnNewEntryTask(wxCommandEvent& WXUNUSED(event))
 {
-    dialog::TaskItemDialog newTask(pParent, pLogger, pConfig);
-    newTask.ShowModal();
+    dialog::TaskItemDialog entryTask(pParent, pLogger, pConfig, dialog::TaskItemType::EntryTask);
+    entryTask.ShowModal();
+}
+
+void TaskBarIcon::OnNewTimedTask(wxCommandEvent& WXUNUSED(event))
+{
+    dialog::TaskItemDialog timedTask(pParent, pLogger, pConfig, dialog::TaskItemType::TimedTask);
+    timedTask.ShowModal();
 }
 
 void TaskBarIcon::OnSettings(wxCommandEvent& WXUNUSED(event))

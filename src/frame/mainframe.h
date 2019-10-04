@@ -41,7 +41,7 @@ class MainFrame : public wxFrame
 public:
     MainFrame(std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
-        const wxString& name = wxT("MainFrame"));
+        const wxString& name = wxT("mainframe"));
     MainFrame(const MainFrame&) = delete;
     virtual ~MainFrame();
 
@@ -60,7 +60,8 @@ private:
 
     void OnAbout(wxCommandEvent& event);
     void OnClose(wxCloseEvent& event);
-    void OnNewTask(wxCommandEvent& event);
+    void OnNewEntryTask(wxCommandEvent& event);
+    void OnNewTimedTask(wxCommandEvent& event);
     void OnNewEmployer(wxCommandEvent& event);
     void OnNewClient(wxCommandEvent& event);
     void OnNewProject(wxCommandEvent& event);
@@ -74,9 +75,9 @@ private:
     void OnItemRightClick(wxListEvent& event);
     void OnIconize(wxIconizeEvent& event);
     void OnSettings(wxCommandEvent& event);
-    void OnNewTimedTask(wxCommandEvent& event);
+    void OnTaskStopwatch(wxCommandEvent& event);
     void OnDateChanged(wxDateEvent& event);
-    void OnNewTimedTaskFromPausedTask(wxCommandEvent& event);
+    void OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event);
     void OnCheckForUpdate(wxCommandEvent& event);
     void OnResize(wxSizeEvent& event);
 

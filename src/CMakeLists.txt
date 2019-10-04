@@ -41,14 +41,14 @@ set (SRC
     "app.manifest"
     "frame/mainframe.cpp"
     "frame/taskbaricon.cpp"
-    "dialogs/taskitemdialog.cpp"
+    "dialogs/taskitemdlg.cpp"
     "dialogs/employerdialog.cpp"
     "dialogs/clientdialog.cpp"
     "dialogs/projectdialog.cpp"
     "dialogs/categorydialog.cpp"
     "dialogs/editlistdialog.cpp"
     "dialogs/settingsdialog.cpp"
-    "dialogs/timedtaskdialog.cpp"
+    "dialogs/stopwatchtaskdlg.cpp"
     "dialogs/checkforupdatedialog.cpp"
     "wizards/setupwizard.cpp")
 

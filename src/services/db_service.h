@@ -40,7 +40,10 @@ struct db_service
     void create_projects_table();
     void create_categories_table();
     void create_tasks_table();
+    void create_task_item_types_table();
     void create_task_items_table();
+
+    void seed_task_item_types_table();
 
     int get_last_insert_rowid();
 
@@ -93,14 +96,7 @@ struct db_service
 
     int create_or_get_task_id(const std::string& date);
 
-    void create_new_task_item(const int projectId,
-        const int taskId,
-        const std::string& startTime,
-        const std::string& endTime,
-        const std::string& duration,
-        const int categoryId,
-        const std::string& description,
-        int billable);
+    void create_new_task_item(const models::task_item& taskItem);
 
     std::vector<models::task_item> get_all_task_items_by_date(const std::string& date);
 

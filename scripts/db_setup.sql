@@ -80,11 +80,20 @@ CREATE TABLE task_items
     date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     is_active INTEGER NOT NULL,
 
+    task_item_type_id INTEGER NOT NULL,
     project_id INTEGER NOT NULL,
     task_id INTEGER NOT NULL,
     category_id INTEGER NOT NULL,
 
+    FOREIGN KEY (task_item_type_id) REFERENCES task_item_types(task_item_type_id),
     FOREIGN KEY (project_id) REFERENCES projects(project_id),
     FOREIGN KEY (task_id) REFERENCES tasks(task_id),
     FOREIGN KEY (category_id) REFERENCES categories(category_id)
+);
+
+-- task item types table
+CREATE TABLE task_item_types
+(
+    task_item_type_id INTEGER PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL
 );

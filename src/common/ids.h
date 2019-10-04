@@ -27,31 +27,34 @@ enum class MenuIds : int {
     NewEmployerId = 1,
     NewClientId = 2,
     NewProjectId = 3,
-    NewTaskId = 4,
-    NewCategoryId = 5,
-    EditEmployerId = 6,
-    EditClientId = 7,
-    EditProjectId = 8,
-    EditCategoryId = 9,
-    SettingsId = 10,
-    NewTimedTask = 11,
-    CheckForUpdate=12
+    NewEntryTaskId = 4,
+    NewTimedTaskId = 5,
+    NewCategoryId = 6,
+    EditEmployerId = 7,
+    EditClientId = 8,
+    EditProjectId = 9,
+    EditCategoryId = 10,
+    SettingsId = 11,
+    StopwatchTaskId = 12,
+    CheckForUpdateId=13
 };
 
-static const int ID_NEW_TASK = static_cast<int>(ids::MenuIds::NewTaskId);
+static const int ID_NEW_ENTRY_TASK = static_cast<int>(ids::MenuIds::NewEntryTaskId);
+static const int ID_NEW_TIMED_TASK = static_cast<int>(ids::MenuIds::NewTimedTaskId);
 static const int ID_NEW_EMPLOYER = static_cast<int>(ids::MenuIds::NewEmployerId);
 static const int ID_NEW_CLIENT = static_cast<int>(ids::MenuIds::NewClientId);
 static const int ID_NEW_PROJECT = static_cast<int>(ids::MenuIds::NewProjectId);
 static const int ID_NEW_CATEGORY = static_cast<int>(ids::MenuIds::NewCategoryId);
-static const int ID_NEW_TIMED_TASK = static_cast<int>(ids::MenuIds::NewTimedTask);
+static const int ID_STOPWATCH_TASK = static_cast<int>(ids::MenuIds::StopwatchTaskId);
 
 static const int ID_EDIT_EMPLOYER = static_cast<int>(MenuIds::EditEmployerId);
 static const int ID_EDIT_CLIENT = static_cast<int>(MenuIds::EditClientId);
 static const int ID_EDIT_PROJECT = static_cast<int>(MenuIds::EditProjectId);
 static const int ID_EDIT_CATEGORY = static_cast<int>(MenuIds::EditCategoryId);
+
 static const int ID_SETTINGS = static_cast<int>(MenuIds::SettingsId);
 
-static const int ID_CHECK_FOR_UPDATE = static_cast<int>(MenuIds::CheckForUpdate);
+static const int ID_CHECK_FOR_UPDATE = static_cast<int>(MenuIds::CheckForUpdateId);
 
 enum class Events : int { ID_SAVE = wxID_HIGHEST + 1, ID_TASK_INSERTED, ID_START_PAUSE, ID_STOP };
 

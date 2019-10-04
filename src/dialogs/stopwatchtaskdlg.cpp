@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "timedtaskdialog.h"
+#include "stopwatchtaskdlg.h"
 
 #include <wx/notifmsg.h>
 #include <wx/statline.h>
@@ -25,9 +25,9 @@
 #include "../common/common.h"
 #include "../common/util.h"
 #include "../services/taskstateservice.h"
-#include "taskitemdialog.h"
+#include "taskitemdlg.h"
 
-wxDEFINE_EVENT(START_NEW_TIMED_TASK, wxCommandEvent);
+wxDEFINE_EVENT(START_NEW_STOPWATCH_TASK, wxCommandEvent);
 
 namespace app::dialog
 {
@@ -35,19 +35,19 @@ static const wxString ElapsedTimeText = wxT("Elapsed Time: %s");
 static const wxString AccumulatedTimeText = wxT("Time accumulated thus far: %s");
 
 // clang-format off
-wxBEGIN_EVENT_TABLE(TimedTaskDialog, wxDialog)
-EVT_CLOSE(TimedTaskDialog::OnClose)
-EVT_TIMER(TimedTaskDialog::IDC__NOTIFICATION_TIMER, TimedTaskDialog::OnTimer)
-EVT_TIMER(TimedTaskDialog::IDC_ELAPSED_TIMER, TimedTaskDialog::OnElapsedTimeUpdate)
-EVT_TIMER(TimedTaskDialog::IDC_HIDE_WINDOW_TIMER, TimedTaskDialog::OnHideWindow)
-EVT_BUTTON(TimedTaskDialog::IDC_START, TimedTaskDialog::OnStart)
-EVT_BUTTON(TimedTaskDialog::IDC_PAUSE, TimedTaskDialog::OnPause)
-EVT_BUTTON(TimedTaskDialog::IDC_STOP, TimedTaskDialog::OnStop)
-EVT_BUTTON(TimedTaskDialog::IDC_CANCEL, TimedTaskDialog::OnCancel)
+wxBEGIN_EVENT_TABLE(StopwatchTaskDialog, wxDialog)
+EVT_CLOSE(StopwatchTaskDialog::OnClose)
+EVT_TIMER(StopwatchTaskDialog::IDC__NOTIFICATION_TIMER, StopwatchTaskDialog::OnTimer)
+EVT_TIMER(StopwatchTaskDialog::IDC_ELAPSED_TIMER, StopwatchTaskDialog::OnElapsedTimeUpdate)
+EVT_TIMER(StopwatchTaskDialog::IDC_HIDE_WINDOW_TIMER, StopwatchTaskDialog::OnHideWindow)
+EVT_BUTTON(StopwatchTaskDialog::IDC_START, StopwatchTaskDialog::OnStart)
+EVT_BUTTON(StopwatchTaskDialog::IDC_PAUSE, StopwatchTaskDialog::OnPause)
+EVT_BUTTON(StopwatchTaskDialog::IDC_STOP, StopwatchTaskDialog::OnStop)
+EVT_BUTTON(StopwatchTaskDialog::IDC_CANCEL, StopwatchTaskDialog::OnCancel)
 wxEND_EVENT_TABLE()
 // clang-format on
 
-TimedTaskDialog::TimedTaskDialog(wxWindow* parent,
+StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
     std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<services::TaskStateService> taskState,
@@ -64,11 +64,16 @@ TimedTaskDialog::TimedTaskDialog(wxWindow* parent,
     , bWasTaskPaused(false)
     , bHasPendingPausedTask(false)
 {
-    long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
-    Create(parent, wxID_ANY, wxT("Timed Task"), wxDefaultPosition, wxSize(320, 240), style, name);
+    Create(parent,
+        wxID_ANY,
+        wxT("Stopwatch Task"),
+        wxDefaultPosition,
+        wxSize(320, 240),
+        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        name);
 }
 
-TimedTaskDialog::TimedTaskDialog(wxWindow* parent,
+StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
     std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<services::TaskStateService> taskState,
@@ -86,11 +91,16 @@ TimedTaskDialog::TimedTaskDialog(wxWindow* parent,
     , bWasTaskPaused(false)
     , bHasPendingPausedTask(hasPendingPausedTask)
 {
-    long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
-    Create(parent, wxID_ANY, wxT("Timed Task"), wxDefaultPosition, wxSize(320, 240), style, name);
+    Create(parent,
+        wxID_ANY,
+        wxT("Timed Task"),
+        wxDefaultPosition,
+        wxSize(320, 240),
+        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        name);
 }
 
-void TimedTaskDialog::Launch()
+void StopwatchTaskDialog::Launch()
 {
     mStartTime = wxDateTime::Now();
     pElapsedTimer->Start(1000 /*milliseconds*/);
@@ -108,7 +118,7 @@ void TimedTaskDialog::Launch()
     wxDialog::ShowModal();
 }
 
-void TimedTaskDialog::LaunchInPausedState()
+void StopwatchTaskDialog::LaunchInPausedState()
 {
     pStartButton->Enable();
     pPauseButton->Disable();
@@ -121,7 +131,7 @@ void TimedTaskDialog::LaunchInPausedState()
     wxDialog::ShowModal();
 }
 
-bool TimedTaskDialog::Create(wxWindow* parent,
+bool StopwatchTaskDialog::Create(wxWindow* parent,
     wxWindowID windowId,
     const wxString& title,
     const wxPoint& position,
@@ -141,7 +151,7 @@ bool TimedTaskDialog::Create(wxWindow* parent,
     return created;
 }
 
-void TimedTaskDialog::CreateControls()
+void StopwatchTaskDialog::CreateControls()
 {
     /* Sizer and Panel Control */
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -192,29 +202,29 @@ void TimedTaskDialog::CreateControls()
     buttonPanelSizer->Add(pCancelButton, common::sizers::ControlDefault);
 }
 
-void TimedTaskDialog::OnElapsedTimeUpdate(wxTimerEvent& WXUNUSED(event))
+void StopwatchTaskDialog::OnElapsedTimeUpdate(wxTimerEvent& WXUNUSED(event))
 {
     auto current = wxDateTime::Now();
     auto timeDiff = current - mStartTime;
     pElapsedTimeText->SetLabel(wxString::Format(ElapsedTimeText, timeDiff.Format()));
 }
 
-void TimedTaskDialog::OnTimer(wxTimerEvent& WXUNUSED(event))
+void StopwatchTaskDialog::OnTimer(wxTimerEvent& WXUNUSED(event))
 {
     auto current = wxDateTime::Now();
     auto elapsed = current - mStartTime;
-    auto message = wxString::Format(wxT("Timed Task running for: %s"), elapsed.Format());
+    auto message = wxString::Format(wxT("Stopwatch Task running for: %s"), elapsed.Format());
     wxNotificationMessage taskElaspedMessage(wxT("Task Tracker"), message, this);
     taskElaspedMessage.Show();
 }
 
-void TimedTaskDialog::OnHideWindow(wxTimerEvent& WXUNUSED(event))
+void StopwatchTaskDialog::OnHideWindow(wxTimerEvent& WXUNUSED(event))
 {
     Iconize(true);
     pHideWindowTimer->Stop();
 }
 
-void TimedTaskDialog::OnStart(wxCommandEvent& WXUNUSED(event))
+void StopwatchTaskDialog::OnStart(wxCommandEvent& WXUNUSED(event))
 {
     bIsPaused = false;
     mStartTime = wxDateTime::Now();
@@ -232,7 +242,7 @@ void TimedTaskDialog::OnStart(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-void TimedTaskDialog::OnPause(wxCommandEvent& WXUNUSED(event))
+void StopwatchTaskDialog::OnPause(wxCommandEvent& WXUNUSED(event))
 {
     pStartButton->Enable();
     pPauseButton->Disable();
@@ -248,13 +258,13 @@ void TimedTaskDialog::OnPause(wxCommandEvent& WXUNUSED(event))
     pAccumulatedTimeText->SetLabel(wxString::Format(AccumulatedTimeText, accumulatedTimeThusFar.Format()));
 
     if (pStartNewTask->IsChecked()) {
-        wxCommandEvent startNewTimedTask(START_NEW_TIMED_TASK);
-        wxPostEvent(pParent, startNewTimedTask);
+        wxCommandEvent startNewStopwatchTask(START_NEW_STOPWATCH_TASK);
+        wxPostEvent(pParent, startNewStopwatchTask);
         EndModal(wxID_OK);
     }
 }
 
-void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
+void StopwatchTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 {
     mEndTime = wxDateTime::Now();
     pNotificationTimer->Stop();
@@ -274,23 +284,25 @@ void TimedTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 
         auto durationOfTask = pTaskState->GetAccumulatedTime();
 
-        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, durationOfTask);
+        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, TaskItemType::EntryTask);
+        newTask.SetDurationFromStopwatchTask(durationOfTask);
         newTask.ShowModal();
     } else {
-        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, mStartTime, mEndTime);
+        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, TaskItemType::TimedTask);
+        newTask.SetTimesFromStopwatchTask(mStartTime, mEndTime);
         newTask.ShowModal();
     }
 
     EndModal(wxID_OK);
 }
 
-void TimedTaskDialog::OnCancel(wxCommandEvent& event)
+void StopwatchTaskDialog::OnCancel(wxCommandEvent& event)
 {
     pTaskState->mTimes.clear();
     EndModal(wxID_CANCEL);
 }
 
-void TimedTaskDialog::OnClose(wxCloseEvent& event)
+void StopwatchTaskDialog::OnClose(wxCloseEvent& event)
 {
     pTaskState->mTimes.clear();
     EndModal(wxID_CLOSE);

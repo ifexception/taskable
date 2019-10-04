@@ -28,26 +28,26 @@
 #include "../config/configuration.h"
 #include "../services/taskstateservice.h"
 
-wxDECLARE_EVENT(START_NEW_TIMED_TASK, wxCommandEvent);
+wxDECLARE_EVENT(START_NEW_STOPWATCH_TASK, wxCommandEvent);
 
 namespace app::dialog
 {
-class TimedTaskDialog : public wxDialog
+class StopwatchTaskDialog : public wxDialog
 {
 public:
-    TimedTaskDialog() = delete;
-    explicit TimedTaskDialog(wxWindow* parent,
+    StopwatchTaskDialog() = delete;
+    explicit StopwatchTaskDialog(wxWindow* parent,
         std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
         std::shared_ptr<services::TaskStateService> taskState,
-        const wxString& name = wxT("TimedTaskDialog"));
-    explicit TimedTaskDialog(wxWindow* parent,
+        const wxString& name = wxT("stopwatchtaskdlg"));
+    explicit StopwatchTaskDialog(wxWindow* parent,
         std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
         std::shared_ptr<services::TaskStateService> taskState,
         bool hasPendingPausedTask,
-        const wxString& name = wxT("TimedTaskDialog"));
-    virtual ~TimedTaskDialog() = default;
+        const wxString& name = wxT("StopwatchTaskDialog"));
+    virtual ~StopwatchTaskDialog() = default;
 
     void Launch();
     void LaunchInPausedState();

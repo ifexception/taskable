@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "taskitemdialog.h"
+#include "taskitemdlg.h"
 
 #include <sqlite_modern_cpp/errors.h>
 #include <wx/timectrl.h>
@@ -42,98 +42,87 @@ EVT_CHOICE(TaskItemDialog::IDC_PROJECTCHOICE, TaskItemDialog::OnProjectChoice)
 EVT_TIME_CHANGED(TaskItemDialog::IDC_STARTTIME, TaskItemDialog::OnStartTimeChange)
 EVT_TIME_CHANGED(TaskItemDialog::IDC_ENDTIME, TaskItemDialog::OnEndTimeChange)
 EVT_CHECKBOX(TaskItemDialog::IDC_ISACTIVE, TaskItemDialog::OnIsActiveCheck)
+EVT_TIME_CHANGED(TaskItemDialog::IDC_DURATIONTIME, TaskItemDialog::OnDurationTimeChange)
 wxEND_EVENT_TABLE()
 
 TaskItemDialog::TaskItemDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<cfg::Configuration> config,
-    bool isEdit,
-    int taskDetailId,
+    TaskItemType taskItemType,
+    wxDateTime dateTimeContext,
     const wxString& name)
-    : pLogger(logger)
+    : pParent(parent)
+    , pLogger(logger)
     , pConfig(config)
-    , mTaskDate(wxGetEmptyString())
-    , bIsEdit(isEdit)
-    , mTaskItemId(taskDetailId)
+    , mType(taskItemType)
+    , bIsEdit(false)
+    , mTaskItemId(0)
+    , mDateContext(dateTimeContext)
+    , mDurationSpan()
     , mProjectId(-1)
     , mStartTime()
     , mEndTime()
-    , pDurationCtrl()
-    , mCategoryId(-1)
+    , mDurationText(wxGetEmptyString())
+    , bBillable(false)
     , mDescriptionText(wxGetEmptyString())
-    , pParent(parent)
-    , bIsPausableTask(false)
+    , mCategoryId(-1)
 // clang-format on
 {
-    wxString title;
-    wxSize size;
-    if (bIsEdit) {
-        title = wxT("Edit Task");
-        size.Set(395, 620);
-    } else {
-        title = wxT("Add Task");
-        size.Set(395, 488);
-    }
-    bool success =
-        Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    Create(parent,
+        wxID_ANY,
+        wxT("Add Task"),
+        wxDefaultPosition,
+        wxSize(395, 488),
+        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        name);
 }
 
 TaskItemDialog::TaskItemDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<cfg::Configuration> config,
-    wxTimeSpan duration,
+    TaskItemType editTaskItemType,
+    bool edit,
+    int taskId,
+    wxDateTime dateTimeContext,
     const wxString& name)
-    : pLogger(logger)
+    : pParent(parent)
+    , pLogger(logger)
     , pConfig(config)
-    , mTaskDate(wxGetEmptyString())
-    , bIsEdit(false)
-    , mTaskItemId(0)
+    , mType(editTaskItemType)
+    , bIsEdit(edit)
+    , mTaskItemId(taskId)
+    , mDateContext(dateTimeContext)
+    , mDurationSpan()
     , mProjectId(-1)
     , mStartTime()
     , mEndTime()
-    , pDurationCtrl()
-    , mCategoryId(-1)
+    , mDurationText(wxGetEmptyString())
+    , bBillable(false)
     , mDescriptionText(wxGetEmptyString())
-    , pParent(parent)
-    , mDuration(duration)
-    , bIsPausableTask(true)
+    , mCategoryId(-1)
 {
-    CreateWithParam(pParent,
+    Create(parent,
         wxID_ANY,
-        wxT("Add Task"),
+        wxT("Edit Task"),
         wxDefaultPosition,
-        wxSize(395, 488),
+        wxSize(395, 620),
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
         name);
 }
 
-TaskItemDialog::TaskItemDialog(wxWindow* parent,
-    std::shared_ptr<spdlog::logger> logger,
-    std::shared_ptr<cfg::Configuration> config,
-    wxDateTime startTime,
-    wxDateTime endTime,
-    const wxString& name)
-    : pLogger(logger)
-    , pConfig(config)
-    , mTaskDate(wxGetEmptyString())
-    , bIsEdit(false)
-    , mTaskItemId(0)
-    , mProjectId(-1)
-    , mStartTime(startTime)
-    , mEndTime(endTime)
-    , pDurationCtrl()
-    , mCategoryId(-1)
-    , mDescriptionText(wxGetEmptyString())
-    , pParent(parent)
-    , bIsPausableTask(false)
+void TaskItemDialog::SetDurationFromStopwatchTask(wxTimeSpan duration)
 {
-    CreateWithParams(pParent,
-        wxID_ANY,
-        wxT("Add Task"),
-        wxDefaultPosition,
-        wxSize(395, 488),
-        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
-        name);
+    wxDateTime durationTime;
+    durationTime.ParseISOTime(duration.Format());
+    pDurationTimeCtrl->SetValue(durationTime);
+}
+
+void TaskItemDialog::SetTimesFromStopwatchTask(wxDateTime startTime, wxDateTime endTime)
+{
+    pStartTimeCtrl->SetValue(startTime);
+    pEndTimeCtrl->SetValue(endTime);
+
+    CalculateTimeDiff(startTime, endTime);
 }
 
 bool TaskItemDialog::Create(wxWindow* parent,
@@ -145,7 +134,6 @@ bool TaskItemDialog::Create(wxWindow* parent,
     const wxString& name)
 {
     bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
-
     if (created) {
         CreateControls();
         FillControls();
@@ -155,58 +143,8 @@ bool TaskItemDialog::Create(wxWindow* parent,
         }
 
         GetSizer()->Fit(this);
-        SetIcon(common::GetProgramIcon());
         GetSizer()->SetSizeHints(this);
-        Center();
-    }
-
-    return created;
-}
-
-bool TaskItemDialog::CreateWithParam(wxWindow* parent,
-    wxWindowID windowId,
-    const wxString& title,
-    const wxPoint& point,
-    const wxSize& size,
-    long style,
-    const wxString& name)
-{
-    bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
-
-    if (created) {
-        CreateControls();
-        FillControls();
-
-        SetValueToControl();
-
-        GetSizer()->Fit(this);
         SetIcon(common::GetProgramIcon());
-        GetSizer()->SetSizeHints(this);
-        Center();
-    }
-
-    return created;
-}
-
-bool TaskItemDialog::CreateWithParams(wxWindow* parent,
-    wxWindowID windowId,
-    const wxString& title,
-    const wxPoint& point,
-    const wxSize& size,
-    long style,
-    const wxString& name)
-{
-    bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
-
-    if (created) {
-        CreateControls();
-        FillControls();
-
-        SetValuesToControls();
-
-        GetSizer()->Fit(this);
-        SetIcon(common::GetProgramIcon());
-        GetSizer()->SetSizeHints(this);
         Center();
     }
 
@@ -215,105 +153,114 @@ bool TaskItemDialog::CreateWithParams(wxWindow* parent,
 
 void TaskItemDialog::CreateControls()
 {
-    /* Window Sizing */
+    /* Sizers */
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(mainSizer);
-
-    auto mainPanelSizer = new wxBoxSizer(wxHORIZONTAL);
-    mainSizer->Add(mainPanelSizer, common::sizers::ControlDefault);
-
-    auto sizer = new wxBoxSizer(wxVERTICAL);
-    mainPanelSizer->Add(sizer, 0);
 
     /* Task Details Box */
     auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Task Details"));
     auto detailsBoxSizer = new wxStaticBoxSizer(detailsBox, wxVERTICAL);
-    sizer->Add(detailsBoxSizer, common::sizers::ControlExpandProp);
+    mainSizer->Add(detailsBoxSizer, common::sizers::ControlExpandProp);
 
     auto taskDetailsPanel = new wxPanel(this, wxID_STATIC);
     detailsBoxSizer->Add(taskDetailsPanel, common::sizers::ControlExpand);
 
-    auto taskFlexGridSizer = new wxFlexGridSizer(0, 2, 0, 0);
-    taskDetailsPanel->SetSizer(taskFlexGridSizer);
+    auto flexGridSizer = new wxFlexGridSizer(0, 2, 0, 0);
+    taskDetailsPanel->SetSizer(flexGridSizer);
 
-    /* ---Controls--- */
-    /* Active Project Dropdown Control */
+    /* -- Controls -- */
+    /* Project Choice Control */
     auto activeProject = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Project"));
-    taskFlexGridSizer->Add(activeProject, common::sizers::ControlCenterVertical);
+    flexGridSizer->Add(activeProject, common::sizers::ControlCenterVertical);
 
     pProjectChoiceCtrl = new wxChoice(taskDetailsPanel, IDC_PROJECTCHOICE, wxDefaultPosition, wxSize(150, -1));
     pProjectChoiceCtrl->AppendString(wxT("Select a project"));
     pProjectChoiceCtrl->SetSelection(0);
     pProjectChoiceCtrl->SetToolTip(wxT("Select a project to associate this task with"));
-    taskFlexGridSizer->Add(pProjectChoiceCtrl, common::sizers::ControlDefault);
+    flexGridSizer->Add(pProjectChoiceCtrl, common::sizers::ControlDefault);
 
-    /* Task Start Time Control */
-    auto taskStartTime = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Start Time"));
-    taskFlexGridSizer->Add(taskStartTime, common::sizers::ControlCenterVertical);
+    if (mType == TaskItemType::TimedTask) {
+        /* Task Start Time Control */
+        auto taskStartTime = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Start Time"));
+        flexGridSizer->Add(taskStartTime, common::sizers::ControlCenterVertical);
 
-    pStartTimeCtrl =
-        new wxTimePickerCtrl(taskDetailsPanel, IDC_STARTTIME, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1));
-    pStartTimeCtrl->SetToolTip(wxT("Enter the time the task started"));
-    taskFlexGridSizer->Add(pStartTimeCtrl, common::sizers::ControlDefault);
+        pStartTimeCtrl = new wxTimePickerCtrl(
+            taskDetailsPanel, IDC_STARTTIME, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1));
+        pStartTimeCtrl->SetToolTip(wxT("Enter the time the task started"));
+        flexGridSizer->Add(pStartTimeCtrl, common::sizers::ControlDefault);
 
-    /* Task End Time Control */
-    auto taskEndTime = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("End Time"));
-    taskFlexGridSizer->Add(taskEndTime, common::sizers::ControlCenterVertical);
+        /* Task End Time Control */
+        auto taskEndTime = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("End Time"));
+        flexGridSizer->Add(taskEndTime, common::sizers::ControlCenterVertical);
 
-    pEndTimeCtrl =
-        new wxTimePickerCtrl(taskDetailsPanel, IDC_ENDTIME, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1));
-    pEndTimeCtrl->SetToolTip(wxT("Enter the time the task ended"));
-    taskFlexGridSizer->Add(pEndTimeCtrl, common::sizers::ControlDefault);
+        pEndTimeCtrl =
+            new wxTimePickerCtrl(taskDetailsPanel, IDC_ENDTIME, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1));
+        pEndTimeCtrl->SetToolTip(wxT("Enter the time the task ended"));
+        flexGridSizer->Add(pEndTimeCtrl, common::sizers::ControlDefault);
 
-    /* Task Duration Text Control */
-    auto durationText = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Duration"));
-    taskFlexGridSizer->Add(durationText, common::sizers::ControlCenterVertical);
+        /* Task Duration Text Control */
+        auto durationText = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Duration"));
+        flexGridSizer->Add(durationText, common::sizers::ControlCenterVertical);
 
-    pDurationCtrl = new wxStaticText(taskDetailsPanel, IDC_DURATION, wxT("00:00:00"));
-    pDurationCtrl->SetToolTip(wxT("Elasped time for the task"));
-    taskFlexGridSizer->Add(pDurationCtrl, common::sizers::ControlDefault);
+        pDurationCtrl = new wxStaticText(taskDetailsPanel, IDC_DURATION, wxT("00:00:00"));
+        pDurationCtrl->SetToolTip(wxT("Elasped time for the task"));
+        flexGridSizer->Add(pDurationCtrl, common::sizers::ControlDefault);
+    }
+
+    if (mType == TaskItemType::EntryTask) {
+        /* Task Duration Time Control */
+        auto durationText = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Duration"));
+        flexGridSizer->Add(durationText, common::sizers::ControlCenterVertical);
+
+        pDurationTimeCtrl = new wxTimePickerCtrl(
+            taskDetailsPanel, IDC_DURATIONTIME, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1));
+        pDurationTimeCtrl->SetToolTip(wxT("Enter the elasped time for the task"));
+        flexGridSizer->Add(pDurationTimeCtrl, common::sizers::ControlDefault);
+    }
 
     /* Billable Checkbox Control */
-    auto billableFillerText = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT(""));
-    taskFlexGridSizer->Add(billableFillerText, common::sizers::ControlDefault);
+    auto billableFillerText = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxGetEmptyString());
+    flexGridSizer->Add(billableFillerText, common::sizers::ControlDefault);
 
     pBillableCtrl = new wxCheckBox(taskDetailsPanel, IDC_BILLABLE, wxT("Billable"));
     pBillableCtrl->SetToolTip(wxT("Set whether this task is billable or not"));
-    taskFlexGridSizer->Add(pBillableCtrl, common::sizers::ControlDefault);
+    flexGridSizer->Add(pBillableCtrl, common::sizers::ControlDefault);
 
     /* Task Category Dropdown Control */
     auto taskCategory = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Category"));
-    taskFlexGridSizer->Add(taskCategory, common::sizers::ControlCenterVertical);
+    flexGridSizer->Add(taskCategory, common::sizers::ControlCenterVertical);
 
     pCategoryChoiceCtrl = new wxChoice(taskDetailsPanel, IDC_CATEGORYCHOICE, wxDefaultPosition, wxSize(150, -1));
     pCategoryChoiceCtrl->AppendString(wxT("Select a category"));
     pCategoryChoiceCtrl->SetSelection(0);
     pCategoryChoiceCtrl->Disable();
-    taskFlexGridSizer->Add(pCategoryChoiceCtrl, common::sizers::ControlDefault);
+    flexGridSizer->Add(pCategoryChoiceCtrl, common::sizers::ControlDefault);
 
     if (bIsEdit) {
         /* Is Active Checkbox Control */
         auto isActiveFiller = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT(""));
-        taskFlexGridSizer->Add(isActiveFiller, common::sizers::ControlDefault);
+        flexGridSizer->Add(isActiveFiller, common::sizers::ControlDefault);
 
         pIsActiveCtrl = new wxCheckBox(taskDetailsPanel, IDC_ISACTIVE, wxT("Is Active"));
-        taskFlexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
+        flexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
     }
 
     /* Task Description Text Control */
     auto taskDescription = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Description"));
-    taskFlexGridSizer->Add(taskDescription, common::sizers::ControlDefault);
+    flexGridSizer->Add(taskDescription, common::sizers::ControlDefault);
 
     auto descriptionFiller = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT(""));
-    taskFlexGridSizer->Add(descriptionFiller, common::sizers::ControlDefault);
+    flexGridSizer->Add(descriptionFiller, common::sizers::ControlDefault);
 
     pDescriptionCtrl =
         new wxTextCtrl(this, IDC_DESCRIPTION, wxGetEmptyString(), wxDefaultPosition, wxSize(320, 180), wxTE_MULTILINE);
+    pDescriptionCtrl->Bind(wxEVT_KILL_FOCUS, &TaskItemDialog::OnDescriptionControlFocusLost, this);
     pDescriptionCtrl->SetToolTip(wxT("Enter a description for the task"));
+    pDescriptionCtrl->SetMaxLength(1024);
     detailsBoxSizer->Add(pDescriptionCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
     if (bIsEdit) {
-        /* Date Created Text Control */
+        /* Date Created Static Text Control */
         pDateCreatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
         auto font = pDateCreatedTextCtrl->GetFont();
         font.MakeItalic();
@@ -321,7 +268,7 @@ void TaskItemDialog::CreateControls()
         pDateCreatedTextCtrl->SetFont(font);
         detailsBoxSizer->Add(pDateCreatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
-        /* Date Updated Text Control */
+        /* Date Updated Static Text Control */
         pDateUpdatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Updated on: %s"));
         detailsBoxSizer->Add(pDateUpdatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
     }
@@ -358,18 +305,29 @@ void TaskItemDialog::FillControls()
         pProjectChoiceCtrl->Append(project.display_name, util::IntToVoidPointer(project.project_id));
     }
 
-    wxDateTime timeWithZeroSeconds = wxDateTime::Now();
-    timeWithZeroSeconds.SetSecond(0);
+    if (mType == TaskItemType::TimedTask) {
+        wxDateTime timeWithZeroSeconds = wxDateTime::Now();
+        timeWithZeroSeconds.SetSecond(0);
 
-    pStartTimeCtrl->SetValue(timeWithZeroSeconds);
-    pEndTimeCtrl->SetValue(timeWithZeroSeconds);
+        pStartTimeCtrl->SetValue(timeWithZeroSeconds);
+        pEndTimeCtrl->SetValue(timeWithZeroSeconds);
+    }
+
+    if (mType == TaskItemType::EntryTask) {
+        wxDateTime timeWithZeroSeconds = wxDateTime::Now();
+        timeWithZeroSeconds.SetSecond(0);
+
+        pDurationTimeCtrl->SetValue(timeWithZeroSeconds);
+    }
 }
 
 void TaskItemDialog::DataToControls()
 {
     services::db_service dbService;
     models::task_item taskItem;
+
     try {
+        assert(mTaskItemId != 0);
         taskItem = dbService.get_task_item_by_id(mTaskItemId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in get_task_item_by_id() - {0:d} : {1}", e.get_code(), e.what());
@@ -377,17 +335,22 @@ void TaskItemDialog::DataToControls()
 
     pProjectChoiceCtrl->SetStringSelection(taskItem.project_name);
 
-    if (!bIsPausableTask) {
+    if (mType == TaskItemType::TimedTask) {
         wxDateTime startTime;
-        startTime.ParseISOTime(taskItem.start_time);
+        startTime.ParseISOTime(*taskItem.start_time);
         pStartTimeCtrl->SetValue(startTime);
 
         wxDateTime endTime;
-        endTime.ParseISOTime(taskItem.end_time);
+        endTime.ParseISOTime(*taskItem.end_time);
         pEndTimeCtrl->SetValue(endTime);
-    }
 
-    pDurationCtrl->SetLabel(taskItem.duration);
+        pDurationCtrl->SetLabel(taskItem.duration);
+    }
+    if (mType == TaskItemType::EntryTask) {
+        wxDateTime durationTime;
+        durationTime.ParseISOTime(taskItem.duration);
+        pDurationTimeCtrl->SetValue(durationTime);
+    }
 
     FillCategoryControl(taskItem.project_id);
     pCategoryChoiceCtrl->SetStringSelection(taskItem.category_name);
@@ -407,29 +370,13 @@ void TaskItemDialog::DataToControls()
     pIsActiveCtrl->SetValue(taskItem.is_active);
 }
 
-void TaskItemDialog::SetValuesToControls()
-{
-    pStartTimeCtrl->SetValue(mStartTime);
-    pEndTimeCtrl->SetValue(mEndTime);
-
-    CalculateTimeDiff(mStartTime, mEndTime);
-}
-
-void TaskItemDialog::SetValueToControl()
-{
-    pDurationCtrl->SetLabel(mDuration.Format());
-    pStartTimeCtrl->Disable();
-    pEndTimeCtrl->Disable();
-}
-
 int TaskItemDialog::GetTaskId()
 {
-    wxDateTime date = wxDateTime::Now();
-    mTaskDate = date.FormatISODate();
+    auto dateNowString = mDateContext.FormatISODate();
     services::db_service dbService;
     int taskId = 0;
     try {
-        taskId = dbService.create_or_get_task_id(mTaskDate);
+        taskId = dbService.create_or_get_task_id(dateNowString);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in create_or_get_task_id() - {0:d} : {1}", e.get_code(), e.what());
     }
@@ -437,57 +384,17 @@ int TaskItemDialog::GetTaskId()
     return taskId;
 }
 
-bool TaskItemDialog::Validate()
+void TaskItemDialog::CalculateTimeDiff(wxDateTime start, wxDateTime end)
 {
-    if (!bIsPausableTask) {
-        auto isStartAheadOfEnd = mStartTime.IsLaterThan(mEndTime);
-        if (isStartAheadOfEnd) {
-            wxMessageBox(wxT("A task cannot be started after the time it has ended"),
-                wxT("Validation failure"),
-                wxOK | wxICON_EXCLAMATION);
-            return false;
-        }
+    auto diff = end.Subtract(start);
+    auto formated = diff.Format(wxT("%H:%M:%S"));
+    pDurationCtrl->SetLabelText(formated);
+}
 
-        auto isEndBeforeStart = mEndTime.IsEarlierThan(mStartTime);
-        if (isEndBeforeStart) {
-            wxMessageBox(wxT("A task cannot end before the time it has started"),
-                wxT("Validation failure"),
-                wxOK | wxICON_EXCLAMATION);
-            return false;
-        }
-
-        if (!bIsEdit && pConfig->IsTimeRoundingEnabled()) {
-            auto isEndTimeInTheFuture = mEndTime.IsLaterThan(wxDateTime::Now());
-            if (isEndTimeInTheFuture) {
-                wxMessageBox(
-                    wxT("A task cannot end in the future"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-                return false;
-            }
-        }
-
-        auto taskTimeSpan = mEndTime - mStartTime;
-        auto isTaskLessThan5Minutes = taskTimeSpan.IsShorterThan(wxTimeSpan::Minutes(5));
-        if (isTaskLessThan5Minutes) {
-            wxMessageBox(
-                wxT("A task cannot be less than 5 minutes long"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-            return false;
-        }
-    }
-
+bool TaskItemDialog::PostValidate()
+{
     if (mDescriptionText.empty()) {
         auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Task description"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
-    }
-
-    if (mDescriptionText.length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Task description"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
-    }
-
-    if (mDescriptionText.length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Task description"));
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
@@ -509,11 +416,12 @@ bool TaskItemDialog::Validate()
 
 bool TaskItemDialog::AreControlsEmpty()
 {
-    if (bIsPausableTask) {
+    if (mType == TaskItemType::EntryTask) {
         bool isEmpty = (mProjectId == 0 || mProjectId == -1) && (mCategoryId == 0 || mCategoryId == -1) &&
                        mDescriptionText.empty();
         return isEmpty;
-    } else {
+    }
+    if (mType == TaskItemType::TimedTask) {
         bool isEmpty = (mProjectId == 0 || mProjectId == -1) && mStartTime == wxDefaultDateTime &&
                        mEndTime == wxDefaultDateTime && (mCategoryId == 0 || mCategoryId == -1) &&
                        mDescriptionText.empty();
@@ -543,6 +451,8 @@ void TaskItemDialog::OnStartTimeChange(wxDateEvent& event)
 
     auto end = pEndTimeCtrl->GetValue();
     CalculateTimeDiff(start, end);
+
+    mValidator.Validate(start, end);
 }
 
 void TaskItemDialog::OnEndTimeChange(wxDateEvent& event)
@@ -557,92 +467,120 @@ void TaskItemDialog::OnEndTimeChange(wxDateEvent& event)
 
     auto start = pStartTimeCtrl->GetValue();
     CalculateTimeDiff(start, end);
+
+    mValidator.Validate(start, end);
 }
 
 void TaskItemDialog::OnIsActiveCheck(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
         pProjectChoiceCtrl->Enable();
-        if (!bIsPausableTask) {
+        if (mType == TaskItemType::TimedTask) {
             pStartTimeCtrl->Enable();
             pEndTimeCtrl->Enable();
+            pDurationCtrl->Enable();
         }
-        pDurationCtrl->Enable();
+        if (mType == TaskItemType::EntryTask) {
+            pDurationTimeCtrl->Enable();
+        }
         pBillableCtrl->Enable();
         pDescriptionCtrl->Enable();
         pCategoryChoiceCtrl->Enable();
     } else {
         pProjectChoiceCtrl->Disable();
-        pStartTimeCtrl->Disable();
-        pEndTimeCtrl->Disable();
-        pDurationCtrl->Disable();
+        if (mType == TaskItemType::TimedTask) {
+            pStartTimeCtrl->Disable();
+            pEndTimeCtrl->Disable();
+            pDurationCtrl->Disable();
+        }
+        if (mType == TaskItemType::EntryTask) {
+            pDurationTimeCtrl->Disable();
+        }
+        pDurationTimeCtrl->Disable();
         pBillableCtrl->Disable();
         pDescriptionCtrl->Disable();
         pCategoryChoiceCtrl->Disable();
     }
 }
 
+void TaskItemDialog::OnDurationTimeChange(wxDateEvent& event)
+{
+    if (pConfig->IsTimeRoundingEnabled()) {
+        auto date = event.GetDate();
+        auto roundedDate = util::RoundToNearestInterval(date, pConfig->GetTimeToRoundTo());
+        pDurationTimeCtrl->SetValue(roundedDate);
+    }
+}
+
+void TaskItemDialog::OnDescriptionControlFocusLost(wxFocusEvent& event)
+{
+    if (pDescriptionCtrl->GetValue().length() < 2) {
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Task description"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    }
+
+    if (pDescriptionCtrl->GetValue().length() > 255) {
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Task description"));
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    }
+
+    event.Skip();
+}
+
 void TaskItemDialog::OnOk(wxCommandEvent& event)
 {
     mProjectId = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
-    mStartTime = pStartTimeCtrl->GetValue();
-    mEndTime = pEndTimeCtrl->GetValue();
-    mDurationText = pDurationCtrl->GetLabelText();
     mCategoryId = util::VoidPointerToInt(pCategoryChoiceCtrl->GetClientData(pCategoryChoiceCtrl->GetSelection()));
     mDescriptionText = pDescriptionCtrl->GetValue();
     bBillable = pBillableCtrl->GetValue();
 
-    auto validationSuccess = Validate();
-    if (!validationSuccess) {
+    bool isValid = PostValidate();
+    if (!isValid) {
         return;
     }
 
-    int taskId = GetTaskId();
-
-    services::db_service dbService;
-    try {
-        wxString startTime;
-        wxString endTime;
-
-        if (bIsPausableTask) {
-            startTime = wxT("");
-            endTime = wxT("");
-        } else {
-            startTime = mStartTime.FormatISOTime();
-            endTime = mEndTime.FormatISOTime();
-        }
-
-        if (bIsEdit && pIsActiveCtrl->IsChecked()) {
-            models::task_item taskItem;
-            taskItem.task_item_id = mTaskItemId;
-            taskItem.start_time = startTime;
-            taskItem.end_time = endTime;
-            taskItem.duration = mDurationText;
-            taskItem.description = std::string(mDescriptionText.ToUTF8());
-            taskItem.billable = bBillable;
-            taskItem.date_modified_utc = util::UnixTimestamp();
-            taskItem.project_id = mProjectId;
-            taskItem.category_id = mCategoryId;
-            dbService.update_task_item(taskItem);
-        } else if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            dbService.delete_task_item(mTaskItemId, util::UnixTimestamp());
-        } else {
-            dbService.create_new_task_item(mProjectId,
-                taskId,
-                std::string(startTime.ToUTF8()),
-                std::string(endTime.ToUTF8()),
-                std::string(mDurationText.ToUTF8()),
-                mCategoryId,
-                std::string(mDescriptionText.ToUTF8()),
-                bBillable);
-        }
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in task_item OnOk() - {0:d} : {1}", e.get_code(), e.what());
+    if (mType == TaskItemType::TimedTask) {
+        mStartTime = pStartTimeCtrl->GetValue();
+        mEndTime = pEndTimeCtrl->GetValue();
+        mDurationText = pDurationCtrl->GetLabelText();
+    }
+    if (mType == TaskItemType::EntryTask) {
+        mDurationTime = pDurationTimeCtrl->GetValue();
     }
 
-    OnTaskSaved();
+    services::db_service dbService;
 
-    EndModal(ids::ID_SAVE);
+    const int taskId = GetTaskId();
+    models::task_item taskItem;
+    if (mType == TaskItemType::TimedTask) {
+        taskItem.task_id = taskId;
+        taskItem.start_time = new std::string(mStartTime.FormatISOTime().ToUTF8());
+        taskItem.end_time = new std::string(mEndTime.FormatISOTime().ToUTF8());
+        taskItem.duration = mDurationText;
+        taskItem.description = std::string(mDescriptionText.ToUTF8());
+        taskItem.billable = bBillable;
+        taskItem.project_id = mProjectId;
+        taskItem.category_id = mCategoryId;
+        taskItem.task_item_type_id = static_cast<int>(mType);
+
+        ProcessTaskItem(taskItem);
+    }
+    if (mType == TaskItemType::EntryTask) {
+        taskItem.task_id = taskId;
+        taskItem.start_time = nullptr;
+        taskItem.end_time = nullptr;
+        taskItem.duration = std::string(mDurationTime.FormatISOTime().ToUTF8());
+        taskItem.description = std::string(mDescriptionText.ToUTF8());
+        taskItem.billable = bBillable;
+        taskItem.project_id = mProjectId;
+        taskItem.category_id = mCategoryId;
+        taskItem.task_item_type_id = static_cast<int>(mType);
+
+        ProcessTaskItem(taskItem);
+    }
+
+    GenerateTaskSavedEvent();
+    EndModal(wxID_OK);
 }
 
 void TaskItemDialog::OnCancel(wxCommandEvent& event)
@@ -656,19 +594,6 @@ void TaskItemDialog::OnCancel(wxCommandEvent& event)
     } else {
         EndModal(wxID_CANCEL);
     }
-}
-
-void TaskItemDialog::OnTaskSaved()
-{
-    wxCommandEvent taskInsertedEvent(TASK_INSERTED);
-    wxPostEvent(pParent, taskInsertedEvent);
-}
-
-void TaskItemDialog::CalculateTimeDiff(wxDateTime start, wxDateTime end)
-{
-    auto diff = end.Subtract(start);
-    auto formated = diff.Format(wxT("%H:%M:%S"));
-    pDurationCtrl->SetLabelText(formated);
 }
 
 void TaskItemDialog::FillCategoryControl(int projectId)
@@ -690,4 +615,60 @@ void TaskItemDialog::FillCategoryControl(int projectId)
     }
 }
 
+void TaskItemDialog::GenerateTaskSavedEvent()
+{
+    wxCommandEvent taskInsertedEvent(TASK_INSERTED);
+    wxPostEvent(pParent, taskInsertedEvent);
+}
+
+void TaskItemDialog::ProcessTaskItem(const models::task_item& taskItem)
+{
+    services::db_service dbService;
+    if (bIsEdit && pIsActiveCtrl->IsChecked()) {
+        try {
+            dbService.update_task_item(taskItem);
+        } catch (const sqlite::sqlite_exception& e) {
+            pLogger->error("Error occured in task_item update_task_item() - {0:d} : {1}", e.get_code(), e.what());
+        }
+    } else if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
+        try {
+            dbService.delete_task_item(mTaskItemId, util::UnixTimestamp());
+        } catch (const sqlite::sqlite_exception& e) {
+            pLogger->error("Error occured in task_item delete_task_item() - {0:d} : {1}", e.get_code(), e.what());
+        }
+    } else {
+        try {
+            dbService.create_new_task_item(taskItem);
+        } catch (const sqlite::sqlite_exception& e) {
+            pLogger->error("Error occured in task_item create_new_task_item() - {0:d} : {1}", e.get_code(), e.what());
+        }
+    }
+}
+
+bool TimeValidators::Validate(wxDateTime startTime, wxDateTime endTime)
+{
+    auto isStartAheadOfEnd = startTime.IsLaterThan(endTime);
+    if (isStartAheadOfEnd) {
+        wxMessageBox(wxT("A task cannot be started after the time it has ended"),
+            wxT("Validation failure"),
+            wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    auto isEndBeforeStart = endTime.IsEarlierThan(startTime);
+    if (isEndBeforeStart) {
+        wxMessageBox(wxT("A task cannot end before the time it has started"),
+            wxT("Validation failure"),
+            wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    auto taskTimeSpan = endTime - startTime;
+    auto isTaskLessThan5Minutes = taskTimeSpan.IsShorterThan(wxTimeSpan::Minutes(5));
+    if (isTaskLessThan5Minutes) {
+        wxMessageBox(
+            wxT("A task cannot be less than 5 minutes long"), wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        return false;
+    }
+}
 } // namespace app::dialog
