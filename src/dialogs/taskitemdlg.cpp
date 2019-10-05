@@ -314,10 +314,12 @@ void TaskItemDialog::FillControls()
     }
 
     if (mType == TaskItemType::EntryTask) {
-        wxDateTime timeWithZeroSeconds = wxDateTime::Now();
-        timeWithZeroSeconds.SetSecond(0);
+        wxDateTime timeInitializedToZero = wxDateTime::Now();
+        timeInitializedToZero.SetSecond(0);
+        timeInitializedToZero.SetMinute(0);
+        timeInitializedToZero.SetHour(0);
 
-        pDurationTimeCtrl->SetValue(timeWithZeroSeconds);
+        pDurationTimeCtrl->SetValue(timeInitializedToZero);
     }
 }
 
