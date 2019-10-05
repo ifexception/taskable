@@ -49,8 +49,8 @@ SetupWizard::SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger)
 
     wxString introWizardMessage =
         wxT("This wizard will help you get started with Tasks Tracker.\n"
-            "The next few pages will setup a employer, a client (which is optional), a project and a category.\n "
-            "Please press \"Next\" to begin the process.");
+            "The next few pages will setup a employer, a client (optional), a project and a category.\n "
+            "Press \"Next\" to begin the process.");
 
     new wxStaticText(pPage1, wxID_ANY, introWizardMessage);
 
@@ -69,8 +69,6 @@ bool SetupWizard::Run()
 {
     auto wizardSuccess = wxWizard::RunWizard(pPage1);
     if (wizardSuccess) {
-        wxStopWatch stopWatch;
-        stopWatch.Start();
         CreateDatabaseFile();
         bool success = SetUpDatabase();
         if (!success) {
@@ -83,10 +81,8 @@ bool SetupWizard::Run()
             DeleteDatabaseFile();
             return false;
         }
-
-        stopWatch.Pause();
-        wxLogDebug(wxString::Format("DbService calls elapsed time: %ldms", stopWatch.Time()));
     }
+
     Destroy();
     return wizardSuccess;
 }
@@ -151,7 +147,6 @@ void SetupWizard::CreateDatabaseFile()
 void SetupWizard::DeleteDatabaseFile()
 {
     const wxString& databaseFilename = wxT("tasks-tracker.db");
-    wxFile file;
     if (wxFileExists(databaseFilename)) {
         wxRemoveFile(databaseFilename);
     }
@@ -243,7 +238,7 @@ AddEmployerAndClientPage::AddEmployerAndClientPage(SetupWizard* parent)
     auto employerText = new wxStaticText(this, wxID_ANY, wxT("Employer:"));
     sizer->Add(employerText, 0, wxALL, 5);
 
-    pEmployerCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), 0);
+    pEmployerCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
     sizer->Add(pEmployerCtrl, 0, wxALL, 5);
 
     wxString employerHelpMessage =
@@ -255,7 +250,7 @@ AddEmployerAndClientPage::AddEmployerAndClientPage(SetupWizard* parent)
     auto clientText = new wxStaticText(this, wxID_ANY, wxT("Client:*"));
     sizer->Add(clientText, 0, wxALL, 5);
 
-    pClientCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), 0);
+    pClientCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
     sizer->Add(pClientCtrl, 0, wxALL, 5);
 
     wxString clientHelpMessage =
@@ -273,7 +268,7 @@ bool AddEmployerAndClientPage::TransferDataFromWindow()
 {
     const wxString employer = pEmployerCtrl->GetValue().Trim();
     if (employer.empty()) {
-        wxMessageBox(wxT("An employer is required"), wxT("TasksTracker"), wxOK | wxICON_ERROR, this);
+        wxMessageBox(wxT("An employer is required"), wxT("Tasks Tracker"), wxOK | wxICON_ERROR, this);
         return false;
     }
 
@@ -321,11 +316,11 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
     auto projectText = new wxStaticText(this, wxID_ANY, wxT("Project:"));
     sizer->Add(projectText, 0, wxALL, 5);
 
-    pNameCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), 0);
+    pNameCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
     sizer->Add(pNameCtrl, 0, wxALL, 5);
 
     wxString projectNameHelpMessage = wxT("Specify a descriptive project name.\n"
-                                          "A project is a undertaking of a business for a client or for itself carried "
+                                          "A project is an undertaking of a business for a client or for itself carried "
                                           "out individually or in a group to achieve a business goal");
     auto projectNameHelpText = new wxStaticText(this, wxID_ANY, projectNameHelpMessage);
     sizer->Add(projectNameHelpText, 0, wxALL, 5);
@@ -333,12 +328,13 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
     auto displayNameText = new wxStaticText(this, wxID_ANY, wxT("Display Name:"));
     sizer->Add(displayNameText, 0, wxALL, 5);
 
-    pDisplayNameCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), 0);
+    pDisplayNameCtrl =
+        new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
     sizer->Add(pDisplayNameCtrl, 0, wxALL, 5);
 
     wxString displayNameHelpMessage = wxT("Specify a shortened version of the project name.\n"
                                           "Similar to a project name, a display name is merely a shortened version of "
-                                          "the project name to aid in readability, identification and display");
+                                          "the project name to aid in leg   ibility, identification and display");
     auto displayNameHelpText = new wxStaticText(this, wxID_ANY, displayNameHelpMessage);
     sizer->Add(displayNameHelpText, 0, wxALL, 5);
 
@@ -350,13 +346,13 @@ bool AddProjectPage::TransferDataFromWindow()
 {
     const wxString projectName = pNameCtrl->GetValue().Trim();
     if (projectName.empty()) {
-        wxMessageBox(wxT("An project name is required"), wxT("TasksTracker"), wxOK | wxICON_ERROR, this);
+        wxMessageBox(wxT("An project name is required"), wxT("Tasks Tracker"), wxOK | wxICON_ERROR, this);
         return false;
     }
 
     const wxString displayName = pDisplayNameCtrl->GetValue().Trim();
     if (displayName.empty()) {
-        wxMessageBox(wxT("An display name is required"), wxT("TasksTracker"), wxOK | wxICON_ERROR, this);
+        wxMessageBox(wxT("A display name is required"), wxT("Tasks Tracker"), wxOK | wxICON_ERROR, this);
         return false;
     }
 
@@ -395,7 +391,7 @@ AddCategoriesPage::AddCategoriesPage(SetupWizard* parent)
     auto categoryText = new wxStaticText(this, wxID_ANY, wxT("Category:"));
     sizer->Add(categoryText, 0, wxALL, 5);
 
-    pNameCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), 0);
+    pNameCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
     sizer->Add(pNameCtrl, 0, wxALL, 5);
 
     wxString categoryNameHelpMessage =
@@ -416,10 +412,10 @@ AddCategoriesPage::AddCategoriesPage(SetupWizard* parent)
     auto categoryColorHelpText = new wxStaticText(this, wxID_ANY, categoryColorHelpMessage);
     sizer->Add(categoryColorHelpText, 0, wxALL, 5);
 
-    auto descriptionText = new wxStaticText(this, wxID_ANY, wxT("Description:"));
+    auto descriptionText = new wxStaticText(this, wxID_ANY, wxT("Description:*"));
     sizer->Add(descriptionText, 0, wxALL, 5);
 
-    pDescriptionCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), 0);
+    pDescriptionCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
     sizer->Add(pDescriptionCtrl, 0, wxALL, 5);
 
     wxString descriptionHelpMessage = wxT("Specify a description for the above category.\n"
@@ -436,7 +432,7 @@ bool AddCategoriesPage::TransferDataFromWindow()
 {
     const wxString category = pNameCtrl->GetValue().Trim();
     if (category.empty()) {
-        wxMessageBox(wxT("An category name is required"), wxT("TasksTracker"), wxOK | wxICON_ERROR, this);
+        wxMessageBox(wxT("An category name is required"), wxT("Tasks Tracker"), wxOK | wxICON_ERROR, this);
         return false;
     }
 
