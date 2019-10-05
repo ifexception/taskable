@@ -24,7 +24,6 @@
 
 #include "../common/constants.h"
 #include "../common/common.h"
-#include "../common/ids.h"
 #include "../common/util.h"
 #include "../services/db_service.h"
 
@@ -32,11 +31,30 @@ namespace app::dialog
 {
 // clang-format off
 wxBEGIN_EVENT_TABLE(ClientDialog, wxDialog)
-EVT_BUTTON(ids::ID_SAVE, ClientDialog::OnSave)
+EVT_BUTTON(wxID_OK, ClientDialog::OnOk)
 EVT_BUTTON(wxID_CANCEL, ClientDialog::OnCancel)
 EVT_CHECKBOX(ClientDialog::IDC_ISACTIVE, ClientDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
+
+ClientDialog::ClientDialog(wxWindow* parent,
+    std::shared_ptr<spdlog::logger> logger,
+    const wxString& name)
+    : pLogger(logger)
+    , mNameText(wxGetEmptyString())
+    , mEmployerId(-1)
+    , bIsEdit(false)
+    , mClientId(0)
 // clang-format on
+{
+    Create(parent,
+        wxID_ANY,
+        wxT("Add Client"),
+        wxDefaultPosition,
+        wxSize(320, 240),
+        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        name);
+    SetMinClientSize(wxSize(320, 240));
+}
 
 ClientDialog::ClientDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
@@ -49,18 +67,13 @@ ClientDialog::ClientDialog(wxWindow* parent,
     , bIsEdit(isEdit)
     , mClientId(clientId)
 {
-    long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
-    wxString title;
-    wxSize size;
-    if (isEdit) {
-        title = wxT("Edit Client");
-        size.Set(320, 320);
-    } else {
-        title = wxT("Add Client");
-        size.Set(320, 240);
-    }
-
-    Create(parent, wxID_ANY, title, wxDefaultPosition, size, style, name);
+    Create(parent,
+        wxID_ANY,
+        wxT("Edit Client"),
+        wxDefaultPosition,
+        wxSize(320, 320),
+        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        name);
 }
 
 bool ClientDialog::Create(wxWindow* parent,
@@ -76,13 +89,14 @@ bool ClientDialog::Create(wxWindow* parent,
     if (created) {
         CreateControls();
         FillControls();
+
         if (bIsEdit) {
             DataToControls();
         }
 
         GetSizer()->Fit(this);
         SetIcon(common::GetProgramIcon());
-        Center();
+        Centre();
     }
 
     return created;
@@ -94,16 +108,10 @@ void ClientDialog::CreateControls()
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(mainSizer);
 
-    auto mainPanelSizer = new wxBoxSizer(wxHORIZONTAL);
-    mainSizer->Add(mainPanelSizer, common::sizers::ControlDefault);
-
-    auto sizer = new wxBoxSizer(wxVERTICAL);
-    mainPanelSizer->Add(sizer, 0);
-
     /* Task Details Box */
-    auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Client Details"));
+    auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Client Information"));
     auto detailsBoxSizer = new wxStaticBoxSizer(detailsBox, wxVERTICAL);
-    sizer->Add(detailsBoxSizer, common::sizers::ControlExpandProp);
+    mainSizer->Add(detailsBoxSizer, common::sizers::ControlExpandProp);
 
     auto clientDetailsPanel = new wxPanel(this, wxID_STATIC);
     detailsBoxSizer->Add(clientDetailsPanel, common::sizers::ControlExpand);
@@ -116,14 +124,9 @@ void ClientDialog::CreateControls()
     auto clientNameText = new wxStaticText(clientDetailsPanel, wxID_STATIC, wxT("Name"));
     taskFlexGridSizer->Add(clientNameText, common::sizers::ControlCenterVertical);
 
-    pNameCtrl = new wxTextCtrl(clientDetailsPanel,
-        IDC_NAME,
-        wxGetEmptyString(),
-        wxDefaultPosition,
-        wxSize(150, -1),
-        wxTE_LEFT,
-        wxDefaultValidator,
-        wxT("client_name_ctrl"));
+    pNameCtrl =
+        new wxTextCtrl(clientDetailsPanel, IDC_NAME, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
+    pNameCtrl->Bind(wxEVT_KILL_FOCUS, &ClientDialog::OnClientTextControlLostFocus, this);
     pNameCtrl->SetToolTip(wxT("Enter a name for the client"));
     taskFlexGridSizer->Add(pNameCtrl, common::sizers::ControlDefault);
 
@@ -132,7 +135,9 @@ void ClientDialog::CreateControls()
     taskFlexGridSizer->Add(employerNameText, common::sizers::ControlCenterVertical);
 
     pEmployerChoiceCtrl =
-        new wxComboBox(clientDetailsPanel, IDC_EMPLOYER, wxT("Select a employer"), wxDefaultPosition, wxDefaultSize);
+        new wxChoice(clientDetailsPanel, IDC_EMPLOYER, wxDefaultPosition, wxDefaultSize);
+    pEmployerChoiceCtrl->AppendString(wxT("Select a employer"));
+    pEmployerChoiceCtrl->SetSelection(0);
     pEmployerChoiceCtrl->SetToolTip(wxT("Select a employer to associate the client with"));
     taskFlexGridSizer->Add(pEmployerChoiceCtrl, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
@@ -158,8 +163,7 @@ void ClientDialog::CreateControls()
     }
 
     /* Horizontal Line*/
-    auto separationLine = new wxStaticLine(
-        this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("new_task_static_line"));
+    auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL);
     mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
@@ -168,10 +172,10 @@ void ClientDialog::CreateControls()
     buttonPanel->SetSizer(buttonPanelSizer);
     mainSizer->Add(buttonPanel, wxSizerFlags(wxSizerFlags().Border(wxALL, 5)).Center());
 
-    auto okButton = new wxButton(buttonPanel, ids::ID_SAVE, wxT("&Save"));
+    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
     auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
-    buttonPanelSizer->Add(okButton, wxSizerFlags().Border(wxALL, 5));
+    buttonPanelSizer->Add(pOkButton, wxSizerFlags().Border(wxALL, 5));
     buttonPanelSizer->Add(cancelButton, wxSizerFlags().Border(wxALL, 5));
 }
 
@@ -200,7 +204,7 @@ void ClientDialog::DataToControls()
         pLogger->error("Error occured on get_client_by_id() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    pNameCtrl->SetValue(client.client_name);
+    pNameCtrl->ChangeValue(client.client_name);
     pEmployerChoiceCtrl->SetStringSelection(client.employer_name);
 
     wxString dateCreatedString = util::ConvertUnixTimestampToString(client.date_created_utc);
@@ -222,18 +226,6 @@ bool ClientDialog::Validate()
         return false;
     }
 
-    if (mNameText.length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Client name"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
-    }
-
-    if (mNameText.length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Client name"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
-    }
-
     if (mEmployerId == -1 || mEmployerId == 0) {
         auto message = wxString::Format(Constants::Messages::SelectionRequired, wxT("Employer"));
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
@@ -248,7 +240,25 @@ bool ClientDialog::AreControlsEmpty()
     return isEmpty;
 }
 
-void ClientDialog::OnSave(wxCommandEvent& event)
+void ClientDialog::OnClientTextControlLostFocus(wxFocusEvent& event)
+{
+    if (pNameCtrl->GetValue().length() < 2) {
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Client name"), 2);
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        pOkButton->Disable();
+
+    } else if (pNameCtrl->GetValue().length() > 255) {
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Client name"), 255);
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        pOkButton->Disable();
+    } else {
+        pOkButton->Enable();
+    }
+
+    event.Skip();
+}
+
+void ClientDialog::OnOk(wxCommandEvent& event)
 {
     mNameText = pNameCtrl->GetValue();
     mEmployerId = util::VoidPointerToInt(pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()));
@@ -277,7 +287,8 @@ void ClientDialog::OnSave(wxCommandEvent& event)
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured on client OnSave() - {0:d} : {1}", e.get_code(), e.what());
     }
-    EndModal(ids::ID_SAVE);
+
+    EndModal(wxID_OK);
 }
 
 void ClientDialog::OnCancel(wxCommandEvent& event)

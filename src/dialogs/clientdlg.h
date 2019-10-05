@@ -33,8 +33,11 @@ public:
     ClientDialog() = delete;
     explicit ClientDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
-        bool isEdit = false,
-        int clientId = 0,
+        const wxString& name = wxT("ClientDialog"));
+    explicit ClientDialog(wxWindow* parent,
+        std::shared_ptr<spdlog::logger> logger,
+        bool isEdit,
+        int clientId,
         const wxString& name = wxT("ClientDialog"));
     virtual ~ClientDialog() = default;
 
@@ -55,13 +58,16 @@ private:
     bool Validate();
     bool AreControlsEmpty();
 
-    void OnSave(wxCommandEvent& event);
+    void OnClientTextControlLostFocus(wxFocusEvent& event);
+    void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
 
     std::shared_ptr<spdlog::logger> pLogger;
+
+    wxButton* pOkButton;
     wxTextCtrl* pNameCtrl;
-    wxComboBox* pEmployerChoiceCtrl;
+    wxChoice* pEmployerChoiceCtrl;
     wxCheckBox* pIsActiveCtrl;
     wxStaticText* pDateCreatedTextCtrl;
     wxStaticText* pDateUpdatedTextCtrl;
