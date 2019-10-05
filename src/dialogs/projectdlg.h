@@ -58,7 +58,7 @@ private:
 
     void OnEmployerSelect(wxCommandEvent& event);
     void OnNameTextEntered(wxCommandEvent& event);
-    void OnSave(wxCommandEvent& event);
+    void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
 

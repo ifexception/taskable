@@ -32,7 +32,7 @@ namespace app::dialog
 {
 // clang-format off
 wxBEGIN_EVENT_TABLE(ProjectDialog, wxDialog)
-EVT_BUTTON(ids::ID_SAVE, ProjectDialog::OnSave)
+EVT_BUTTON(wxID_OK, ProjectDialog::OnOk)
 EVT_BUTTON(wxID_CANCEL, ProjectDialog::OnCancel)
 EVT_CHOICE(ProjectDialog::IDC_EMPLOYERCHOICE, ProjectDialog::OnEmployerSelect)
 EVT_CHECKBOX(ProjectDialog::IDC_ISACTIVE, ProjectDialog::OnIsActiveCheck)
@@ -188,8 +188,7 @@ void ProjectDialog::CreateControls()
     }
 
     /* Horizontal Line*/
-    auto separation_line = new wxStaticLine(
-        this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("project_details_static_line"));
+    auto separation_line = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
     mainSizer->Add(separation_line, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
@@ -198,7 +197,7 @@ void ProjectDialog::CreateControls()
     buttonPanel->SetSizer(buttonPanelSizer);
     mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
-    auto okButton = new wxButton(buttonPanel, ids::ID_SAVE, wxT("&Save"));
+    auto okButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
     auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
     buttonPanelSizer->Add(okButton, common::sizers::ControlDefault);
@@ -231,8 +230,8 @@ void ProjectDialog::DataToControls()
         pLogger->error("Error occured in get_project_by_id() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    pNameCtrl->SetValue(project.project_name); // TODO use ChangeValue as SetValue generates a event
-    pDisplayNameCtrl->SetValue(project.display_name);
+    pNameCtrl->ChangeValue(project.project_name);
+    pDisplayNameCtrl->ChangeValue(project.display_name);
     pEmployerChoiceCtrl->SetStringSelection(project.employer_name);
 
     if (!project.client_name.empty()) {
@@ -277,13 +276,13 @@ bool ProjectDialog::Validate()
     }
 
     if (mNameText.length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Project name"));
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Project name"), 2);
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
 
     if (mNameText.length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Project name"));
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Project name"), 255);
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
@@ -295,13 +294,13 @@ bool ProjectDialog::Validate()
     }
 
     if (mDisplayNameText.length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Display name"));
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Display name"), 2);
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
 
     if (mDisplayNameText.length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Display name"));
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Display name"), 255);
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
@@ -349,16 +348,19 @@ void ProjectDialog::OnEmployerSelect(wxCommandEvent& event)
 void ProjectDialog::OnNameTextEntered(wxCommandEvent& WXUNUSED(event))
 {
     auto currentNameText = pNameCtrl->GetValue();
-    pDisplayNameCtrl->SetValue(currentNameText);
+    pDisplayNameCtrl->ChangeValue(currentNameText);
 }
 
-void ProjectDialog::OnSave(wxCommandEvent& event)
+void ProjectDialog::OnOk(wxCommandEvent& event)
 {
     mNameText = pNameCtrl->GetValue();
     mDisplayNameText = pDisplayNameCtrl->GetValue();
 
     mEmployerId = util::VoidPointerToInt(pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()));
-    mClientId = util::VoidPointerToInt(pClientChoiceCtrl->GetClientData(pClientChoiceCtrl->GetSelection()));
+    if (pClientChoiceCtrl->IsEnabled()) {
+        mClientId = util::VoidPointerToInt(
+            pClientChoiceCtrl->GetClientData(pClientChoiceCtrl->GetSelection())); // TODO if statement
+    }
 
     bool isValid = Validate();
     if (!isValid) {

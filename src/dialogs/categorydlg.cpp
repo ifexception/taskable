@@ -257,19 +257,19 @@ bool CategoryDialog::Validate()
     }
 
     if (mNameText.length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Category name"));
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Category name"), 2);
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
 
     if (mNameText.length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Category name"));
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Category name"), 255);
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
 
     if (mDescriptionText.length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Description"));
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Description"), 255);
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }

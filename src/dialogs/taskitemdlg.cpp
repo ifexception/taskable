@@ -515,12 +515,12 @@ void TaskItemDialog::OnDurationTimeChange(wxDateEvent& event)
 void TaskItemDialog::OnDescriptionControlFocusLost(wxFocusEvent& event)
 {
     if (pDescriptionCtrl->GetValue().length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Task description"));
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Task description"), 2);
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
     }
 
     if (pDescriptionCtrl->GetValue().length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Task description"));
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Task description"), 255);
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
     }
 

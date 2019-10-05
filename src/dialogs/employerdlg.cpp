@@ -195,13 +195,13 @@ bool EmployerDialog::Validate()
     }
 
     if (mNameText.length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Employer name"));
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Employer name"), 2);
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
 
     if (mNameText.length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Employer name"));
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Employer name"), 255);
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
