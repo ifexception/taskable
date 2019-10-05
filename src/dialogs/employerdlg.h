@@ -33,9 +33,12 @@ public:
     EmployerDialog() = default;
     explicit EmployerDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
-        bool isEdit = false,
-        int employerId = 0,
-        const wxString& name = "EmployerDialog");
+        const wxString& name = "employerdlg");
+    explicit EmployerDialog(wxWindow* parent,
+        std::shared_ptr<spdlog::logger> logger,
+        bool isEdit,
+        int employerId,
+        const wxString& name = wxT("employerdlg"));
     virtual ~EmployerDialog() = default;
 
 private:
@@ -55,11 +58,14 @@ private:
     bool Validate();
     bool AreControlsEmpty();
 
-    void OnSave(wxCommandEvent& event);
+    void OnEmployerTextControlLostFocus(wxFocusEvent& event);
+    void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
 
     std::shared_ptr<spdlog::logger> pLogger;
+
+    wxButton* pOkButton;
     wxTextCtrl* pEmployerCtrl;
     wxCheckBox* pIsActiveCtrl;
     wxStaticText* pDateCreatedTextCtrl;
@@ -69,6 +75,13 @@ private:
     bool bIsEdit;
     int mEmployerId;
 
-    enum { IDC_ISACTIVE, WIDTH = 330, HEIGHT = 300, MIN_WIDTH = 320, MIN_HEIGHT = 240 };
+    enum {
+        IDC_EMPLOYERTEXT = wxID_HIGHEST + 1,
+        IDC_ISACTIVE,
+        WIDTH = 330,
+        HEIGHT = 300,
+        MIN_WIDTH = 320,
+        MIN_HEIGHT = 240
+    };
 };
 } // namespace app::dialog
