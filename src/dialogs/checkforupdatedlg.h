@@ -47,7 +47,7 @@ class CheckForUpdateDialog : public wxDialog
 {
 public:
     CheckForUpdateDialog() = delete;
-    explicit CheckForUpdateDialog(wxWindow* parent, const wxString& name = wxT("checkforupdate"));
+    explicit CheckForUpdateDialog(wxWindow* parent, const wxString& name = wxT("checkforupdatedlg"));
     virtual ~CheckForUpdateDialog() = default;
 
     void LaunchModal();
@@ -74,7 +74,7 @@ private:
     void ThreadCleanupProcedure();
 
     void OnHyperLinkClicked(wxHyperlinkEvent& event);
-    void OnOK(wxCommandEvent& event);
+    void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnThreadCompletion(wxThreadEvent& event);
     void OnClose(wxCloseEvent& event);

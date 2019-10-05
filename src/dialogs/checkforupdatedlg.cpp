@@ -49,7 +49,6 @@ CheckForUpdateThread::~CheckForUpdateThread()
 wxThread::ExitCode CheckForUpdateThread::Entry()
 {
     std::string eventString = "";
-    wxLogDebug("Entered thread");
 
     if (TestDestroy()) {
         return nullptr;
@@ -83,7 +82,7 @@ wxThread::ExitCode CheckForUpdateThread::Entry()
 // clang-format off
 wxBEGIN_EVENT_TABLE(CheckForUpdateDialog, wxDialog)
     EVT_CLOSE(CheckForUpdateDialog::OnClose)
-    EVT_BUTTON(wxID_OK, CheckForUpdateDialog::OnOK)
+    EVT_BUTTON(wxID_OK, CheckForUpdateDialog::OnOk)
     EVT_BUTTON(wxID_CANCEL, CheckForUpdateDialog::OnCancel)
     EVT_HYPERLINK(CheckForUpdateDialog::IDC_NEW_RELEASE_LINK, CheckForUpdateDialog::OnHyperLinkClicked)
 wxEND_EVENT_TABLE()
@@ -153,7 +152,7 @@ void CheckForUpdateDialog::CreateControls()
         wxDefaultPosition,
         wxDefaultSize,
         wxHL_DEFAULT_STYLE);
-    pNewReleaseLink->Disable();
+    pNewReleaseLink->Hide();
     sizer->Add(pNewReleaseLink, common::sizers::ControlDefault);
 
     /* Gauge Control */
@@ -161,8 +160,7 @@ void CheckForUpdateDialog::CreateControls()
     sizer->Add(pGaugeCtrl, common::sizers::ControlExpand);
 
     /* Horizontal Line*/
-    auto separationLine = new wxStaticLine(
-        this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("checkforupdate_static_line"));
+    auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL);
     mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
@@ -173,6 +171,7 @@ void CheckForUpdateDialog::CreateControls()
 
     pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
     pOkButton->Disable();
+
     auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
     cancelButton->SetFocus();
 
@@ -220,7 +219,7 @@ void CheckForUpdateDialog::OnHyperLinkClicked(wxHyperlinkEvent& event)
     wxLaunchDefaultBrowser(event.GetURL());
 }
 
-void CheckForUpdateDialog::OnOK(wxCommandEvent& event)
+void CheckForUpdateDialog::OnOk(wxCommandEvent& event)
 {
     EndModal(wxID_OK);
 }
@@ -249,7 +248,7 @@ void CheckForUpdateDialog::OnThreadCompletion(wxThreadEvent& event)
             description);
         pNewReleaseAvailable->SetLabel(text);
         pNewReleaseLink->SetLabel(downloadLink);
-        pNewReleaseLink->Enable();
+        pNewReleaseLink->Show();
     } else {
         auto text = wxT("No new release available.");
         pNewReleaseAvailable->SetLabel(text);
