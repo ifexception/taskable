@@ -35,8 +35,11 @@ public:
     CategoryDialog() = default;
     explicit CategoryDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
-        bool isEdit = false,
-        int categoryId = 0,
+        const wxString& name = "CategoryDialog");
+    explicit CategoryDialog(wxWindow* parent,
+        std::shared_ptr<spdlog::logger> logger,
+        bool isEdit,
+        int categoryId,
         const wxString& name = "CategoryDialog");
     virtual ~CategoryDialog() = default;
 
@@ -57,12 +60,15 @@ private:
     bool Validate();
     bool AreControlsEmpty();
 
-    void OnSave(wxCommandEvent& event);
+    void OnNameControlFocusLost(wxFocusEvent& event);
+    void OnDescriptionControlFocusLost(wxFocusEvent& event);
+    void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
 
     std::shared_ptr<spdlog::logger> pLogger;
 
+    wxButton* pOkButton;
     wxChoice* pProjectChoiceCtrl;
     wxTextCtrl* pNameCtrl;
     wxColourPickerCtrl* pColorPickerCtrl;

@@ -26,7 +26,6 @@
 
 #include "../common/constants.h"
 #include "../common/common.h"
-#include "../common/ids.h"
 #include "../common/util.h"
 #include "../services/db_service.h"
 
@@ -34,10 +33,30 @@ namespace app::dialog
 {
 // clang-format off
 wxBEGIN_EVENT_TABLE(CategoryDialog, wxDialog)
-EVT_BUTTON(ids::ID_SAVE, CategoryDialog::OnSave)
+EVT_BUTTON(wxID_OK, CategoryDialog::OnOk)
 EVT_BUTTON(wxID_CANCEL, CategoryDialog::OnCancel)
 EVT_CHECKBOX(CategoryDialog::IDC_ISACTIVE, CategoryDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
+
+CategoryDialog::CategoryDialog(wxWindow* parent,
+    std::shared_ptr<spdlog::logger> logger,
+    const wxString& name)
+    : pLogger(logger)
+    , mProjectChoiceId(-1)
+    , mNameText(wxGetEmptyString())
+    , mDescriptionText(wxGetEmptyString())
+    , bIsEdit(false)
+    , mCategoryId(0)
+// clang-format on
+{
+    Create(parent,
+        wxID_ANY,
+        wxT("Add Category"),
+        wxDefaultPosition,
+        wxSize(320, 280),
+        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        name);
+}
 
 CategoryDialog::CategoryDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
@@ -50,19 +69,14 @@ CategoryDialog::CategoryDialog(wxWindow* parent,
     , mDescriptionText(wxGetEmptyString())
     , bIsEdit(isEdit)
     , mCategoryId(categoryId)
-// clang-format on
 {
-    wxString title;
-    wxSize size;
-    if (isEdit) {
-        title = wxT("Edit Category");
-        size.Set(320, 320);
-    } else {
-        title = wxT("Add Category");
-        size.Set(320, 240);
-    }
-
-    Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    Create(parent,
+        wxID_ANY,
+        wxT("Edit Category"),
+        wxDefaultPosition,
+        wxSize(320, 320),
+        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        name);
 }
 
 bool CategoryDialog::Create(wxWindow* parent,
@@ -77,6 +91,7 @@ bool CategoryDialog::Create(wxWindow* parent,
     if (created) {
         CreateControls();
         FillControls();
+
         if (bIsEdit) {
             DataToControls();
         }
@@ -95,16 +110,10 @@ void CategoryDialog::CreateControls()
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(mainSizer);
 
-    auto mainPanelSizer = new wxBoxSizer(wxHORIZONTAL);
-    mainSizer->Add(mainPanelSizer, common::sizers::ControlDefault);
-
-    auto sizer = new wxBoxSizer(wxVERTICAL);
-    mainPanelSizer->Add(sizer, 0);
-
     /* Task Details Box */
     auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Category Details"));
     auto detailsBoxSizer = new wxStaticBoxSizer(detailsBox, wxVERTICAL);
-    sizer->Add(detailsBoxSizer, common::sizers::ControlExpandProp);
+    mainSizer->Add(detailsBoxSizer, common::sizers::ControlExpandProp);
 
     auto categoryDetailsPanel = new wxPanel(this, wxID_STATIC);
     detailsBoxSizer->Add(categoryDetailsPanel, common::sizers::ControlExpand);
@@ -127,14 +136,9 @@ void CategoryDialog::CreateControls()
     auto nameText = new wxStaticText(categoryDetailsPanel, wxID_STATIC, wxT("Name"));
     flexGridSizer->Add(nameText, common::sizers::ControlCenterVertical);
 
-    pNameCtrl = new wxTextCtrl(categoryDetailsPanel,
-        IDC_NAME,
-        wxGetEmptyString(),
-        wxDefaultPosition,
-        wxSize(150, -1),
-        wxTE_LEFT,
-        wxDefaultValidator,
-        wxT("category_name_ctrl"));
+    pNameCtrl = new wxTextCtrl(
+        categoryDetailsPanel, IDC_NAME, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
+    pNameCtrl->Bind(wxEVT_KILL_FOCUS, &CategoryDialog::OnNameControlFocusLost, this);
     pNameCtrl->SetToolTip(wxT("Enter a name for this category"));
     flexGridSizer->Add(pNameCtrl, common::sizers::ControlDefault);
 
@@ -154,18 +158,13 @@ void CategoryDialog::CreateControls()
     }
 
     /* Category Description Text Control */
-    auto descriptionText = new wxStaticText(categoryDetailsPanel, wxID_STATIC, wxT("Description"));
+    auto descriptionText = new wxStaticText(categoryDetailsPanel, wxID_STATIC, wxT("Description*"));
     flexGridSizer->Add(descriptionText, common::sizers::ControlCenterVertical);
 
-    pDescriptionCtrl = new wxTextCtrl(this,
-        IDC_DESCRIPTION,
-        wxGetEmptyString(),
-        wxDefaultPosition,
-        wxSize(240, 160),
-        wxTE_MULTILINE,
-        wxDefaultValidator,
-        wxT("category_description_ctrl"));
-    pDescriptionCtrl->SetToolTip(wxT("Enter a detailed description of a task category"));
+    pDescriptionCtrl =
+        new wxTextCtrl(this, IDC_DESCRIPTION, wxGetEmptyString(), wxDefaultPosition, wxSize(240, 160), wxTE_MULTILINE);
+    pDescriptionCtrl->Bind(wxEVT_KILL_FOCUS, &CategoryDialog::OnDescriptionControlFocusLost, this);
+    pDescriptionCtrl->SetToolTip(wxT("Enter a (optional) detailed description of a task category"));
     detailsBoxSizer->Add(pDescriptionCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
     if (bIsEdit) {
@@ -183,8 +182,7 @@ void CategoryDialog::CreateControls()
     }
 
     /* Horizontal Line*/
-    auto separationLine = new wxStaticLine(
-        this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL, wxT("category_static_line"));
+    auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
     mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
@@ -193,10 +191,10 @@ void CategoryDialog::CreateControls()
     buttonPanel->SetSizer(buttonPanelSizer);
     mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
-    auto okButton = new wxButton(buttonPanel, ids::ID_SAVE, wxT("&Save"));
+    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&Save"));
     auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
-    buttonPanelSizer->Add(okButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(pOkButton, common::sizers::ControlDefault);
     buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
 }
 
@@ -226,10 +224,10 @@ void CategoryDialog::DataToControls()
     }
 
     pProjectChoiceCtrl->SetStringSelection(category.project_name);
-    pNameCtrl->SetValue(category.category_name);
+    pNameCtrl->ChangeValue(category.category_name);
 
     pColorPickerCtrl->SetColour(wxColour(category.color));
-    pDescriptionCtrl->SetValue(category.description);
+    pDescriptionCtrl->ChangeValue(category.description);
 
     wxString dateCreatedString = util::ConvertUnixTimestampToString(category.date_created_utc);
     wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
@@ -256,24 +254,6 @@ bool CategoryDialog::Validate()
         return false;
     }
 
-    if (mNameText.length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Category name"), 2);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
-    }
-
-    if (mNameText.length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Category name"), 255);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
-    }
-
-    if (mDescriptionText.length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Description"), 255);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
-    }
-
     return true;
 }
 
@@ -283,7 +263,41 @@ bool CategoryDialog::AreControlsEmpty()
     return isEmpty;
 }
 
-void CategoryDialog::OnSave(wxCommandEvent& event)
+void CategoryDialog::OnNameControlFocusLost(wxFocusEvent& event)
+{
+    if (pNameCtrl->GetValue().length() < 2) {
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Category name"), 2);
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        pOkButton->Disable();
+    } else if (pNameCtrl->GetValue().length() > 255) {
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Category name"), 255);
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        pOkButton->Disable();
+    } else {
+        pOkButton->Enable();
+    }
+
+    event.Skip();
+}
+
+void CategoryDialog::OnDescriptionControlFocusLost(wxFocusEvent& event)
+{
+    if (pDescriptionCtrl->GetValue().length() == 1) {
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Description"), 2);
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        pOkButton->Disable();
+    } else if (mDescriptionText.length() > 255) {
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Description"), 255);
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        pOkButton->Disable();
+    } else {
+        pOkButton->Enable();
+    }
+
+    event.Skip();
+}
+
+void CategoryDialog::OnOk(wxCommandEvent& event)
 {
     mProjectChoiceId = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
     mNameText = pNameCtrl->GetValue();
@@ -320,7 +334,7 @@ void CategoryDialog::OnSave(wxCommandEvent& event)
         pLogger->error("Error occured in category OnSave() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    EndModal(ids::ID_SAVE);
+    EndModal(wxID_OK);
 }
 
 void CategoryDialog::OnCancel(wxCommandEvent& event)
