@@ -41,6 +41,21 @@ wxEND_EVENT_TABLE()
 
 ProjectDialog::ProjectDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
+    const wxString& name)
+    : pLogger(logger)
+    , mNameText(wxGetEmptyString())
+    , mDisplayNameText(wxGetEmptyString())
+    , mEmployerId(-1)
+    , mClientId(-1)
+    , mProjectId(0)
+    , bIsEdit(false)
+// clang-format on
+{
+    Create(parent, wxID_ANY, wxT("Add Project"), wxDefaultPosition, wxSize(420, 380), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+}
+
+ProjectDialog::ProjectDialog(wxWindow* parent,
+    std::shared_ptr<spdlog::logger> logger,
     bool isEdit,
     int projectId,
     const wxString& name)
@@ -53,17 +68,13 @@ ProjectDialog::ProjectDialog(wxWindow* parent,
     , bIsEdit(isEdit)
 // clang-format on
 {
-    wxString title;
-    wxSize size;
-    if (isEdit) {
-        title = wxT("Edit Project");
-        size.Set(420, 380);
-    } else {
-        title = wxT("Add Project");
-        size.Set(420, 440);
-    }
-
-    Create(parent, wxID_ANY, title, wxDefaultPosition, size, wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    Create(parent,
+        wxID_ANY,
+        wxT("Edit Project"),
+        wxDefaultPosition,
+        wxSize(420, 440),
+        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        name);
 }
 
 bool ProjectDialog::Create(wxWindow* parent,
@@ -79,6 +90,7 @@ bool ProjectDialog::Create(wxWindow* parent,
     if (created) {
         CreateControls();
         FillControls();
+
         if (bIsEdit) {
             DataToControls();
         }
@@ -97,16 +109,10 @@ void ProjectDialog::CreateControls()
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(mainSizer);
 
-    auto mainPanelSizer = new wxBoxSizer(wxHORIZONTAL);
-    mainSizer->Add(mainPanelSizer, common::sizers::ControlDefault);
-
-    auto sizer = new wxBoxSizer(wxVERTICAL);
-    mainPanelSizer->Add(sizer, 0);
-
     /* Project Details Box */
     auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Project Details"));
     auto detailsBoxSizer = new wxStaticBoxSizer(detailsBox, wxVERTICAL);
-    sizer->Add(detailsBoxSizer, common::sizers::ControlExpand);
+    mainSizer->Add(detailsBoxSizer, common::sizers::ControlExpand);
 
     auto projectDetailsPanel = new wxPanel(this, wxID_STATIC);
     detailsBoxSizer->Add(projectDetailsPanel, common::sizers::ControlExpand);
@@ -124,9 +130,8 @@ void ProjectDialog::CreateControls()
         wxGetEmptyString(),
         wxDefaultPosition,
         wxSize(150, -1),
-        wxTE_LEFT,
-        wxDefaultValidator,
-        wxT("project_name_ctrl"));
+        wxTE_LEFT);
+    pNameCtrl->Bind(wxEVT_KILL_FOCUS, &ProjectDialog::OnProjectNameLostFocus, this);
     pNameCtrl->SetToolTip(wxT("Enter a name for the project"));
     taskFlexGridSizer->Add(pNameCtrl, common::sizers::ControlDefault);
 
@@ -139,9 +144,8 @@ void ProjectDialog::CreateControls()
         wxGetEmptyString(),
         wxDefaultPosition,
         wxSize(150, -1),
-        wxTE_LEFT,
-        wxDefaultValidator,
-        wxT("project_display_name_ctrl"));
+        wxTE_LEFT);
+    pDisplayNameCtrl->Bind(wxEVT_KILL_FOCUS, &ProjectDialog::OnDisplayNameLostFocus, this);
     pDisplayNameCtrl->SetToolTip(wxT("Enter a shortened, convenient display name for the project"));
     taskFlexGridSizer->Add(pDisplayNameCtrl, common::sizers::ControlDefault);
 
@@ -150,9 +154,9 @@ void ProjectDialog::CreateControls()
     taskFlexGridSizer->Add(employerText, common::sizers::ControlCenterVertical);
 
     pEmployerChoiceCtrl = new wxChoice(projectDetailsPanel, IDC_EMPLOYERCHOICE, wxDefaultPosition, wxSize(150, -1));
-    pEmployerChoiceCtrl->SetToolTip(wxT("Select a employer to associate the project with"));
     pEmployerChoiceCtrl->AppendString(wxT("Select a employer"));
     pEmployerChoiceCtrl->SetSelection(0);
+    pEmployerChoiceCtrl->SetToolTip(wxT("Select a employer to associate the project with"));
     taskFlexGridSizer->Add(pEmployerChoiceCtrl, common::sizers::ControlDefault);
 
     /* Client Choice Ctrl */
@@ -197,10 +201,10 @@ void ProjectDialog::CreateControls()
     buttonPanel->SetSizer(buttonPanelSizer);
     mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
-    auto okButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
+    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
     auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
-    buttonPanelSizer->Add(okButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(pOkButton, common::sizers::ControlDefault);
     buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
 }
 
@@ -275,32 +279,8 @@ bool ProjectDialog::Validate()
         return false;
     }
 
-    if (mNameText.length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Project name"), 2);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
-    }
-
-    if (mNameText.length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Project name"), 255);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
-    }
-
     if (mDisplayNameText.empty()) {
         auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Display name"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
-    }
-
-    if (mDisplayNameText.length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Display name"), 2);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
-    }
-
-    if (mDisplayNameText.length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Display name"), 255);
         wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
         return false;
     }
@@ -320,9 +300,43 @@ bool ProjectDialog::AreControlsEmpty()
     return isEmpty;
 }
 
+void ProjectDialog::OnProjectNameLostFocus(wxFocusEvent& event)
+{
+    if (pNameCtrl->GetValue().length() < 2) {
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Project name"), 2);
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        pOkButton->Disable();
+    } else if (pNameCtrl->GetValue().length() > 255) {
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Project name"), 255);
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        pOkButton->Disable();
+    } else {
+        pOkButton->Enable();
+    }
+
+    event.Skip();
+}
+
+void ProjectDialog::OnDisplayNameLostFocus(wxFocusEvent& event)
+{
+    if (pDisplayNameCtrl->GetValue().length() < 2) {
+        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Display name"), 2);
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        pOkButton->Disable();
+    } else if (pDisplayNameCtrl->GetValue().length() > 255) {
+        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Display name"), 255);
+        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+        pOkButton->Disable();
+    } else {
+        pOkButton->Enable();
+    }
+
+    event.Skip();
+}
+
 void ProjectDialog::OnEmployerSelect(wxCommandEvent& event)
 {
-    pClientChoiceCtrl->Clear();
+    pClientChoiceCtrl->Clear(); // only run if clients > 0
     pClientChoiceCtrl->AppendString(wxT("Select a client"));
     int employerId = util::VoidPointerToInt(event.GetClientData());
     std::vector<models::client> clients;
@@ -351,7 +365,7 @@ void ProjectDialog::OnNameTextEntered(wxCommandEvent& WXUNUSED(event))
     pDisplayNameCtrl->ChangeValue(currentNameText);
 }
 
-void ProjectDialog::OnOk(wxCommandEvent& event)
+void ProjectDialog::OnOk(wxCommandEvent& WXUNUSED(event))
 {
     mNameText = pNameCtrl->GetValue();
     mDisplayNameText = pDisplayNameCtrl->GetValue();
@@ -400,7 +414,7 @@ void ProjectDialog::OnOk(wxCommandEvent& event)
     EndModal(ids::ID_SAVE);
 }
 
-void ProjectDialog::OnCancel(wxCommandEvent& event)
+void ProjectDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
 {
     bool areControlsEmpty = AreControlsEmpty();
     if (!areControlsEmpty) {

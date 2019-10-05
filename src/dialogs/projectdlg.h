@@ -33,8 +33,11 @@ public:
     ProjectDialog() = default;
     explicit ProjectDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
-        bool isEdit = false,
-        int projectId = 0,
+        const wxString& name = "ProjectDialog");
+    explicit ProjectDialog(wxWindow* parent,
+        std::shared_ptr<spdlog::logger> logger,
+        bool isEdit,
+        int projectId,
         const wxString& name = "ProjectDialog");
     virtual ~ProjectDialog() = default;
 
@@ -56,6 +59,8 @@ private:
     bool Validate();
     bool AreControlsEmpty();
 
+    void OnProjectNameLostFocus(wxFocusEvent& event);
+    void OnDisplayNameLostFocus(wxFocusEvent& event);
     void OnEmployerSelect(wxCommandEvent& event);
     void OnNameTextEntered(wxCommandEvent& event);
     void OnOk(wxCommandEvent& event);
@@ -63,6 +68,8 @@ private:
     void OnIsActiveCheck(wxCommandEvent& event);
 
     std::shared_ptr<spdlog::logger> pLogger;
+
+    wxButton* pOkButton;
     wxTextCtrl* pNameCtrl;
     wxTextCtrl* pDisplayNameCtrl;
     wxChoice* pEmployerChoiceCtrl;
