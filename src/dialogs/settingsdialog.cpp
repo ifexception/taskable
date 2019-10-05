@@ -40,8 +40,13 @@ SettingsDialog::SettingsDialog(wxWindow* parent, std::shared_ptr<cfg::Configurat
 : pConfig(config)
 // clang-format on
 {
-    long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
-    bool success = Create(parent, wxID_ANY, wxT("Settings"), wxDefaultPosition, wxSize(500, 320), style, name);
+    bool success = Create(parent,
+        wxID_ANY,
+        wxT("Settings"),
+        wxDefaultPosition,
+        wxSize(500, 320),
+        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        name);
     SetMinClientSize(wxSize(480, 320));
 }
 
@@ -187,6 +192,20 @@ void SettingsDialog::CreateControls()
     pNotificationTimeChoice->SetToolTip(wxT("Select a interval in minutes for timed task notification update"));
     timedTaskGridSizer->Add(pNotificationTimeChoice, common::sizers::ControlDefault);
 
+    auto pausedTaskReminerText = new wxStaticText(timedTaskPanel, wxID_ANY, wxT("Paused Task Reminder Interval (m)"));
+    timedTaskGridSizer->Add(pausedTaskReminerText, common::sizers::ControlDefault);
+
+    wxArrayString pausedTaskReminderChoices;
+    pausedTaskReminderChoices.Add(wxT("1"));
+    pausedTaskReminderChoices.Add(wxT("3"));
+    pausedTaskReminderChoices.Add(wxT("5"));
+    pausedTaskReminderChoices.Add(wxT("10"));
+    pausedTaskReminderChoices.Add(wxT("15"));
+    pPausedTaskReminderChoice = new wxChoice(
+        timedTaskPanel, IDC_PAUSED_TASK_REMINDER_CHOICE, wxDefaultPosition, wxSize(150, -1), pausedTaskReminderChoices);
+    pPausedTaskReminderChoice->SetToolTip(wxT("Select a interval in minutes for a reminder when a task is paused"));
+    timedTaskGridSizer->Add(pPausedTaskReminderChoice, common::sizers::ControlDefault);
+
     /* Task Item Settings */
     auto taskItemSettingsBox = new wxStaticBox(this, wxID_ANY, wxT("Task Item"));
     auto taskItemSettingsSizer = new wxStaticBoxSizer(taskItemSettingsBox, wxHORIZONTAL);
@@ -218,7 +237,7 @@ void SettingsDialog::CreateControls()
 
     /* Horizontal Line*/
     auto separationLine = new wxStaticLine(
-        this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL, wxT("settings_static_line"));
+        this, wxID_ANY, wxDefaultPosition, wxSize(150, -1), wxLI_HORIZONTAL);
     mainSizer->Add(separationLine, 0, wxEXPAND | wxALL, 1);
 
     /* Button Panel */
@@ -267,6 +286,7 @@ void SettingsDialog::FillControls()
 
     pHideWindowTimeChoice->SetStringSelection(std::to_string(pConfig->GetHideWindowTimerInterval()));
     pNotificationTimeChoice->SetStringSelection(std::to_string(pConfig->GetNotificationTimerInterval()));
+    pPausedTaskReminderChoice->SetStringSelection(std::to_string(pConfig->GetPausedTaskReminderInterval()));
 
     pTimeRounding->SetValue(pConfig->IsTimeRoundingEnabled());
     if (!pConfig->IsTimeRoundingEnabled()) {
@@ -291,6 +311,7 @@ void SettingsDialog::OnOk(wxCommandEvent& WXUNUSED(event))
     pConfig->SetMinimizeTimedTaskWindow(pMinimizeTimedTaskWindow->GetValue());
     pConfig->SetHideWindowTimerInterval(std::stoi(pHideWindowTimeChoice->GetStringSelection().ToStdString()));
     pConfig->SetNotificationTimerInterval(std::stoi(pNotificationTimeChoice->GetStringSelection().ToStdString()));
+    pConfig->SetPausedTaskReminderInterval(std::stoi(pPausedTaskReminderChoice->GetStringSelection().ToStdString()));
 
     pConfig->SetTimeRounding(pTimeRounding->GetValue());
     pConfig->SetTimeToRoundTo(std::stoi(pRoundOffToChoice->GetStringSelection().ToStdString()));
@@ -302,7 +323,7 @@ void SettingsDialog::OnOk(wxCommandEvent& WXUNUSED(event))
 
 void SettingsDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
 {
-    int ret = wxMessageBox(wxT("Are you sure you want to exit?\nAny changes you've made will be lost."),
+    int ret = wxMessageBox(wxT("Are you sure you want to exit?\nAny changes made will be lost."),
         wxT("Tasks Tracker"),
         wxYES_NO | wxICON_QUESTION);
     if (ret == wxNO) {

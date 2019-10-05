@@ -48,3 +48,8 @@ wxString app::common::GetVersion()
 {
     return wxString::Format(wxT("%d.%d.%d"), TASKS_TRACKER_MAJOR, TASKS_TRACKER_MINOR, TASKS_TRACKER_PATCH);
 }
+
+wxString app::common::GetProgramName()
+{
+    return wxT("Tasks Tracker");
+}

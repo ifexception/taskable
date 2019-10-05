@@ -37,15 +37,15 @@ static const wxString AccumulatedTimeText = wxT("Time accumulated thus far: %s")
 // clang-format off
 wxBEGIN_EVENT_TABLE(StopwatchTaskDialog, wxDialog)
 EVT_CLOSE(StopwatchTaskDialog::OnClose)
-EVT_TIMER(StopwatchTaskDialog::IDC__NOTIFICATION_TIMER, StopwatchTaskDialog::OnTimer)
+EVT_TIMER(StopwatchTaskDialog::IDC_NOTIFICATION_TIMER, StopwatchTaskDialog::OnTimer)
 EVT_TIMER(StopwatchTaskDialog::IDC_ELAPSED_TIMER, StopwatchTaskDialog::OnElapsedTimeUpdate)
 EVT_TIMER(StopwatchTaskDialog::IDC_HIDE_WINDOW_TIMER, StopwatchTaskDialog::OnHideWindow)
+EVT_TIMER(StopwatchTaskDialog::IDC_PAUSED_TASK_REMINDER, StopwatchTaskDialog::OnPausedTaskReminder)
 EVT_BUTTON(StopwatchTaskDialog::IDC_START, StopwatchTaskDialog::OnStart)
 EVT_BUTTON(StopwatchTaskDialog::IDC_PAUSE, StopwatchTaskDialog::OnPause)
 EVT_BUTTON(StopwatchTaskDialog::IDC_STOP, StopwatchTaskDialog::OnStop)
 EVT_BUTTON(StopwatchTaskDialog::IDC_CANCEL, StopwatchTaskDialog::OnCancel)
 wxEND_EVENT_TABLE()
-// clang-format on
 
 StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
     std::shared_ptr<cfg::Configuration> config,
@@ -56,13 +56,15 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
     , pParent(parent)
     , pElapsedTimeText(nullptr)
     , pElapsedTimer(std::make_unique<wxTimer>(this, IDC_ELAPSED_TIMER))
-    , pNotificationTimer(std::make_unique<wxTimer>(this, IDC__NOTIFICATION_TIMER))
+    , pNotificationTimer(std::make_unique<wxTimer>(this, IDC_NOTIFICATION_TIMER))
     , pHideWindowTimer(std::make_unique<wxTimer>(this, IDC_HIDE_WINDOW_TIMER))
+    , pPausedTaskReminder(std::make_unique<wxTimer>(this, IDC_PAUSED_TASK_REMINDER))
     , pConfig(config)
     , pTaskState(taskState)
     , mStartTime()
     , bWasTaskPaused(false)
     , bHasPendingPausedTask(false)
+// clang-format on
 {
     Create(parent,
         wxID_ANY,
@@ -83,8 +85,9 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
     , pParent(parent)
     , pElapsedTimeText(nullptr)
     , pElapsedTimer(std::make_unique<wxTimer>(this, IDC_ELAPSED_TIMER))
-    , pNotificationTimer(std::make_unique<wxTimer>(this, IDC__NOTIFICATION_TIMER))
+    , pNotificationTimer(std::make_unique<wxTimer>(this, IDC_NOTIFICATION_TIMER))
     , pHideWindowTimer(std::make_unique<wxTimer>(this, IDC_HIDE_WINDOW_TIMER))
+    , pPausedTaskReminder(std::make_unique<wxTimer>(this, IDC_PAUSED_TASK_REMINDER))
     , pConfig(config)
     , pTaskState(taskState)
     , mStartTime()
@@ -169,7 +172,8 @@ void StopwatchTaskDialog::CreateControls()
     pElapsedTimeText->SetFont(font);
     sizer->Add(pElapsedTimeText, common::sizers::ControlHorizontal);
 
-    pAccumulatedTimeText = new wxStaticText(mainPanel, IDC_ACCUMULATED_TIME, wxT("Time accumulated thus far: 00:00:00"));
+    pAccumulatedTimeText =
+        new wxStaticText(mainPanel, IDC_ACCUMULATED_TIME, wxT("Time accumulated thus far: 00:00:00"));
     auto font2 = pAccumulatedTimeText->GetFont();
     font2.SetPointSize(8);
     pAccumulatedTimeText->SetFont(font2);
@@ -213,8 +217,8 @@ void StopwatchTaskDialog::OnTimer(wxTimerEvent& WXUNUSED(event))
 {
     auto current = wxDateTime::Now();
     auto elapsed = current - mStartTime;
-    auto message = wxString::Format(wxT("Stopwatch Task running for: %s"), elapsed.Format());
-    wxNotificationMessage taskElaspedMessage(wxT("Task Tracker"), message, this);
+    auto message = wxString::Format(wxT("Task running for: %s"), elapsed.Format());
+    wxNotificationMessage taskElaspedMessage(common::GetProgramName(), message, this);
     taskElaspedMessage.Show();
 }
 
@@ -224,6 +228,13 @@ void StopwatchTaskDialog::OnHideWindow(wxTimerEvent& WXUNUSED(event))
     pHideWindowTimer->Stop();
 }
 
+void StopwatchTaskDialog::OnPausedTaskReminder(wxTimerEvent& event)
+{
+    auto message = wxT("There is a pending pasued task");
+    wxNotificationMessage pausedTaskMessage(common::GetProgramName(), message, this);
+    pausedTaskMessage.Show();
+}
+
 void StopwatchTaskDialog::OnStart(wxCommandEvent& WXUNUSED(event))
 {
     bIsPaused = false;
@@ -231,6 +242,7 @@ void StopwatchTaskDialog::OnStart(wxCommandEvent& WXUNUSED(event))
 
     pElapsedTimer->Start(1000 /*milliseconds*/);
     pNotificationTimer->Start(util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval()));
+    pPausedTaskReminder->Stop();
 
     pStopButton->Enable();
     pStartButton->Disable();
@@ -249,10 +261,11 @@ void StopwatchTaskDialog::OnPause(wxCommandEvent& WXUNUSED(event))
     pStartNewTask->Disable();
     pNotificationTimer->Stop();
     pElapsedTimer->Stop();
+    pPausedTaskReminder->Start(util::MinutesToMilliseconds(pConfig->GetPausedTaskReminderInterval()));
     bWasTaskPaused = true;
-    mEndTime = wxDateTime::Now();
     bIsPaused = true;
 
+    mEndTime = wxDateTime::Now();
     pTaskState->PushTimes(mStartTime, mEndTime);
     auto accumulatedTimeThusFar = pTaskState->GetAccumulatedTime();
     pAccumulatedTimeText->SetLabel(wxString::Format(AccumulatedTimeText, accumulatedTimeThusFar.Format()));
@@ -269,6 +282,9 @@ void StopwatchTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
     mEndTime = wxDateTime::Now();
     pNotificationTimer->Stop();
     pElapsedTimer->Stop();
+    if (pPausedTaskReminder->IsRunning()) {
+        pPausedTaskReminder->Stop();
+    }
     pStopButton->Disable();
     pPauseButton->Disable();
     pStartButton->Disable();

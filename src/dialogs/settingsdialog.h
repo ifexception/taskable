@@ -71,6 +71,7 @@ private:
     wxCheckBox* pMinimizeTimedTaskWindow;
     wxChoice* pHideWindowTimeChoice;
     wxChoice* pNotificationTimeChoice;
+    wxChoice* pPausedTaskReminderChoice;
 
     wxCheckBox* pTimeRounding;
     wxChoice* pRoundOffToChoice;
@@ -90,6 +91,7 @@ private:
         IDC_CLOSE_TIMED_TASK_WINDOW,
         IDC_HIDE_WINDOW_TIME_CHOICE,
         IDC_NOTIFICATION_TIME_CHOICE,
+        IDC_PAUSED_TASK_REMINDER_CHOICE,
         IDC_ENABLE_TIME_ROUNDING,
         IDC_ROUND_OFF_TO
     };

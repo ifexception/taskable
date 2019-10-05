@@ -64,6 +64,9 @@ public:
     int GetNotificationTimerInterval() const;
     void SetNotificationTimerInterval(int value);
 
+    int GetPausedTaskReminderInterval() const;
+    void SetPausedTaskReminderInterval(int value);
+
     wxSize GetFrameSize() const;
     void SetFrameSize(const wxSize value);
 

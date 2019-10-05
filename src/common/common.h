@@ -43,4 +43,6 @@ extern const char** GetProgramIcon();
 std::string GetLicense();
 
 wxString GetVersion();
+
+wxString GetProgramName();
 } // namespace app::common

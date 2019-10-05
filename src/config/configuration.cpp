@@ -142,6 +142,16 @@ void Configuration::SetNotificationTimerInterval(int value)
     Set<int>(wxT("settings"), wxT("notificationTimer"), value);
 }
 
+int Configuration::GetPausedTaskReminderInterval() const
+{
+    return Get<int>(wxT("settings"), wxT("pausedTaskReminder"));
+}
+
+void Configuration::SetPausedTaskReminderInterval(int value)
+{
+    Set<int>(wxT("settings"), wxT("pausedTaskReminder"), value);
+}
+
 wxSize Configuration::GetFrameSize() const
 {
     auto dimensions = Get<wxString>(wxT("persistence"), wxT("dimensions"));

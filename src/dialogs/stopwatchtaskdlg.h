@@ -46,7 +46,7 @@ public:
         std::shared_ptr<spdlog::logger> logger,
         std::shared_ptr<services::TaskStateService> taskState,
         bool hasPendingPausedTask,
-        const wxString& name = wxT("StopwatchTaskDialog"));
+        const wxString& name = wxT("stopwatchtaskdlg"));
     virtual ~StopwatchTaskDialog() = default;
 
     void Launch();
@@ -68,6 +68,7 @@ private:
     void OnElapsedTimeUpdate(wxTimerEvent& event);
     void OnTimer(wxTimerEvent& event);
     void OnHideWindow(wxTimerEvent& event);
+    void OnPausedTaskReminder(wxTimerEvent& event);
     void OnStart(wxCommandEvent& event);
     void OnPause(wxCommandEvent& event);
     void OnStop(wxCommandEvent& event);
@@ -86,6 +87,7 @@ private:
     std::unique_ptr<wxTimer> pElapsedTimer;
     std::unique_ptr<wxTimer> pNotificationTimer;
     std::unique_ptr<wxTimer> pHideWindowTimer;
+    std::unique_ptr<wxTimer> pPausedTaskReminder;
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<services::TaskStateService> pTaskState;
 
@@ -100,8 +102,9 @@ private:
         IDC_ACCUMULATED_TIME,
         IDC_START_NEW_TASK_CHECK,
         IDC_ELAPSED_TIMER,
-        IDC__NOTIFICATION_TIMER,
+        IDC_NOTIFICATION_TIMER,
         IDC_HIDE_WINDOW_TIMER,
+        IDC_PAUSED_TASK_REMINDER,
         IDC_START,
         IDC_PAUSE,
         IDC_STOP,
