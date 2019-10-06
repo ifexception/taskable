@@ -170,14 +170,14 @@ void StopwatchTaskDialog::CreateControls()
     auto font = pElapsedTimeText->GetFont();
     font.SetPointSize(16);
     pElapsedTimeText->SetFont(font);
-    sizer->Add(pElapsedTimeText, common::sizers::ControlHorizontal);
+    sizer->Add(pElapsedTimeText, common::sizers::ControlCenterHorizontal);
 
     pAccumulatedTimeText =
         new wxStaticText(mainPanel, IDC_ACCUMULATED_TIME, wxT("Time accumulated thus far: 00:00:00"));
     auto font2 = pAccumulatedTimeText->GetFont();
     font2.SetPointSize(8);
     pAccumulatedTimeText->SetFont(font2);
-    sizer->Add(pAccumulatedTimeText, common::sizers::ControlHorizontal);
+    sizer->Add(pAccumulatedTimeText, common::sizers::ControlCenterHorizontal);
 
     pStartNewTask =
         new wxCheckBox(mainPanel, IDC_START_NEW_TASK_CHECK, wxT("Start new task when pausing current task"));

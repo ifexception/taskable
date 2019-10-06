@@ -153,7 +153,7 @@ void CheckForUpdateDialog::CreateControls()
         wxDefaultSize,
         wxHL_DEFAULT_STYLE);
     pNewReleaseLink->Hide();
-    sizer->Add(pNewReleaseLink, common::sizers::ControlDefault);
+    sizer->Add(pNewReleaseLink, common::sizers::ControlCenterHorizontal);
 
     /* Gauge Control */
     pGaugeCtrl = new wxGauge(mainPanel, IDC_GAUGE, 100);
