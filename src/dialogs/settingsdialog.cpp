@@ -1,4 +1,4 @@
-//  Tasks Tracker is a desktop that aids you in tracking your timesheets
+//  Taskable is a desktop that aids you in tracking your timesheets
 //  and seeing what work you have done.
 //
 //  Copyright(C) <2019> <Szymon Welgus>
@@ -324,7 +324,7 @@ void SettingsDialog::OnOk(wxCommandEvent& WXUNUSED(event))
 void SettingsDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
 {
     int ret = wxMessageBox(wxT("Are you sure you want to exit?\nAny changes made will be lost."),
-        wxT("Tasks Tracker"),
+        wxT("Taskable"),
         wxYES_NO | wxICON_QUESTION);
     if (ret == wxNO) {
         return;

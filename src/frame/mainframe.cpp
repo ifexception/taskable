@@ -1,4 +1,4 @@
-//  Tasks Tracker is a desktop that aids you in tracking your timesheets
+//  Taskable is a desktop that aids you in tracking your timesheets
 //  and seeing what work you have done.
 //
 //  Copyright(C) <2019> <Szymon Welgus>
@@ -75,7 +75,7 @@ wxEND_EVENT_TABLE()
 MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     const wxString& name)
-    : wxFrame(nullptr, wxID_ANY, wxT("Tasks Tracker"), wxDefaultPosition, wxSize(600, 500), wxDEFAULT_FRAME_STYLE, name)
+    : wxFrame(nullptr, wxID_ANY, wxT("Taskable"), wxDefaultPosition, wxSize(600, 500), wxDEFAULT_FRAME_STYLE, name)
     , pLogger(logger)
     , pConfig(config)
     , pTaskState(std::make_shared<services::TaskStateService>())
@@ -284,7 +284,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
 {
     if (pConfig->IsConfirmOnExit() && event.CanVeto()) {
         int ret = wxMessageBox(
-            wxT("Are you sure to exit the application?"), wxT("Tasks Tracker"), wxICON_QUESTION | wxYES_NO);
+            wxT("Are you sure to exit the application?"), wxT("Taskable"), wxICON_QUESTION | wxYES_NO);
         if (ret == wxNO) {
             event.Veto();
             return;

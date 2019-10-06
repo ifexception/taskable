@@ -1,4 +1,4 @@
-//  Tasks Tracker is a desktop that aids you in tracking your timesheets
+//  Taskable is a desktop that aids you in tracking your timesheets
 //  and seeing what work you have done.
 //
 //  Copyright(C)<2019><Szymon Welgus>
@@ -48,7 +48,7 @@ SetupWizard::SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger)
     pPage1 = new wxWizardPageSimple(this);
 
     wxString introWizardMessage =
-        wxT("This wizard will help you get started with Tasks Tracker.\n"
+        wxT("This wizard will help you get started with Taskable.\n"
             "The next few pages will setup a employer, a client (optional), a project and a category.\n "
             "Press \"Next\" to begin the process.");
 
@@ -268,7 +268,7 @@ bool AddEmployerAndClientPage::TransferDataFromWindow()
 {
     const wxString employer = pEmployerCtrl->GetValue().Trim();
     if (employer.empty()) {
-        wxMessageBox(wxT("An employer is required"), wxT("Tasks Tracker"), wxOK | wxICON_ERROR, this);
+        wxMessageBox(wxT("An employer is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
         return false;
     }
 
@@ -283,7 +283,7 @@ bool AddEmployerAndClientPage::TransferDataFromWindow()
 void AddEmployerAndClientPage::OnWizardCancel(wxWizardEvent& event)
 {
     auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"),
-        wxT("Tasks Tracker Wizard"),
+        wxT("Taskable Wizard"),
         wxICON_QUESTION | wxYES_NO);
     if (userResponse == wxNO) {
         event.Veto();
@@ -346,13 +346,13 @@ bool AddProjectPage::TransferDataFromWindow()
 {
     const wxString projectName = pNameCtrl->GetValue().Trim();
     if (projectName.empty()) {
-        wxMessageBox(wxT("An project name is required"), wxT("Tasks Tracker"), wxOK | wxICON_ERROR, this);
+        wxMessageBox(wxT("An project name is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
         return false;
     }
 
     const wxString displayName = pDisplayNameCtrl->GetValue().Trim();
     if (displayName.empty()) {
-        wxMessageBox(wxT("A display name is required"), wxT("Tasks Tracker"), wxOK | wxICON_ERROR, this);
+        wxMessageBox(wxT("A display name is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
         return false;
     }
 
@@ -365,7 +365,7 @@ bool AddProjectPage::TransferDataFromWindow()
 void AddProjectPage::OnWizardCancel(wxWizardEvent& event)
 {
     auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"),
-        wxT("Tasks Tracker Wizard"),
+        wxT("Taskable Wizard"),
         wxICON_QUESTION | wxYES_NO);
     if (userResponse == wxNO) {
         event.Veto();
@@ -432,7 +432,7 @@ bool AddCategoriesPage::TransferDataFromWindow()
 {
     const wxString category = pNameCtrl->GetValue().Trim();
     if (category.empty()) {
-        wxMessageBox(wxT("An category name is required"), wxT("Tasks Tracker"), wxOK | wxICON_ERROR, this);
+        wxMessageBox(wxT("An category name is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
         return false;
     }
 
@@ -450,7 +450,7 @@ bool AddCategoriesPage::TransferDataFromWindow()
 void AddCategoriesPage::OnWizardCancel(wxWizardEvent& event)
 {
     auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"),
-        wxT("Tasks Tracker Wizard"),
+        wxT("Taskable Wizard"),
         wxICON_QUESTION | wxYES_NO);
     if (userResponse == wxNO) {
         event.Veto();

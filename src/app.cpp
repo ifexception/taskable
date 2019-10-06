@@ -1,4 +1,4 @@
-//  Tasks Tracker is a desktop that aids you in tracking your timesheets
+//  Taskable is a desktop that aids you in tracking your timesheets
 //  and seeing what work you have done.
 //
 //  Copyright(C)<2019><Szymon Welgus>
@@ -43,7 +43,7 @@ bool App::OnInit()
     bool isInstanceAlreadyRunning = pInstanceChecker->IsAnotherRunning();
     if (isInstanceAlreadyRunning) {
         wxMessageBox(wxT("Another instance of the application is already running."),
-            wxT("Tasks Tracker"),
+            wxT("Taskable"),
             wxOK_DEFAULT | wxICON_WARNING);
         return false;
     }

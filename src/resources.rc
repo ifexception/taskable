@@ -21,7 +21,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName",        "Szymon Welgus"
-            VALUE "FileDescription",    "Time Tracker Software"
+            VALUE "FileDescription",    "Task Management Software"
             VALUE "FileVersion",        FILE_VERSION_STR "\0"
             VALUE "InternalName",       INTERNAL_FILE_NAME "\0"
             VALUE "LegalCopyright",     "Copyright (C) 2019 Szymon Welgus"

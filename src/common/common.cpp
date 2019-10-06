@@ -1,4 +1,4 @@
-//  Tasks Tracker is a desktop that aids you in tracking your timesheets
+//  Taskable is a desktop that aids you in tracking your timesheets
 //  and seeing what work you have done.
 //
 //  Copyright(C) <2019> <Szymon Welgus>
@@ -28,7 +28,7 @@ const char** app::common::GetProgramIcon()
 
 std::string app::common::GetLicense()
 {
-    return "Tasks Tracker is a desktop that aids you in tracking your timesheets"
+    return "Taskable is a desktop that aids you in tracking your timesheets"
            "and seeing what work you have done.\n"
            "Copyright(C) 2019 Szymon Welgus\n"
            "This program is free software : you can redistribute it and /"
@@ -51,5 +51,5 @@ wxString app::common::GetVersion()
 
 wxString app::common::GetProgramName()
 {
-    return wxT("Tasks Tracker");
+    return wxT("Taskable");
 }

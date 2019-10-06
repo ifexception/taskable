@@ -631,7 +631,7 @@ to attach them to the start of each source file to most effectively
 state the exclusion of warranty; and each file should have at least
 the "copyright" line and a pointer to where the full notice is found.
 
-    Tasks Tracker is a desktop that aids you in tracking your
+    Taskable is a desktop that aids you in tracking your
     timesheets and seeing what work you have done.
     Copyright (C) <2019>  <Szymon Welgus>
 

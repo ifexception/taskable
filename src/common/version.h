@@ -1,4 +1,4 @@
-//  Tasks Tracker is a desktop that aids you in tracking your timesheets
+//  Taskable is a desktop that aids you in tracking your timesheets
 //  and seeing what work you have done.
 //
 //  Copyright(C) <2019> <Szymon Welgus>
@@ -26,7 +26,7 @@
 #define _STRINGIFY(s) #s
 #define STRINGIFY(s) _STRINGIFY(s)
 
-#define FILE_DESCRIPTION "TasksTracker"
+#define FILE_DESCRIPTION "Taskable"
 #define FILE_VERSION TASKS_TRACKER_MAJOR, TASKS_TRACKER_MINOR, TASKS_TRACKER_PATCH
 #define PRODUCT_VERSION FILE_VERSION
 #define FILE_VERSION_STR STRINGIFY(TASKS_TRACKER_MAJOR) \

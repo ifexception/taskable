@@ -1,4 +1,4 @@
-# Tasks Tracker
+# Taskable
 A desktop app to help you manage how you've spent your time on tasks during the day by tracking the time you've spent on tasks throughout the day
 
 ## Getting Started

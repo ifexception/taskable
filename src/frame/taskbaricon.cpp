@@ -1,4 +1,4 @@
-//  Tasks Tracker is a desktop that aids you in tracking your timesheets
+//  Taskable is a desktop that aids you in tracking your timesheets
 //  and seeing what work you have done.
 //
 //  Copyright(C) <2019> <Szymon Welgus>
@@ -48,7 +48,7 @@ TaskBarIcon::TaskBarIcon(wxFrame* parent,
 
 void TaskBarIcon::SetTaskBarIcon()
 {
-    SetIcon(wxIcon(common::GetProgramIcon()), wxT("Tasks Tracker"));
+    SetIcon(wxIcon(common::GetProgramIcon()), wxT("Taskable"));
 }
 
 wxMenu* TaskBarIcon::CreatePopupMenu()
