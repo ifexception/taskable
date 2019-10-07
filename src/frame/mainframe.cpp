@@ -132,7 +132,7 @@ void MainFrame::CreateControls()
     /* Status Bar Control */
     pStatusBar = CreateStatusBar(2);
     SetStatusText(wxT("Ready"));
-    SetStatusText(wxString::Format("%d.%d.%d", TASKS_TRACKER_MAJOR, TASKS_TRACKER_MINOR, TASKS_TRACKER_PATCH), 1);
+    SetStatusText(wxString::Format("%d.%d.%d", TASKABLE_MAJOR, TASKABLE_MINOR, TASKABLE_PATCH), 1);
 
     /* File Menu Control */
     auto fileMenu = new wxMenu();
@@ -268,7 +268,7 @@ void MainFrame::OnAbout(wxCommandEvent& event)
     wxAboutDialogInfo aboutInfo;
     aboutInfo.SetIcon(common::GetProgramIcon());
     aboutInfo.SetName(wxT("TasksTracker"));
-    aboutInfo.SetVersion(wxString::Format("%d.%d.%d", TASKS_TRACKER_MAJOR, TASKS_TRACKER_MINOR, TASKS_TRACKER_PATCH));
+    aboutInfo.SetVersion(wxString::Format("%d.%d.%d", TASKABLE_MAJOR, TASKABLE_MINOR, TASKABLE_PATCH));
     aboutInfo.SetDescription(
         wxT("A desktop application to help you manage how you've spent your time on tasks during the day\n"
             " by tracking the time you've spent on those tasks throughout the day"));

@@ -46,7 +46,7 @@ std::string app::common::GetLicense()
 
 wxString app::common::GetVersion()
 {
-    return wxString::Format(wxT("%d.%d.%d"), TASKS_TRACKER_MAJOR, TASKS_TRACKER_MINOR, TASKS_TRACKER_PATCH);
+    return wxString::Format(wxT("%d.%d.%d"), TASKABLE_MAJOR, TASKABLE_MINOR, TASKABLE_PATCH);
 }
 
 wxString app::common::GetProgramName()
