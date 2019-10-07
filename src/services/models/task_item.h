@@ -90,4 +90,17 @@ struct task {
     static const std::string createTask;
     static const std::string getTaskHoursById;
 };
+
+struct task_context {
+    task_context() = default;
+    task_context(std::string employerName, std::unique_ptr<std::string> clientName);
+    ~task_context() = default;
+
+    std::string employer_name;
+    std::string* client_name;
+
+    void cleanup();
+
+    static const std::string getEmployerAndClientByProjectId;
+};
 } // namespace app::models

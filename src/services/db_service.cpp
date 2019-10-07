@@ -499,6 +499,21 @@ void db_service::delete_category(const int categoryId, const int dateModified)
        << dateModified;
 }
 
+models::task_context db_service::get_employer_and_client_by_project_id(const int projectId)
+{
+    models::task_context taskContext;
+
+    auto db = db_connection::get_instance().get_handle();
+    db << models::task_context::getEmployerAndClientByProjectId
+       << projectId
+       >> [&](std::string employerName,
+            std::unique_ptr<std::string> clientName) {
+               taskContext = models::task_context(employerName, std::move(clientName));
+    };
+
+    return taskContext;
+}
+
 int db_service::create_or_get_task_id(const std::string& date)
 {
     int aTaskId = 0;

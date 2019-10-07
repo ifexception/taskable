@@ -72,6 +72,18 @@ const std::string task::getTaskHoursById = "SELECT task_items.duration "
                                            "FROM task_items "
                                            "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
                                            "WHERE task_date = ?";
+
+const std::string task_context::getEmployerAndClientByProjectId = "SELECT employers.name as employer_name, "
+                                                                  "clients.name as client_name "
+                                                                  "FROM employers "
+                                                                  "LEFT JOIN clients "
+                                                                  "ON employers.employer_id = clients.employer_id "
+                                                                  "INNER JOIN projects as p1 "
+                                                                  "ON p1.employer_id = employers.employer_id "
+                                                                  "LEFT JOIN projects as p2 "
+                                                                  "ON p2.client_id = clients.client_id "
+                                                                  "WHERE p1.project_id = ?";
+
 task_item::task_item(int taskItemId,
     std::string taskDate,
     std::unique_ptr<std::string> startTime,
@@ -84,8 +96,8 @@ task_item::task_item(int taskItemId,
     int taskItemTypeId)
     : task_item_id(taskItemId)
     , task_date(taskDate)
-    , start_time()
-    , end_time()
+    , start_time(nullptr)
+    , end_time(nullptr)
     , duration(duration)
     , description(description)
     , category_name(categoryName)
@@ -139,6 +151,22 @@ void task_item::cleanup()
     }
     if (end_time) {
         delete end_time;
+    }
+}
+
+task_context::task_context(std::string employerName, std::unique_ptr<std::string> clientName)
+    : employer_name(employerName)
+    , client_name(nullptr)
+{
+    if (clientName) {
+        client_name = new std::string(*clientName);
+    }
+}
+
+void task_context::cleanup()
+{
+    if (client_name) {
+        delete client_name;
     }
 }
 } // namespace app::models

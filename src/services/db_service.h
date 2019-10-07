@@ -94,6 +94,8 @@ struct db_service
 
     void delete_category(const int categoryId, const int dateModified);
 
+    models::task_context get_employer_and_client_by_project_id(const int projectId);
+
     int create_or_get_task_id(const std::string& date);
 
     void create_new_task_item(const models::task_item& taskItem);

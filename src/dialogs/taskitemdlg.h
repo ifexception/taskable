@@ -28,8 +28,9 @@
 #include "../config/configuration.h"
 #include "../services/models/task_item.h"
 
-class wxTimePickerCtrl;
 class wxDateEvent;
+class wxDatePickerCtrl;
+class wxTimePickerCtrl;
 
 wxDECLARE_EVENT(TASK_INSERTED, wxCommandEvent);
 
@@ -106,6 +107,8 @@ private:
     std::shared_ptr<cfg::Configuration> pConfig;
 
     wxWindow* pParent;
+    wxStaticText* pTaskContextTextCtrl;
+    wxDatePickerCtrl* pDateContextCtrl;
     wxChoice* pProjectChoiceCtrl;
     wxTimePickerCtrl* pStartTimeCtrl;
     wxTimePickerCtrl* pEndTimeCtrl;
@@ -136,7 +139,9 @@ private:
     int mCategoryId;
 
     enum {
-        IDC_PROJECTCHOICE = wxID_HIGHEST + 1,
+        IDC_TASKCONTEXTINFO = wxID_HIGHEST + 1,
+        IDC_DATECONTEXT,
+        IDC_PROJECTCHOICE,
         IDC_STARTTIME,
         IDC_ENDTIME,
         IDC_DURATION,

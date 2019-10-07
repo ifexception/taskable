@@ -20,8 +20,9 @@
 #include "taskitemdlg.h"
 
 #include <sqlite_modern_cpp/errors.h>
-#include <wx/timectrl.h>
+#include <wx/datectrl.h>
 #include <wx/dateevt.h>
+#include <wx/timectrl.h>
 #include <wx/statline.h>
 
 #include "../common/constants.h"
@@ -34,6 +35,9 @@ wxDEFINE_EVENT(TASK_INSERTED, wxCommandEvent);
 
 namespace app::dialog
 {
+static const wxString TaskContextWithoutClient = wxT("Task for employer %s");
+static const wxString TaskContextWithClient = wxT("Task for employer %s and client %s");
+
 // clang-format off
 wxBEGIN_EVENT_TABLE(TaskItemDialog, wxDialog)
 EVT_BUTTON(wxID_OK, TaskItemDialog::OnOk)
@@ -156,6 +160,39 @@ void TaskItemDialog::CreateControls()
     /* Sizers */
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(mainSizer);
+
+    /* Task Context Box */
+    auto contextBox = new wxStaticBox(this, wxID_ANY, wxT("Context"));
+    auto contextBoxSizer = new wxStaticBoxSizer(contextBox, wxVERTICAL);
+    mainSizer->Add(contextBoxSizer, common::sizers::ControlDefault);
+
+    auto taskContextPanel = new wxPanel(this, wxID_STATIC);
+    contextBoxSizer->Add(taskContextPanel, common::sizers::ControlExpand);
+
+    auto contextFlexGridSizer = new wxFlexGridSizer(2, 0, 0);
+    taskContextPanel->SetSizer(contextFlexGridSizer);
+
+    /* -- Controls -- */
+    /* Task Context Info Text Control */
+    pTaskContextTextCtrl = new wxStaticText(taskContextPanel, IDC_TASKCONTEXTINFO, wxT("Please select a project to begin..."));
+    pTaskContextTextCtrl->SetToolTip(
+        wxT("Additional information under which employer and client the task is being added"));
+    auto taskContextTextFont = pTaskContextTextCtrl->GetFont();
+    taskContextTextFont.MakeItalic();
+    taskContextTextFont.SetPointSize(9);
+    pTaskContextTextCtrl->SetFont(taskContextTextFont);
+    contextFlexGridSizer->Add(pTaskContextTextCtrl, common::sizers::ControlDefault);
+
+    auto taskContextTextFiller = new wxStaticText(this, wxID_ANY, wxT(""));
+    contextFlexGridSizer->Add(taskContextTextFiller, common::sizers::ControlDefault);
+
+    auto dateContextText = new wxStaticText(taskContextPanel, wxID_STATIC, wxT("Date"));
+    contextFlexGridSizer->Add(dateContextText, common::sizers::ControlCenterVertical);
+
+    pDateContextCtrl = new wxDatePickerCtrl(
+        taskContextPanel, IDC_DATECONTEXT, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1), wxDP_DROPDOWN);
+    pDateContextCtrl->SetToolTip(wxT("The date under which this task will be saved under"));
+    contextFlexGridSizer->Add(pDateContextCtrl, common::sizers::ControlDefault);
 
     /* Task Details Box */
     auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Task Details"));
@@ -292,9 +329,9 @@ void TaskItemDialog::CreateControls()
 
 void TaskItemDialog::FillControls()
 {
-    std::vector<models::project> projects;
-
     services::db_service dbService;
+
+    std::vector<models::project> projects;
     try {
         projects = dbService.get_projects();
     } catch (const sqlite::sqlite_exception& e) {
@@ -439,6 +476,23 @@ void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
     int projectId = util::VoidPointerToInt(event.GetClientData());
 
     FillCategoryControl(projectId);
+
+    services::db_service dbService;
+    models::task_context taskContext;
+    try {
+        taskContext = dbService.get_employer_and_client_by_project_id(projectId);
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error(
+            "Error occured in get_employer_and_client_by_project_id() - {0:d} : {1}", e.get_code(), e.what());
+    }
+
+    if (taskContext.client_name) {
+        pTaskContextTextCtrl->SetLabel(
+            wxString::Format(TaskContextWithClient, taskContext.employer_name, taskContext.client_name));
+        taskContext.cleanup();
+    } else {
+        pTaskContextTextCtrl->SetLabel(wxString::Format(TaskContextWithoutClient, taskContext.employer_name));
+    }
 }
 
 void TaskItemDialog::OnStartTimeChange(wxDateEvent& event)
