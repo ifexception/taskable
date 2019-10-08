@@ -19,15 +19,16 @@
 
 #include "configuration.h"
 
+#include "../common/common.h"
 #include "../common/util.h"
 
 namespace app::cfg
 {
-wxString Configuration::CFG_FILE = "tasks-tracker.ini";
+wxString Configuration::CFG_FILE = "taskable.ini";
 
 Configuration::Configuration()
 {
-    wxString configPath = wxPathOnly(wxStandardPaths::Get().GetExecutablePath()) + "\\" + CFG_FILE;
+    wxString configPath = wxPathOnly(wxStandardPaths::Get().GetExecutablePath()) + "\\" + common::GetConfigFileName();
     pConfig = new wxFileConfig(wxEmptyString, wxEmptyString, configPath);
     pConfig->SetPath("/");
 }

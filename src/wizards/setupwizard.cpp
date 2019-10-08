@@ -27,6 +27,7 @@
 #include <wx/wx.h>
 #include <wx/file.h>
 
+#include "../common/common.h"
 #include "../services/db_service.h"
 #include "../../res/icons8-service-64.xpm"
 
@@ -139,14 +140,14 @@ void SetupWizard::SetDescription(const wxString& description)
 
 void SetupWizard::CreateDatabaseFile()
 {
-    const wxString& databaseFilename = wxT("tasks-tracker.db");
+    const wxString& databaseFilename = common::GetDbFileName();
     wxFile file;
     file.Create(databaseFilename);
 }
 
 void SetupWizard::DeleteDatabaseFile()
 {
-    const wxString& databaseFilename = wxT("tasks-tracker.db");
+    const wxString& databaseFilename = common::GetDbFileName();
     if (wxFileExists(databaseFilename)) {
         wxRemoveFile(databaseFilename);
     }

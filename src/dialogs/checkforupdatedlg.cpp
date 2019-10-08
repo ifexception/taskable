@@ -55,7 +55,7 @@ wxThread::ExitCode CheckForUpdateThread::Entry()
     }
 
     std::string githubUrl = "https://api.github.com";
-    std::string releasesApi = "/repos/ifexception/wx-tasks-tracker/releases/latest";
+    std::string releasesApi = "/repos/ifexception/taskable/releases/latest";
     std::string url = githubUrl + releasesApi;
 
     auto response = cpr::Get(cpr::Url{ url }, cpr::Header{ { "Accept", "application/vnd.github.v3+json" } });
@@ -148,7 +148,7 @@ void CheckForUpdateDialog::CreateControls()
     pNewReleaseLink = new wxHyperlinkCtrl(mainPanel,
         IDC_NEW_RELEASE_LINK,
         wxT("New Release"),
-        wxT("https://www.github.com/ifexception/wx-tasks-tracker/releases"),
+        wxT("https://www.github.com/ifexception/taskable/releases"),
         wxDefaultPosition,
         wxDefaultSize,
         wxHL_DEFAULT_STYLE);

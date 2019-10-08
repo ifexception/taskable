@@ -13,7 +13,7 @@ Once you've installed and configured `vcpkg`, install the following libraries:
  * wxwidgets (3.1 +)
 
 Ensure that when you have started Visual Studio that the _CMake Server_ does not give any warnings about missing packages.
-You can now use Visual Studio to build the project. Currently only _Visual Studio 2017_ is supported to the version of CMake being used by Visual Studio.
+You can now use Visual Studio to build the project. Currently _Visual Studio 2019_ is supported to the version of CMake being used by Visual Studio.
 
 ### Linux
 `//TODO`

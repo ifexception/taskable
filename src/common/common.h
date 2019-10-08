@@ -45,4 +45,8 @@ std::string GetLicense();
 wxString GetVersion();
 
 wxString GetProgramName();
+
+wxString GetDbFileName();
+
+wxString GetConfigFileName();
 } // namespace app::common

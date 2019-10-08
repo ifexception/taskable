@@ -25,6 +25,7 @@
 
 #include <wx/msw/registry.h>
 
+#include "common/common.h"
 #include "common/constants.h"
 #include "frame/mainframe.h"
 
@@ -43,7 +44,7 @@ bool App::OnInit()
     bool isInstanceAlreadyRunning = pInstanceChecker->IsAnotherRunning();
     if (isInstanceAlreadyRunning) {
         wxMessageBox(wxT("Another instance of the application is already running."),
-            wxT("Taskable"),
+            common::GetProgramName(),
             wxOK_DEFAULT | wxICON_WARNING);
         return false;
     }
@@ -120,16 +121,16 @@ bool App::InitializeLogging()
 
 bool App::DatabaseFileExists()
 {
-    bool dbFileExists = wxFileExists(wxT("tasks-tracker.db")); // FIXME: remove hardcoded string
+    bool dbFileExists = wxFileExists(common::GetDbFileName());
     return dbFileExists;
 }
 
 bool App::IsInstalled()
 {
 #if _DEBUG
-    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\TasksTrackerd");
+    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\Taskabled");
 #else
-    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\TasksTracker");
+    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\Taskable");
 #endif // _DEBUG
 
     if (key.Exists()) {
@@ -148,9 +149,9 @@ bool App::IsInstalled()
 bool App::ConfigureRegistry()
 {
 #if _DEBUG
-    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\TasksTrackerd");
+    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\Taskabled");
 #else
-    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\TasksTracker");
+    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\Taskable");
 #endif // _DEBUG
 
     bool result = key.Create();
@@ -161,9 +162,6 @@ bool App::ConfigureRegistry()
 #endif // _DEBUG
     if (!result) {
         pLogger->critical("Unable to set registry");
-        wxMessageBox(wxT("This application requires you to run it as a Administrator"),
-            wxT("Error"),
-            wxOK_DEFAULT | wxICON_EXCLAMATION);
         return false;
     }
     return true;

@@ -53,3 +53,13 @@ wxString app::common::GetProgramName()
 {
     return wxT("Taskable");
 }
+
+wxString app::common::GetDbFileName()
+{
+    return wxT("taskable.db");
+}
+
+wxString app::common::GetConfigFileName()
+{
+    return wxT("taskable.ini");
+}

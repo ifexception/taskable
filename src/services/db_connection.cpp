@@ -19,6 +19,8 @@
 
 #include "db_connection.h"
 
+#include "../common/common.h"
+
 namespace app::services
 {
 db_connection& db_connection::get_instance()
@@ -33,7 +35,7 @@ sqlite::database db_connection::get_handle()
 }
 
 db_connection::db_connection()
-    : mDatabase("tasks-tracker.db",
+    : mDatabase(common::GetDbFileName().ToStdString(),
           sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 })
 {
 }

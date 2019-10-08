@@ -75,7 +75,7 @@ wxEND_EVENT_TABLE()
 MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     const wxString& name)
-    : wxFrame(nullptr, wxID_ANY, wxT("Taskable"), wxDefaultPosition, wxSize(600, 500), wxDEFAULT_FRAME_STYLE, name)
+    : wxFrame(nullptr, wxID_ANY, common::GetProgramName(), wxDefaultPosition, wxSize(600, 500), wxDEFAULT_FRAME_STYLE, name)
     , pLogger(logger)
     , pConfig(config)
     , pTaskState(std::make_shared<services::TaskStateService>())
@@ -267,13 +267,13 @@ void MainFrame::OnAbout(wxCommandEvent& event)
 {
     wxAboutDialogInfo aboutInfo;
     aboutInfo.SetIcon(common::GetProgramIcon());
-    aboutInfo.SetName(wxT("TasksTracker"));
+    aboutInfo.SetName(common::GetProgramName());
     aboutInfo.SetVersion(wxString::Format("%d.%d.%d", TASKABLE_MAJOR, TASKABLE_MINOR, TASKABLE_PATCH));
     aboutInfo.SetDescription(
         wxT("A desktop application to help you manage how you've spent your time on tasks during the day\n"
             " by tracking the time you've spent on those tasks throughout the day"));
     aboutInfo.SetCopyright("(C) 2018-2019");
-    aboutInfo.SetWebSite(wxT("https://github.com/ifexception/wx-tasks-tracker"));
+    aboutInfo.SetWebSite(wxT("https://github.com/ifexception/taskable"));
     aboutInfo.SetLicence(common::GetLicense());
     aboutInfo.AddDeveloper(wxT("Szymon Welgus"));
 
@@ -283,8 +283,8 @@ void MainFrame::OnAbout(wxCommandEvent& event)
 void MainFrame::OnClose(wxCloseEvent& event)
 {
     if (pConfig->IsConfirmOnExit() && event.CanVeto()) {
-        int ret = wxMessageBox(
-            wxT("Are you sure to exit the application?"), wxT("Taskable"), wxICON_QUESTION | wxYES_NO);
+        int ret =
+            wxMessageBox(wxT("Are you sure to exit the application?"), common::GetProgramName(), wxICON_QUESTION | wxYES_NO);
         if (ret == wxNO) {
             event.Veto();
             return;
@@ -372,8 +372,7 @@ void MainFrame::OnItemDoubleClick(wxListEvent& event)
     dialog::TaskItemType type = static_cast<dialog::TaskItemType>(taskItemTypeId);
     wxDateTime dateContext = pDatePickerCtrl->GetValue();
 
-    dialog::TaskItemDialog editTask(
-        this, pLogger, pConfig, type, true, taskItemId, dateContext);
+    dialog::TaskItemDialog editTask(this, pLogger, pConfig, type, true, taskItemId, dateContext);
     editTask.ShowModal();
 }
 
