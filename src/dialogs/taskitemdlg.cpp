@@ -35,8 +35,8 @@ wxDEFINE_EVENT(TASK_INSERTED, wxCommandEvent);
 
 namespace app::dialog
 {
-static const wxString TaskContextWithoutClient = wxT("Task for employer %s");
-static const wxString TaskContextWithClient = wxT("Task for employer %s and client %s");
+static const wxString TaskContextWithoutClient = wxT("Capturing task for employer %s");
+static const wxString TaskContextWithClient = wxT("Capturing task for employer %s and client %s");
 
 // clang-format off
 wxBEGIN_EVENT_TABLE(TaskItemDialog, wxDialog)
@@ -164,35 +164,36 @@ void TaskItemDialog::CreateControls()
     /* Task Context Box */
     auto contextBox = new wxStaticBox(this, wxID_ANY, wxT("Context"));
     auto contextBoxSizer = new wxStaticBoxSizer(contextBox, wxVERTICAL);
-    mainSizer->Add(contextBoxSizer, common::sizers::ControlDefault);
+    mainSizer->Add(contextBoxSizer, common::sizers::ControlExpand);
 
     auto taskContextPanel = new wxPanel(this, wxID_STATIC);
     contextBoxSizer->Add(taskContextPanel, common::sizers::ControlExpand);
 
-    auto contextFlexGridSizer = new wxFlexGridSizer(2, 0, 0);
-    taskContextPanel->SetSizer(contextFlexGridSizer);
+    auto contextSizer = new wxBoxSizer(wxVERTICAL);
+    taskContextPanel->SetSizer(contextSizer);
 
     /* -- Controls -- */
     /* Task Context Info Text Control */
-    pTaskContextTextCtrl = new wxStaticText(taskContextPanel, IDC_TASKCONTEXTINFO, wxT("Please select a project to begin..."));
+    pTaskContextTextCtrl = new wxStaticText(taskContextPanel, IDC_TASKCONTEXTINFO, wxT("Select a project..."));
     pTaskContextTextCtrl->SetToolTip(
         wxT("Additional information under which employer and client the task is being added"));
     auto taskContextTextFont = pTaskContextTextCtrl->GetFont();
     taskContextTextFont.MakeItalic();
     taskContextTextFont.SetPointSize(9);
     pTaskContextTextCtrl->SetFont(taskContextTextFont);
-    contextFlexGridSizer->Add(pTaskContextTextCtrl, common::sizers::ControlDefault);
+    contextSizer->Add(pTaskContextTextCtrl, common::sizers::ControlDefault);
 
-    auto taskContextTextFiller = new wxStaticText(this, wxID_ANY, wxT(""));
-    contextFlexGridSizer->Add(taskContextTextFiller, common::sizers::ControlDefault);
+    auto dateContextSizer = new wxBoxSizer(wxHORIZONTAL);
+    contextSizer->Add(dateContextSizer, common::sizers::ControlDefault);
 
-    auto dateContextText = new wxStaticText(taskContextPanel, wxID_STATIC, wxT("Date"));
-    contextFlexGridSizer->Add(dateContextText, common::sizers::ControlCenterVertical);
+    /* Date Context Control */
+    auto dateContextText = new wxStaticText(taskContextPanel, wxID_STATIC, wxT("Date          "));
+    dateContextSizer->Add(dateContextText, common::sizers::ControlCenter);
 
     pDateContextCtrl = new wxDatePickerCtrl(
         taskContextPanel, IDC_DATECONTEXT, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1), wxDP_DROPDOWN);
     pDateContextCtrl->SetToolTip(wxT("The date under which this task will be saved under"));
-    contextFlexGridSizer->Add(pDateContextCtrl, common::sizers::ControlDefault);
+    dateContextSizer->Add(pDateContextCtrl, common::sizers::ControlDefault);
 
     /* Task Details Box */
     auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Task Details"));
