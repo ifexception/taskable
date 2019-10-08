@@ -172,6 +172,7 @@ void StopwatchTaskDialog::CreateControls()
     pElapsedTimeText->SetFont(font);
     sizer->Add(pElapsedTimeText, common::sizers::ControlCenterHorizontal);
 
+    /* Accumulated Time Text Control */
     pAccumulatedTimeText =
         new wxStaticText(mainPanel, IDC_ACCUMULATED_TIME, wxT("Time accumulated thus far: 00:00:00"));
     auto font2 = pAccumulatedTimeText->GetFont();
@@ -179,9 +180,26 @@ void StopwatchTaskDialog::CreateControls()
     pAccumulatedTimeText->SetFont(font2);
     sizer->Add(pAccumulatedTimeText, common::sizers::ControlCenterHorizontal);
 
+    /* Start New Task on Pause Checkbox Control */
     pStartNewTask =
         new wxCheckBox(mainPanel, IDC_START_NEW_TASK_CHECK, wxT("Start new task when pausing current task"));
     sizer->Add(pStartNewTask, common::sizers::ControlDefault);
+
+    sizer->AddSpacer(2);
+
+    /* Task Description Sizer */
+    auto taskDescSizer = new wxBoxSizer(wxHORIZONTAL);
+    sizer->Add(taskDescSizer, common::sizers::ControlExpand);
+
+    /* Stopwatch Task Description Text Control */
+    auto taskDescriptionText = new wxStaticText(mainPanel, wxID_STATIC, wxT("Description"));
+    taskDescSizer->Add(taskDescriptionText, common::sizers::ControlCenter);
+
+    pStopwatchDescription =
+        new wxTextCtrl(mainPanel, IDC_TASK_DESCRIPTION, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1));
+    pStopwatchDescription->SetToolTip(wxT("Enter a short description for the stopwatch task to track"));
+    pStopwatchDescription->SetMaxLength(32);
+    taskDescSizer->Add(pStopwatchDescription, common::sizers::ControlDefault);
 
     /* Horizontal Line*/
     auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
@@ -302,10 +320,12 @@ void StopwatchTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 
         dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, TaskItemType::EntryTask);
         newTask.SetDurationFromStopwatchTask(durationOfTask);
+        newTask.SetDescriptionFromStopwatchTask(pStopwatchDescription->GetValue());
         newTask.ShowModal();
     } else {
         dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, TaskItemType::TimedTask);
         newTask.SetTimesFromStopwatchTask(mStartTime, mEndTime);
+        newTask.SetDescriptionFromStopwatchTask(pStopwatchDescription->GetValue());
         newTask.ShowModal();
     }
 

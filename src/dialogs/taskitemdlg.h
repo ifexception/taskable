@@ -67,6 +67,7 @@ public:
 
     void SetDurationFromStopwatchTask(wxTimeSpan duration);
     void SetTimesFromStopwatchTask(wxDateTime startTime, wxDateTime endTime);
+    void SetDescriptionFromStopwatchTask(const wxString& value);
 
 private:
     wxDECLARE_EVENT_TABLE();

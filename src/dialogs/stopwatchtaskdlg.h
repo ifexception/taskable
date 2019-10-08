@@ -76,7 +76,11 @@ private:
     void OnClose(wxCloseEvent& event);
 
     std::shared_ptr<spdlog::logger> pLogger;
+    std::shared_ptr<cfg::Configuration> pConfig;
+    std::shared_ptr<services::TaskStateService> pTaskState;
+
     wxWindow* pParent;
+    wxTextCtrl* pStopwatchDescription;
     wxStaticText* pElapsedTimeText;
     wxStaticText* pAccumulatedTimeText;
     wxCheckBox* pStartNewTask;
@@ -88,8 +92,6 @@ private:
     std::unique_ptr<wxTimer> pNotificationTimer;
     std::unique_ptr<wxTimer> pHideWindowTimer;
     std::unique_ptr<wxTimer> pPausedTaskReminder;
-    std::shared_ptr<cfg::Configuration> pConfig;
-    std::shared_ptr<services::TaskStateService> pTaskState;
 
     wxDateTime mStartTime;
     wxDateTime mEndTime;
@@ -98,7 +100,8 @@ private:
     bool bHasPendingPausedTask;
 
     enum {
-        IDC_ELAPSED = wxID_HIGHEST + 1,
+        IDC_TASK_DESCRIPTION = wxID_HIGHEST + 1,
+        IDC_ELAPSED,
         IDC_ACCUMULATED_TIME,
         IDC_START_NEW_TASK_CHECK,
         IDC_ELAPSED_TIMER,

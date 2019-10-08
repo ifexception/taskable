@@ -130,6 +130,11 @@ void TaskItemDialog::SetTimesFromStopwatchTask(wxDateTime startTime, wxDateTime 
     CalculateTimeDiff(startTime, endTime);
 }
 
+void TaskItemDialog::SetDescriptionFromStopwatchTask(const wxString& value)
+{
+    pDescriptionCtrl->SetValue(value);
+}
+
 bool TaskItemDialog::Create(wxWindow* parent,
     wxWindowID windowId,
     const wxString& title,
