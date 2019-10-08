@@ -89,6 +89,7 @@ private:
     bool PostValidate();
     bool AreControlsEmpty();
 
+    void OnDateContextChange(wxDateEvent& event);
     void OnProjectChoice(wxCommandEvent& event);
     void OnStartTimeChange(wxDateEvent& event);
     void OnEndTimeChange(wxDateEvent& event);

@@ -42,11 +42,12 @@ static const wxString TaskContextWithClient = wxT("Capturing task for employer %
 wxBEGIN_EVENT_TABLE(TaskItemDialog, wxDialog)
 EVT_BUTTON(wxID_OK, TaskItemDialog::OnOk)
 EVT_BUTTON(wxID_CANCEL, TaskItemDialog::OnCancel)
+EVT_DATE_CHANGED(TaskItemDialog::IDC_DATECONTEXT, TaskItemDialog::OnDateContextChange)
 EVT_CHOICE(TaskItemDialog::IDC_PROJECTCHOICE, TaskItemDialog::OnProjectChoice)
 EVT_TIME_CHANGED(TaskItemDialog::IDC_STARTTIME, TaskItemDialog::OnStartTimeChange)
 EVT_TIME_CHANGED(TaskItemDialog::IDC_ENDTIME, TaskItemDialog::OnEndTimeChange)
-EVT_CHECKBOX(TaskItemDialog::IDC_ISACTIVE, TaskItemDialog::OnIsActiveCheck)
 EVT_TIME_CHANGED(TaskItemDialog::IDC_DURATIONTIME, TaskItemDialog::OnDurationTimeChange)
+EVT_CHECKBOX(TaskItemDialog::IDC_ISACTIVE, TaskItemDialog::OnIsActiveCheck)
 wxEND_EVENT_TABLE()
 
 TaskItemDialog::TaskItemDialog(wxWindow* parent,
@@ -359,6 +360,11 @@ void TaskItemDialog::FillControls()
 
         pDurationTimeCtrl->SetValue(timeInitializedToZero);
     }
+
+    pDateContextCtrl->SetValue(mDateContext);
+    auto bottomRangeDate = wxDateTime::GetCurrentYear() - 1;
+    auto bottomDateContext = wxDateTime::Now().SetYear(bottomRangeDate);
+    pDateContextCtrl->SetRange(bottomDateContext, mDateContext);
 }
 
 void TaskItemDialog::DataToControls()
@@ -372,6 +378,11 @@ void TaskItemDialog::DataToControls()
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in get_task_item_by_id() - {0:d} : {1}", e.get_code(), e.what());
     }
+
+    pDateContextCtrl->SetValue(mDateContext);
+    auto bottomRangeDate = wxDateTime::GetCurrentYear() - 1;
+    auto bottomDateContext = wxDateTime::Now().SetYear(bottomRangeDate);
+    pDateContextCtrl->SetRange(bottomDateContext, mDateContext);
 
     pProjectChoiceCtrl->SetStringSelection(taskItem.project_name);
 
@@ -467,6 +478,11 @@ bool TaskItemDialog::AreControlsEmpty()
                        mDescriptionText.empty();
         return isEmpty;
     }
+}
+
+void TaskItemDialog::OnDateContextChange(wxDateEvent& event)
+{
+    mDateContext = pDateContextCtrl->GetValue();
 }
 
 void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
