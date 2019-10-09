@@ -100,10 +100,10 @@ private:
     bool bHasPendingPausedTask;
 
     enum {
-        IDC_TASK_DESCRIPTION = wxID_HIGHEST + 1,
-        IDC_ELAPSED,
+        IDC_ELAPSED = wxID_HIGHEST + 1,
         IDC_ACCUMULATED_TIME,
         IDC_START_NEW_TASK_CHECK,
+        IDC_TASK_DESCRIPTION,
         IDC_ELAPSED_TIMER,
         IDC_NOTIFICATION_TIMER,
         IDC_HIDE_WINDOW_TIMER,

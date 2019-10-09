@@ -649,8 +649,7 @@ void db_service::update_task_item(models::task_item task)
             << task.project_id
             << task.category_id
             << task.task_item_id;
-    }
-    else {
+    } else {
         db << models::task_item::updateTaskItem
            << *task.start_time
            << *task.end_time

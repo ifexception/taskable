@@ -640,8 +640,6 @@ void TaskItemDialog::OnOk(wxCommandEvent& event)
         taskItem.project_id = mProjectId;
         taskItem.category_id = mCategoryId;
         taskItem.task_item_type_id = static_cast<int>(mType);
-
-        ProcessTaskItem(taskItem);
     }
     if (mType == TaskItemType::EntryTask) {
         taskItem.task_id = taskId;
@@ -653,9 +651,13 @@ void TaskItemDialog::OnOk(wxCommandEvent& event)
         taskItem.project_id = mProjectId;
         taskItem.category_id = mCategoryId;
         taskItem.task_item_type_id = static_cast<int>(mType);
-
-        ProcessTaskItem(taskItem);
     }
+
+    if (bIsEdit) {
+        taskItem.task_item_id = mTaskItemId;
+    }
+
+    ProcessTaskItem(taskItem);
 
     taskItem.cleanup();
     GenerateTaskSavedEvent();
