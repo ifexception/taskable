@@ -136,10 +136,20 @@ void MainFrame::CreateControls()
 
     /* File Menu Control */
     auto fileMenu = new wxMenu();
-    fileMenu->Append(ids::ID_NEW_ENTRY_TASK, wxT("New Task &Entry...\tCtrl-N"), wxT("Create new task entry"));
-    fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("New &Timed Task...\tCtrl-T"), wxT("Create new timed task"));
+
+    auto entryTaskMenuItem =
+        fileMenu->Append(ids::ID_NEW_ENTRY_TASK, wxT("New Task &Entry\tCtrl-N"), wxT("Create new task entry"));
+    entryTaskMenuItem->SetBitmap(common::GetEntryTaskIcon());
+
+    auto timedTaskMenuItem =
+        fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("New &Timed Task\tCtrl-T"), wxT("Create new timed task"));
+    timedTaskMenuItem->SetBitmap(common::GetTimedTaskIcon());
+
     fileMenu->AppendSeparator();
-    fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("Sto&pwatch Task...\tCtrl-Q"), wxT("Start task stopwatch"));
+
+    auto stopwatchMenuItem = fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("Sto&pwatch Task\tCtrl-Q"), wxT("Start task stopwatch"));
+    stopwatchMenuItem->SetBitmap(common::GetStopwatchIcon());
+
     fileMenu->AppendSeparator();
     fileMenu->Append(ids::ID_NEW_EMPLOYER, wxT("New &Employer"), wxT("Create new employer"));
     fileMenu->Append(ids::ID_NEW_CLIENT, wxT("New &Client"), wxT("Create new client"));
@@ -155,16 +165,18 @@ void MainFrame::CreateControls()
     editMenu->Append(ids::ID_EDIT_PROJECT, wxT("Edit &Project"), wxT("Select a project to edit"));
     editMenu->Append(ids::ID_EDIT_CATEGORY, wxT("Edit C&ategory"), wxT("Select a category to edit"));
     editMenu->AppendSeparator();
-    editMenu->Append(ids::ID_SETTINGS, wxT("&Settings...\tCtrl-P"), wxT("Edit application settings"));
+    editMenu->Append(ids::ID_SETTINGS, wxT("&Settings\tCtrl-P"), wxT("Edit application settings"));
 
     /* Export Menu Control */
     auto exportMenu = new wxMenu();
 
     /* Help Menu Control */
     wxMenu* helpMenu = new wxMenu();
-    helpMenu->Append(wxID_ABOUT);
-    helpMenu->Append(
+    auto helpMenuItem = helpMenu->Append(wxID_ABOUT);
+    helpMenuItem->SetBitmap(common::GetAboutIcon());
+    auto checkUpdateMenuItem = helpMenu->Append(
         ids::ID_CHECK_FOR_UPDATE, wxT("Check for update"), wxT("Check if an update is available for application"));
+    checkUpdateMenuItem->SetBitmap(common::GetCheckForUpdateIcon());
 
     /* Menu Bar */
     wxMenuBar* menuBar = new wxMenuBar();
@@ -283,8 +295,8 @@ void MainFrame::OnAbout(wxCommandEvent& event)
 void MainFrame::OnClose(wxCloseEvent& event)
 {
     if (pConfig->IsConfirmOnExit() && event.CanVeto()) {
-        int ret =
-            wxMessageBox(wxT("Are you sure to exit the application?"), common::GetProgramName(), wxICON_QUESTION | wxYES_NO);
+        int ret = wxMessageBox(
+            wxT("Are you sure to exit the application?"), common::GetProgramName(), wxICON_QUESTION | wxYES_NO);
         if (ret == wxNO) {
             event.Veto();
             return;
@@ -360,8 +372,11 @@ void MainFrame::OnEditCategory(wxCommandEvent& event)
 void MainFrame::OnTaskInserted(wxCommandEvent& event)
 {
     pListCtrl->DeleteAllItems();
-    CalculateTotalTime();
-    RefreshItems();
+
+    auto selectedDate = pDatePickerCtrl->GetValue();
+
+    CalculateTotalTime(selectedDate);
+    RefreshItems(selectedDate);
 }
 
 void MainFrame::OnItemDoubleClick(wxListEvent& event)
@@ -420,6 +435,8 @@ void MainFrame::OnDateChanged(wxDateEvent& event)
 
     CalculateTotalTime(date);
     RefreshItems(date);
+
+    pListCtrl->SetFocus();
 }
 
 void MainFrame::OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event)

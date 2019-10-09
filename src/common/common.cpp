@@ -19,11 +19,41 @@
 
 #include "common.h"
 
-#include "../../res/icons8-tasks-64.xpm"
+#include "../../res/taskable.xpm"
+#include "../../res/about.xpm"
+#include "../../res/checkforupdate.xpm"
+#include "../../res/entry-task.xpm"
+#include "../../res/timed-task.xpm"
+#include "../../res/stopwatch.xpm"
 
 const char** app::common::GetProgramIcon()
 {
-    return tasks_tracker_xpm;
+    return taskablexpm;
+}
+
+const char** app::common::GetAboutIcon()
+{
+    return aboutxpm;
+}
+
+const char** app::common::GetCheckForUpdateIcon()
+{
+    return checkforupdatexpm;
+}
+
+const char** app::common::GetEntryTaskIcon()
+{
+    return entrytaskxpm;
+}
+
+const char** app::common::GetTimedTaskIcon()
+{
+    return timedtaskxpm;
+}
+
+const char** app::common::GetStopwatchIcon()
+{
+    return stopwatchxpm;
 }
 
 std::string app::common::GetLicense()

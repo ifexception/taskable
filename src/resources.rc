@@ -1,7 +1,7 @@
 #include "wx/msw/wx.rc"
 #include "common/version.h"
 
-AppIcon ICON "..\\res\\icons8-tasks-64.ico"
+AppIcon ICON "..\\res\\taskable.ico"
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION        FILE_VERSION
