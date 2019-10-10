@@ -46,7 +46,7 @@ EmployerDialog::EmployerDialog(wxWindow* parent, std::shared_ptr<spdlog::logger>
 {
     Create(parent,
         wxID_ANY,
-        wxT("Add Task"),
+        wxT("Add Employer"),
         wxDefaultPosition,
         wxSize(330, 300),
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
@@ -66,7 +66,7 @@ EmployerDialog::EmployerDialog(wxWindow* parent,
 {
     Create(parent,
         wxID_ANY,
-        wxT("Edit Task"),
+        wxT("Edit Employer"),
         wxDefaultPosition,
         wxSize(330, 400),
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
@@ -156,7 +156,7 @@ void EmployerDialog::CreateControls()
     buttonPanel->SetSizer(buttonPanelSizer);
     mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
-    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&Save"));
+    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
     auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
     buttonPanelSizer->Add(pOkButton, common::sizers::ControlDefault);
@@ -233,6 +233,7 @@ void EmployerDialog::OnOk(wxCommandEvent& event)
     try {
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
             models::employer employer;
+            employer.employer_id = mEmployerId;
             employer.employer_name = std::string(mNameText.ToUTF8());
             employer.date_modified_utc = util::UnixTimestamp();
             dbService.update_employer(employer);

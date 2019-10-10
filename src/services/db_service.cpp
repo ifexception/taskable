@@ -368,14 +368,18 @@ void db_service::update_project(models::project project)
         db << models::project::updateProject
            << project.project_name
            << project.display_name
+           << project.date_modified_utc
            << project.employer_id
-           << nullptr;
+           << nullptr
+           << project.project_id;
     } else {
         db << models::project::updateProject
            << project.project_name
            << project.display_name
+           << project.date_modified_utc
            << project.employer_id
-           << project.client_id;
+           << project.client_id
+           << project.project_id;
     }
 }
 

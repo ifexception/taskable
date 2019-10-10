@@ -49,7 +49,7 @@ const std::string project::getProjectById = "SELECT projects.project_id, "
                                             "LEFT JOIN clients ON projects.client_id = clients.client_id "
                                             "WHERE projects.project_id = ?";
 const std::string project::updateProject =
-    "UPDATE projects SET name = ?, display_name = ?, date_modified_utc = ?, employer_id = ?, client_id = ?";
+    "UPDATE projects SET name = ?, display_name = ?, date_modified_utc = ?, employer_id = ?, client_id = ? WHERE project_id = ?";
 const std::string project::deleteProject =
     "UPDATE projects SET is_active = 0, date_modified_utc = ? WHERE project_id = ?";
 

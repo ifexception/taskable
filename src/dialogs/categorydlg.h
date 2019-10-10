@@ -35,12 +35,12 @@ public:
     CategoryDialog() = default;
     explicit CategoryDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
-        const wxString& name = "CategoryDialog");
+        const wxString& name = "categorydialogdlg");
     explicit CategoryDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
         bool isEdit,
         int categoryId,
-        const wxString& name = "CategoryDialog");
+        const wxString& name = "categorydialogdlg");
     virtual ~CategoryDialog() = default;
 
 private:

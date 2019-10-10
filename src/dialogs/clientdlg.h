@@ -33,12 +33,12 @@ public:
     ClientDialog() = delete;
     explicit ClientDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
-        const wxString& name = wxT("ClientDialog"));
+        const wxString& name = wxT("clientdialogdlg"));
     explicit ClientDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
         bool isEdit,
         int clientId,
-        const wxString& name = wxT("ClientDialog"));
+        const wxString& name = wxT("clientdialogdl"));
     virtual ~ClientDialog() = default;
 
 private:

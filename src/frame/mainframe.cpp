@@ -529,8 +529,10 @@ void MainFrame::RefreshItems(wxDateTime date)
     for (auto taskItem : taskItems) {
         listIndex = pListCtrl->InsertItem(columnIndex++, taskItem.project_name);
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem.task_date);
-        pListCtrl->SetItem(listIndex, columnIndex++, wxGetEmptyString());
-        pListCtrl->SetItem(listIndex, columnIndex++, wxGetEmptyString());
+        pListCtrl->SetItem(
+            listIndex, columnIndex++, taskItem.start_time ? wxString(*taskItem.start_time) : wxGetEmptyString());
+        pListCtrl->SetItem(
+            listIndex, columnIndex++, taskItem.end_time ? wxString(*taskItem.end_time) : wxGetEmptyString());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem.duration);
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem.category_name);
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem.description);

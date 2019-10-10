@@ -385,8 +385,10 @@ void ProjectDialog::OnOk(wxCommandEvent& WXUNUSED(event))
         services::db_service dbService;
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
             models::project project;
+            project.project_id = mProjectId;
             project.project_name = std::string(mNameText.ToUTF8());
             project.display_name = std::string(mDisplayNameText.ToUTF8());
+            project.date_modified_utc = util::UnixTimestamp();
             project.employer_id = mEmployerId;
             if (mClientId == -1 || mClientId == 0) {
                 project.client_id = 0;
