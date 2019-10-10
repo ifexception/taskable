@@ -18,8 +18,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #define TASKABLE_MAJOR 0
-#define TASKABLE_MINOR 9
-#define TASKABLE_PATCH 8
+#define TASKABLE_MINOR 10
+#define TASKABLE_PATCH 0
 
 #define TASKABLE_VERSION (TASKABLE_MAJOR * 1000 + TASKABLE_MINOR * 100 + TASKABLE_PATCH)
 
