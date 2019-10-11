@@ -510,7 +510,7 @@ void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
 
     if (taskContext.client_name) {
         pTaskContextTextCtrl->SetLabel(
-            wxString::Format(TaskContextWithClient, taskContext.employer_name, taskContext.client_name));
+            wxString::Format(TaskContextWithClient, taskContext.employer_name, *taskContext.client_name));
         taskContext.cleanup();
     } else {
         pTaskContextTextCtrl->SetLabel(wxString::Format(TaskContextWithoutClient, taskContext.employer_name));

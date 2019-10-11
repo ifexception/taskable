@@ -76,11 +76,11 @@ const std::string task::getTaskHoursById = "SELECT task_items.duration "
 const std::string task_context::getEmployerAndClientByProjectId = "SELECT employers.name as employer_name, "
                                                                   "clients.name as client_name "
                                                                   "FROM employers "
-                                                                  "LEFT JOIN clients "
+                                                                  "INNER JOIN clients "
                                                                   "ON employers.employer_id = clients.employer_id "
                                                                   "INNER JOIN projects as p1 "
                                                                   "ON p1.employer_id = employers.employer_id "
-                                                                  "LEFT JOIN projects as p2 "
+                                                                  "INNER JOIN projects as p2 "
                                                                   "ON p2.client_id = clients.client_id "
                                                                   "WHERE p1.project_id = ?";
 
