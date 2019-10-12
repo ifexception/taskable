@@ -130,6 +130,9 @@ void StopwatchTaskDialog::LaunchInPausedState()
 
     auto accumulatedTimeThusFar = pTaskState->GetAccumulatedTime();
     pAccumulatedTimeText->SetLabel(wxString::Format(AccumulatedTimeText, accumulatedTimeThusFar.Format()));
+    if (!pTaskState->GetStoredDescription().empty()) {
+        pStopwatchDescription->ChangeValue(wxString(pTaskState->GetStoredDescription()));
+    }
 
     wxDialog::ShowModal();
 }
@@ -287,6 +290,12 @@ void StopwatchTaskDialog::OnPause(wxCommandEvent& WXUNUSED(event))
     pTaskState->PushTimes(mStartTime, mEndTime);
     auto accumulatedTimeThusFar = pTaskState->GetAccumulatedTime();
     pAccumulatedTimeText->SetLabel(wxString::Format(AccumulatedTimeText, accumulatedTimeThusFar.Format()));
+
+    if (!pStopwatchDescription->GetValue().empty()) {
+        if (pStopwatchDescription->GetValue().ToStdString() != pTaskState->GetStoredDescription()) {
+            pTaskState->StoreDescription(pStopwatchDescription->GetValue().ToStdString());
+        }
+    }
 
     if (pStartNewTask->IsChecked()) {
         wxCommandEvent startNewStopwatchTask(START_NEW_STOPWATCH_TASK);

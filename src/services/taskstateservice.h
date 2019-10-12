@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <string>
 #include <tuple>
 #include <vector>
 
@@ -33,8 +34,11 @@ public:
     ~TaskStateService() = default;
 
     void PushTimes(wxDateTime startTime, wxDateTime endTime);
+    void StoreDescription(const std::string& description);
     wxTimeSpan GetAccumulatedTime();
+    std::string GetStoredDescription() const;
 
     std::vector<std::tuple<wxDateTime, wxDateTime>> mTimes;
+    std::string mDescription;
 };
 } // namespace app::services
