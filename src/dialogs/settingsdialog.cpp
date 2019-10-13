@@ -206,6 +206,10 @@ void SettingsDialog::CreateControls()
     pPausedTaskReminderChoice->SetToolTip(wxT("Select a interval in minutes for a reminder when a task is paused"));
     timedTaskGridSizer->Add(pPausedTaskReminderChoice, common::sizers::ControlDefault);
 
+    pStartStopwatchOnLaunch = new wxCheckBox(timedTaskPanel, IDC_START_STOPWATCH_ON_LAUNCH, wxT("Start Stopwatch on Launch"));
+    pStartStopwatchOnLaunch->SetToolTip(wxT("Set whether to start the stopwatch immediately or on \"Start\" button click"));
+    timedTaskGridSizer->Add(pStartStopwatchOnLaunch, common::sizers::ControlDefault);
+
     /* Task Item Settings */
     auto taskItemSettingsBox = new wxStaticBox(this, wxID_ANY, wxT("Task Item"));
     auto taskItemSettingsSizer = new wxStaticBoxSizer(taskItemSettingsBox, wxHORIZONTAL);
@@ -287,6 +291,7 @@ void SettingsDialog::FillControls()
     pHideWindowTimeChoice->SetStringSelection(std::to_string(pConfig->GetHideWindowTimerInterval()));
     pNotificationTimeChoice->SetStringSelection(std::to_string(pConfig->GetNotificationTimerInterval()));
     pPausedTaskReminderChoice->SetStringSelection(std::to_string(pConfig->GetPausedTaskReminderInterval()));
+    pStartStopwatchOnLaunch->SetValue(pConfig->IsStartStopwatchOnLaunch());
 
     pTimeRounding->SetValue(pConfig->IsTimeRoundingEnabled());
     if (!pConfig->IsTimeRoundingEnabled()) {
@@ -312,6 +317,7 @@ void SettingsDialog::OnOk(wxCommandEvent& WXUNUSED(event))
     pConfig->SetHideWindowTimerInterval(std::stoi(pHideWindowTimeChoice->GetStringSelection().ToStdString()));
     pConfig->SetNotificationTimerInterval(std::stoi(pNotificationTimeChoice->GetStringSelection().ToStdString()));
     pConfig->SetPausedTaskReminderInterval(std::stoi(pPausedTaskReminderChoice->GetStringSelection().ToStdString()));
+    pConfig->SetStartStopwatchOnLaunch(pStartStopwatchOnLaunch->GetValue());
 
     pConfig->SetTimeRounding(pTimeRounding->GetValue());
     pConfig->SetTimeToRoundTo(std::stoi(pRoundOffToChoice->GetStringSelection().ToStdString()));

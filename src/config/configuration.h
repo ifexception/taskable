@@ -67,6 +67,9 @@ public:
     int GetPausedTaskReminderInterval() const;
     void SetPausedTaskReminderInterval(int value);
 
+    bool IsStartStopwatchOnLaunch() const;
+    void SetStartStopwatchOnLaunch(bool value);
+
     wxSize GetFrameSize() const;
     void SetFrameSize(const wxSize value);
 

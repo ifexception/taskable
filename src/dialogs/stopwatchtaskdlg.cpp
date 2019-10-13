@@ -105,17 +105,19 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
 
 void StopwatchTaskDialog::Launch()
 {
-    mStartTime = wxDateTime::Now();
-    pElapsedTimer->Start(1000 /*milliseconds*/);
-    pNotificationTimer->Start(util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval()));
+    if (!pConfig->IsStartStopwatchOnLaunch()) {
+        mStartTime = wxDateTime::Now();
+        pElapsedTimer->Start(1000 /*milliseconds*/);
+        pNotificationTimer->Start(util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval()));
 
-    if (pConfig->IsMinimizeTimedTaskWindow()) {
-        pHideWindowTimer->Start(util::SecondsToMilliseconds(pConfig->GetHideWindowTimerInterval()), true);
-    }
+        if (pConfig->IsMinimizeTimedTaskWindow()) {
+            pHideWindowTimer->Start(util::SecondsToMilliseconds(pConfig->GetHideWindowTimerInterval()), true);
+        }
 
-    pStartButton->Disable();
-    if (bHasPendingPausedTask) {
-        pStartNewTask->Disable();
+        pStartButton->Disable();
+        if (bHasPendingPausedTask) {
+            pStartNewTask->Disable();
+        }
     }
 
     wxDialog::ShowModal();
@@ -263,7 +265,9 @@ void StopwatchTaskDialog::OnStart(wxCommandEvent& WXUNUSED(event))
 
     pElapsedTimer->Start(1000 /*milliseconds*/);
     pNotificationTimer->Start(util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval()));
-    pPausedTaskReminder->Stop();
+    if (pPausedTaskReminder->IsRunning()) {
+        pPausedTaskReminder->Stop();
+    }
 
     pStopButton->Enable();
     pStartButton->Disable();

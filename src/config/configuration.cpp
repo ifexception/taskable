@@ -153,6 +153,16 @@ void Configuration::SetPausedTaskReminderInterval(int value)
     Set<int>(wxT("settings"), wxT("pausedTaskReminder"), value);
 }
 
+bool Configuration::IsStartStopwatchOnLaunch() const
+{
+    return Get<bool>(wxT("settings"), wxT("startStopwatchOnLaunch"));
+}
+
+void Configuration::SetStartStopwatchOnLaunch(bool value)
+{
+    Set<bool>(wxT("settings"), wxT("startStopwatchOnLaunch"), value);
+}
+
 wxSize Configuration::GetFrameSize() const
 {
     auto dimensions = Get<wxString>(wxT("persistence"), wxT("dimensions"));
