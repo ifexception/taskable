@@ -163,6 +163,16 @@ void Configuration::SetStartStopwatchOnLaunch(bool value)
     Set<bool>(wxT("settings"), wxT("startStopwatchOnLaunch"), value);
 }
 
+bool Configuration::IsStartStopwatchOnResume() const
+{
+    return Get<bool>(wxT("settings"), wxT("startStopwatchOnResume"));
+}
+
+void Configuration::SetStartStopwatchOnResume(bool value)
+{
+    Set<bool>(wxT("settings"), wxT("startStopwatchOnResume"), value);
+}
+
 wxSize Configuration::GetFrameSize() const
 {
     auto dimensions = Get<wxString>(wxT("persistence"), wxT("dimensions"));

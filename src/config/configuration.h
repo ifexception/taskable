@@ -70,6 +70,9 @@ public:
     bool IsStartStopwatchOnLaunch() const;
     void SetStartStopwatchOnLaunch(bool value);
 
+    bool IsStartStopwatchOnResume() const;
+    void SetStartStopwatchOnResume(bool value);
+
     wxSize GetFrameSize() const;
     void SetFrameSize(const wxSize value);
 
