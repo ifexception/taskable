@@ -37,7 +37,7 @@ const wxSizerFlags ControlExpand = wxSizerFlags(ControlDefault).Expand();
 const wxSizerFlags ControlExpandProp = wxSizerFlags(ControlDefault).Align(wxEXPAND).Proportion(1);
 } // namespace sizers
 
-// TODO Check licensing https://icons8.com/icon/pack/business/plasticine
+// TODO Check licensing https://icons8.com/icon/pack/time-and-date/cute-clipart
 extern const char** GetProgramIcon();
 extern const char** GetAboutIcon();
 extern const char** GetCheckForUpdateIcon();
