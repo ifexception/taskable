@@ -451,7 +451,7 @@ void MainFrame::OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event)
     pTaskStorage->Restore(pTaskState);
 
     dialog::StopwatchTaskDialog stopwatchPausedTask(this, pConfig, pLogger, pTaskState);
-    stopwatchPausedTask.LaunchInPausedState();
+    stopwatchPausedTask.Relaunch();
 
     pTaskStorage->mTimes.clear();
 }

@@ -33,6 +33,8 @@ namespace app::dialog
 {
 static const wxString ElapsedTimeText = wxT("Elapsed Time: %s");
 static const wxString AccumulatedTimeText = wxT("Time accumulated thus far: %s");
+static const wxString TaskRunningForText = wxT("Task running for: %s");
+static const wxString PendingPausedTaskText = wxT("There is a pending pasued task");
 
 // clang-format off
 wxBEGIN_EVENT_TABLE(StopwatchTaskDialog, wxDialog)
@@ -62,13 +64,14 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
     , pConfig(config)
     , pTaskState(taskState)
     , mStartTime()
+    , mEndTime()
     , bWasTaskPaused(false)
     , bHasPendingPausedTask(false)
 // clang-format on
 {
     Create(parent,
         wxID_ANY,
-        wxT("Stopwatch Task"),
+        wxT("Stopwatch"),
         wxDefaultPosition,
         wxSize(320, 240),
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
@@ -91,12 +94,13 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
     , pConfig(config)
     , pTaskState(taskState)
     , mStartTime()
+    , mEndTime()
     , bWasTaskPaused(false)
     , bHasPendingPausedTask(hasPendingPausedTask)
 {
     Create(parent,
         wxID_ANY,
-        wxT("Timed Task"),
+        wxT("Stopwatch"),
         wxDefaultPosition,
         wxSize(320, 240),
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
@@ -105,31 +109,35 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
 
 void StopwatchTaskDialog::Launch()
 {
-    if (!pConfig->IsStartStopwatchOnLaunch()) {
-        mStartTime = wxDateTime::Now();
-        pElapsedTimer->Start(1000 /*milliseconds*/);
-        pNotificationTimer->Start(util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval()));
+    pPauseButton->Disable();
+    pStopButton->Disable();
+    pStartNewTask->Disable();
 
-        if (pConfig->IsMinimizeTimedTaskWindow()) {
-            pHideWindowTimer->Start(util::SecondsToMilliseconds(pConfig->GetHideWindowTimerInterval()), true);
-        }
-
-        pStartButton->Disable();
-        if (bHasPendingPausedTask) {
-            pStartNewTask->Disable();
-        }
+    if (pConfig->IsStartStopwatchOnLaunch()) {
+        ExecuteStartupProcedure();
     }
 
     wxDialog::ShowModal();
 }
 
-void StopwatchTaskDialog::LaunchInPausedState()
+void StopwatchTaskDialog::Relaunch()
 {
-    pStartButton->Enable();
-    pPauseButton->Disable();
-    pStartNewTask->Disable();
+    // if we can start stopwatch on resume, then execute startup procedure
+    if (pConfig->IsStartStopwatchOnResume()) {
+        ExecuteStartupProcedure();
+    } else {
+        // if we cannot, enable start button
+        pStartButton->Enable();
+
+        // and disable pause button
+        pPauseButton->Disable();
+        pStartNewTask->Disable(); // CHECK: Should this be disabled?
+    }
+
+    /* set state */
     bWasTaskPaused = true;
 
+    /* restore state */
     auto accumulatedTimeThusFar = pTaskState->GetAccumulatedTime();
     pAccumulatedTimeText->SetLabel(wxString::Format(AccumulatedTimeText, accumulatedTimeThusFar.Format()));
     if (!pTaskState->GetStoredDescription().empty()) {
@@ -229,6 +237,130 @@ void StopwatchTaskDialog::CreateControls()
     buttonPanelSizer->Add(pCancelButton, common::sizers::ControlDefault);
 }
 
+void StopwatchTaskDialog::ExecuteStartupProcedure()
+{
+    /* get the current time */
+    mStartTime = wxDateTime::Now();
+
+    /* set state */
+    bIsPaused = false;
+
+    /* start the timers */
+    pElapsedTimer->Start(1000 /*milliseconds*/);
+    pNotificationTimer->Start(util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval()));
+
+    /* stop paused task reminder */
+    if (pPausedTaskReminder->IsRunning()) {
+        pPausedTaskReminder->Stop();
+    }
+
+    /* enable stop and pause buttons */
+    pStopButton->Enable();
+    pPauseButton->Enable();
+
+    /* disable start button */
+    pStartButton->Disable();
+
+    /* check for pending task */
+    if (bHasPendingPausedTask) {
+        pStartNewTask->Disable();
+    } else {
+        pStartNewTask->Enable();
+    }
+}
+
+void StopwatchTaskDialog::ExecutePauseProcedure()
+{
+    /* set state */
+    bIsPaused = true;
+    bWasTaskPaused = true;
+
+    /* enable start button */
+    pStartButton->Enable();
+
+    /* disable pause button */
+    pPauseButton->Disable();
+
+    /* disable checkbox to start new task */
+    pStartNewTask->Disable();
+
+    /* stop timers */
+    pNotificationTimer->Stop();
+    pElapsedTimer->Stop();
+
+    /* start timer */
+    pPausedTaskReminder->Start(util::MinutesToMilliseconds(pConfig->GetPausedTaskReminderInterval()));
+
+    /* get the current end time */
+    mEndTime = wxDateTime::Now();
+
+    /* save state */
+    pTaskState->PushTimes(mStartTime, mEndTime);
+    if (!pStopwatchDescription->GetValue().empty()) {
+        if (pStopwatchDescription->GetValue().ToStdString() != pTaskState->GetStoredDescription()) {
+            pTaskState->StoreDescription(pStopwatchDescription->GetValue().ToStdString());
+        }
+    }
+
+    /* update UI */
+    auto accumulatedTimeThusFar = pTaskState->GetAccumulatedTime();
+    pAccumulatedTimeText->SetLabel(wxString::Format(AccumulatedTimeText, accumulatedTimeThusFar.Format()));
+
+    /* check if a new stopwatch task needs to be started */
+    if (pStartNewTask->IsChecked()) {
+        wxCommandEvent startNewStopwatchTask(START_NEW_STOPWATCH_TASK);
+        wxPostEvent(pParent, startNewStopwatchTask);
+        EndModal(wxID_OK);
+    }
+}
+
+void StopwatchTaskDialog::ExecuteStopProcedure()
+{
+    /* did the user go from pause to stop state? */
+    if (!bIsPaused) {
+    /* get the current end time */
+        mEndTime = wxDateTime::Now();
+
+        /* push state */
+        pTaskState->PushTimes(mStartTime, mEndTime);
+    }
+
+    /* stop timers */
+    pNotificationTimer->Stop();
+    pElapsedTimer->Stop();
+    if (pPausedTaskReminder->IsRunning()) {
+        pPausedTaskReminder->Stop();
+    }
+
+    /* disable buttons */
+    pStopButton->Disable();
+    pPauseButton->Disable();
+    pStartButton->Disable();
+    pStartNewTask->Disable();
+
+    /* was the task paused previously? */
+    if (bWasTaskPaused) {
+        /* save state */
+        auto accumulatedTimeThusFar = pTaskState->GetAccumulatedTime();
+        pAccumulatedTimeText->SetLabel(wxString::Format(AccumulatedTimeText, accumulatedTimeThusFar.Format()));
+
+        /* sum up the time for the task */
+        auto durationOfTask = pTaskState->GetAccumulatedTime();
+
+        /* launch dialog */
+        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, TaskItemType::EntryTask);
+        newTask.SetDurationFromStopwatchTask(durationOfTask);
+        newTask.SetDescriptionFromStopwatchTask(pStopwatchDescription->GetValue());
+        newTask.ShowModal();
+    } else {
+        /* launch dialog */
+        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, TaskItemType::TimedTask);
+        newTask.SetTimesFromStopwatchTask(mStartTime, mEndTime);
+        newTask.SetDescriptionFromStopwatchTask(pStopwatchDescription->GetValue());
+        newTask.ShowModal();
+    }
+}
+
 void StopwatchTaskDialog::OnElapsedTimeUpdate(wxTimerEvent& WXUNUSED(event))
 {
     auto current = wxDateTime::Now();
@@ -240,7 +372,7 @@ void StopwatchTaskDialog::OnTimer(wxTimerEvent& WXUNUSED(event))
 {
     auto current = wxDateTime::Now();
     auto elapsed = current - mStartTime;
-    auto message = wxString::Format(wxT("Task running for: %s"), elapsed.Format());
+    auto message = wxString::Format(TaskRunningForText, elapsed.Format());
     wxNotificationMessage taskElaspedMessage(common::GetProgramName(), message, this);
     taskElaspedMessage.Show();
 }
@@ -253,94 +385,23 @@ void StopwatchTaskDialog::OnHideWindow(wxTimerEvent& WXUNUSED(event))
 
 void StopwatchTaskDialog::OnPausedTaskReminder(wxTimerEvent& event)
 {
-    auto message = wxT("There is a pending pasued task");
-    wxNotificationMessage pausedTaskMessage(common::GetProgramName(), message, this);
+    wxNotificationMessage pausedTaskMessage(common::GetProgramName(), PendingPausedTaskText, this);
     pausedTaskMessage.Show();
 }
 
 void StopwatchTaskDialog::OnStart(wxCommandEvent& WXUNUSED(event))
 {
-    bIsPaused = false;
-    mStartTime = wxDateTime::Now();
-
-    pElapsedTimer->Start(1000 /*milliseconds*/);
-    pNotificationTimer->Start(util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval()));
-    if (pPausedTaskReminder->IsRunning()) {
-        pPausedTaskReminder->Stop();
-    }
-
-    pStopButton->Enable();
-    pStartButton->Disable();
-    pPauseButton->Enable();
-    if (bHasPendingPausedTask) {
-        pStartNewTask->Disable();
-    } else {
-        pStartNewTask->Enable();
-    }
+    ExecuteStartupProcedure();
 }
 
 void StopwatchTaskDialog::OnPause(wxCommandEvent& WXUNUSED(event))
 {
-    pStartButton->Enable();
-    pPauseButton->Disable();
-    pStartNewTask->Disable();
-    pNotificationTimer->Stop();
-    pElapsedTimer->Stop();
-    pPausedTaskReminder->Start(util::MinutesToMilliseconds(pConfig->GetPausedTaskReminderInterval()));
-    bWasTaskPaused = true;
-    bIsPaused = true;
-
-    mEndTime = wxDateTime::Now();
-    pTaskState->PushTimes(mStartTime, mEndTime);
-    auto accumulatedTimeThusFar = pTaskState->GetAccumulatedTime();
-    pAccumulatedTimeText->SetLabel(wxString::Format(AccumulatedTimeText, accumulatedTimeThusFar.Format()));
-
-    if (!pStopwatchDescription->GetValue().empty()) {
-        if (pStopwatchDescription->GetValue().ToStdString() != pTaskState->GetStoredDescription()) {
-            pTaskState->StoreDescription(pStopwatchDescription->GetValue().ToStdString());
-        }
-    }
-
-    if (pStartNewTask->IsChecked()) {
-        wxCommandEvent startNewStopwatchTask(START_NEW_STOPWATCH_TASK);
-        wxPostEvent(pParent, startNewStopwatchTask);
-        EndModal(wxID_OK);
-    }
+    ExecutePauseProcedure();
 }
 
 void StopwatchTaskDialog::OnStop(wxCommandEvent& WXUNUSED(event))
 {
-    mEndTime = wxDateTime::Now();
-    pNotificationTimer->Stop();
-    pElapsedTimer->Stop();
-    if (pPausedTaskReminder->IsRunning()) {
-        pPausedTaskReminder->Stop();
-    }
-    pStopButton->Disable();
-    pPauseButton->Disable();
-    pStartButton->Disable();
-    pStartNewTask->Disable();
-
-    if (bWasTaskPaused) {
-        if (!bIsPaused) {
-            pTaskState->PushTimes(mStartTime, mEndTime);
-        }
-
-        auto accumulatedTimeThusFar = pTaskState->GetAccumulatedTime();
-        pAccumulatedTimeText->SetLabel(wxString::Format(AccumulatedTimeText, accumulatedTimeThusFar.Format()));
-
-        auto durationOfTask = pTaskState->GetAccumulatedTime();
-
-        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, TaskItemType::EntryTask);
-        newTask.SetDurationFromStopwatchTask(durationOfTask);
-        newTask.SetDescriptionFromStopwatchTask(pStopwatchDescription->GetValue());
-        newTask.ShowModal();
-    } else {
-        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, TaskItemType::TimedTask);
-        newTask.SetTimesFromStopwatchTask(mStartTime, mEndTime);
-        newTask.SetDescriptionFromStopwatchTask(pStopwatchDescription->GetValue());
-        newTask.ShowModal();
-    }
+    ExecuteStopProcedure();
 
     EndModal(wxID_OK);
 }

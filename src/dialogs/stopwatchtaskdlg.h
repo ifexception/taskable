@@ -50,7 +50,7 @@ public:
     virtual ~StopwatchTaskDialog() = default;
 
     void Launch();
-    void LaunchInPausedState();
+    void Relaunch();
 
 private:
     wxDECLARE_EVENT_TABLE();
@@ -64,6 +64,10 @@ private:
         const wxString& name);
 
     void CreateControls();
+
+    void ExecuteStartupProcedure();
+    void ExecutePauseProcedure();
+    void ExecuteStopProcedure();
 
     void OnElapsedTimeUpdate(wxTimerEvent& event);
     void OnTimer(wxTimerEvent& event);
