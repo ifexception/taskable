@@ -10,11 +10,13 @@ endif ()
 
 message (STATUS "CMAKE_CONFIGURATION_TYPES:${CMAKE_CONFIGURATION_TYPES}")
 
+find_package(ZLIB REQUIRED)
 find_package (sqlite3 CONFIG REQUIRED)
 find_package (spdlog CONFIG REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
+message (STATUS "ZLIB found: ${ZLIB_FOUND}")
 message (STATUS "sqlite3 found: ${sqlite3_FOUND}")
 message (STATUS "spdlog found: ${spdlog_FOUND}")
 message (STATUS "wxWidgets_FOUND: ${wxWidgets_FOUND}")
@@ -73,6 +75,7 @@ target_compile_definitions (${PROJECT_NAME} PUBLIC
 
 target_link_libraries (${PROJECT_NAME}
     ${wxWidgets_LIBRARIES}
+    ZLIB::ZLIB
     sqlite3
     spdlog::spdlog
     cpr
