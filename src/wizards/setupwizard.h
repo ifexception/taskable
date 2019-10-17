@@ -48,9 +48,6 @@ public:
     wxString GetProject() const;
     void SetProject(const wxString& project);
     void SetProjectDisplayName(const wxString& project);
-    void SetCategory(const wxString& category);
-    void SetCategoryColor(const wxColour& color);
-    void SetDescription(const wxString& description);
 
 private:
     void CreateDatabaseFile();
@@ -65,9 +62,6 @@ private:
     wxString mClient;
     wxString mProject;
     wxString mDisplayName;
-    wxString mCategory;
-    wxColour mCategoryColor;
-    wxString mDescription;
 };
 
 class AddEmployerAndClientPage final : public wxWizardPageSimple
@@ -106,25 +100,5 @@ private:
     SetupWizard* pParent;
     wxTextCtrl* pNameCtrl;
     wxTextCtrl* pDisplayNameCtrl;
-};
-
-class AddCategoriesPage final : public wxWizardPageSimple
-{
-public:
-    AddCategoriesPage() = default;
-    explicit AddCategoriesPage(SetupWizard* parent);
-    virtual ~AddCategoriesPage() = default;
-
-    bool TransferDataFromWindow() override;
-
-private:
-    wxDECLARE_EVENT_TABLE();
-
-    void OnWizardCancel(wxWizardEvent& event);
-
-    SetupWizard* pParent;
-    wxTextCtrl* pNameCtrl;
-    wxColourPickerCtrl* pColorPickerCtrl;
-    wxTextCtrl* pDescriptionCtrl;
 };
 } // namespace app::wizard

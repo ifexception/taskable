@@ -57,11 +57,9 @@ SetupWizard::SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger)
 
     auto page2 = new AddEmployerAndClientPage(this);
     auto page3 = new AddProjectPage(this);
-    auto page4 = new AddCategoriesPage(this);
 
     wxWizardPageSimple::Chain(pPage1, page2);
     wxWizardPageSimple::Chain(page2, page3);
-    wxWizardPageSimple::Chain(page3, page4);
 
     GetPageAreaSizer()->Add(pPage1);
 }
@@ -121,21 +119,6 @@ void SetupWizard::SetProject(const wxString& project)
 void SetupWizard::SetProjectDisplayName(const wxString& displayName)
 {
     mDisplayName = displayName;
-}
-
-void SetupWizard::SetCategory(const wxString& category)
-{
-    mCategory = category;
-}
-
-void SetupWizard::SetCategoryColor(const wxColour& color)
-{
-    mCategoryColor = color;
-}
-
-void SetupWizard::SetDescription(const wxString& description)
-{
-    mDescription = description;
 }
 
 void SetupWizard::CreateDatabaseFile()
@@ -214,13 +197,6 @@ bool SetupWizard::SetUpEntities()
         return false;
     }
 
-    try {
-        dbService.create_new_category(
-            projectId, std::string(mCategory.ToUTF8()), mCategoryColor.GetRGB(), std::string(mDescription.ToUTF8()));
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on create_new_category() - {0:d} : {1}", e.get_code(), e.what());
-        return false;
-    }
     return true;
 }
 
@@ -364,91 +340,6 @@ bool AddProjectPage::TransferDataFromWindow()
 }
 
 void AddProjectPage::OnWizardCancel(wxWizardEvent& event)
-{
-    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"),
-        wxT("Taskable Wizard"),
-        wxICON_QUESTION | wxYES_NO);
-    if (userResponse == wxNO) {
-        event.Veto();
-    }
-}
-
-// clang-format off
-wxBEGIN_EVENT_TABLE(AddCategoriesPage, wxWizardPageSimple)
-EVT_WIZARD_CANCEL(wxID_ANY, AddCategoriesPage::OnWizardCancel)
-wxEND_EVENT_TABLE()
-
-AddCategoriesPage::AddCategoriesPage(SetupWizard* parent)
-    : wxWizardPageSimple(parent)
-    , pParent(parent)
-// clang-format on
-{
-    auto sizer = new wxBoxSizer(wxVERTICAL);
-
-    auto infoMessage = wxString::Format("Add a category to the project: %s", pParent->GetProject());
-    auto infoText = new wxStaticText(this, wxID_ANY, infoMessage);
-    sizer->Add(infoText, 0, wxALL, 5);
-
-    auto categoryText = new wxStaticText(this, wxID_ANY, wxT("Category:"));
-    sizer->Add(categoryText, 0, wxALL, 5);
-
-    pNameCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
-    sizer->Add(pNameCtrl, 0, wxALL, 5);
-
-    wxString categoryNameHelpMessage =
-        wxT("Specify a category for the project.\n"
-            "A category is the specific type of task you worked on or did for said project, e.g. \"meetings\"");
-    auto categoryNameHelpText = new wxStaticText(this, wxID_ANY, categoryNameHelpMessage);
-    sizer->Add(categoryNameHelpText, 0, wxALL, 5);
-
-    auto colorText = new wxStaticText(this, wxID_ANY, wxT("Color"));
-    sizer->Add(colorText, 0, wxALL, 5);
-
-    pColorPickerCtrl = new wxColourPickerCtrl(this, wxID_ANY);
-    sizer->Add(pColorPickerCtrl, 0, wxALL, 5);
-
-    wxString categoryColorHelpMessage =
-        wxT("Select a color for this category.\n"
-            "Specifying a color helps you with easily identifying tasks on the main list view");
-    auto categoryColorHelpText = new wxStaticText(this, wxID_ANY, categoryColorHelpMessage);
-    sizer->Add(categoryColorHelpText, 0, wxALL, 5);
-
-    auto descriptionText = new wxStaticText(this, wxID_ANY, wxT("Description:*"));
-    sizer->Add(descriptionText, 0, wxALL, 5);
-
-    pDescriptionCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
-    sizer->Add(pDescriptionCtrl, 0, wxALL, 5);
-
-    wxString descriptionHelpMessage = wxT("Specify a description for the above category.\n"
-                                          "A description for the category helps you create a distinction between "
-                                          "similar categories for different projects");
-    auto descriptionHelpText = new wxStaticText(this, wxID_ANY, descriptionHelpMessage);
-    sizer->Add(descriptionHelpText, 0, wxALL, 5);
-
-    SetSizer(sizer);
-    sizer->Fit(this);
-}
-
-bool AddCategoriesPage::TransferDataFromWindow()
-{
-    const wxString category = pNameCtrl->GetValue().Trim();
-    if (category.empty()) {
-        wxMessageBox(wxT("An category name is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
-        return false;
-    }
-
-    const wxColour color = pColorPickerCtrl->GetColour();
-
-    const wxString description = pDescriptionCtrl->GetValue().Trim();
-
-    pParent->SetCategory(category);
-    pParent->SetCategoryColor(color);
-    pParent->SetDescription(description);
-
-    return true;
-}
-
-void AddCategoriesPage::OnWizardCancel(wxWizardEvent& event)
 {
     auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"),
         wxT("Taskable Wizard"),
