@@ -46,18 +46,24 @@ set (SRC
     "dialogs/taskitemdlg.cpp"
     "dialogs/employerdlg.cpp"
     "dialogs/clientdlg.cpp"
-    "dialogs/projectdlg.cpp"
-    "dialogs/categorydlg.cpp"
     "dialogs/editlistdlg.cpp"
     "dialogs/settingsdialog.cpp"
     "dialogs/stopwatchtaskdlg.cpp"
     "dialogs/checkforupdatedlg.cpp"
-    "wizards/setupwizard.cpp")
+    "wizards/setupwizard.cpp"
+
+    "dialogs/categorydlg.cpp"
+    "dialogs/categoriesdlg.cpp"
+    "models/categorymodel.cpp"
+
+    "dialogs/projectdlg.cpp"
+    "models/projectmodel.cpp"
+    )
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
 
 target_compile_options (${PROJECT_NAME} PRIVATE
-    $<$<CXX_COMPILER_ID:MSVC>:/W3 /permissive- /TP>
+    $<$<CXX_COMPILER_ID:MSVC>:/W3 /permissive- /TP /EHsc>
     $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra>)
 
 target_compile_features (${PROJECT_NAME} PRIVATE
