@@ -20,10 +20,11 @@
 #pragma once
 
 #include <memory>
+#include <tuple>
 
 #include <wx/wx.h>
+#include <wx/listctrl.h>
 #include <wx/clrpicker.h>
-
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
@@ -31,15 +32,14 @@
 
 namespace app::dialog
 {
-class CategoryDialog final : public wxDialog
+class CategoriesDialog final : public wxDialog
 {
 public:
-    CategoryDialog() = default;
-    explicit CategoryDialog(wxWindow* parent,
+    CategoriesDialog() = delete;
+    CategoriesDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
-        int categoryId,
-        const wxString& name = "categorydialogdlg");
-    virtual ~CategoryDialog() = default;
+        const wxString& name = wxT("categoriesdlg"));
+    virtual ~CategoriesDialog() = default;
 
 private:
     bool Create(wxWindow* parent,
@@ -53,21 +53,39 @@ private:
     void ConfigureEventBindings();
     void CreateControls();
     void FillControls();
-    void DataToControls();
+    void FillControls(model::CategoryModel category);
     void PostInitializeProcedure();
 
-    void AttachRichTooltipToNameTextControl();
+    void AppendListControlEntry(model::CategoryModel category);
+    void UpdateListControlEntry(model::CategoryModel category);
+
+    void AttachRichTooltipToNameControl();
     void AttachRichTooltipToProjectChoiceControl();
 
     void OnProjectChoiceSelection(wxCommandEvent& event);
     void OnNameChange(wxCommandEvent& event);
     void OnColorChange(wxColourPickerEvent& event);
 
-    void OnOk(wxCommandEvent& event);
+    void OnClear(wxCommandEvent& event);
+    void OnAdd(wxCommandEvent& event);
+    void OnEdit(wxCommandEvent& event);
+    void OnRemove(wxCommandEvent& event);
+    void OnRemoveAll(wxCommandEvent& event);
+    void OnOK(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
-    void OnIsActiveCheck(wxCommandEvent& event);
 
-    bool Validate();
+    void OnItemChecked(wxListEvent& event);
+    void OnItemUnchecked(wxListEvent& event);
+    void OnItemRightClick(wxListEvent& event);
+
+    model::CategoryModel ExtractCategoryDataFromListIndex();
+    model::CategoryModel ExtractCategoryDataFromListIndex(long index);
+
+    bool HasPendingChanges();
+    bool ValidateCreate();
+    bool ValidateUpdate();
+
+    void ResetControlValues();
 
     std::shared_ptr<spdlog::logger> pLogger;
 
@@ -76,16 +94,22 @@ private:
     wxTextCtrl* pNameTextCtrl;
     wxColourPickerCtrl* pColorPickerCtrl;
     wxCheckBox* pIsActiveCtrl;
-    wxStaticText* pDateTextCtrl;
+    wxStaticText* pDateCreatedTextCtrl;
+    wxStaticText* pDateUpdatedTextCtrl;
+    wxListCtrl* pCategoryListCtrl;
+    wxButton* pAddButton;
+    wxButton* pRemoveButton;
+    wxButton* pRemoveAllButton;
+    wxButton* pClearButton;
     wxButton* pOkButton;
     wxButton* pCancelButton;
 
-    model::CategoryModel mCategory;
-    int mCategoryId;
-    bool bTouched;
+    long mItemIndex;
+    std::vector<long> mItemIndexes;
+    model::CategoryModel mModel;
+    std::vector<model::CategoryModel> mCategories;
+    bool bEditFromListCtrl;
 
-    enum { IDC_PROJECTCHOICE = wxID_HIGHEST + 1, IDC_NAME, IDC_COLOR, IDC_ISACTIVE };
-
-    static const wxString& DateLabel;
+    enum { IDC_PROJECTCHOICE = wxID_HIGHEST + 1, IDC_NAME, IDC_COLOR, IDC_ISACTIVE, IDC_LIST };
 };
 } // namespace app::dialog

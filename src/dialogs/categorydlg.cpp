@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <sqlite_modern_cpp/errors.h>
+#include <wx/richtooltip.h>
 #include <wx/statline.h>
 
 #include "../common/constants.h"
@@ -31,44 +32,24 @@
 
 namespace app::dialog
 {
-// clang-format off
-wxBEGIN_EVENT_TABLE(CategoryDialog, wxDialog)
-EVT_BUTTON(wxID_OK, CategoryDialog::OnOk)
-EVT_BUTTON(wxID_CANCEL, CategoryDialog::OnCancel)
-EVT_CHECKBOX(CategoryDialog::IDC_ISACTIVE, CategoryDialog::OnIsActiveCheck)
-wxEND_EVENT_TABLE()
+const wxString& CategoryDialog::DateLabel = wxT("Created %s | Updated %s");
 
 CategoryDialog::CategoryDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
-    const wxString& name)
-    : pLogger(logger)
-    , mProjectChoiceId(-1)
-    , mNameText(wxGetEmptyString())
-    , mDescriptionText(wxGetEmptyString())
-    , bIsEdit(false)
-    , mCategoryId(0)
-// clang-format on
-{
-    Create(parent,
-        wxID_ANY,
-        wxT("Add Category"),
-        wxDefaultPosition,
-        wxSize(320, 280),
-        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
-        name);
-}
-
-CategoryDialog::CategoryDialog(wxWindow* parent,
-    std::shared_ptr<spdlog::logger> logger,
-    bool isEdit,
     int categoryId,
     const wxString& name)
-    : pLogger(logger)
-    , mProjectChoiceId(-1)
-    , mNameText(wxGetEmptyString())
-    , mDescriptionText(wxGetEmptyString())
-    , bIsEdit(isEdit)
+    : pParent(parent)
+    , pProjectChoiceCtrl(nullptr)
+    , pNameTextCtrl(nullptr)
+    , pColorPickerCtrl(nullptr)
+    , pIsActiveCtrl(nullptr)
+    , pDateTextCtrl(nullptr)
+    , pOkButton(nullptr)
+    , pCancelButton(nullptr)
+    , mCategory(categoryId)
     , mCategoryId(categoryId)
+    , bTouched(false)
+    , pLogger(logger)
 {
     Create(parent,
         wxID_ANY,
@@ -87,16 +68,16 @@ bool CategoryDialog::Create(wxWindow* parent,
     long style,
     const wxString& name)
 {
+    SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS);
     bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
     if (created) {
         CreateControls();
+        ConfigureEventBindings();
         FillControls();
-
-        if (bIsEdit) {
-            DataToControls();
-        }
+        DataToControls();
 
         GetSizer()->Fit(this);
+        GetSizer()->SetSizeHints(this);
         SetIcon(common::GetProgramIcon());
         Center();
     }
@@ -104,13 +85,56 @@ bool CategoryDialog::Create(wxWindow* parent,
     return created;
 }
 
+// clang-format off
+void CategoryDialog::ConfigureEventBindings()
+{
+    pProjectChoiceCtrl->Bind(
+        wxEVT_CHOICE,
+        &CategoryDialog::OnProjectChoiceSelection,
+        this
+    );
+
+    pNameTextCtrl->Bind(
+        wxEVT_TEXT,
+        &CategoryDialog::OnNameChange,
+        this
+    );
+
+    pColorPickerCtrl->Bind(
+        wxEVT_COLOURPICKER_CHANGED,
+        &CategoryDialog::OnColorChange,
+        this
+    );
+
+    pIsActiveCtrl->Bind(
+        wxEVT_CHECKBOX,
+        &CategoryDialog::OnIsActiveCheck,
+        this
+    );
+
+    pOkButton->Bind(
+        wxEVT_BUTTON,
+        &CategoryDialog::OnOk,
+        this,
+        wxID_OK
+    );
+
+    pCancelButton->Bind(
+        wxEVT_BUTTON,
+        &CategoryDialog::OnCancel,
+        this,
+        wxID_CANCEL
+    );
+}
+// clang-format on
+
 void CategoryDialog::CreateControls()
 {
     /* Window Sizing */
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(mainSizer);
 
-    /* Task Details Box */
+    /* Category Details Box */
     auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Category Details"));
     auto detailsBoxSizer = new wxStaticBoxSizer(detailsBox, wxVERTICAL);
     mainSizer->Add(detailsBoxSizer, common::sizers::ControlExpandProp);
@@ -136,50 +160,33 @@ void CategoryDialog::CreateControls()
     auto nameText = new wxStaticText(categoryDetailsPanel, wxID_STATIC, wxT("Name"));
     flexGridSizer->Add(nameText, common::sizers::ControlCenterVertical);
 
-    pNameCtrl = new wxTextCtrl(
+    pNameTextCtrl = new wxTextCtrl(
         categoryDetailsPanel, IDC_NAME, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
-    pNameCtrl->Bind(wxEVT_KILL_FOCUS, &CategoryDialog::OnNameControlFocusLost, this);
-    pNameCtrl->SetToolTip(wxT("Enter a name for this category"));
-    flexGridSizer->Add(pNameCtrl, common::sizers::ControlDefault);
+    pNameTextCtrl->SetHint(wxT("Name for category"));
+    pNameTextCtrl->SetToolTip(wxT("Enter a name for this category"));
+    flexGridSizer->Add(pNameTextCtrl, common::sizers::ControlDefault);
 
-    auto colorPickerFiller = new wxStaticText(categoryDetailsPanel, wxID_ANY, wxT(""));
+    /* Color Picker Control */
+    auto colorPickerFiller = new wxStaticText(categoryDetailsPanel, wxID_ANY, wxGetEmptyString());
     flexGridSizer->Add(colorPickerFiller, common::sizers::ControlDefault);
 
     pColorPickerCtrl = new wxColourPickerCtrl(categoryDetailsPanel, IDC_COLOR);
+    pColorPickerCtrl->SetToolTip(wxT("Select a color to associate this category with"));
     flexGridSizer->Add(pColorPickerCtrl, common::sizers::ControlDefault);
 
-    if (bIsEdit) {
-        auto isActiveFiller = new wxStaticText(categoryDetailsPanel, wxID_STATIC, wxT(""));
-        flexGridSizer->Add(isActiveFiller, common::sizers::ControlDefault);
+    /* Is Active Checkbox Control */
+    auto isActiveFiller = new wxStaticText(categoryDetailsPanel, wxID_STATIC, wxGetEmptyString());
+    flexGridSizer->Add(isActiveFiller, common::sizers::ControlDefault);
 
-        /* Is Active Checkbox Control */
-        pIsActiveCtrl = new wxCheckBox(categoryDetailsPanel, IDC_ISACTIVE, wxT("Is Active"));
-        flexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
-    }
+    pIsActiveCtrl = new wxCheckBox(categoryDetailsPanel, IDC_ISACTIVE, wxT("Is Active"));
+    flexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
 
-    /* Category Description Text Control */
-    auto descriptionText = new wxStaticText(categoryDetailsPanel, wxID_STATIC, wxT("Description*"));
-    flexGridSizer->Add(descriptionText, common::sizers::ControlCenterVertical);
-
-    pDescriptionCtrl =
-        new wxTextCtrl(this, IDC_DESCRIPTION, wxGetEmptyString(), wxDefaultPosition, wxSize(240, 160), wxTE_MULTILINE);
-    pDescriptionCtrl->Bind(wxEVT_KILL_FOCUS, &CategoryDialog::OnDescriptionControlFocusLost, this);
-    pDescriptionCtrl->SetToolTip(wxT("Enter a (optional) detailed description of a task category"));
-    detailsBoxSizer->Add(pDescriptionCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
-
-    if (bIsEdit) {
-        /* Date Created Text Control */
-        pDateCreatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
-        auto font = pDateCreatedTextCtrl->GetFont();
-        font.MakeItalic();
-        font.SetPointSize(8);
-        pDateCreatedTextCtrl->SetFont(font);
-        detailsBoxSizer->Add(pDateCreatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
-
-        /* Date Updated Text Control */
-        pDateUpdatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Updated on: %s"));
-        detailsBoxSizer->Add(pDateUpdatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
-    }
+    /* Date Created Text Control */
+    pDateTextCtrl = new wxStaticText(this, wxID_STATIC, wxGetEmptyString());
+    auto font = pDateTextCtrl->GetFont();
+    font.SetPointSize(7);
+    pDateTextCtrl->SetFont(font);
+    detailsBoxSizer->Add(pDateTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
     /* Horizontal Line*/
     auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
@@ -191,156 +198,130 @@ void CategoryDialog::CreateControls()
     buttonPanel->SetSizer(buttonPanelSizer);
     mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
-    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&Save"));
-    auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
+    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
+    pCancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
     buttonPanelSizer->Add(pOkButton, common::sizers::ControlDefault);
-    buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(pCancelButton, common::sizers::ControlDefault);
 }
 
 void CategoryDialog::FillControls()
 {
-    std::vector<models::project> projects;
-    try {
-        services::db_service dbService;
-        projects = dbService.get_projects();
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in get_projects() - {0:d} : {1}", e.get_code(), e.what());
-    }
+    auto projects = model::ProjectModel::GetAllProjects();
 
     for (auto p : projects) {
-        pProjectChoiceCtrl->Append(p.display_name, util::IntToVoidPointer(p.project_id));
+        pProjectChoiceCtrl->Append(p.GetDisplayName(), util::IntToVoidPointer(p.GetProjectId()));
     }
 }
 
 void CategoryDialog::DataToControls()
 {
-    services::db_service dbService;
-    models::category category;
+    model::CategoryModel category;
     try {
-        category = dbService.get_category_by_id(mCategoryId);
+        category = model::CategoryModel::GetCategoryById(mCategoryId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in get_category_by_id() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    pProjectChoiceCtrl->SetStringSelection(category.project_name);
-    pNameCtrl->ChangeValue(category.category_name);
+    pProjectChoiceCtrl->SetStringSelection(category.GetProject().GetDisplayName());
+    pProjectChoiceCtrl->SendSelectionChangedEvent(wxEVT_CHOICE);
 
-    pColorPickerCtrl->SetColour(wxColour(category.color));
-    pDescriptionCtrl->ChangeValue(category.description);
+    pNameTextCtrl->SetValue(category.GetName());
 
-    wxString dateCreatedString = util::ConvertUnixTimestampToString(category.date_created_utc);
-    wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
-    pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
+    pColorPickerCtrl->SetColour(category.GetColor());
+    wxColourPickerEvent event(this, IDC_COLOR, category.GetColor());
+    wxPostEvent(this, event);
 
-    wxString dateUpdatedString = util::ConvertUnixTimestampToString(category.date_modified_utc);
-    wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
-    pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
+    pDateTextCtrl->SetLabel(wxString::Format(CategoryDialog::DateLabel,
+        category.GetDateCreated().FormatISOCombined(),
+        category.GetDateModitied().FormatISOCombined()));
 
-    pIsActiveCtrl->SetValue(category.is_active);
+    pIsActiveCtrl->SetValue(category.IsActive());
+}
+
+void CategoryDialog::PostInitializeProcedure()
+{
+    pOkButton->Disable();
 }
 
 bool CategoryDialog::Validate()
 {
-    if (mProjectChoiceId == -1 || mProjectChoiceId == 0) {
-        auto message = wxString::Format(Constants::Messages::SelectionRequired, wxT("Project"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
+    bool isValid = true;
+    if (!mCategory.IsNameValid()) {
+        isValid = false;
+        AttachRichTooltipToNameTextControl();
     }
 
-    if (mNameText.empty()) {
-        auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Category name"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
+    if (!mCategory.IsProjectSelected()) {
+        isValid = false;
+        AttachRichTooltipToProjectChoiceControl();
     }
 
-    return true;
+    return isValid;
 }
 
-bool CategoryDialog::AreControlsEmpty()
+void CategoryDialog::AttachRichTooltipToNameTextControl()
 {
-    bool isEmpty = (mProjectChoiceId == -1 || mProjectChoiceId == 0) && mNameText.empty();
-    return isEmpty;
+    const wxString errorHeader = wxT("Invalid input");
+    const wxString errorMessage = wxT("A name is required \nand must be within %d to %d characters long");
+    const wxString errorMessageFormat = wxString::Format(errorMessage, Constants::MinLength, Constants::MaxLength);
+
+    wxRichToolTip tooltip(errorHeader, errorMessageFormat);
+    tooltip.SetIcon(wxICON_WARNING);
+    tooltip.ShowFor(pNameTextCtrl);
 }
 
-void CategoryDialog::OnNameControlFocusLost(wxFocusEvent& event)
+void CategoryDialog::AttachRichTooltipToProjectChoiceControl()
 {
-    if (pNameCtrl->GetValue().length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Category name"), 2);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        pOkButton->Disable();
-    } else if (pNameCtrl->GetValue().length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Category name"), 255);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        pOkButton->Disable();
-    } else {
-        pOkButton->Enable();
-    }
+    const wxString errorHeader = wxT("Invalid selection");
+    const wxString errorMessage = wxT("A project selection is required");
 
-    event.Skip();
+    wxRichToolTip tooltip(errorHeader, errorMessage);
+    tooltip.SetIcon(wxICON_WARNING);
+    tooltip.ShowFor(pProjectChoiceCtrl);
 }
 
-void CategoryDialog::OnDescriptionControlFocusLost(wxFocusEvent& event)
+void CategoryDialog::OnProjectChoiceSelection(wxCommandEvent& event)
 {
-    if (pDescriptionCtrl->GetValue().length() == 1) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Description"), 2);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        pOkButton->Disable();
-    } else if (mDescriptionText.length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Description"), 255);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        pOkButton->Disable();
-    } else {
-        pOkButton->Enable();
-    }
+    int id = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
+    wxString name = pProjectChoiceCtrl->GetStringSelection();
 
-    event.Skip();
+    mCategory.SetProjectId(id);
+    mCategory.GetProject().SetDisplayName(name);
+    bTouched = true;
+}
+
+void CategoryDialog::OnNameChange(wxCommandEvent& event)
+{
+    wxString name = pNameTextCtrl->GetValue();
+    mCategory.SetName(name);
+    bTouched = true;
+}
+
+void CategoryDialog::OnColorChange(wxColourPickerEvent& event)
+{
+    wxColor color = pColorPickerCtrl->GetColour();
+    mCategory.SetColor(color);
+    bTouched = true;
 }
 
 void CategoryDialog::OnOk(wxCommandEvent& event)
 {
-    mProjectChoiceId = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
-    mNameText = pNameCtrl->GetValue();
-    mColor = pColorPickerCtrl->GetColour();
-    mDescriptionText = pDescriptionCtrl->GetValue();
+    if (Validate()) {
+        mCategory.SetDateModified(wxDateTime::Now());
+        if (pIsActiveCtrl->IsChecked()) {
+            model::CategoryModel::Update(mCategory);
+        } else {
+            model::CategoryModel::Delete(mCategory);
+        }
 
-    bool isValid = Validate();
-    if (!isValid) {
-        return;
+        EndModal(wxID_OK);
     }
-
-    services::db_service dbService;
-    try {
-        if (bIsEdit && pIsActiveCtrl->IsChecked()) {
-            models::category category;
-            category.category_id = mCategoryId;
-            category.category_name = std::string(mNameText.ToUTF8());
-            category.color = mColor.GetRGB();
-            category.description = std::string(mDescriptionText.ToUTF8());
-            category.project_id = mProjectChoiceId;
-            category.date_modified_utc = util::UnixTimestamp();
-            dbService.update_category(category);
-        }
-        if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            dbService.delete_category(mCategoryId, util::UnixTimestamp());
-        }
-        if (!bIsEdit) {
-            dbService.create_new_category(mProjectChoiceId,
-                std::string(mNameText.ToUTF8()),
-                mColor.GetRGB(),
-                std::string(mDescriptionText.ToUTF8()));
-        }
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in category OnSave() - {0:d} : {1}", e.get_code(), e.what());
-    }
-
-    EndModal(wxID_OK);
 }
 
 void CategoryDialog::OnCancel(wxCommandEvent& event)
 {
-    bool areControlsEmpty = AreControlsEmpty();
-    if (!areControlsEmpty) {
+    if (bTouched) {
         int answer = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
         if (answer == wxYES) {
             EndModal(wxID_CANCEL);
@@ -354,12 +335,12 @@ void CategoryDialog::OnIsActiveCheck(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
         pProjectChoiceCtrl->Enable();
-        pNameCtrl->Enable();
-        pDescriptionCtrl->Enable();
+        pNameTextCtrl->Enable();
+        pColorPickerCtrl->Enable();
     } else {
         pProjectChoiceCtrl->Disable();
-        pNameCtrl->Disable();
-        pDescriptionCtrl->Disable();
+        pNameTextCtrl->Disable();
+        pColorPickerCtrl->Disable();
     }
 }
 
