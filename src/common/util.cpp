@@ -37,6 +37,12 @@ wxString ConvertUnixTimestampToString(int timestamp)
     return dateString;
 }
 
+wxDateTime ToDateTime(int timestamp)
+{
+    time_t time = static_cast<time_t>(timestamp);
+    return wxDateTime(time);
+}
+
 wxDateTime RoundToNearestInterval(wxDateTime value, int interval)
 {
     auto seconds = value.GetTicks();

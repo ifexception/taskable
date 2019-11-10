@@ -29,6 +29,8 @@ namespace app::util
 {
 wxString ConvertUnixTimestampToString(int timestamp);
 
+wxDateTime ToDateTime(int timestamp);
+
 wxDateTime RoundToNearestInterval(wxDateTime value, int interval);
 
 int UnixTimestamp();
@@ -44,5 +46,5 @@ void* IntToVoidPointer(int value);
 namespace lib
 {
 std::vector<std::string> split(const std::string& in, char delimiter);
-}
+} // namespace lib
 } // namespace app::util
