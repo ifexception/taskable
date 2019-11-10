@@ -24,15 +24,14 @@
 
 namespace app::Constants
 {
-static const std::string LoggerName = "TasksTracker_Daily";
+static const std::string LoggerName = "Taskable_Daily";
 static const char* LogsDirectory = "logs";
-static const char* LogsFilename = "TasksTracker.log.txt";
+static const char* LogsFilename = "Taskable.log.txt";
 
 static const char* TotalHours = "Total Hours %H:%M:%S";
 
-namespace Titles
-{
-}
+static const int MinLength = 2;
+static const int MaxLength = 255;
 
 namespace Messages
 {
@@ -46,23 +45,4 @@ namespace Info
 {
 static std::string LoggerInitialized = "Logger initialized.";
 } // namespace Info
-
-namespace Error
-{
-static const char* SqliteError = "Error sqlite code: {0}";
-
-static const char* SqliteConnection = "Failed to connect to sqlite instance: {0}";
-
-static const char* StatementExecution = "Error while executing query: {0}";
-
-// std::string messages
-static std::string BackupInitialization = "Error initializing sqlite backup handle";
-
-static std::string UnableToBackupPage = "Error while backing up";
-
-static std::string StatementInitialization = "Error initializing sqlite statement handle";
-
-static std::string NoRowToGet = "No row to get a column from. Run() was not called, or returned false.";
-
-} // namespace Error
 } // namespace app::Constants
