@@ -84,13 +84,15 @@ struct db_service
 
     void create_new_category(const int projectId, const std::string& name, int color, const std::string& description);
 
+    void create_new_category(const models::category category);
+
     std::vector<models::category> get_categories_by_project_id(const int projectId);
 
     models::category get_category_by_id(const int categoryId);
 
     std::vector<models::category> get_categories();
 
-    void update_category(models::category category);
+    void update_category(const models::category category);
 
     void delete_category(const int categoryId, const int dateModified);
 

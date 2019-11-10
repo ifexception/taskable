@@ -64,8 +64,8 @@ void db_service::create_projects_table()
                               "    project_id INTEGER PRIMARY KEY NOT NULL,"
                               "    name TEXT NOT NULL UNIQUE,"
                               "    display_name TEXT NOT NULL,"
-                              "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-                              "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),"
+                              "    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),"
                               "    is_active INTEGER NOT NULL,"
                               "    employer_id INTEGER NOT NULL,"
                               "    client_id INTEGER NULL,"
@@ -83,10 +83,9 @@ void db_service::create_categories_table()
                               "("
                               "    category_id INTEGER PRIMARY KEY NOT NULL,"
                               "    name TEXT NOT NULL,"
-                              "    description TEXT NULL,"
                               "    color INTEGER NOT NULL,"
-                              "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-                              "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),"
+                              "    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),"
                               "    is_active INTEGER NOT NULL,"
                               "    project_id INTEGER NOT NULL,"
                               "    FOREIGN KEY (project_id) REFERENCES projects(project_id)"
@@ -401,6 +400,15 @@ void db_service::create_new_category(const int projectId, const std::string& nam
        << projectId;
 }
 
+void db_service::create_new_category(const models::category category)
+{
+    auto db = db_connection::get_instance().get_handle();
+    db << models::category::createNewCategory
+       << category.category_name
+       << category.color
+       << category.project_id;
+}
+
 std::vector<models::category> db_service::get_categories_by_project_id(const int projectId)
 {
     std::vector<models::category> categories;
@@ -410,8 +418,7 @@ std::vector<models::category> db_service::get_categories_by_project_id(const int
        << projectId
        >> [&](int categoryId,
            std::string categoryName,
-           int color,
-           std::unique_ptr<std::string> description,
+           unsigned int color,
            int dateCreatedUtc,
            int dateModifiedUtc,
            int isActive,
@@ -419,7 +426,6 @@ std::vector<models::category> db_service::get_categories_by_project_id(const int
            models::category category(categoryId,
                categoryName,
                color,
-               description != nullptr ? *description : "",
                dateCreatedUtc,
                dateModifiedUtc,
                isActive,
@@ -439,8 +445,7 @@ models::category db_service::get_category_by_id(const int categoryId)
        << categoryId
        >> [&](int categoryId,
            std::string categoryName,
-           int color,
-           std::unique_ptr<std::string> description,
+           unsigned int color,
            int dateCreatedUtc,
            int dateModifiedUtc,
            int isActive,
@@ -448,7 +453,6 @@ models::category db_service::get_category_by_id(const int categoryId)
            category = models::category(categoryId,
                categoryName,
                color,
-               description != nullptr ? *description : "",
                dateCreatedUtc,
                dateModifiedUtc,
                isActive,
@@ -466,14 +470,12 @@ std::vector<models::category> db_service::get_categories()
     db << models::category::getCategories
        >> [&](int categoryId,
            std::string categoryName,
-           std::unique_ptr<std::string> description,
            int dateCreatedUtc,
            int dateModifiedUtc,
            int isActive,
            std::string projectName) {
             models::category category(categoryId,
                    categoryName,
-                   description != nullptr ? *description : "",
                    dateCreatedUtc,
                    dateModifiedUtc,
                    isActive,
@@ -484,13 +486,12 @@ std::vector<models::category> db_service::get_categories()
     return categories;
 }
 
-void db_service::update_category(models::category category)
+void db_service::update_category(const models::category category)
 {
     auto db = db_connection::get_instance().get_handle();
     db << models::category::updateCategory
        << category.category_name
        << category.color
-       << category.description
        << category.project_id
        << category.date_modified_utc
        << category.category_id;

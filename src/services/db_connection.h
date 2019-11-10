@@ -20,6 +20,7 @@
 #pragma once
 
 #include <sqlite_modern_cpp.h>
+
 namespace app::services
 {
 class db_connection final
