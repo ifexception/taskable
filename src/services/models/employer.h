@@ -23,6 +23,7 @@
 
 namespace app::models
 {
+// TODO Legacy, remove
 struct employer
 {
     employer() = default;

@@ -23,28 +23,26 @@
 
 namespace app::models
 {
-struct category
-{
+// TODO Legacy, remove
+struct category {
     category() = default;
+    explicit category(std::string categoryName, unsigned int color, int projectId, std::string projectName);
     explicit category(int categoryId,
         std::string categoryName,
-        int color,
-        std::string description,
+        unsigned int color,
         int dateCreatedUtc,
         int dateModifiedUtc,
         int isActive,
         int projectId);
     explicit category(int categoryId,
         std::string categoryName,
-        std::string description,
         int dateCreatedUtc,
         int dateModifiedUtc,
         int isActive,
         std::string projectName);
     explicit category(int categoryId,
         std::string categoryName,
-        int color,
-        std::string description,
+        unsigned int color,
         int dateCreatedUtc,
         int dateModifiedUtc,
         int isActive,
@@ -53,8 +51,7 @@ struct category
 
     int category_id;
     std::string category_name;
-    int color;
-    std::string description;
+    unsigned int color;
     int date_created_utc;
     int date_modified_utc;
     int is_active;
@@ -68,4 +65,4 @@ struct category
     static const std::string updateCategory;
     static const std::string deleteCategory;
 };
-}
+} // namespace app::models

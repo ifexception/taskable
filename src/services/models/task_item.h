@@ -24,6 +24,7 @@
 
 namespace app::models
 {
+// TODO Legacy, remove
 struct task_item {
     task_item() = default;
     explicit task_item(int taskItemId,

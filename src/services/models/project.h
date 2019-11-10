@@ -23,8 +23,8 @@
 
 namespace app::models
 {
-struct project
-{
+// TODO Legacy, remove
+struct project {
     project() = default;
     explicit project(int projectId,
         std::string projectName,
@@ -62,4 +62,4 @@ struct project
     static const std::string updateProject;
     static const std::string deleteProject;
 };
-}
+} // namespace app::models

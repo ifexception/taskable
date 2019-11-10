@@ -23,6 +23,7 @@
 
 namespace app::models
 {
+// TODO Legacy, remove
 struct client
 {
     client() = default;
