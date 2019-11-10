@@ -30,8 +30,8 @@ CREATE TABLE projects
     project_id INTEGER PRIMARY KEY NOT NULL,
     name TEXT NOT NULL UNIQUE,
     display_name TEXT NOT NULL,
-    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
-    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
+    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
     is_active INTEGER NOT NULL,
 
     employer_id INTEGER NOT NULL,
@@ -56,10 +56,9 @@ CREATE TABLE categories
 (
     category_id INTEGER PRIMARY KEY NOT NULL,
     name TEXT NOT NULL,
-    description TEXT NULL,
     color INTEGER NOT NULL,
-    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
-    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
+    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
     is_active INTEGER NOT NULL,
 
     project_id INTEGER NOT NULL,
