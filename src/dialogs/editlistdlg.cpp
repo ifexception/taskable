@@ -126,7 +126,7 @@ void EditListDialog::OnItemDoubleClick(wxListEvent& event)
         break;
     }
     case dialog_type::Category: {
-        CategoryDialog editCategory(this, pLogger, true, id);
+        CategoryDialog editCategory(this, pLogger, id);
         editCategory.ShowModal();
         break;
     }

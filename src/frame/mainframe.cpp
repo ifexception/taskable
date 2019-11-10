@@ -42,6 +42,7 @@
 #include "../dialogs/checkforupdatedlg.h"
 #include "../services/db_service.h"
 #include "../wizards/setupwizard.h"
+#include "../dialogs/categoriesdlg.h"
 #include "taskbaricon.h"
 
 namespace app::frame
@@ -138,7 +139,7 @@ void MainFrame::CreateControls()
     auto fileMenu = new wxMenu();
 
     auto entryTaskMenuItem =
-        fileMenu->Append(ids::ID_NEW_ENTRY_TASK, wxT("New Task &Entry\tCtrl-N"), wxT("Create new task entry"));
+        fileMenu->Append(ids::ID_NEW_ENTRY_TASK, wxT("New &Entry Task\tCtrl-N"), wxT("Create new entry task"));
     entryTaskMenuItem->SetBitmap(common::GetEntryTaskIcon());
 
     auto timedTaskMenuItem =
@@ -147,7 +148,7 @@ void MainFrame::CreateControls()
 
     fileMenu->AppendSeparator();
 
-    auto stopwatchMenuItem = fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("Sto&pwatch Task\tCtrl-Q"), wxT("Start task stopwatch"));
+    auto stopwatchMenuItem = fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("&Stopwatch Task\tCtrl-Q"), wxT("Start task stopwatch"));
     stopwatchMenuItem->SetBitmap(common::GetStopwatchIcon());
 
     fileMenu->AppendSeparator();
@@ -341,8 +342,8 @@ void MainFrame::OnNewProject(wxCommandEvent& event)
 
 void MainFrame::OnNewCategory(wxCommandEvent& event)
 {
-    dialog::CategoryDialog categoryDialog(this, pLogger);
-    categoryDialog.ShowModal();
+    dialog::CategoriesDialog categoriesDialog(this, pLogger);
+    categoriesDialog.ShowModal();
 }
 
 void MainFrame::OnEditEmployer(wxCommandEvent& event)
