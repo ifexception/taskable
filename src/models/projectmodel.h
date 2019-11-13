@@ -21,6 +21,7 @@
 
 #include <vector>
 
+#include <wx/datetime.h>
 #include <wx/string.h>
 
 namespace app::model
@@ -36,15 +37,15 @@ public:
     const int GetProjectId() const;
     const wxString GetName() const;
     const wxString GetDisplayName() const;
-    const int GetDateCreated();
-    const int GetDateUpdated();
+    const wxDateTime GetDateCreated();
+    const wxDateTime GetDateUpdated();
     const bool IsActive() const;
 
     void SetProjectId(const int projectId);
     void SetName(const wxString& name);
     void SetDisplayName(const wxString& displayName);
-    void SetDateCreated(const int dateCreated);
-    void SetDateUpdated(const int dateUpdated);
+    void SetDateCreated(const wxDateTime& dateCreated);
+    void SetDateUpdated(const wxDateTime& dateUpdated);
     void IsActive(const bool isActive);
 
     static std::vector<model::ProjectModel> GetAllProjects();
@@ -53,8 +54,8 @@ private:
     int mProjectId;
     wxString mName;
     wxString mDisplayName;
-    int mDateCreated;
-    int mDateUpdated;
+    wxDateTime mDateCreated;
+    wxDateTime mDateUpdated;
     bool bIsActive;
 
     static const std::string getProjects;

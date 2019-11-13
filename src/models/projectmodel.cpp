@@ -27,8 +27,8 @@ ProjectModel::ProjectModel()
     : mProjectId(0)
     , mName(wxGetEmptyString())
     , mDisplayName(wxGetEmptyString())
-    , mDateCreated(0)
-    , mDateUpdated(0)
+    , mDateCreated(wxDefaultDateTime)
+    , mDateUpdated(wxDefaultDateTime)
     , bIsActive(false)
 {
 }
@@ -36,12 +36,20 @@ ProjectModel::ProjectModel()
 ProjectModel::ProjectModel(int projectId, wxString name, wxString displayName)
     : ProjectModel()
 {
-    SetProjectId(projectId);
-    SetName(name);
-    SetDisplayName(displayName);
+    mProjectId = projectId;
+    mName = name;
+    mDisplayName = displayName;
 }
 
-void ProjectModel::Reset() {}
+void ProjectModel::Reset()
+{
+    mProjectId = 0;
+    mName = wxGetEmptyString();
+    mDisplayName = wxGetEmptyString();
+    mDateCreated = wxDefaultDateTime;
+    mDateUpdated = wxDefaultDateTime;
+    bIsActive = false;
+}
 
 const int ProjectModel::GetProjectId() const
 {
@@ -58,12 +66,12 @@ const wxString ProjectModel::GetDisplayName() const
     return mDisplayName;
 }
 
-const int ProjectModel::GetDateCreated()
+const wxDateTime ProjectModel::GetDateCreated()
 {
     return mDateCreated;
 }
 
-const int ProjectModel::GetDateUpdated()
+const wxDateTime ProjectModel::GetDateUpdated()
 {
     return mDateUpdated;
 }
@@ -88,12 +96,12 @@ void ProjectModel::SetDisplayName(const wxString& displayName)
     mDisplayName = displayName;
 }
 
-void ProjectModel::SetDateCreated(const int dateCreated)
+void ProjectModel::SetDateCreated(const wxDateTime& dateCreated)
 {
     mDateCreated = dateCreated;
 }
 
-void ProjectModel::SetDateUpdated(const int dateUpdated)
+void ProjectModel::SetDateUpdated(const wxDateTime& dateUpdated)
 {
     mDateUpdated = dateUpdated;
 }
