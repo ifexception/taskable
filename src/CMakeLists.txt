@@ -44,13 +44,15 @@ set (SRC
     "frame/mainframe.cpp"
     "frame/taskbaricon.cpp"
     "dialogs/taskitemdlg.cpp"
-    "dialogs/employerdlg.cpp"
     "dialogs/clientdlg.cpp"
     "dialogs/editlistdlg.cpp"
     "dialogs/settingsdialog.cpp"
     "dialogs/stopwatchtaskdlg.cpp"
     "dialogs/checkforupdatedlg.cpp"
     "wizards/setupwizard.cpp"
+
+    "dialogs/employerdlg.cpp"
+    "models/employermodel.cpp"
 
     "dialogs/categorydlg.cpp"
     "dialogs/categoriesdlg.cpp"

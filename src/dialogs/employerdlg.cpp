@@ -20,6 +20,7 @@
 #include "employerdlg.h"
 
 #include <sqlite_modern_cpp/errors.h>
+#include <wx/richtooltip.h>
 #include <wx/statline.h>
 
 #include "../common/constants.h"
@@ -30,19 +31,13 @@
 
 namespace app::dialog
 {
-// clang-format off
-wxBEGIN_EVENT_TABLE(EmployerDialog, wxDialog)
-EVT_BUTTON(wxID_OK, EmployerDialog::OnOk)
-EVT_BUTTON(wxID_CANCEL, EmployerDialog::OnCancel)
-EVT_CHECKBOX(EmployerDialog::IDC_ISACTIVE, EmployerDialog::OnIsActiveCheck)
-wxEND_EVENT_TABLE()
+const wxString& EmployerDialog::DateLabel = wxT("Created %s | Updated %s");
 
 EmployerDialog::EmployerDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, const wxString& name)
     : pLogger(logger)
-    , mNameText(wxGetEmptyString())
     , bIsEdit(false)
-    , mEmployerId(0)
-// clang-format on
+    , mEmployerId(-1)
+    , mEmployer()
 {
     Create(parent,
         wxID_ANY,
@@ -60,9 +55,9 @@ EmployerDialog::EmployerDialog(wxWindow* parent,
     int employerId,
     const wxString& name)
     : pLogger(logger)
-    , mNameText(wxGetEmptyString())
     , bIsEdit(isEdit)
     , mEmployerId(employerId)
+    , mEmployer(employerId)
 {
     Create(parent,
         wxID_ANY,
@@ -85,6 +80,7 @@ bool EmployerDialog::Create(wxWindow* parent,
     bool created = wxDialog::Create(parent, windowId, title, point, size, style, name);
     if (created) {
         CreateControls();
+        ConfigureEventBindings();
 
         if (bIsEdit) {
             DataToControls();
@@ -120,10 +116,11 @@ void EmployerDialog::CreateControls()
     auto employerName = new wxStaticText(employerDetailsPanel, wxID_STATIC, wxT("Name"));
     taskFlexGridSizer->Add(employerName, common::sizers::ControlCenterVertical);
 
-    pEmployerCtrl = new wxTextCtrl(
+    pNameTextCtrl = new wxTextCtrl(
         employerDetailsPanel, IDC_EMPLOYERTEXT, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
-    pEmployerCtrl->Bind(wxEVT_KILL_FOCUS, &EmployerDialog::OnEmployerTextControlLostFocus, this);
-    taskFlexGridSizer->Add(pEmployerCtrl, common::sizers::ControlDefault);
+    pNameTextCtrl->SetHint(wxT("Enter employer name"));
+    pNameTextCtrl->SetToolTip(wxT("Enter a name for the employer"));
+    taskFlexGridSizer->Add(pNameTextCtrl, common::sizers::ControlDefault);
 
     if (bIsEdit) {
         auto isActiveFiller = new wxStaticText(employerDetailsPanel, wxID_STATIC, wxT(""));
@@ -134,16 +131,11 @@ void EmployerDialog::CreateControls()
         taskFlexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
 
         /* Date Created Text Control */
-        pDateCreatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
-        auto font = pDateCreatedTextCtrl->GetFont();
-        font.MakeItalic();
-        font.SetPointSize(8);
-        pDateCreatedTextCtrl->SetFont(font);
-        detailsBoxSizer->Add(pDateCreatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
-
-        /* Date Updated Text Control */
-        pDateUpdatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Updated on: %s"));
-        detailsBoxSizer->Add(pDateUpdatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+        pDateTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
+        auto font = pDateTextCtrl->GetFont();
+        font.SetPointSize(7);
+        pDateTextCtrl->SetFont(font);
+        detailsBoxSizer->Add(pDateTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
     }
 
     /* Horizontal Line*/
@@ -157,40 +149,84 @@ void EmployerDialog::CreateControls()
     mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
     pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
-    auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
+    pCancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
     buttonPanelSizer->Add(pOkButton, common::sizers::ControlDefault);
-    buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(pCancelButton, common::sizers::ControlDefault);
 }
+
+// clang-format off
+void EmployerDialog::ConfigureEventBindings()
+{
+    pNameTextCtrl->Bind(
+        wxEVT_TEXT,
+        &EmployerDialog::OnNameChange,
+        this
+    );
+
+    pOkButton->Bind(
+        wxEVT_BUTTON,
+        &EmployerDialog::OnOk,
+        this,
+        wxID_OK
+    );
+
+    pCancelButton->Bind(
+        wxEVT_BUTTON,
+        &EmployerDialog::OnCancel,
+        this,
+        wxID_CANCEL
+    );
+
+    if (bIsEdit) {
+        pIsActiveCtrl->Bind(
+            wxEVT_CHECKBOX,
+            &EmployerDialog::OnIsActiveCheck,
+            this
+        );
+    }
+}
+// clang-format on
 
 void EmployerDialog::DataToControls()
 {
-    services::db_service dbService;
-    models::employer employer;
+    model::EmployerModel employer;
     try {
-        employer = dbService.get_employer(mEmployerId);
+        employer = model::EmployerModel::GetById(mEmployerId);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in get_employer() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in GetById() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    pEmployerCtrl->ChangeValue(employer.employer_name);
+    pNameTextCtrl->SetValue(employer.GetName());
 
-    wxString dateCreatedString = util::ConvertUnixTimestampToString(employer.date_created_utc);
-    wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
-    pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
+    pDateTextCtrl->SetLabel(wxString::Format(EmployerDialog::DateLabel,
+        employer.GetDateCreated().FormatISOCombined(),
+        employer.GetDateModified().FormatISOCombined()));
 
-    wxString dateUpdatedString = util::ConvertUnixTimestampToString(employer.date_modified_utc);
-    wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
-    pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
+    pIsActiveCtrl->SetValue(employer.IsActive());
+}
 
-    pIsActiveCtrl->SetValue(employer.is_active);
+void EmployerDialog::AttachRichTooltipToNameTextControl()
+{
+    const wxString errorHeader = wxT("Invalid input");
+    const wxString errorMessage = wxT("A name is required \nand must be within %d to %d characters long");
+    const wxString errorMessageFormat = wxString::Format(errorMessage, Constants::MinLength, Constants::MaxLength);
+
+    wxRichToolTip tooltip(errorHeader, errorMessageFormat);
+    tooltip.SetIcon(wxICON_WARNING);
+    tooltip.ShowFor(pNameTextCtrl);
+}
+
+void EmployerDialog::OnNameChange(wxCommandEvent& event)
+{
+    wxString name = pNameTextCtrl->GetValue();
+    mEmployer.SetName(name);
 }
 
 bool EmployerDialog::Validate()
 {
-    if (mNameText.empty()) {
-        auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Employer name"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    if (!mEmployer.IsNameValid()) {
+        AttachRichTooltipToNameTextControl();
         return false;
     }
 
@@ -199,56 +235,26 @@ bool EmployerDialog::Validate()
 
 bool EmployerDialog::AreControlsEmpty()
 {
-    bool isEmpty = mNameText.empty();
-    return isEmpty;
-}
-
-void EmployerDialog::OnEmployerTextControlLostFocus(wxFocusEvent& event)
-{
-    if (pEmployerCtrl->GetValue().length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Employer name"), 2);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        pOkButton->Disable();
-    } else if (pEmployerCtrl->GetValue().length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Employer name"), 255);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        pOkButton->Disable();
-    } else {
-        pOkButton->Enable();
-    }
-
-    event.Skip();
+    return pNameTextCtrl->GetValue().empty();
 }
 
 void EmployerDialog::OnOk(wxCommandEvent& event)
 {
-    mNameText = pEmployerCtrl->GetValue();
-
-    bool isValid = Validate();
-    if (!isValid) {
-        return;
-    }
-
-    services::db_service dbService;
-    try {
+    if (Validate()) {
+        if (!bIsEdit) {
+            model::EmployerModel::Create(mEmployer);
+        }
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
-            models::employer employer;
-            employer.employer_id = mEmployerId;
-            employer.employer_name = std::string(mNameText.ToUTF8());
-            employer.date_modified_utc = util::UnixTimestamp();
-            dbService.update_employer(employer);
+            mEmployer.SetDateModified(wxDateTime::Now());
+            model::EmployerModel::Update(mEmployer);
         }
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            dbService.delete_employer(mEmployerId, util::UnixTimestamp());
+            mEmployer.SetDateModified(wxDateTime::Now());
+            model::EmployerModel::Delete(mEmployer);
         }
-        if (!bIsEdit) {
-            dbService.create_new_employer(std::string(mNameText.ToUTF8()));
-        }
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in employer OnSave() - {0:d} : {1}", e.get_code(), e.what());
-    }
 
-    EndModal(wxID_OK);
+        EndModal(wxID_OK);
+    }
 }
 
 void EmployerDialog::OnCancel(wxCommandEvent& event)
@@ -267,9 +273,9 @@ void EmployerDialog::OnCancel(wxCommandEvent& event)
 void EmployerDialog::OnIsActiveCheck(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
-        pEmployerCtrl->Enable();
+        pNameTextCtrl->Enable();
     } else {
-        pEmployerCtrl->Disable();
+        pNameTextCtrl->Disable();
     }
 }
 } // namespace app::dialog

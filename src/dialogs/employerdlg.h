@@ -25,6 +25,8 @@
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
+#include "../models/employermodel.h"
+
 namespace app::dialog
 {
 class EmployerDialog final : public wxDialog
@@ -42,7 +44,6 @@ public:
     virtual ~EmployerDialog() = default;
 
 private:
-    wxDECLARE_EVENT_TABLE();
 
     bool Create(wxWindow* parent,
         wxWindowID windowId,
@@ -53,27 +54,31 @@ private:
         const wxString& name);
 
     void CreateControls();
+    void ConfigureEventBindings();
     void DataToControls();
 
-    bool Validate();
-    bool AreControlsEmpty();
+    void AttachRichTooltipToNameTextControl();
 
-    void OnEmployerTextControlLostFocus(wxFocusEvent& event);
+    void OnNameChange(wxCommandEvent& event);
+
     void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
 
+    bool Validate();
+    bool AreControlsEmpty();
+
     std::shared_ptr<spdlog::logger> pLogger;
 
-    wxButton* pOkButton;
-    wxTextCtrl* pEmployerCtrl;
+    wxTextCtrl* pNameTextCtrl;
     wxCheckBox* pIsActiveCtrl;
-    wxStaticText* pDateCreatedTextCtrl;
-    wxStaticText* pDateUpdatedTextCtrl;
+    wxStaticText* pDateTextCtrl;
+    wxButton* pOkButton;
+    wxButton* pCancelButton;
 
-    wxString mNameText;
     bool bIsEdit;
     int mEmployerId;
+    model::EmployerModel mEmployer;
 
     enum {
         IDC_EMPLOYERTEXT = wxID_HIGHEST + 1,
@@ -83,5 +88,7 @@ private:
         MIN_WIDTH = 320,
         MIN_HEIGHT = 240
     };
+
+    static const wxString& DateLabel;
 };
 } // namespace app::dialog

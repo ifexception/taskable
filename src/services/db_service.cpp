@@ -32,8 +32,8 @@ void db_service::create_employers_table()
                               "("
                               "    employer_id INTEGER PRIMARY KEY NOT NULL,"
                               "    name TEXT NOT NULL,"
-                              "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-                              "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
                               "    is_active INTEGER NOT NULL"
                               ");";
     auto db = db_connection::get_instance().get_handle();
