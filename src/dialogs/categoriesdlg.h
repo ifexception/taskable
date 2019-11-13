@@ -82,8 +82,7 @@ private:
     model::CategoryModel ExtractCategoryDataFromListIndex(long index);
 
     bool HasPendingChanges();
-    bool ValidateCreate();
-    bool ValidateUpdate();
+    bool Validate();
 
     void ResetControlValues();
 

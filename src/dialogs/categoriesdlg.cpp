@@ -423,7 +423,7 @@ void CategoriesDialog::OnClear(wxCommandEvent& event)
 
 void CategoriesDialog::OnAdd(wxCommandEvent& event)
 {
-    if (ValidateCreate()) {
+    if (Validate()) {
         if (!bEditFromListCtrl) {
             mCategories.push_back(mModel);
             AppendListControlEntry(mModel);
@@ -611,7 +611,7 @@ bool CategoriesDialog::HasPendingChanges()
     return mCategories.size() > 0;
 }
 
-bool CategoriesDialog::ValidateCreate()
+bool CategoriesDialog::Validate()
 {
     bool isValid = true;
     if (!mModel.IsNameValid()) {
@@ -625,11 +625,6 @@ bool CategoriesDialog::ValidateCreate()
     }
 
     return isValid;
-}
-
-bool CategoriesDialog::ValidateUpdate()
-{
-    return false;
 }
 
 void CategoriesDialog::ResetControlValues()
