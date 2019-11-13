@@ -50,8 +50,8 @@ private:
         long style,
         const wxString& name);
 
-    void ConfigureEventBindings();
     void CreateControls();
+    void ConfigureEventBindings();
     void FillControls();
     void DataToControls();
     void PostInitializeProcedure();

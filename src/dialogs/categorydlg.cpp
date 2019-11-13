@@ -234,7 +234,7 @@ void CategoryDialog::DataToControls()
 
     pDateTextCtrl->SetLabel(wxString::Format(CategoryDialog::DateLabel,
         category.GetDateCreated().FormatISOCombined(),
-        category.GetDateModitied().FormatISOCombined()));
+        category.GetDateModified().FormatISOCombined()));
 
     pIsActiveCtrl->SetValue(category.IsActive());
 }

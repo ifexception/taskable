@@ -54,7 +54,7 @@ public:
     const wxString GetName() const;
     const wxColor GetColor() const;
     const wxDateTime GetDateCreated() const;
-    const wxDateTime GetDateModitied() const;
+    const wxDateTime GetDateModified() const;
     const bool IsActive() const;
     const int GetProjectId() const;
 

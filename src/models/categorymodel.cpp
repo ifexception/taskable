@@ -114,7 +114,7 @@ const wxDateTime CategoryModel::GetDateCreated() const
     return mDateCreated;
 }
 
-const wxDateTime CategoryModel::GetDateModitied() const
+const wxDateTime CategoryModel::GetDateModified() const
 {
     return mDateModified;
 }
