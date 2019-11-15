@@ -44,7 +44,6 @@ set (SRC
     "frame/mainframe.cpp"
     "frame/taskbaricon.cpp"
     "dialogs/taskitemdlg.cpp"
-    "dialogs/clientdlg.cpp"
     "dialogs/editlistdlg.cpp"
     "dialogs/settingsdialog.cpp"
     "dialogs/stopwatchtaskdlg.cpp"
@@ -53,6 +52,9 @@ set (SRC
 
     "dialogs/employerdlg.cpp"
     "models/employermodel.cpp"
+
+    "dialogs/clientdlg.cpp"
+    "models/clientmodel.cpp"
 
     "dialogs/categorydlg.cpp"
     "dialogs/categoriesdlg.cpp"

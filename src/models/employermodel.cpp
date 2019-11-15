@@ -125,6 +125,20 @@ EmployerModel EmployerModel::GetById(const int id)
     return employer;
 }
 
+std::vector<EmployerModel> EmployerModel::GetAll()
+{
+    std::vector<EmployerModel> employers;
+
+    auto db = services::db_connection::get_instance().get_handle();
+    db << model::EmployerModel::getEmployers >>
+        [&](int employerId, std::string employerName, int dateCreated, int dateModified, int isActive) {
+            model::EmployerModel employer(employerId, employerName, dateCreated, dateModified, isActive);
+            employers.push_back(employer);
+        };
+
+    return employers;
+}
+
 void EmployerModel::Update(const EmployerModel& employer)
 {
     auto db = services::db_connection::get_instance().get_handle();

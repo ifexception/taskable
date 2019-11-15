@@ -19,59 +19,64 @@
 
 #pragma once
 
-#include <memory>
 #include <string>
-#include <vector>
 
 #include <wx/string.h>
 #include <wx/datetime.h>
 
-#define FMT_HEADER_ONLY
-#include <spdlog/spdlog.h>
+#include "employermodel.h"
 
 namespace app::model
 {
-class EmployerModel final
+class ClientModel final
 {
 public:
-    EmployerModel();
-    EmployerModel(const int employerId);
-    EmployerModel(int employerId, wxString name, int dateCreated, int dateModified, bool isActive);
-    ~EmployerModel() = default;
+    ClientModel();
+    ClientModel(const int clientId);
+    ClientModel(int clientId, wxString name, int dateCreated, int dateModified, bool isActive, wxString employerName);
+    ~ClientModel() = default;
 
     bool IsNameValid();
+    bool IsEmployerSelected();
 
-    const int GetEmployerId() const;
+    const int GetClientId() const;
     const wxString GetName() const;
     const wxDateTime GetDateCreated() const;
     const wxDateTime GetDateModified() const;
     const bool IsActive() const;
+    const int GetEmployerId() const;
 
-    void SetEmployerId(const int employerId);
+    EmployerModel& GetEmployer();
+
+    void SetClientId(const int clientId);
     void SetName(const wxString& name);
     void SetDateCreated(const wxDateTime& dateCreated);
     void SetDateModified(const wxDateTime& dateModified);
     void IsActive(const bool isActive);
+    void SetEmployerId(const int employerId);
 
-    static void Create(const EmployerModel& employer);
-    static EmployerModel GetById(const int id);
-    static std::vector<EmployerModel> GetAll();
-    static void Update(const EmployerModel& employer);
-    static void Delete(const EmployerModel& employer);
+    void SetEmployer(const EmployerModel& employer);
+
+    static void Create(const ClientModel& client);
+    static ClientModel GetById(const int clientId);
+    static void Update(const ClientModel& client);
+    static void Delete(const ClientModel& client);
 
 private:
-    std::shared_ptr<spdlog::logger> pLogger;
-
-    int mEmployerId;
+    int mClientId;
     wxString mName;
     wxDateTime mDateCreated;
     wxDateTime mDateModified;
     bool bIsActive;
+    int mEmployerId;
 
-    static const std::string createEmployer;
-    static const std::string getEmployers;
-    static const std::string getEmployer;
-    static const std::string updateEmployer;
-    static const std::string deleteEmployer;
+    EmployerModel mEmployer;
+
+    static const std::string createClient;
+    static const std::string getClientsByEmployerId;
+    static const std::string getClients;
+    static const std::string getClientById;
+    static const std::string updateClient;
+    static const std::string deleteClient;
 };
-}
+} // namespace app::model

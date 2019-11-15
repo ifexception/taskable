@@ -25,8 +25,8 @@ const std::string client::createNewClient = "INSERT INTO clients (name, is_activ
 const std::string client::getClientsByEmployerId = "SELECT * FROM clients WHERE employer_id = ?";
 const std::string client::getClients = "SELECT clients.client_id, "
                                        "clients.name AS client_name, "
-                                       "clients.date_created_utc, "
-                                       "clients.date_modified_utc, "
+                                       "clients.date_created, "
+                                       "clients.date_modified, "
                                        "clients.is_active, "
                                        "employers.name AS employer_name "
                                        "FROM clients "
@@ -34,16 +34,16 @@ const std::string client::getClients = "SELECT clients.client_id, "
                                        "WHERE clients.is_active = 1";
 const std::string client::getClientById = "SELECT clients.client_id, "
                                           "clients.name AS client_name, "
-                                          "clients.date_created_utc, "
-                                          "clients.date_modified_utc, "
+                                          "clients.date_created, "
+                                          "clients.date_modified, "
                                           "clients.is_active, "
                                           "employers.name AS employer_name "
                                           "FROM clients "
                                           "INNER JOIN employers ON clients.employer_id = employers.employer_id "
                                           "WHERE clients.client_id = ?";
 const std::string client::updateClient =
-    "UPDATE clients SET name = ?, date_modified_utc = ?, employer_id = ? WHERE client_id = ?";
-const std::string client::deleteClient = "UPDATE clients SET is_active = 0, date_modified_utc = ? WHERE client_id = ?";
+    "UPDATE clients SET name = ?, date_modified = ?, employer_id = ? WHERE client_id = ?";
+const std::string client::deleteClient = "UPDATE clients SET is_active = 0, date_modified = ? WHERE client_id = ?";
 
 client::client(int clientId,
     std::string clientName,

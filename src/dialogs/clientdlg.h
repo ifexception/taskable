@@ -25,6 +25,8 @@
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
+#include "../models/clientmodel.h"
+
 namespace app::dialog
 {
 class ClientDialog : public wxDialog
@@ -33,17 +35,15 @@ public:
     ClientDialog() = delete;
     explicit ClientDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
-        const wxString& name = wxT("clientdialogdlg"));
+        const wxString& name = wxT("clientdlg"));
     explicit ClientDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
         bool isEdit,
         int clientId,
-        const wxString& name = wxT("clientdialogdl"));
+        const wxString& name = wxT("clientdlg"));
     virtual ~ClientDialog() = default;
 
 private:
-    wxDECLARE_EVENT_TABLE();
-
     bool Create(wxWindow* parent,
         wxWindowID windowId,
         const wxString& title,
@@ -51,32 +51,40 @@ private:
         const wxSize& size,
         long style,
         const wxString& name);
+
     void CreateControls();
+    void ConfigureEventBindings();
     void FillControls();
     void DataToControls();
 
     bool Validate();
     bool AreControlsEmpty();
 
-    void OnClientTextControlLostFocus(wxFocusEvent& event);
+    void AttachRichTooltipToNameTextControl();
+    void AttachRichTooltipToEmployerChoiceControl();
+
+    void OnNameChange(wxCommandEvent& event);
+    void OnEmployerChoiceSelection(wxCommandEvent& event);
+
     void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
 
     std::shared_ptr<spdlog::logger> pLogger;
 
-    wxButton* pOkButton;
-    wxTextCtrl* pNameCtrl;
+    wxTextCtrl* pNameTextCtrl;
     wxChoice* pEmployerChoiceCtrl;
     wxCheckBox* pIsActiveCtrl;
-    wxStaticText* pDateCreatedTextCtrl;
-    wxStaticText* pDateUpdatedTextCtrl;
+    wxStaticText* pDateTextCtrl;
+    wxButton* pOkButton;
+    wxButton* pCancelButton;
 
-    wxString mNameText;
-    int mEmployerId;
-    bool bIsEdit;
+    model::ClientModel mClient;
     int mClientId;
+    bool bIsEdit;
 
-    enum { IDC_NAME, IDC_EMPLOYER, IDC_ISACTIVE };
+    enum { IDC_NAME = wxID_HIGHEST + 1, IDC_EMPLOYER, IDC_ISACTIVE };
+
+    static const wxString& DateLabel;
 };
 } // namespace app::dialog

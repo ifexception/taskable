@@ -20,31 +20,29 @@
 #include "clientdlg.h"
 
 #include <sqlite_modern_cpp/errors.h>
+#include <wx/richtooltip.h>
 #include <wx/statline.h>
 
 #include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/util.h"
-#include "../services/db_service.h"
+#include "../models/employermodel.h"
 
 namespace app::dialog
 {
-// clang-format off
-wxBEGIN_EVENT_TABLE(ClientDialog, wxDialog)
-EVT_BUTTON(wxID_OK, ClientDialog::OnOk)
-EVT_BUTTON(wxID_CANCEL, ClientDialog::OnCancel)
-EVT_CHECKBOX(ClientDialog::IDC_ISACTIVE, ClientDialog::OnIsActiveCheck)
-wxEND_EVENT_TABLE()
+const wxString& ClientDialog::DateLabel = wxT("Created %s | Updated %s");
 
-ClientDialog::ClientDialog(wxWindow* parent,
-    std::shared_ptr<spdlog::logger> logger,
-    const wxString& name)
+ClientDialog::ClientDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, const wxString& name)
     : pLogger(logger)
-    , mNameText(wxGetEmptyString())
-    , mEmployerId(-1)
+    , pNameTextCtrl(nullptr)
+    , pEmployerChoiceCtrl(nullptr)
+    , pIsActiveCtrl(nullptr)
+    , pDateTextCtrl(nullptr)
+    , pOkButton(nullptr)
+    , pCancelButton(nullptr)
+    , mClient()
+    , mClientId(-1)
     , bIsEdit(false)
-    , mClientId(0)
-// clang-format on
 {
     Create(parent,
         wxID_ANY,
@@ -62,10 +60,15 @@ ClientDialog::ClientDialog(wxWindow* parent,
     int clientId,
     const wxString& name)
     : pLogger(logger)
-    , mNameText(wxGetEmptyString())
-    , mEmployerId(-1)
-    , bIsEdit(isEdit)
+    , pNameTextCtrl(nullptr)
+    , pEmployerChoiceCtrl(nullptr)
+    , pIsActiveCtrl(nullptr)
+    , pDateTextCtrl(nullptr)
+    , pOkButton(nullptr)
+    , pCancelButton(nullptr)
+    , mClient()
     , mClientId(clientId)
+    , bIsEdit(isEdit)
 {
     Create(parent,
         wxID_ANY,
@@ -88,6 +91,7 @@ bool ClientDialog::Create(wxWindow* parent,
 
     if (created) {
         CreateControls();
+        ConfigureEventBindings();
         FillControls();
 
         if (bIsEdit) {
@@ -96,7 +100,7 @@ bool ClientDialog::Create(wxWindow* parent,
 
         GetSizer()->Fit(this);
         SetIcon(common::GetProgramIcon());
-        Centre();
+        Center();
     }
 
     return created;
@@ -109,7 +113,7 @@ void ClientDialog::CreateControls()
     SetSizer(mainSizer);
 
     /* Task Details Box */
-    auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Client Information"));
+    auto detailsBox = new wxStaticBox(this, wxID_ANY, wxT("Client Details"));
     auto detailsBoxSizer = new wxStaticBoxSizer(detailsBox, wxVERTICAL);
     mainSizer->Add(detailsBoxSizer, common::sizers::ControlExpandProp);
 
@@ -124,42 +128,36 @@ void ClientDialog::CreateControls()
     auto clientNameText = new wxStaticText(clientDetailsPanel, wxID_STATIC, wxT("Name"));
     taskFlexGridSizer->Add(clientNameText, common::sizers::ControlCenterVertical);
 
-    pNameCtrl =
+    pNameTextCtrl =
         new wxTextCtrl(clientDetailsPanel, IDC_NAME, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
-    pNameCtrl->Bind(wxEVT_KILL_FOCUS, &ClientDialog::OnClientTextControlLostFocus, this);
-    pNameCtrl->SetToolTip(wxT("Enter a name for the client"));
-    taskFlexGridSizer->Add(pNameCtrl, common::sizers::ControlDefault);
+    pNameTextCtrl->SetHint(wxT("Client name"));
+    pNameTextCtrl->SetToolTip(wxT("Enter a name for the client"));
+    taskFlexGridSizer->Add(pNameTextCtrl, common::sizers::ControlDefault);
 
     /* Employer Selection Control */
     auto employerNameText = new wxStaticText(clientDetailsPanel, wxID_STATIC, wxT("Employer"));
     taskFlexGridSizer->Add(employerNameText, common::sizers::ControlCenterVertical);
 
-    pEmployerChoiceCtrl =
-        new wxChoice(clientDetailsPanel, IDC_EMPLOYER, wxDefaultPosition, wxDefaultSize);
+    pEmployerChoiceCtrl = new wxChoice(clientDetailsPanel, IDC_EMPLOYER, wxDefaultPosition, wxDefaultSize);
     pEmployerChoiceCtrl->AppendString(wxT("Select a employer"));
     pEmployerChoiceCtrl->SetSelection(0);
     pEmployerChoiceCtrl->SetToolTip(wxT("Select a employer to associate the client with"));
     taskFlexGridSizer->Add(pEmployerChoiceCtrl, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
     if (bIsEdit) {
+        /* Is Active Checkbox Control */
         auto isActiveFiller = new wxStaticText(clientDetailsPanel, wxID_STATIC, wxT(""));
         taskFlexGridSizer->Add(isActiveFiller, common::sizers::ControlDefault);
 
-        /* Is Active Checkbox Control */
         pIsActiveCtrl = new wxCheckBox(clientDetailsPanel, IDC_ISACTIVE, wxT("Is Active"));
         taskFlexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
 
-        /* Date Created Text Control */
-        pDateCreatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
-        auto font = pDateCreatedTextCtrl->GetFont();
-        font.MakeItalic();
+        /* Date Text Control */
+        pDateTextCtrl = new wxStaticText(this, wxID_STATIC, wxT(""));
+        auto font = pDateTextCtrl->GetFont();
         font.SetPointSize(8);
-        pDateCreatedTextCtrl->SetFont(font);
-        detailsBoxSizer->Add(pDateCreatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
-
-        /* Date Updated Text Control */
-        pDateUpdatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Updated on: %s"));
-        detailsBoxSizer->Add(pDateUpdatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+        pDateTextCtrl->SetFont(font);
+        detailsBoxSizer->Add(pDateTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
     }
 
     /* Horizontal Line*/
@@ -173,122 +171,159 @@ void ClientDialog::CreateControls()
     mainSizer->Add(buttonPanel, wxSizerFlags(wxSizerFlags().Border(wxALL, 5)).Center());
 
     pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
-    auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
+    pCancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
     buttonPanelSizer->Add(pOkButton, wxSizerFlags().Border(wxALL, 5));
-    buttonPanelSizer->Add(cancelButton, wxSizerFlags().Border(wxALL, 5));
+    buttonPanelSizer->Add(pCancelButton, wxSizerFlags().Border(wxALL, 5));
 }
+
+// clang-format off
+void ClientDialog::ConfigureEventBindings()
+{
+    pEmployerChoiceCtrl->Bind(
+        wxEVT_CHOICE,
+        &ClientDialog::OnEmployerChoiceSelection,
+        this
+    );
+
+    pNameTextCtrl->Bind(
+        wxEVT_TEXT,
+        &ClientDialog::OnNameChange,
+        this
+    );
+
+    if (bIsEdit) {
+        pIsActiveCtrl->Bind(
+            wxEVT_CHECKBOX,
+            &ClientDialog::OnIsActiveCheck,
+            this
+        );
+    }
+
+    pOkButton->Bind(
+        wxEVT_BUTTON,
+        &ClientDialog::OnOk,
+        this,
+        wxID_OK
+    );
+
+    pCancelButton->Bind(
+        wxEVT_BUTTON,
+        &ClientDialog::OnCancel,
+        this,
+        wxID_CANCEL
+    );
+}
+// clang-format on
 
 void ClientDialog::FillControls()
 {
-    services::db_service dbService;
-    std::vector<models::employer> employers;
+    std::vector<model::EmployerModel> employers;
     try {
-        employers = dbService.get_employers();
+        employers = model::EmployerModel::GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on get_employers() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (auto employer : employers) {
-        pEmployerChoiceCtrl->Append(employer.employer_name, util::IntToVoidPointer(employer.employer_id));
+        pEmployerChoiceCtrl->Append(employer.GetName(), util::IntToVoidPointer(employer.GetEmployerId()));
     }
 }
 
 void ClientDialog::DataToControls()
 {
-    services::db_service dbService;
-    models::client client;
+    model::ClientModel client;
     try {
-        client = dbService.get_client_by_id(mClientId);
+        client = model::ClientModel::GetById(mClientId);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on get_client_by_id() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on GetById() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    pNameCtrl->ChangeValue(client.client_name);
-    pEmployerChoiceCtrl->SetStringSelection(client.employer_name);
+    pNameTextCtrl->SetValue(client.GetName());
+    pEmployerChoiceCtrl->SetStringSelection(client.GetEmployer().GetName());
+    pEmployerChoiceCtrl->SendSelectionChangedEvent(wxEVT_CHOICE);
 
-    wxString dateCreatedString = util::ConvertUnixTimestampToString(client.date_created_utc);
-    wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
-    pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
+    pDateTextCtrl->SetLabel(wxString::Format(ClientDialog::DateLabel,
+        client.GetDateCreated().FormatISOCombined(),
+        client.GetDateModified().FormatISOCombined()));
 
-    wxString dateUpdatedString = util::ConvertUnixTimestampToString(client.date_modified_utc);
-    wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
-    pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
-
-    pIsActiveCtrl->SetValue(client.is_active);
+    pIsActiveCtrl->SetValue(client.IsActive());
 }
 
 bool ClientDialog::Validate()
 {
-    if (mNameText.empty()) {
-        auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Client name"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
+    bool isValid = true;
+    if (!mClient.IsNameValid()) {
+        isValid = false;
+        AttachRichTooltipToNameTextControl();
     }
 
-    if (mEmployerId == -1 || mEmployerId == 0) {
-        auto message = wxString::Format(Constants::Messages::SelectionRequired, wxT("Employer"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        return false;
+    if (!mClient.IsEmployerSelected()) {
+        isValid = false;
+        AttachRichTooltipToEmployerChoiceControl();
     }
-    return true;
+
+    return isValid;
 }
 
 bool ClientDialog::AreControlsEmpty()
 {
-    bool isEmpty = mNameText.empty() && (mEmployerId == -1 || mEmployerId == 0);
-    return isEmpty;
+    return pNameTextCtrl->GetValue().empty() && pEmployerChoiceCtrl->GetSelection() == 0;
 }
 
-void ClientDialog::OnClientTextControlLostFocus(wxFocusEvent& event)
+void ClientDialog::AttachRichTooltipToNameTextControl()
 {
-    if (pNameCtrl->GetValue().length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Client name"), 2);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        pOkButton->Disable();
+    const wxString errorHeader = wxT("Invalid input");
+    const wxString errorMessage = wxT("A name is required \nand must be within %d to %d characters long");
+    const wxString errorMessageFormat = wxString::Format(errorMessage, Constants::MinLength, Constants::MaxLength);
 
-    } else if (pNameCtrl->GetValue().length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Client name"), 255);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        pOkButton->Disable();
-    } else {
-        pOkButton->Enable();
-    }
+    wxRichToolTip tooltip(errorHeader, errorMessageFormat);
+    tooltip.SetIcon(wxICON_WARNING);
+    tooltip.ShowFor(pNameTextCtrl);
+}
 
-    event.Skip();
+void ClientDialog::AttachRichTooltipToEmployerChoiceControl()
+{
+    const wxString errorHeader = wxT("Invalid selection");
+    const wxString errorMessage = wxT("A project selection is required");
+
+    wxRichToolTip tooltip(errorHeader, errorMessage);
+    tooltip.SetIcon(wxICON_WARNING);
+    tooltip.ShowFor(pEmployerChoiceCtrl);
+}
+
+void ClientDialog::OnNameChange(wxCommandEvent& event)
+{
+    wxString name = pNameTextCtrl->GetValue();
+    mClient.SetName(name);
+}
+
+void ClientDialog::OnEmployerChoiceSelection(wxCommandEvent& event)
+{
+    int id = util::VoidPointerToInt(pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()));
+    wxString name = pEmployerChoiceCtrl->GetStringSelection();
+
+    mClient.SetEmployerId(id);
+    mClient.GetEmployer().SetName(name);
 }
 
 void ClientDialog::OnOk(wxCommandEvent& event)
 {
-    mNameText = pNameCtrl->GetValue();
-    mEmployerId = util::VoidPointerToInt(pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()));
-
-    bool isValid = Validate();
-    if (!isValid) {
-        return;
-    }
-
-    services::db_service clientService;
-    try {
-        if (bIsEdit && pIsActiveCtrl->IsChecked()) {
-            models::client client;
-            client.client_id = mClientId;
-            client.client_name = std::string(mNameText.ToUTF8());
-            client.date_modified_utc = util::UnixTimestamp();
-            client.employer_id = mEmployerId;
-            clientService.update_client(client);
-        }
-        if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            clientService.delete_client(mClientId, util::UnixTimestamp());
-        }
+    if (Validate()) {
         if (!bIsEdit) {
-            clientService.create_new_client(std::string(mNameText.ToUTF8()), mEmployerId);
+            model::ClientModel::Create(mClient);
         }
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on client OnSave() - {0:d} : {1}", e.get_code(), e.what());
-    }
 
-    EndModal(wxID_OK);
+        if (bIsEdit && pIsActiveCtrl->IsChecked()) {
+            model::ClientModel::Update(mClient);
+        }
+
+        if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
+            model::ClientModel::Delete(mClient);
+        }
+
+        EndModal(wxID_OK);
+    }
 }
 
 void ClientDialog::OnCancel(wxCommandEvent& event)
@@ -307,10 +342,10 @@ void ClientDialog::OnCancel(wxCommandEvent& event)
 void ClientDialog::OnIsActiveCheck(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
-        pNameCtrl->Enable();
+        pNameTextCtrl->Enable();
         pEmployerChoiceCtrl->Enable();
     } else {
-        pNameCtrl->Disable();
+        pNameTextCtrl->Disable();
         pEmployerChoiceCtrl->Disable();
     }
 }
