@@ -30,6 +30,8 @@
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
+#include "setupdatabase.h"
+
 namespace app::wizard
 {
 class SetupWizard final : public wxWizard
@@ -52,11 +54,12 @@ public:
 private:
     void CreateDatabaseFile();
     void DeleteDatabaseFile();
-    bool SetUpDatabase();
+    bool SetUpTables();
     bool SetUpEntities();
 
     std::shared_ptr<spdlog::logger> pLogger;
     wxWizardPageSimple* pPage1;
+    wxFrame* pFrame;
 
     wxString mEmployer;
     wxString mClient;

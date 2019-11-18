@@ -42,6 +42,7 @@ SetupWizard::SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger)
           wxDEFAULT_DIALOG_STYLE)
     , pLogger(logger)
     , pPage1(nullptr)
+    , pFrame(frame)
     , mEmployer(wxGetEmptyString())
     , mClient(wxGetEmptyString())
     , mProject(wxGetEmptyString())
@@ -69,7 +70,7 @@ bool SetupWizard::Run()
     auto wizardSuccess = wxWizard::RunWizard(pPage1);
     if (wizardSuccess) {
         CreateDatabaseFile();
-        bool success = SetUpDatabase();
+        bool success = SetUpTables();
         if (!success) {
             DeleteDatabaseFile();
             return false;
@@ -136,68 +137,16 @@ void SetupWizard::DeleteDatabaseFile()
     }
 }
 
-bool SetupWizard::SetUpDatabase()
+bool SetupWizard::SetUpTables()
 {
-    services::db_service dbService;
-
-    try {
-        dbService.create_employers_table();
-        dbService.create_clients_table();
-        dbService.create_projects_table();
-        dbService.create_categories_table();
-        dbService.create_tasks_table();
-        dbService.create_task_item_types_table();
-        dbService.create_task_items_table();
-
-        dbService.seed_task_item_types_table();
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on create_X_table() - {0:d} : {1}", e.get_code(), e.what());
-        return false;
-    }
-
-    return true;
+    SetupTables tables(pLogger);
+    return tables.CreateTables();
 }
 
 bool SetupWizard::SetUpEntities()
 {
-    services::db_service dbService;
-    int employerId = 0;
-    try {
-        dbService.create_new_employer(std::string(mEmployer.ToUTF8()));
-        employerId = dbService.get_last_insert_rowid();
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on create_new_employer() - {0:d} : {1}", e.get_code(), e.what());
-        return false;
-    }
-
-    int clientId = 0;
-    if (!mClient.empty()) {
-        try {
-            dbService.create_new_client(std::string(mClient.ToUTF8()), employerId);
-            clientId = dbService.get_last_insert_rowid();
-        } catch (const sqlite::sqlite_exception& e) {
-            pLogger->error("Error occured on create_new_client() - {0:d} : {1}", e.get_code(), e.what());
-            return false;
-        }
-    }
-
-    int projectId = 0;
-    try {
-        bool isAssociatedWithClient = clientId != 0;
-        if (isAssociatedWithClient) {
-            dbService.create_new_project(
-                std::string(mProject.ToUTF8()), std::string(mDisplayName.ToUTF8()), employerId, &clientId);
-        } else {
-            dbService.create_new_project(
-                std::string(mProject.ToUTF8()), std::string(mDisplayName.ToUTF8()), employerId, nullptr);
-        }
-        projectId = dbService.get_last_insert_rowid();
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on create_new_project() - {0:d} : {1}", e.get_code(), e.what());
-        return false;
-    }
-
-    return true;
+    SetupEntities entities(pLogger);
+    return entities.CreateEntities(mEmployer, mClient, mProject, mDisplayName);
 }
 
 // clang-format off
@@ -219,7 +168,7 @@ AddEmployerAndClientPage::AddEmployerAndClientPage(SetupWizard* parent)
     sizer->Add(pEmployerCtrl, 0, wxALL, 5);
 
     wxString employerHelpMessage =
-        wxT("Specify a descriptive employer name.\n"
+        wxT("Specify a descriptive name for an employer.\n"
             "An employer is whoever you work for and under who all data will be grouped under");
     auto employerHelpText = new wxStaticText(this, wxID_ANY, employerHelpMessage);
     sizer->Add(employerHelpText, 0, wxALL, 5);
@@ -310,8 +259,8 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
     sizer->Add(pDisplayNameCtrl, 0, wxALL, 5);
 
     wxString displayNameHelpMessage = wxT("Specify a shortened version of the project name.\n"
-                                          "Similar to a project name, a display name is merely a shortened version of "
-                                          "the project name to aid in leg   ibility, identification and display");
+                                          "Similar to a project name, a display name is a shortened version of "
+                                          "the project name to aid in legibility and display");
     auto displayNameHelpText = new wxStaticText(this, wxID_ANY, displayNameHelpMessage);
     sizer->Add(displayNameHelpText, 0, wxALL, 5);
 

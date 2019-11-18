@@ -29,7 +29,6 @@ set (SRC
     "common/util.cpp"
     "config/configuration.cpp"
     "common/constants.cpp"
-    "services/models/employer.cpp"
     "services/models/client.cpp"
     "services/models/project.cpp"
     "services/models/category.cpp"
@@ -48,7 +47,9 @@ set (SRC
     "dialogs/settingsdialog.cpp"
     "dialogs/stopwatchtaskdlg.cpp"
     "dialogs/checkforupdatedlg.cpp"
+
     "wizards/setupwizard.cpp"
+    "wizards/setupdatabase.cpp"
 
     "dialogs/employerdlg.cpp"
     "models/employermodel.cpp"
