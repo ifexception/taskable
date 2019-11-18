@@ -166,59 +166,6 @@ int db_service::get_last_insert_rowid()
     return id;
 }
 
-void db_service::create_new_employer(const std::string& employerName)
-{
-    auto db = db_connection::get_instance().get_handle();
-    db << models::employer::createNewEmployer
-       << employerName;
-}
-
-std::vector<models::employer> db_service::get_employers()
-{
-    std::vector<models::employer> employers;
-
-    auto db = db_connection::get_instance().get_handle();
-    db << models::employer::getEmployers
-       >> [&](int employerId, std::string employerName, int dateCreatedUtc, int dateModifiedUtc, int isActive) {
-           models::employer employer(employerId, employerName, dateCreatedUtc, dateModifiedUtc, isActive);
-           employers.push_back(employer);
-       };
-
-    return employers;
-}
-
-models::employer db_service::get_employer(const int employerId)
-{
-    models::employer employer;
-
-    auto db = db_connection::get_instance().get_handle();
-    db << models::employer::getEmployer
-       << employerId
-       >> [&](int employerId, std::string employerName, int dateCreatedUtc, int dateModifiedUtc, int isActive) {
-           employer = models::employer(employerId, employerName, dateCreatedUtc, dateModifiedUtc, isActive);
-       };
-
-    return employer;
-}
-
-void db_service::update_employer(models::employer employer)
-{
-    auto db = db_connection::get_instance().get_handle();
-    db << models::employer::updateEmployer
-       << employer.employer_name
-       << employer.date_modified_utc
-       << employer.employer_id;
-}
-
-void db_service::delete_employer(const int employerId, const int dateModified)
-{
-    auto db = db_connection::get_instance().get_handle();
-
-    db << models::employer::deleteEmployer
-       << dateModified
-       << employerId;
-}
-
 void db_service::create_new_client(const std::string& name, const int employerId)
 {
     auto db = db_connection::get_instance().get_handle();

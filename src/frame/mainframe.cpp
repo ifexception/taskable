@@ -348,25 +348,25 @@ void MainFrame::OnNewCategory(wxCommandEvent& event)
 
 void MainFrame::OnEditEmployer(wxCommandEvent& event)
 {
-    dialog::EditListDialog employerEdit(this, dialog::dialog_type::Employer, pLogger);
+    dialog::EditListDialog employerEdit(this, dialog::DialogType::Employer, pLogger);
     employerEdit.ShowModal();
 }
 
 void MainFrame::OnEditClient(wxCommandEvent& event)
 {
-    dialog::EditListDialog clientEdit(this, dialog::dialog_type::Client, pLogger);
+    dialog::EditListDialog clientEdit(this, dialog::DialogType::Client, pLogger);
     clientEdit.ShowModal();
 }
 
 void MainFrame::OnEditProject(wxCommandEvent& event)
 {
-    dialog::EditListDialog projectEdit(this, dialog::dialog_type::Project, pLogger);
+    dialog::EditListDialog projectEdit(this, dialog::DialogType::Project, pLogger);
     projectEdit.ShowModal();
 }
 
 void MainFrame::OnEditCategory(wxCommandEvent& event)
 {
-    dialog::EditListDialog categoryEdit(this, dialog::dialog_type::Category, pLogger);
+    dialog::EditListDialog categoryEdit(this, dialog::DialogType::Category, pLogger);
     categoryEdit.ShowModal();
 }
 

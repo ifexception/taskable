@@ -22,7 +22,6 @@
 #include <string>
 #include <vector>
 
-#include "models/employer.h"
 #include "models/client.h"
 #include "models/project.h"
 #include "models/category.h"
@@ -46,16 +45,6 @@ struct db_service
     void seed_task_item_types_table();
 
     int get_last_insert_rowid();
-
-    void create_new_employer(const std::string& employerName);
-
-    std::vector<models::employer> get_employers();
-
-    models::employer get_employer(const int employerId);
-
-    void update_employer(models::employer employer);
-
-    void delete_employer(const int employerId, const int dateModified);
 
     void create_new_client(const std::string& name, const int employerId);
 

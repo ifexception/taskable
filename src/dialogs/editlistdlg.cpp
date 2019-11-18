@@ -38,7 +38,7 @@ wxEND_EVENT_TABLE()
 // clang-format on
 
 EditListDialog::EditListDialog(wxWindow* parent,
-    dialog_type dialogType,
+    DialogType dialogType,
     std::shared_ptr<spdlog::logger> logger,
     const wxString& name)
     : mType(dialogType)
@@ -110,22 +110,22 @@ void EditListDialog::OnItemDoubleClick(wxListEvent& event)
     int id = event.GetData();
 
     switch (mType) {
-    case dialog_type::Employer: {
+    case DialogType::Employer: {
         EmployerDialog editEmployer(this, pLogger, true, id);
         editEmployer.ShowModal();
         break;
     }
-    case dialog_type::Client: {
+    case DialogType::Client: {
         ClientDialog editClient(this, pLogger, true, id);
         editClient.ShowModal();
         break;
     }
-    case dialog_type::Project: {
+    case DialogType::Project: {
         ProjectDialog editProject(this, pLogger, true, id);
         editProject.ShowModal();
         break;
     }
-    case dialog_type::Category: {
+    case DialogType::Category: {
         CategoryDialog editCategory(this, pLogger, id);
         editCategory.ShowModal();
         break;
@@ -144,16 +144,16 @@ void EditListDialog::SetStrategy()
     }
 
     switch (mType) {
-    case dialog_type::Employer:
+    case DialogType::Employer:
         mStrategy = new EmployerStrategy(pLogger);
         break;
-    case dialog_type::Client:
+    case DialogType::Client:
         mStrategy = new ClientStrategy(pLogger);
         break;
-    case dialog_type::Project:
+    case DialogType::Project:
         mStrategy = new ProjectStrategy(pLogger);
         break;
-    case dialog_type::Category:
+    case DialogType::Category:
         mStrategy = new CategoryStrategy(pLogger);
         break;
     default:
@@ -164,13 +164,13 @@ void EditListDialog::SetStrategy()
 std::string EditListDialog::MapEnumToValue()
 {
     switch (mType) {
-    case dialog_type::Employer:
+    case DialogType::Employer:
         return "Employer";
-    case dialog_type::Client:
+    case DialogType::Client:
         return "Client";
-    case dialog_type::Project:
+    case DialogType::Project:
         return "Project";
-    case dialog_type::Category:
+    case DialogType::Category:
         return "Category";
     default:
         return "";
@@ -189,28 +189,26 @@ EmployerStrategy::EmployerStrategy(std::shared_ptr<spdlog::logger> logger)
 
 void EmployerStrategy::CreateControl(wxListCtrl* control)
 {
+    control->SetSize(wxSize(250, 100));
+
     wxListItem nameColumn;
     nameColumn.SetId(0);
     nameColumn.SetText(wxT("Employer"));
     nameColumn.SetWidth(100);
     control->InsertColumn(0, nameColumn);
 
-    wxListItem dateCreatedColumn;
-    dateCreatedColumn.SetId(1);
-    dateCreatedColumn.SetText(wxT("Date Created"));
-    control->InsertColumn(1, dateCreatedColumn);
-
     wxListItem dateModifiedColumn;
-    dateModifiedColumn.SetId(2);
+    dateModifiedColumn.SetId(1);
     dateModifiedColumn.SetText(wxT("Date Modified"));
-    control->InsertColumn(2, dateModifiedColumn);
+    dateModifiedColumn.SetWidth(148);
+    control->InsertColumn(1, dateModifiedColumn);
 }
 
 void EmployerStrategy::DataToControl(wxListCtrl* control)
 {
-    std::vector<models::employer> employers;
+    std::vector<model::EmployerModel> employers;
     try {
-        employers = dbService.get_employers();
+        employers = model::EmployerModel::GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in get_employers() - {0:d} : {1}", e.get_code(), e.what());
     }
@@ -218,10 +216,9 @@ void EmployerStrategy::DataToControl(wxListCtrl* control)
     int listIndex = 0;
     int columnIndex = 0;
     for (auto employer : employers) {
-        listIndex = control->InsertItem(columnIndex++, employer.employer_name);
-        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(employer.date_created_utc));
-        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(employer.date_modified_utc));
-        control->SetItemPtrData(listIndex, employer.employer_id);
+        listIndex = control->InsertItem(columnIndex++, employer.GetName());
+        control->SetItem(listIndex, columnIndex++, employer.GetDateModified().FormatISOCombined());
+        control->SetItemPtrData(listIndex, employer.GetEmployerId());
         columnIndex = 0;
     }
 }

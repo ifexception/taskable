@@ -26,6 +26,7 @@
 #include "../common/common.h"
 #include "../common/ids.h"
 #include "../common/util.h"
+#include "../models/employermodel.h"
 #include "../services/db_service.h"
 
 namespace app::dialog
@@ -210,16 +211,15 @@ void ProjectDialog::CreateControls()
 
 void ProjectDialog::FillControls()
 {
-    std::vector<models::employer> employers;
-    services::db_service dbService;
+    std::vector<model::EmployerModel> employers;
     try {
-        employers = dbService.get_employers();
+        employers = model::EmployerModel::GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in get_employers() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in GetAll()() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (auto employer : employers) {
-        pEmployerChoiceCtrl->Append(employer.employer_name, util::IntToVoidPointer(employer.employer_id));
+        pEmployerChoiceCtrl->Append(employer.GetName(), util::IntToVoidPointer(employer.GetEmployerId()));
     }
 }
 

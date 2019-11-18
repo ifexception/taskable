@@ -24,11 +24,13 @@
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
+#include "../models/employermodel.h"
+
 #include "../services/db_service.h"
 
 namespace app::dialog
 {
-enum class dialog_type { Employer, Client, Project, Category };
+enum class DialogType { Employer, Client, Project, Category };
 
 struct Strategy
 {
@@ -105,7 +107,7 @@ class EditListDialog final : public wxDialog
 public:
     EditListDialog() = delete;
     explicit EditListDialog(wxWindow* parent,
-        dialog_type dialogType,
+        DialogType dialogType,
         std::shared_ptr<spdlog::logger> logger,
         const wxString& name = wxT("EditListDialog"));
     virtual ~EditListDialog();
@@ -133,8 +135,8 @@ private:
     std::shared_ptr<spdlog::logger> pLogger;
     wxListCtrl* pListCtrl;
     Strategy* mStrategy;
-    dialog_type mType;
+    DialogType mType;
 
-    enum { IDC_LIST };
+    enum { IDC_LIST  = wxID_HIGHEST + 1};
 };
 } // namespace app::dialog
