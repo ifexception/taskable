@@ -83,6 +83,7 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
     , pTaskStorage(std::make_unique<services::TaskStorage>())
     , bHasPendingTaskToResume(false)
     , bHasInitialized(false)
+    , pTaskBarIcon(nullptr)
 // clang-format on
 {
 }
@@ -92,7 +93,7 @@ MainFrame::~MainFrame()
     auto size = GetSize();
     pConfig->SetFrameSize(size);
 
-    if (pTaskBarIcon) {
+    if (pTaskBarIcon != nullptr) {
         delete pTaskBarIcon; // TODO Wrap TaskBarIcon in a std::unique_ptr
     }
 }
