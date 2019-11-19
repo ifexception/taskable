@@ -28,41 +28,25 @@
 #include <wx/file.h>
 
 #include "../common/common.h"
-#include "../services/db_service.h"
-#include "../../res/icons8-service-64.xpm"
+#include "../../res/setupwizard.xpm"
 
 namespace app::wizard
 {
 SetupWizard::SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger)
-    : wxWizard(frame,
-          wxID_ANY,
-          wxT("Setup Wizard"),
-          wxBitmap(tasks_tracker_service),
-          wxDefaultPosition,
-          wxDEFAULT_DIALOG_STYLE)
+    : wxWizard(frame, wxID_ANY, wxT("Setup Wizard"), wxBitmap(setupwizard), wxDefaultPosition, wxDEFAULT_DIALOG_STYLE)
     , pLogger(logger)
-    , pPage1(nullptr)
     , pFrame(frame)
+    , pPage1(nullptr)
     , mEmployer(wxGetEmptyString())
     , mClient(wxGetEmptyString())
     , mProject(wxGetEmptyString())
 {
-    pPage1 = new wxWizardPageSimple(this);
-
-    wxString introWizardMessage =
-        wxT("This wizard will help you get started with Taskable.\n"
-            "The next few pages will setup a employer, a client (optional), a project and a category.\n "
-            "Press \"Next\" to begin the process.");
-
-    new wxStaticText(pPage1, wxID_ANY, introWizardMessage);
-
+    pPage1 = new WelcomePage(this);
     auto page2 = new AddEmployerAndClientPage(this);
     auto page3 = new AddProjectPage(this);
 
     wxWizardPageSimple::Chain(pPage1, page2);
     wxWizardPageSimple::Chain(page2, page3);
-
-    GetPageAreaSizer()->Add(pPage1);
 }
 
 bool SetupWizard::Run()
@@ -147,6 +131,40 @@ bool SetupWizard::SetUpEntities()
 {
     SetupEntities entities(pLogger);
     return entities.CreateEntities(mEmployer, mClient, mProject, mDisplayName);
+}
+
+WelcomePage::WelcomePage(SetupWizard* parent)
+    : wxWizardPageSimple(parent)
+{
+    CreateControls();
+}
+
+void WelcomePage::CreateControls()
+{
+    auto mainSizer = new wxBoxSizer(wxVERTICAL);
+
+    /* Welcome message Static Text Control */
+    wxString welcomeMessage = wxT("Welcome to the Taskable\n"
+                                  "Setup Wizard");
+    auto welcomeText = new wxStaticText(this, wxID_ANY, welcomeMessage);
+    auto welcomeTextFont = welcomeText->GetFont();
+    welcomeTextFont.MakeBold();
+    welcomeTextFont.SetPointSize(16);
+    welcomeText->SetFont(welcomeTextFont);
+    mainSizer->Add(welcomeText, wxSizerFlags().Border(wxALL, 5));
+
+    /* Wizard introduction Static Text Control */
+    wxString introWizardMessage = wxT("This wizard will help you get Taskable setup\n"
+                                      "on your computer.\n");
+    auto introText = new wxStaticText(this, wxID_ANY, introWizardMessage);
+    mainSizer->Add(introText, wxSizerFlags().Border(wxALL, 5));
+
+    /* Continue next Static Text Control */
+    wxString continueNextMessage = wxT("\n\n\nTo continue, click Next.");
+    auto continueNextText = new wxStaticText(this, wxID_ANY, continueNextMessage);
+    mainSizer->Add(continueNextText, wxSizerFlags().Border(wxALL, 5));
+
+    SetSizerAndFit(mainSizer);
 }
 
 // clang-format off
@@ -245,9 +263,10 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
     pNameCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
     sizer->Add(pNameCtrl, 0, wxALL, 5);
 
-    wxString projectNameHelpMessage = wxT("Specify a descriptive project name.\n"
-                                          "A project is an undertaking of a business for a client or for itself carried "
-                                          "out individually or in a group to achieve a business goal");
+    wxString projectNameHelpMessage =
+        wxT("Specify a descriptive project name.\n"
+            "A project is an undertaking of a business for a client or for itself carried "
+            "out individually or in a group to achieve a business goal");
     auto projectNameHelpText = new wxStaticText(this, wxID_ANY, projectNameHelpMessage);
     sizer->Add(projectNameHelpText, 0, wxALL, 5);
 

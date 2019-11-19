@@ -34,6 +34,8 @@
 
 namespace app::wizard
 {
+class WelcomePage;
+
 class SetupWizard final : public wxWizard
 {
 public:
@@ -58,13 +60,24 @@ private:
     bool SetUpEntities();
 
     std::shared_ptr<spdlog::logger> pLogger;
-    wxWizardPageSimple* pPage1;
     wxFrame* pFrame;
+    WelcomePage* pPage1;
 
     wxString mEmployer;
     wxString mClient;
     wxString mProject;
     wxString mDisplayName;
+};
+
+class WelcomePage final : public wxWizardPageSimple
+{
+public:
+    WelcomePage() = delete;
+    WelcomePage(SetupWizard* parent);
+    virtual ~WelcomePage() = default;
+
+private:
+    void CreateControls();
 };
 
 class AddEmployerAndClientPage final : public wxWizardPageSimple
