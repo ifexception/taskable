@@ -183,7 +183,7 @@ AddEmployerAndClientPage::AddEmployerAndClientPage(SetupWizard* parent)
     auto employerSizer = new wxBoxSizer(wxVERTICAL);
     mainSizer->Add(employerSizer, wxSizerFlags().Border(wxALL, 5).Expand());
 
-    wxString employerDescriptiveText = wxT("An employer is whoever employs you\n"
+    wxString employerDescriptiveText = wxT("An employer is the company that employs you\n"
                                            "(this can be a company or self-employment)");
     auto employerTextCtrl = new wxStaticText(this, wxID_ANY, employerDescriptiveText);
     employerSizer->Add(employerTextCtrl, wxSizerFlags().Border(wxALL, 5));
@@ -251,9 +251,8 @@ bool AddEmployerAndClientPage::TransferDataFromWindow()
 
 void AddEmployerAndClientPage::OnWizardCancel(wxWizardEvent& event)
 {
-    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit?"),
-        common::GetProgramName(),
-        wxICON_QUESTION | wxYES_NO);
+    auto userResponse = wxMessageBox(
+        wxT("Are you sure want to cancel the setup and exit?"), common::GetProgramName(), wxICON_QUESTION | wxYES_NO);
     if (userResponse == wxNO) {
         event.Veto();
     }
@@ -269,47 +268,69 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
     , pParent(parent)
 // clang-format on
 {
-    auto sizer = new wxBoxSizer(wxVERTICAL);
-
+    auto mainSizer = new wxBoxSizer(wxVERTICAL);
     wxString infoMessage = wxGetEmptyString();
     if (!pParent->GetClient().empty()) {
-        infoMessage = wxString::Format(
-            "Add a project for employer: %s and client: %s", pParent->GetEmployer(), pParent->GetClient());
+        infoMessage = wxString::Format("Add a project for employer:\n"
+                                       "%s and client: %s",
+            pParent->GetEmployer(),
+            pParent->GetClient());
     } else {
-        infoMessage = wxString::Format("Add a project for employer: %s", pParent->GetEmployer());
+        infoMessage = wxString::Format("Add a project for employer:\n"
+                                       "%s",
+            pParent->GetEmployer());
     }
 
     auto infoText = new wxStaticText(this, wxID_ANY, infoMessage);
-    sizer->Add(infoText, 0, wxALL, 5);
+    auto infoTextFont = infoText->GetFont();
+    infoTextFont.MakeBold();
+    infoText->SetFont(infoTextFont);
+    mainSizer->Add(infoText, wxSizerFlags().Border(wxALL, 5));
 
-    auto projectText = new wxStaticText(this, wxID_ANY, wxT("Project:"));
-    sizer->Add(projectText, 0, wxALL, 5);
+    auto projectSizer = new wxBoxSizer(wxVERTICAL);
+    mainSizer->Add(projectSizer, wxSizerFlags().Border(wxALL, 5).Expand());
+
+    auto projectInfoText = wxT("A business undertaking as a individual or\n"
+                               "team to achieve a business goal");
+    auto projectInfoTextCtrl = new wxStaticText(this, wxID_ANY, projectInfoText);
+    projectSizer->Add(projectInfoTextCtrl, wxSizerFlags().Border(wxALL, 5));
+
+    auto projectHorizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(2, 2), wxLI_HORIZONTAL);
+    projectSizer->Add(projectHorizontalLine, wxSizerFlags().Expand());
+
+    auto projectLabel = new wxStaticText(this, wxID_ANY, wxT("Project:"));
+    projectSizer->Add(projectLabel, wxSizerFlags().Border(wxALL, 5));
 
     pNameCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
-    sizer->Add(pNameCtrl, 0, wxALL, 5);
+    pNameCtrl->SetHint(wxT("Project name"));
+    pNameCtrl->SetToolTip(wxT("Specify a project name to associate with said employer and/or client"));
+    projectSizer->Add(pNameCtrl, wxSizerFlags().Border(wxALL, 5));
 
-    wxString projectNameHelpMessage =
-        wxT("Specify a descriptive project name.\n"
-            "A project is an undertaking of a business for a client or for itself carried "
-            "out individually or in a group to achieve a business goal");
-    auto projectNameHelpText = new wxStaticText(this, wxID_ANY, projectNameHelpMessage);
-    sizer->Add(projectNameHelpText, 0, wxALL, 5);
+    mainSizer->AddSpacer(8);
 
-    auto displayNameText = new wxStaticText(this, wxID_ANY, wxT("Display Name:"));
-    sizer->Add(displayNameText, 0, wxALL, 5);
+    auto horizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(1, 1), wxLI_HORIZONTAL);
+    mainSizer->Add(horizontalLine, wxSizerFlags().Expand());
+
+    mainSizer->AddSpacer(8);
+
+    wxString displayNameInfo = wxT("A shortened version of a project name to\n"
+                                   "aid with legibility and display.");
+    auto displayNameInfoTextCtrl = new wxStaticText(this, wxID_ANY, displayNameInfo);
+    projectSizer->Add(displayNameInfoTextCtrl, wxSizerFlags().Border(wxALL, 5));
+
+    auto displayNameHorizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(2, 2), wxLI_HORIZONTAL);
+    projectSizer->Add(displayNameHorizontalLine, wxSizerFlags().Expand());
+
+    auto displayNameLabel = new wxStaticText(this, wxID_ANY, wxT("Display Name:"));
+    projectSizer->Add(displayNameLabel, wxSizerFlags().Border(wxALL, 5));
 
     pDisplayNameCtrl =
         new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
-    sizer->Add(pDisplayNameCtrl, 0, wxALL, 5);
+    pDisplayNameCtrl->SetHint(wxT("Display name"));
+    pDisplayNameCtrl->SetToolTip(wxT("Specify a shortened version of the project name"));
+    projectSizer->Add(pDisplayNameCtrl, 0, wxALL, 5);
 
-    wxString displayNameHelpMessage = wxT("Specify a shortened version of the project name.\n"
-                                          "Similar to a project name, a display name is a shortened version of "
-                                          "the project name to aid in legibility and display");
-    auto displayNameHelpText = new wxStaticText(this, wxID_ANY, displayNameHelpMessage);
-    sizer->Add(displayNameHelpText, 0, wxALL, 5);
-
-    SetSizer(sizer);
-    sizer->Fit(this);
+    SetSizerAndFit(mainSizer);
 }
 
 bool AddProjectPage::TransferDataFromWindow()
