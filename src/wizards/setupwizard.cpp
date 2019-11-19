@@ -26,6 +26,7 @@
 #include <sqlite_modern_cpp/errors.h>
 #include <wx/wx.h>
 #include <wx/file.h>
+#include <wx/statline.h>
 
 #include "../common/common.h"
 #include "../../res/setupwizard.xpm"
@@ -155,7 +156,7 @@ void WelcomePage::CreateControls()
 
     /* Wizard introduction Static Text Control */
     wxString introWizardMessage = wxT("This wizard will help you get Taskable setup\n"
-                                      "on your computer.\n");
+                                      "on your computer.");
     auto introText = new wxStaticText(this, wxID_ANY, introWizardMessage);
     mainSizer->Add(introText, wxSizerFlags().Border(wxALL, 5));
 
@@ -177,42 +178,66 @@ AddEmployerAndClientPage::AddEmployerAndClientPage(SetupWizard* parent)
     , pParent(parent)
 // clang-format on
 {
-    auto sizer = new wxBoxSizer(wxVERTICAL);
+    auto mainSizer = new wxBoxSizer(wxVERTICAL);
 
+    auto employerSizer = new wxBoxSizer(wxVERTICAL);
+    mainSizer->Add(employerSizer, wxSizerFlags().Border(wxALL, 5).Expand());
+
+    wxString employerDescriptiveText = wxT("An employer is whoever employs you\n"
+                                           "(this can be a company or self-employment)");
+    auto employerTextCtrl = new wxStaticText(this, wxID_ANY, employerDescriptiveText);
+    employerSizer->Add(employerTextCtrl, wxSizerFlags().Border(wxALL, 5));
+
+    auto employerHorizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(1, 1), wxLI_HORIZONTAL);
+    employerSizer->Add(employerHorizontalLine, wxSizerFlags().Expand());
+
+    auto employerHSizer = new wxBoxSizer(wxHORIZONTAL);
     auto employerText = new wxStaticText(this, wxID_ANY, wxT("Employer:"));
-    sizer->Add(employerText, 0, wxALL, 5);
+    employerHSizer->Add(employerText, wxSizerFlags().Border(wxALL, 5).CenterVertical());
 
     pEmployerCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
-    sizer->Add(pEmployerCtrl, 0, wxALL, 5);
+    pEmployerCtrl->SetHint(wxT("Employer name"));
+    pEmployerCtrl->SetToolTip(wxT("Specify a descriptive name for an employer"));
+    employerHSizer->Add(pEmployerCtrl, wxSizerFlags().Border(wxALL, 5));
+    employerSizer->Add(employerHSizer, 0);
 
-    wxString employerHelpMessage =
-        wxT("Specify a descriptive name for an employer.\n"
-            "An employer is whoever you work for and under who all data will be grouped under");
-    auto employerHelpText = new wxStaticText(this, wxID_ANY, employerHelpMessage);
-    sizer->Add(employerHelpText, 0, wxALL, 5);
+    mainSizer->AddSpacer(16);
 
+    auto horizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(3, 3), wxLI_HORIZONTAL);
+    mainSizer->Add(horizontalLine, wxSizerFlags().Expand());
+
+    mainSizer->AddSpacer(16);
+
+    auto clientSizer = new wxBoxSizer(wxVERTICAL);
+    mainSizer->Add(clientSizer, wxSizerFlags().Border(wxALL, 5).Expand());
+
+    wxString clientDescriptiveText = wxT("A client is a beneficiary of an employer\n"
+                                         "(utilizes a person's/companys services)");
+    auto clientTextCtrl = new wxStaticText(this, wxID_ANY, clientDescriptiveText);
+    clientSizer->Add(clientTextCtrl, wxSizerFlags().Border(wxALL, 5));
+
+    auto clientHorizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(1, 1), wxLI_HORIZONTAL);
+    clientSizer->Add(clientHorizontalLine, wxSizerFlags().Expand());
+
+    auto clientHSizer = new wxBoxSizer(wxHORIZONTAL);
     auto clientText = new wxStaticText(this, wxID_ANY, wxT("Client:*"));
-    sizer->Add(clientText, 0, wxALL, 5);
+    clientHSizer->Add(clientText, wxSizerFlags().Border(wxALL, 5).CenterVertical());
 
     pClientCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
-    sizer->Add(pClientCtrl, 0, wxALL, 5);
+    pClientCtrl->SetHint(wxT("Client name (optional)"));
+    pClientCtrl->SetToolTip(wxT("Specify a client name to associate to the employer above"));
+    clientHSizer->Add(pClientCtrl, wxSizerFlags().Border(wxALL, 5));
 
-    wxString clientHelpMessage =
-        wxT("Specify a descriptive name for a client.\n"
-            "If your employer has multiple clients and you work with them then you can add a client\n"
-            "A client is, however, optional and can be safely skipped if you do not deal with clients");
-    auto clientHelpText = new wxStaticText(this, wxID_ANY, clientHelpMessage);
-    sizer->Add(clientHelpText, 0, wxALL, 5);
+    clientSizer->Add(clientHSizer, 0);
 
-    SetSizer(sizer);
-    sizer->Fit(this);
+    SetSizerAndFit(mainSizer);
 }
 
 bool AddEmployerAndClientPage::TransferDataFromWindow()
 {
     const wxString employer = pEmployerCtrl->GetValue().Trim();
     if (employer.empty()) {
-        wxMessageBox(wxT("An employer is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
+        wxMessageBox(wxT("An employer is required"), common::GetProgramName(), wxOK | wxICON_ERROR, this);
         return false;
     }
 
@@ -226,8 +251,8 @@ bool AddEmployerAndClientPage::TransferDataFromWindow()
 
 void AddEmployerAndClientPage::OnWizardCancel(wxWizardEvent& event)
 {
-    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"),
-        wxT("Taskable Wizard"),
+    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit?"),
+        common::GetProgramName(),
         wxICON_QUESTION | wxYES_NO);
     if (userResponse == wxNO) {
         event.Veto();
