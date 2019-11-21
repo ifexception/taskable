@@ -269,23 +269,6 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
 // clang-format on
 {
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
-    wxString infoMessage = wxGetEmptyString();
-    if (!pParent->GetClient().empty()) {
-        infoMessage = wxString::Format("Add a project for employer:\n"
-                                       "%s and client: %s",
-            pParent->GetEmployer(),
-            pParent->GetClient());
-    } else {
-        infoMessage = wxString::Format("Add a project for employer:\n"
-                                       "%s",
-            pParent->GetEmployer());
-    }
-
-    auto infoText = new wxStaticText(this, wxID_ANY, infoMessage);
-    auto infoTextFont = infoText->GetFont();
-    infoTextFont.MakeBold();
-    infoText->SetFont(infoTextFont);
-    mainSizer->Add(infoText, wxSizerFlags().Border(wxALL, 5));
 
     auto projectSizer = new wxBoxSizer(wxVERTICAL);
     mainSizer->Add(projectSizer, wxSizerFlags().Border(wxALL, 5).Expand());
@@ -298,20 +281,20 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
     auto projectHorizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(2, 2), wxLI_HORIZONTAL);
     projectSizer->Add(projectHorizontalLine, wxSizerFlags().Expand());
 
+    auto projectNameHSizer = new wxBoxSizer(wxHORIZONTAL);
+    projectSizer->Add(projectNameHSizer, 1);
+
     auto projectLabel = new wxStaticText(this, wxID_ANY, wxT("Project:"));
-    projectSizer->Add(projectLabel, wxSizerFlags().Border(wxALL, 5));
+    projectNameHSizer->Add(projectLabel, wxSizerFlags().Border(wxALL, 5).CenterVertical());
+
+    projectNameHSizer->AddStretchSpacer(1);
 
     pNameCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
     pNameCtrl->SetHint(wxT("Project name"));
     pNameCtrl->SetToolTip(wxT("Specify a project name to associate with said employer and/or client"));
-    projectSizer->Add(pNameCtrl, wxSizerFlags().Border(wxALL, 5));
+    projectNameHSizer->Add(pNameCtrl, wxSizerFlags().Border(wxALL, 5));
 
-    mainSizer->AddSpacer(8);
-
-    auto horizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(1, 1), wxLI_HORIZONTAL);
-    mainSizer->Add(horizontalLine, wxSizerFlags().Expand());
-
-    mainSizer->AddSpacer(8);
+    projectSizer->AddSpacer(8);
 
     wxString displayNameInfo = wxT("A shortened version of a project name to\n"
                                    "aid with legibility and display.");
@@ -321,14 +304,17 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
     auto displayNameHorizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(2, 2), wxLI_HORIZONTAL);
     projectSizer->Add(displayNameHorizontalLine, wxSizerFlags().Expand());
 
+    auto displayNameHSizer = new wxBoxSizer(wxHORIZONTAL);
+    projectSizer->Add(displayNameHSizer, 1);
+
     auto displayNameLabel = new wxStaticText(this, wxID_ANY, wxT("Display Name:"));
-    projectSizer->Add(displayNameLabel, wxSizerFlags().Border(wxALL, 5));
+    displayNameHSizer->Add(displayNameLabel, wxSizerFlags().Border(wxALL, 5));
 
     pDisplayNameCtrl =
         new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
     pDisplayNameCtrl->SetHint(wxT("Display name"));
     pDisplayNameCtrl->SetToolTip(wxT("Specify a shortened version of the project name"));
-    projectSizer->Add(pDisplayNameCtrl, 0, wxALL, 5);
+    displayNameHSizer->Add(pDisplayNameCtrl, wxSizerFlags().Border(wxALL, 5).CenterVertical());
 
     SetSizerAndFit(mainSizer);
 }
@@ -337,7 +323,7 @@ bool AddProjectPage::TransferDataFromWindow()
 {
     const wxString projectName = pNameCtrl->GetValue().Trim();
     if (projectName.empty()) {
-        wxMessageBox(wxT("An project name is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
+        wxMessageBox(wxT("A project name is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
         return false;
     }
 
@@ -355,9 +341,8 @@ bool AddProjectPage::TransferDataFromWindow()
 
 void AddProjectPage::OnWizardCancel(wxWizardEvent& event)
 {
-    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup and exit the wizard?"),
-        wxT("Taskable Wizard"),
-        wxICON_QUESTION | wxYES_NO);
+    auto userResponse = wxMessageBox(
+        wxT("Are you sure want to cancel the setup and exit?"), wxT("Taskable Wizard"), wxICON_QUESTION | wxYES_NO);
     if (userResponse == wxNO) {
         event.Veto();
     }

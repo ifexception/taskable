@@ -206,14 +206,16 @@ bool SetupEntities::CreateEntities(std::string employerName,
     std::string projectDisplayName)
 {
     auto db = services::db_connection::get_instance().get_handle();
-    db << "begin transaction";
+    // db << "begin transaction";
     try {
         int employerId = CreateEmployer(employerName);
         int clientId = CreateClient(clientName, employerId);
         CreateProject(projectName, projectDisplayName, employerId, clientId);
-    } catch (const std::exception&) {
+        return true;
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured: Database Setup Procedure - {0:d} : {1}", e.get_code(), e.what());
+        return false;
     }
-    return false;
 }
 
 int SetupEntities::CreateEmployer(std::string employerName)
