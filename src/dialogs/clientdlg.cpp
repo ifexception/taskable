@@ -255,12 +255,12 @@ bool ClientDialog::Validate()
     bool isValid = true;
     if (!mClient.IsNameValid()) {
         isValid = false;
-        AttachRichTooltipToNameTextControl();
+        common::validations::ForRequiredText(pNameTextCtrl, wxT("client name"));
     }
 
     if (!mClient.IsEmployerSelected()) {
         isValid = false;
-        AttachRichTooltipToEmployerChoiceControl();
+        common::validations::ForRequiredChoiceSelection(pEmployerChoiceCtrl, wxT("employer"));
     }
 
     return isValid;
@@ -269,27 +269,6 @@ bool ClientDialog::Validate()
 bool ClientDialog::AreControlsEmpty()
 {
     return pNameTextCtrl->GetValue().empty() && pEmployerChoiceCtrl->GetSelection() == 0;
-}
-
-void ClientDialog::AttachRichTooltipToNameTextControl()
-{
-    const wxString errorHeader = wxT("Invalid input");
-    const wxString errorMessage = wxT("A name is required \nand must be within %d to %d characters long");
-    const wxString errorMessageFormat = wxString::Format(errorMessage, Constants::MinLength, Constants::MaxLength);
-
-    wxRichToolTip tooltip(errorHeader, errorMessageFormat);
-    tooltip.SetIcon(wxICON_WARNING);
-    tooltip.ShowFor(pNameTextCtrl);
-}
-
-void ClientDialog::AttachRichTooltipToEmployerChoiceControl()
-{
-    const wxString errorHeader = wxT("Invalid selection");
-    const wxString errorMessage = wxT("A project selection is required");
-
-    wxRichToolTip tooltip(errorHeader, errorMessage);
-    tooltip.SetIcon(wxICON_WARNING);
-    tooltip.ShowFor(pEmployerChoiceCtrl);
 }
 
 void ClientDialog::OnNameChange(wxCommandEvent& event)

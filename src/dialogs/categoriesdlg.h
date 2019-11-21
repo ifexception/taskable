@@ -59,9 +59,6 @@ private:
     void AppendListControlEntry(model::CategoryModel category);
     void UpdateListControlEntry(model::CategoryModel category);
 
-    void AttachRichTooltipToNameControl();
-    void AttachRichTooltipToProjectChoiceControl();
-
     void OnProjectChoiceSelection(wxCommandEvent& event);
     void OnNameChange(wxCommandEvent& event);
     void OnColorChange(wxColourPickerEvent& event);

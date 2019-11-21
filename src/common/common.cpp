@@ -19,6 +19,9 @@
 
 #include "common.h"
 
+#include <wx/richtooltip.h>
+
+#include "constants.h"
 #include "../../res/taskable.xpm"
 #include "../../res/about.xpm"
 #include "../../res/checkforupdate.xpm"
@@ -92,4 +95,28 @@ wxString app::common::GetDbFileName()
 wxString app::common::GetConfigFileName()
 {
     return wxT("taskable.ini");
+}
+
+void app::common::validations::ForRequiredChoiceSelection(wxWindow* window, wxString forType)
+{
+    const wxString errorHeader = wxT("Invalid selection");
+    const wxString errorMessage = wxString::Format(wxT("A %s selection is required"), forType);
+
+    wxRichToolTip tooltip(errorHeader, errorMessage);
+    tooltip.SetIcon(wxICON_WARNING);
+    tooltip.ShowFor(window);
+}
+
+void app::common::validations::ForRequiredText(wxWindow* window, wxString forType)
+{
+    const wxString errorHeader = wxT("Invalid input");
+    const wxString errorMessage =
+        wxString::Format(wxT("A %s is required \nand must be within %d to %d characters long"),
+            forType,
+            Constants::MinLength,
+            Constants::MaxLength);
+
+    wxRichToolTip tooltip(errorHeader, errorMessage);
+    tooltip.SetIcon(wxICON_WARNING);
+    tooltip.ShowFor(window);
 }

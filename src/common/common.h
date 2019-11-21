@@ -19,8 +19,7 @@
 
 #pragma once
 
-#include <wx/sizer.h>
-#include <wx/string.h>
+#include <wx/wx.h>
 
 #include "version.h"
 
@@ -36,6 +35,12 @@ const wxSizerFlags ControlRight = wxSizerFlags(ControlDefault).Right();
 const wxSizerFlags ControlExpand = wxSizerFlags(ControlDefault).Expand();
 const wxSizerFlags ControlExpandProp = wxSizerFlags(ControlDefault).Align(wxEXPAND).Proportion(1);
 } // namespace sizers
+
+namespace validations
+{
+void ForRequiredChoiceSelection(wxWindow* window, wxString forType);
+void ForRequiredText(wxWindow* window, wxString forType);
+} // namespace validations
 
 // TODO Check licensing https://icons8.com/icon/pack/time-and-date/cute-clipart
 extern const char** GetProgramIcon();

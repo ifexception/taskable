@@ -374,27 +374,6 @@ void CategoriesDialog::UpdateListControlEntry(model::CategoryModel category)
     mItemIndex = -1;
 }
 
-void CategoriesDialog::AttachRichTooltipToNameControl()
-{
-    const wxString errorHeader = wxT("Invalid input");
-    const wxString errorMessage = wxT("A name is required \nand must be within %d to %d characters long");
-    const wxString errorMessageFormat = wxString::Format(errorMessage, Constants::MinLength, Constants::MaxLength);
-
-    wxRichToolTip tooltip(errorHeader, errorMessageFormat);
-    tooltip.SetIcon(wxICON_WARNING);
-    tooltip.ShowFor(pNameTextCtrl);
-}
-
-void CategoriesDialog::AttachRichTooltipToProjectChoiceControl()
-{
-    const wxString errorHeader = wxT("Invalid selection");
-    const wxString errorMessage = wxT("A project selection is required");
-
-    wxRichToolTip tooltip(errorHeader, errorMessage);
-    tooltip.SetIcon(wxICON_WARNING);
-    tooltip.ShowFor(pProjectChoiceCtrl);
-}
-
 void CategoriesDialog::OnProjectChoiceSelection(wxCommandEvent& event)
 {
     int id = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
@@ -616,12 +595,12 @@ bool CategoriesDialog::Validate()
     bool isValid = true;
     if (!mModel.IsNameValid()) {
         isValid = false;
-        AttachRichTooltipToNameControl();
+        common::validations::ForRequiredText(pNameTextCtrl, wxT("category name"));
     }
 
     if (!mModel.IsProjectSelected()) {
         isValid = false;
-        AttachRichTooltipToProjectChoiceControl();
+        common::validations::ForRequiredChoiceSelection(pProjectChoiceCtrl, wxT("project"));
     }
 
     return isValid;

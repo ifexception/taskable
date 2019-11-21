@@ -57,8 +57,6 @@ private:
     void ConfigureEventBindings();
     void DataToControls();
 
-    void AttachRichTooltipToNameTextControl();
-
     void OnNameChange(wxCommandEvent& event);
 
     void OnOk(wxCommandEvent& event);

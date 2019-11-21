@@ -60,9 +60,6 @@ private:
     bool Validate();
     bool AreControlsEmpty();
 
-    void AttachRichTooltipToNameTextControl();
-    void AttachRichTooltipToEmployerChoiceControl();
-
     void OnNameChange(wxCommandEvent& event);
     void OnEmployerChoiceSelection(wxCommandEvent& event);
 

@@ -206,17 +206,6 @@ void EmployerDialog::DataToControls()
     pIsActiveCtrl->SetValue(employer.IsActive());
 }
 
-void EmployerDialog::AttachRichTooltipToNameTextControl()
-{
-    const wxString errorHeader = wxT("Invalid input");
-    const wxString errorMessage = wxT("A name is required \nand must be within %d to %d characters long");
-    const wxString errorMessageFormat = wxString::Format(errorMessage, Constants::MinLength, Constants::MaxLength);
-
-    wxRichToolTip tooltip(errorHeader, errorMessageFormat);
-    tooltip.SetIcon(wxICON_WARNING);
-    tooltip.ShowFor(pNameTextCtrl);
-}
-
 void EmployerDialog::OnNameChange(wxCommandEvent& event)
 {
     wxString name = pNameTextCtrl->GetValue();
@@ -226,7 +215,7 @@ void EmployerDialog::OnNameChange(wxCommandEvent& event)
 bool EmployerDialog::Validate()
 {
     if (!mEmployer.IsNameValid()) {
-        AttachRichTooltipToNameTextControl();
+        common::validations::ForRequiredText(pNameTextCtrl, wxT("employer name"));
         return false;
     }
 

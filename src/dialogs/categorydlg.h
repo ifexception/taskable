@@ -56,9 +56,6 @@ private:
     void DataToControls();
     void PostInitializeProcedure();
 
-    void AttachRichTooltipToNameTextControl();
-    void AttachRichTooltipToProjectChoiceControl();
-
     void OnProjectChoiceSelection(wxCommandEvent& event);
     void OnNameChange(wxCommandEvent& event);
     void OnColorChange(wxColourPickerEvent& event);
