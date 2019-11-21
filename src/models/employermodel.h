@@ -26,9 +26,6 @@
 #include <wx/string.h>
 #include <wx/datetime.h>
 
-#define FMT_HEADER_ONLY
-#include <spdlog/spdlog.h>
-
 namespace app::model
 {
 class EmployerModel final
@@ -54,14 +51,15 @@ public:
     void IsActive(const bool isActive);
 
     static void Create(const EmployerModel& employer);
+    static void Create(std::unique_ptr<EmployerModel> employer);
     static EmployerModel GetById(const int id);
     static std::vector<EmployerModel> GetAll();
     static void Update(const EmployerModel& employer);
+    static void Update(std::unique_ptr<EmployerModel> employer);
     static void Delete(const EmployerModel& employer);
+    static void Delete(std::unique_ptr<EmployerModel> employer);
 
 private:
-    std::shared_ptr<spdlog::logger> pLogger;
-
     int mEmployerId;
     wxString mName;
     wxDateTime mDateCreated;
@@ -74,4 +72,4 @@ private:
     static const std::string updateEmployer;
     static const std::string deleteEmployer;
 };
-}
+} // namespace app::model

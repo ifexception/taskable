@@ -37,7 +37,7 @@ EmployerDialog::EmployerDialog(wxWindow* parent, std::shared_ptr<spdlog::logger>
     : pLogger(logger)
     , bIsEdit(false)
     , mEmployerId(-1)
-    , mEmployer()
+    , pEmployer(std::make_unique<model::EmployerModel>())
 {
     Create(parent,
         wxID_ANY,
@@ -57,7 +57,7 @@ EmployerDialog::EmployerDialog(wxWindow* parent,
     : pLogger(logger)
     , bIsEdit(isEdit)
     , mEmployerId(employerId)
-    , mEmployer(employerId)
+    , pEmployer(std::make_unique<model::EmployerModel>(mEmployerId))
 {
     Create(parent,
         wxID_ANY,
@@ -118,7 +118,7 @@ void EmployerDialog::CreateControls()
 
     pNameTextCtrl = new wxTextCtrl(
         employerDetailsPanel, IDC_EMPLOYERTEXT, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
-    pNameTextCtrl->SetHint(wxT("Enter employer name"));
+    pNameTextCtrl->SetHint(wxT("Employer name"));
     pNameTextCtrl->SetToolTip(wxT("Enter a name for the employer"));
     taskFlexGridSizer->Add(pNameTextCtrl, common::sizers::ControlDefault);
 
@@ -209,12 +209,12 @@ void EmployerDialog::DataToControls()
 void EmployerDialog::OnNameChange(wxCommandEvent& event)
 {
     wxString name = pNameTextCtrl->GetValue();
-    mEmployer.SetName(name);
+    pEmployer->SetName(name);
 }
 
 bool EmployerDialog::Validate()
 {
-    if (!mEmployer.IsNameValid()) {
+    if (!pEmployer->IsNameValid()) {
         common::validations::ForRequiredText(pNameTextCtrl, wxT("employer name"));
         return false;
     }
@@ -231,15 +231,15 @@ void EmployerDialog::OnOk(wxCommandEvent& event)
 {
     if (Validate()) {
         if (!bIsEdit) {
-            model::EmployerModel::Create(mEmployer);
+            model::EmployerModel::Create(std::move(pEmployer));
         }
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
-            mEmployer.SetDateModified(wxDateTime::Now());
-            model::EmployerModel::Update(mEmployer);
+            pEmployer->SetDateModified(wxDateTime::Now());
+            model::EmployerModel::Update(std::move(pEmployer));
         }
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            mEmployer.SetDateModified(wxDateTime::Now());
-            model::EmployerModel::Delete(mEmployer);
+            pEmployer->SetDateModified(wxDateTime::Now());
+            model::EmployerModel::Delete(std::move(pEmployer));
         }
 
         EndModal(wxID_OK);

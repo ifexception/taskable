@@ -32,7 +32,6 @@ EmployerModel::EmployerModel()
     , mDateModified(wxDefaultDateTime)
     , bIsActive(false)
 {
-    pLogger = spdlog::get(Constants::LoggerName);
 }
 
 EmployerModel::EmployerModel(const int employerId)
@@ -112,6 +111,12 @@ void EmployerModel::Create(const EmployerModel& employer)
     db << EmployerModel::createEmployer << employer.GetName();
 }
 
+void EmployerModel::Create(std::unique_ptr<EmployerModel> employer)
+{
+    auto db = services::db_connection::get_instance().get_handle();
+    db << EmployerModel::createEmployer << employer->GetName();
+}
+
 EmployerModel EmployerModel::GetById(const int id)
 {
     EmployerModel employer;
@@ -146,11 +151,25 @@ void EmployerModel::Update(const EmployerModel& employer)
        << employer.GetEmployerId();
 }
 
+void EmployerModel::Update(std::unique_ptr<EmployerModel> employer)
+{
+    auto db = services::db_connection::get_instance().get_handle();
+    db << EmployerModel::updateEmployer << std::string(employer->GetName().ToUTF8()) << util::UnixTimestamp()
+       << employer->GetEmployerId();
+}
+
 void EmployerModel::Delete(const EmployerModel& employer)
 {
     auto db = services::db_connection::get_instance().get_handle();
 
     db << EmployerModel::deleteEmployer << util::UnixTimestamp() << employer.GetEmployerId();
+}
+
+void EmployerModel::Delete(std::unique_ptr<EmployerModel> employer)
+{
+    auto db = services::db_connection::get_instance().get_handle();
+
+    db << EmployerModel::deleteEmployer << util::UnixTimestamp() << employer->GetEmployerId();
 }
 
 const std::string EmployerModel::createEmployer = "INSERT INTO employers (name, is_active) VALUES (?, 1);";

@@ -76,7 +76,7 @@ private:
 
     bool bIsEdit;
     int mEmployerId;
-    model::EmployerModel mEmployer;
+    std::unique_ptr<model::EmployerModel> pEmployer;
 
     enum {
         IDC_EMPLOYERTEXT = wxID_HIGHEST + 1,
