@@ -207,7 +207,7 @@ void CategoryDialog::CreateControls()
 
 void CategoryDialog::FillControls()
 {
-    auto projects = model::ProjectModel::GetAllProjects();
+    auto projects = model::ProjectModel::GetAll();
 
     for (auto p : projects) {
         pProjectChoiceCtrl->Append(p.GetDisplayName(), util::IntToVoidPointer(p.GetProjectId()));
