@@ -40,6 +40,14 @@ EmployerModel::EmployerModel(const int employerId)
     mEmployerId = employerId;
 }
 
+EmployerModel::EmployerModel(const int employerId, bool loadFromDb)
+    : EmployerModel()
+{
+    assert(loadFromDb == true);
+    auto employer = EmployerModel::GetById(employerId);
+    *this = employer;
+}
+
 EmployerModel::EmployerModel(int employerId, wxString name, int dateCreated, int dateModified, bool isActive)
     : EmployerModel()
 {
@@ -105,12 +113,6 @@ void EmployerModel::IsActive(const bool isActive)
     bIsActive = isActive;
 }
 
-void EmployerModel::Create(const EmployerModel& employer)
-{
-    auto db = services::db_connection::get_instance().get_handle();
-    db << EmployerModel::createEmployer << employer.GetName();
-}
-
 void EmployerModel::Create(std::unique_ptr<EmployerModel> employer)
 {
     auto db = services::db_connection::get_instance().get_handle();
@@ -144,25 +146,11 @@ std::vector<EmployerModel> EmployerModel::GetAll()
     return employers;
 }
 
-void EmployerModel::Update(const EmployerModel& employer)
-{
-    auto db = services::db_connection::get_instance().get_handle();
-    db << EmployerModel::updateEmployer << std::string(employer.GetName().ToUTF8()) << util::UnixTimestamp()
-       << employer.GetEmployerId();
-}
-
 void EmployerModel::Update(std::unique_ptr<EmployerModel> employer)
 {
     auto db = services::db_connection::get_instance().get_handle();
     db << EmployerModel::updateEmployer << std::string(employer->GetName().ToUTF8()) << util::UnixTimestamp()
        << employer->GetEmployerId();
-}
-
-void EmployerModel::Delete(const EmployerModel& employer)
-{
-    auto db = services::db_connection::get_instance().get_handle();
-
-    db << EmployerModel::deleteEmployer << util::UnixTimestamp() << employer.GetEmployerId();
 }
 
 void EmployerModel::Delete(std::unique_ptr<EmployerModel> employer)

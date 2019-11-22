@@ -76,7 +76,7 @@ private:
     wxButton* pOkButton;
     wxButton* pCancelButton;
 
-    model::ClientModel mClient;
+    std::unique_ptr<model::ClientModel> pClient;
     int mClientId;
     bool bIsEdit;
 

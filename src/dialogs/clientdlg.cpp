@@ -40,7 +40,7 @@ ClientDialog::ClientDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> log
     , pDateTextCtrl(nullptr)
     , pOkButton(nullptr)
     , pCancelButton(nullptr)
-    , mClient()
+    , pClient(std::make_unique<model::ClientModel>())
     , mClientId(-1)
     , bIsEdit(false)
 {
@@ -66,7 +66,7 @@ ClientDialog::ClientDialog(wxWindow* parent,
     , pDateTextCtrl(nullptr)
     , pOkButton(nullptr)
     , pCancelButton(nullptr)
-    , mClient()
+    , pClient(std::make_unique<model::ClientModel>(clientId))
     , mClientId(clientId)
     , bIsEdit(isEdit)
 {
@@ -77,6 +77,7 @@ ClientDialog::ClientDialog(wxWindow* parent,
         wxSize(320, 320),
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
         name);
+    SetMinClientSize(wxSize(320, 240));
 }
 
 bool ClientDialog::Create(wxWindow* parent,
@@ -99,6 +100,7 @@ bool ClientDialog::Create(wxWindow* parent,
         }
 
         GetSizer()->Fit(this);
+        GetSizer()->SetSizeHints(this);
         SetIcon(common::GetProgramIcon());
         Center();
     }
@@ -240,7 +242,8 @@ void ClientDialog::DataToControls()
     }
 
     pNameTextCtrl->SetValue(client.GetName());
-    pEmployerChoiceCtrl->SetStringSelection(client.GetEmployer().GetName());
+
+    pEmployerChoiceCtrl->SetStringSelection(client.GetEmployer()->GetName());
     pEmployerChoiceCtrl->SendSelectionChangedEvent(wxEVT_CHOICE);
 
     pDateTextCtrl->SetLabel(wxString::Format(ClientDialog::DateLabel,
@@ -253,12 +256,12 @@ void ClientDialog::DataToControls()
 bool ClientDialog::Validate()
 {
     bool isValid = true;
-    if (!mClient.IsNameValid()) {
+    if (!pClient->IsNameValid()) {
         isValid = false;
         common::validations::ForRequiredText(pNameTextCtrl, wxT("client name"));
     }
 
-    if (!mClient.IsEmployerSelected()) {
+    if (!pClient->IsEmployerSelected()) {
         isValid = false;
         common::validations::ForRequiredChoiceSelection(pEmployerChoiceCtrl, wxT("employer"));
     }
@@ -274,7 +277,7 @@ bool ClientDialog::AreControlsEmpty()
 void ClientDialog::OnNameChange(wxCommandEvent& event)
 {
     wxString name = pNameTextCtrl->GetValue();
-    mClient.SetName(name);
+    pClient->SetName(name);
 }
 
 void ClientDialog::OnEmployerChoiceSelection(wxCommandEvent& event)
@@ -282,23 +285,23 @@ void ClientDialog::OnEmployerChoiceSelection(wxCommandEvent& event)
     int id = util::VoidPointerToInt(pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()));
     wxString name = pEmployerChoiceCtrl->GetStringSelection();
 
-    mClient.SetEmployerId(id);
-    mClient.GetEmployer().SetName(name);
+    pClient->SetEmployerId(id);
+    pClient->GetEmployer()->SetName(name);
 }
 
 void ClientDialog::OnOk(wxCommandEvent& event)
 {
     if (Validate()) {
         if (!bIsEdit) {
-            model::ClientModel::Create(mClient);
+            model::ClientModel::Create(std::move(pClient));
         }
 
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
-            model::ClientModel::Update(mClient);
+            model::ClientModel::Update(std::move(pClient));
         }
 
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            model::ClientModel::Delete(mClient);
+            model::ClientModel::Delete(std::move(pClient));
         }
 
         EndModal(wxID_OK);

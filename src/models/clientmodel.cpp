@@ -32,7 +32,7 @@ ClientModel::ClientModel()
     , mDateModified(wxDefaultDateTime)
     , bIsActive(false)
     , mEmployerId(-1)
-    , mEmployer()
+    , pEmployer(new EmployerModel())
 {
 }
 
@@ -46,8 +46,7 @@ ClientModel::ClientModel(int clientId,
     wxString name,
     int dateCreated,
     int dateModified,
-    bool isActive,
-    wxString employerName)
+    bool isActive)
     : ClientModel()
 {
     mClientId = clientId;
@@ -55,8 +54,6 @@ ClientModel::ClientModel(int clientId,
     mDateCreated = util::ToDateTime(dateCreated);
     mDateModified = util::ToDateTime(dateModified);
     bIsActive = isActive;
-
-    mEmployer.SetName(employerName);
 }
 
 bool ClientModel::IsNameValid()
@@ -99,9 +96,9 @@ const int ClientModel::GetEmployerId() const
     return mEmployerId;
 }
 
-EmployerModel& ClientModel::GetEmployer()
+EmployerModel* ClientModel::GetEmployer()
 {
-    return mEmployer;
+    return pEmployer;
 }
 
 void ClientModel::SetClientId(const int clientId)
@@ -134,16 +131,16 @@ void ClientModel::SetEmployerId(const int employerId)
     mEmployerId = employerId;
 }
 
-void ClientModel::SetEmployer(const EmployerModel& employer)
+void ClientModel::SetEmployer(EmployerModel* employer)
 {
-    mEmployer = employer;
+    pEmployer = employer;
 }
 
-void ClientModel::Create(const ClientModel& client)
+void ClientModel::Create(std::unique_ptr<model::ClientModel> client)
 {
     auto db = services::db_connection::get_instance().get_handle();
 
-    db << model::ClientModel::createClient << std::string(client.GetName().ToUTF8()) << client.GetEmployerId();
+    db << model::ClientModel::createClient << std::string(client->GetName().ToUTF8()) << client->GetEmployerId();
 }
 
 ClientModel ClientModel::GetById(const int clientId)
@@ -156,25 +153,28 @@ ClientModel ClientModel::GetById(const int clientId)
                                                                int dateCreatedUtc,
                                                                int dateModifiedUtc,
                                                                int isActive,
-                                                               std::string employerName) {
-        client = model::ClientModel(clientId, clientName, dateCreatedUtc, dateModifiedUtc, isActive, employerName);
+                                                               int employerId) {
+        client = model::ClientModel(clientId, clientName, dateCreatedUtc, dateModifiedUtc, isActive);
+        auto employer = new model::EmployerModel(employerId, true);
+        client.SetEmployer(employer);
     };
     return client;
 }
 
-void ClientModel::Update(const ClientModel& client)
+void ClientModel::Update(std::unique_ptr<model::ClientModel> client)
 {
     auto db = services::db_connection::get_instance().get_handle();
 
-    db << model::ClientModel::updateClient << client.GetName() << util::UnixTimestamp() << client.GetEmployerId()
-       << client.GetClientId();
+    db << model::ClientModel::updateClient << std::string(client->GetName().ToUTF8()) << util::UnixTimestamp()
+       << client->GetEmployerId()
+       << client->GetClientId();
 }
 
-void ClientModel::Delete(const ClientModel& client)
+void ClientModel::Delete(std::unique_ptr<model::ClientModel> client)
 {
     auto db = services::db_connection::get_instance().get_handle();
 
-    db << model::ClientModel::deleteClient << util::UnixTimestamp() << client.GetClientId();
+    db << model::ClientModel::deleteClient << util::UnixTimestamp() << client->GetClientId();
 }
 
 const std::string ClientModel::createClient = "INSERT INTO clients (name, is_active, employer_id) VALUES (?, 1, ?)";
@@ -202,7 +202,7 @@ const std::string ClientModel::getClientById = "SELECT clients.client_id, "
                                                "clients.date_created, "
                                                "clients.date_modified, "
                                                "clients.is_active, "
-                                               "employers.name AS employer_name "
+                                               "employers.employer_id AS employer_id "
                                                "FROM clients "
                                                "INNER JOIN employers ON clients.employer_id = employers.employer_id "
                                                "WHERE clients.client_id = ?";

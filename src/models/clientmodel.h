@@ -33,7 +33,7 @@ class ClientModel final
 public:
     ClientModel();
     ClientModel(const int clientId);
-    ClientModel(int clientId, wxString name, int dateCreated, int dateModified, bool isActive, wxString employerName);
+    ClientModel(int clientId, wxString name, int dateCreated, int dateModified, bool isActive);
     ~ClientModel() = default;
 
     bool IsNameValid();
@@ -46,7 +46,7 @@ public:
     const bool IsActive() const;
     const int GetEmployerId() const;
 
-    EmployerModel& GetEmployer();
+    EmployerModel* GetEmployer();
 
     void SetClientId(const int clientId);
     void SetName(const wxString& name);
@@ -55,12 +55,12 @@ public:
     void IsActive(const bool isActive);
     void SetEmployerId(const int employerId);
 
-    void SetEmployer(const EmployerModel& employer);
+    void SetEmployer(EmployerModel* employer);
 
-    static void Create(const ClientModel& client);
+    static void Create(std::unique_ptr<model::ClientModel> client);
     static ClientModel GetById(const int clientId);
-    static void Update(const ClientModel& client);
-    static void Delete(const ClientModel& client);
+    static void Update(std::unique_ptr<model::ClientModel> client);
+    static void Delete(std::unique_ptr<model::ClientModel> client);
 
 private:
     int mClientId;
@@ -70,7 +70,7 @@ private:
     bool bIsActive;
     int mEmployerId;
 
-    EmployerModel mEmployer;
+    EmployerModel* pEmployer;
 
     static const std::string createClient;
     static const std::string getClientsByEmployerId;
