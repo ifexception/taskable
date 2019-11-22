@@ -24,21 +24,42 @@ CREATE TABLE clients
     FOREIGN KEY (employer_id) REFERENCES employers(employer_id)
 );
 
+-- rate_types table
+CREATE TABLE rate_types
+(
+    rate_type_id INTEGER PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL
+);
+
+-- create currencies table
+CREATE TABLE currencies
+(
+    currency_id INTEGER PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    code TEXT NOT NULL,
+    symbol TEXT NOT NULL
+);
+
 -- projects table
 CREATE TABLE projects
 (
     project_id INTEGER PRIMARY KEY NOT NULL,
     name TEXT NOT NULL UNIQUE,
     display_name TEXT NOT NULL,
+    billable INTEGER NOT NULL,
     date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
     date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
     is_active INTEGER NOT NULL,
 
     employer_id INTEGER NOT NULL,
     client_id INTEGER NULL,
+    rate_type_id INTEGER NULL,
+    currency_id INTEGER NULL,
 
     FOREIGN KEY (employer_id) REFERENCES employers(employer_id),
-    FOREIGN KEY (client_id) REFERENCES clients(client_id)
+    FOREIGN KEY (client_id) REFERENCES clients(client_id),
+    FOREIGN KEY (rate_type_id) REFERENCES rate_types(rate_type_id),
+    FOREIGN KEY (currency_id) REFERENCES currencies(currency_id)
 );
 
 -- tasks table

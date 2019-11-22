@@ -38,6 +38,8 @@ bool SetupTables::Create()
     try {
         CreateEmployersTable();
         CreateClientsTable();
+        CreateRateTypesTable();
+        CreateCurrenciesTable();
         CreateProjectsTable();
         CreateCategoriesTable();
         CreateTasksTable();
@@ -54,6 +56,8 @@ bool SetupTables::Create()
 bool SetupTables::Seed()
 {
     try {
+        SeedRateTypesTable();
+        SeedCurrenciesTable();
         SeedTaskItemTypesTable();
         return true;
     } catch (const sqlite::sqlite_exception& e) {
@@ -93,6 +97,32 @@ void SetupTables::CreateClientsTable()
     db << query;
 }
 
+void SetupTables::CreateRateTypesTable()
+{
+    const std::string query = "CREATE TABLE rate_types"
+                              "("
+                              "    rate_type_id INTEGER PRIMARY KEY NOT NULL,"
+                              "    name TEXT NOT NULL"
+                              ");";
+
+    auto db = services::db_connection::get_instance().get_handle();
+    db << query;
+}
+
+void SetupTables::CreateCurrenciesTable()
+{
+    const std::string query = "CREATE TABLE currencies"
+                              "("
+                              "    currency_id INTEGER PRIMARY KEY NOT NULL,"
+                              "    name TEXT NOT NULL,"
+                              "    code TEXT NOT NULL,"
+                              "    symbol TEXT NOT NULL"
+                              ");";
+
+    auto db = services::db_connection::get_instance().get_handle();
+    db << query;
+}
+
 void SetupTables::CreateProjectsTable()
 {
     const std::string query = "CREATE TABLE projects"
@@ -100,13 +130,18 @@ void SetupTables::CreateProjectsTable()
                               "    project_id INTEGER PRIMARY KEY NOT NULL,"
                               "    name TEXT NOT NULL UNIQUE,"
                               "    display_name TEXT NOT NULL,"
+                              "    billable INTEGER NOT NULL,"
                               "    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),"
                               "    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),"
                               "    is_active INTEGER NOT NULL,"
                               "    employer_id INTEGER NOT NULL,"
                               "    client_id INTEGER NULL,"
+                              "    rate_type_id INTEGER NULL,"
+                              "    currency_id INTEGER NULL,                      "
                               "    FOREIGN KEY (employer_id) REFERENCES employers(employer_id),"
                               "    FOREIGN KEY (client_id) REFERENCES clients(client_id)"
+                              "    FOREIGN KEY(rate_type_id) REFERENCES rate_types(rate_type_id),"
+                              "    FOREIGN KEY(currency_id) REFERENCES currencies(currency_id)"
                               ");";
 
     auto db = services::db_connection::get_instance().get_handle();
@@ -183,6 +218,30 @@ void SetupTables::CreateTaskItemsTable()
 
     auto db = services::db_connection::get_instance().get_handle();
     db << query;
+}
+
+void SetupTables::SeedRateTypesTable()
+{
+    const std::string query1 = "INSERT INTO rate_type (name) VALUES ('Minute')";
+    const std::string query2 = "INSERT INTO rate_type (name) VALUES ('Hour')";
+    const std::string query3 = "INSERT INTO rate_type (name) VALUES ('Day')";
+
+    auto db = services::db_connection::get_instance().get_handle();
+    db << query1;
+    db << query2;
+    db << query3;
+}
+
+void SetupTables::SeedCurrenciesTable()
+{
+    const std::string query1 = "INSERT INTO currencies (name, code, symbol) VALUES ('Zlotych', 'PLN', 'zł');";
+    const std::string query2 = "INSERT INTO currency (name, code, symbol) VALUES ('Rand', 'ZAR', 'R');";
+    const std::string query3 = "INSERT INTO currency (name, code, symbol) VALUES ('Dollars', 'USD', '$');";
+
+    auto db = services::db_connection::get_instance().get_handle();
+    db << query1;
+    db << query2;
+    db << query3;
 }
 
 void SetupTables::SeedTaskItemTypesTable()

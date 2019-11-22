@@ -44,12 +44,16 @@ private:
 
     void CreateEmployersTable();
     void CreateClientsTable();
+    void CreateRateTypesTable();
+    void CreateCurrenciesTable();
     void CreateProjectsTable();
     void CreateCategoriesTable();
     void CreateTasksTable();
     void CreateTaskItemTypesTable();
     void CreateTaskItemsTable();
 
+    void SeedRateTypesTable();
+    void SeedCurrenciesTable();
     void SeedTaskItemTypesTable();
 };
 
