@@ -35,12 +35,12 @@ namespace app::dialog
 wxBEGIN_EVENT_TABLE(EditListDialog, wxDialog)
 EVT_LIST_ITEM_ACTIVATED(EditListDialog::IDC_LIST, EditListDialog::OnItemDoubleClick)
 wxEND_EVENT_TABLE()
-// clang-format on
+    // clang-format on
 
-EditListDialog::EditListDialog(wxWindow* parent,
-    DialogType dialogType,
-    std::shared_ptr<spdlog::logger> logger,
-    const wxString& name)
+    EditListDialog::EditListDialog(wxWindow* parent,
+        DialogType dialogType,
+        std::shared_ptr<spdlog::logger> logger,
+        const wxString& name)
     : mType(dialogType)
     , pLogger(logger)
     , mStrategy(nullptr)
@@ -206,7 +206,7 @@ void EmployerStrategy::CreateControl(wxListCtrl* control)
 
 void EmployerStrategy::DataToControl(wxListCtrl* control)
 {
-    std::vector<model::EmployerModel> employers;
+    std::vector<std::unique_ptr<model::EmployerModel>> employers;
     try {
         employers = model::EmployerModel::GetAll();
     } catch (const sqlite::sqlite_exception& e) {
@@ -215,10 +215,10 @@ void EmployerStrategy::DataToControl(wxListCtrl* control)
 
     int listIndex = 0;
     int columnIndex = 0;
-    for (auto employer : employers) {
-        listIndex = control->InsertItem(columnIndex++, employer.GetName());
-        control->SetItem(listIndex, columnIndex++, employer.GetDateModified().FormatISOCombined());
-        control->SetItemPtrData(listIndex, employer.GetEmployerId());
+    for (int i = 0; i < employers.size(); i++) {
+        listIndex = control->InsertItem(columnIndex++, employers[i]->GetName());
+        control->SetItem(listIndex, columnIndex++, employers[i]->GetDateModified().FormatISOCombined());
+        control->SetItemPtrData(listIndex, employers[i]->GetEmployerId());
         columnIndex = 0;
     }
 }
@@ -235,27 +235,25 @@ ClientStrategy::ClientStrategy(std::shared_ptr<spdlog::logger> logger)
 
 void ClientStrategy::CreateControl(wxListCtrl* control)
 {
+    control->SetSize(wxSize(350, 100));
+
     wxListItem employerColumn;
     employerColumn.SetId(0);
     employerColumn.SetText(wxT("Employer"));
-    employerColumn.SetWidth(100);
+    employerColumn.SetWidth(80);
     control->InsertColumn(0, employerColumn);
 
     wxListItem nameColumn;
     nameColumn.SetId(1);
     nameColumn.SetText(wxT("Client"));
-    nameColumn.SetWidth(100);
+    nameColumn.SetWidth(120);
     control->InsertColumn(1, nameColumn);
 
-    wxListItem dateCreatedColumn;
-    dateCreatedColumn.SetId(2);
-    dateCreatedColumn.SetText(wxT("Date Created"));
-    control->InsertColumn(2, dateCreatedColumn);
-
     wxListItem dateModifiedColumn;
-    dateModifiedColumn.SetId(3);
+    dateModifiedColumn.SetId(2);
     dateModifiedColumn.SetText(wxT("Date Modified"));
-    control->InsertColumn(3, dateModifiedColumn);
+    dateModifiedColumn.SetWidth(148);
+    control->InsertColumn(2, dateModifiedColumn);
 }
 
 void ClientStrategy::DataToControl(wxListCtrl* control)
@@ -272,7 +270,6 @@ void ClientStrategy::DataToControl(wxListCtrl* control)
     for (auto client : clients) {
         listIndex = control->InsertItem(columnIndex++, client.employer_name);
         control->SetItem(listIndex, columnIndex++, client.client_name);
-        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(client.date_created_utc));
         control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(client.date_modified_utc));
         control->SetItemPtrData(listIndex, client.client_id);
         columnIndex = 0;

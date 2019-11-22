@@ -55,10 +55,10 @@ public:
     void IsActive(const bool isActive);
     void SetEmployerId(const int employerId);
 
-    void SetEmployer(EmployerModel* employer);
+    void SetEmployer(std::unique_ptr<EmployerModel> employer);
 
     static void Create(std::unique_ptr<model::ClientModel> client);
-    static ClientModel GetById(const int clientId);
+    static std::unique_ptr<ClientModel > GetById(const int clientId);
     static void Update(std::unique_ptr<model::ClientModel> client);
     static void Delete(std::unique_ptr<model::ClientModel> client);
 
@@ -70,7 +70,7 @@ private:
     bool bIsActive;
     int mEmployerId;
 
-    EmployerModel* pEmployer;
+    std::unique_ptr<EmployerModel> pEmployer;
 
     static const std::string createClient;
     static const std::string getClientsByEmployerId;

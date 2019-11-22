@@ -220,37 +220,37 @@ void ClientDialog::ConfigureEventBindings()
 
 void ClientDialog::FillControls()
 {
-    std::vector<model::EmployerModel> employers;
+    std::vector<std::unique_ptr<model::EmployerModel>> employers;
     try {
         employers = model::EmployerModel::GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured on GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    for (auto employer : employers) {
-        pEmployerChoiceCtrl->Append(employer.GetName(), util::IntToVoidPointer(employer.GetEmployerId()));
+    for (int i = 0; i < employers.size(); i++) {
+        pEmployerChoiceCtrl->Append(employers[i]->GetName(), util::IntToVoidPointer(employers[i]->GetEmployerId()));
     }
 }
 
 void ClientDialog::DataToControls()
 {
-    model::ClientModel client;
+    std::unique_ptr<model::ClientModel> client = nullptr;
     try {
         client = model::ClientModel::GetById(mClientId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured on GetById() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    pNameTextCtrl->SetValue(client.GetName());
+    pNameTextCtrl->SetValue(client->GetName());
 
-    pEmployerChoiceCtrl->SetStringSelection(client.GetEmployer()->GetName());
+    pEmployerChoiceCtrl->SetStringSelection(client->GetEmployer()->GetName());
     pEmployerChoiceCtrl->SendSelectionChangedEvent(wxEVT_CHOICE);
 
     pDateTextCtrl->SetLabel(wxString::Format(ClientDialog::DateLabel,
-        client.GetDateCreated().FormatISOCombined(),
-        client.GetDateModified().FormatISOCombined()));
+        client->GetDateCreated().FormatISOCombined(),
+        client->GetDateModified().FormatISOCombined()));
 
-    pIsActiveCtrl->SetValue(client.IsActive());
+    pIsActiveCtrl->SetValue(client->IsActive());
 }
 
 bool ClientDialog::Validate()

@@ -211,15 +211,15 @@ void ProjectDialog::CreateControls()
 
 void ProjectDialog::FillControls()
 {
-    std::vector<model::EmployerModel> employers;
+    std::vector<std::unique_ptr<model::EmployerModel>> employers;
     try {
         employers = model::EmployerModel::GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in GetAll()() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    for (auto employer : employers) {
-        pEmployerChoiceCtrl->Append(employer.GetName(), util::IntToVoidPointer(employer.GetEmployerId()));
+    for (int i = 0; i < employers.size(); i++) {
+        pEmployerChoiceCtrl->Append(employers[i]->GetName(), util::IntToVoidPointer(employers[i]->GetEmployerId()));
     }
 }
 

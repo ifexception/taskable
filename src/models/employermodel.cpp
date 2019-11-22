@@ -45,7 +45,11 @@ EmployerModel::EmployerModel(const int employerId, bool loadFromDb)
 {
     assert(loadFromDb == true);
     auto employer = EmployerModel::GetById(employerId);
-    *this = employer;
+    mEmployerId = employer->GetEmployerId();
+    mName = employer->GetName();
+    mDateCreated = employer->GetDateCreated();
+    mDateModified = employer->GetDateModified();
+    bIsActive = employer->IsActive();
 }
 
 EmployerModel::EmployerModel(int employerId, wxString name, int dateCreated, int dateModified, bool isActive)
@@ -119,28 +123,29 @@ void EmployerModel::Create(std::unique_ptr<EmployerModel> employer)
     db << EmployerModel::createEmployer << employer->GetName();
 }
 
-EmployerModel EmployerModel::GetById(const int id)
+std::unique_ptr<EmployerModel> EmployerModel::GetById(const int id)
 {
-    EmployerModel employer;
+    std::unique_ptr<EmployerModel> employer;
 
     auto db = services::db_connection::get_instance().get_handle();
     db << EmployerModel::getEmployer << id >>
         [&](int employerId, std::string employerName, int dateCreated, int dateModified, int isActive) {
-            employer = EmployerModel(employerId, employerName, dateCreated, dateModified, isActive);
+            employer = std::make_unique<EmployerModel>(employerId, employerName, dateCreated, dateModified, isActive);
         };
 
-    return employer;
+    return std::move(employer);
 }
 
-std::vector<EmployerModel> EmployerModel::GetAll()
+std::vector<std::unique_ptr<EmployerModel>> EmployerModel::GetAll()
 {
-    std::vector<EmployerModel> employers;
+    std::vector<std::unique_ptr<EmployerModel>> employers;
 
     auto db = services::db_connection::get_instance().get_handle();
     db << model::EmployerModel::getEmployers >>
         [&](int employerId, std::string employerName, int dateCreated, int dateModified, int isActive) {
-            model::EmployerModel employer(employerId, employerName, dateCreated, dateModified, isActive);
-            employers.push_back(employer);
+            auto employer =
+                std::make_unique<EmployerModel>(employerId, employerName, dateCreated, dateModified, isActive);
+            employers.push_back(std::move(employer));
         };
 
     return employers;

@@ -190,20 +190,20 @@ void EmployerDialog::ConfigureEventBindings()
 
 void EmployerDialog::DataToControls()
 {
-    model::EmployerModel employer;
+    std::unique_ptr<model::EmployerModel> employer;
     try {
         employer = model::EmployerModel::GetById(mEmployerId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in GetById() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    pNameTextCtrl->SetValue(employer.GetName());
+    pNameTextCtrl->SetValue(employer->GetName());
 
     pDateTextCtrl->SetLabel(wxString::Format(EmployerDialog::DateLabel,
-        employer.GetDateCreated().FormatISOCombined(),
-        employer.GetDateModified().FormatISOCombined()));
+        employer->GetDateCreated().FormatISOCombined(),
+        employer->GetDateModified().FormatISOCombined()));
 
-    pIsActiveCtrl->SetValue(employer.IsActive());
+    pIsActiveCtrl->SetValue(employer->IsActive());
 }
 
 void EmployerDialog::OnNameChange(wxCommandEvent& event)

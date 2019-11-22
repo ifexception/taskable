@@ -53,8 +53,8 @@ public:
     void IsActive(const bool isActive);
 
     static void Create(std::unique_ptr<EmployerModel> employer);
-    static EmployerModel GetById(const int id);
-    static std::vector<EmployerModel> GetAll();
+    static std::unique_ptr<EmployerModel> GetById(const int id);
+    static std::vector<std::unique_ptr<EmployerModel>> GetAll();
     static void Update(std::unique_ptr<EmployerModel> employer);
     static void Delete(std::unique_ptr<EmployerModel> employer);
 

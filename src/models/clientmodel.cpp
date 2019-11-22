@@ -42,11 +42,7 @@ ClientModel::ClientModel(const int clientId)
     mClientId = clientId;
 }
 
-ClientModel::ClientModel(int clientId,
-    wxString name,
-    int dateCreated,
-    int dateModified,
-    bool isActive)
+ClientModel::ClientModel(int clientId, wxString name, int dateCreated, int dateModified, bool isActive)
     : ClientModel()
 {
     mClientId = clientId;
@@ -98,7 +94,7 @@ const int ClientModel::GetEmployerId() const
 
 EmployerModel* ClientModel::GetEmployer()
 {
-    return pEmployer;
+    return pEmployer.get();
 }
 
 void ClientModel::SetClientId(const int clientId)
@@ -131,9 +127,9 @@ void ClientModel::SetEmployerId(const int employerId)
     mEmployerId = employerId;
 }
 
-void ClientModel::SetEmployer(EmployerModel* employer)
+void ClientModel::SetEmployer(std::unique_ptr<EmployerModel> employer)
 {
-    pEmployer = employer;
+    pEmployer = std::move(employer);
 }
 
 void ClientModel::Create(std::unique_ptr<model::ClientModel> client)
@@ -143,9 +139,9 @@ void ClientModel::Create(std::unique_ptr<model::ClientModel> client)
     db << model::ClientModel::createClient << std::string(client->GetName().ToUTF8()) << client->GetEmployerId();
 }
 
-ClientModel ClientModel::GetById(const int clientId)
+std::unique_ptr<ClientModel> ClientModel::GetById(const int clientId)
 {
-    model::ClientModel client;
+    std::unique_ptr<ClientModel> client = nullptr;
 
     auto db = services::db_connection::get_instance().get_handle();
     db << model::ClientModel::getClientById << clientId >> [&](int clientId,
@@ -154,9 +150,8 @@ ClientModel ClientModel::GetById(const int clientId)
                                                                int dateModifiedUtc,
                                                                int isActive,
                                                                int employerId) {
-        client = model::ClientModel(clientId, clientName, dateCreatedUtc, dateModifiedUtc, isActive);
-        auto employer = new model::EmployerModel(employerId, true);
-        client.SetEmployer(employer);
+        client = std::make_unique<ClientModel>(clientId, clientName, dateCreatedUtc, dateModifiedUtc, isActive);
+        client->SetEmployer(std::make_unique<EmployerModel>(employerId, true));
     };
     return client;
 }
@@ -166,8 +161,7 @@ void ClientModel::Update(std::unique_ptr<model::ClientModel> client)
     auto db = services::db_connection::get_instance().get_handle();
 
     db << model::ClientModel::updateClient << std::string(client->GetName().ToUTF8()) << util::UnixTimestamp()
-       << client->GetEmployerId()
-       << client->GetClientId();
+       << client->GetEmployerId() << client->GetClientId();
 }
 
 void ClientModel::Delete(std::unique_ptr<model::ClientModel> client)
@@ -209,7 +203,6 @@ const std::string ClientModel::getClientById = "SELECT clients.client_id, "
 ;
 const std::string ClientModel::updateClient =
     "UPDATE clients SET name = ?, date_modified = ?, employer_id = ? WHERE client_id = ?";
-const std::string ClientModel::deleteClient =
-    "UPDATE clients SET is_active = 0, date_modified = ? WHERE client_id = ?";
+const std::string ClientModel::deleteClient = "UPDATE clients SET is_active = 0, date_modified = ? WHERE client_id = ?";
 
 } // namespace app::model
