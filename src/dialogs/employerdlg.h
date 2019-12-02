@@ -57,14 +57,11 @@ private:
     void ConfigureEventBindings();
     void DataToControls();
 
-    void OnNameChange(wxCommandEvent& event);
-
     void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
 
-    bool Validate();
-    bool AreControlsEmpty();
+    bool TransferDataAndValidate();
 
     std::shared_ptr<spdlog::logger> pLogger;
 

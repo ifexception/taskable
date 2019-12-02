@@ -116,8 +116,18 @@ void EmployerDialog::CreateControls()
     auto employerName = new wxStaticText(employerDetailsPanel, wxID_STATIC, wxT("Name"));
     taskFlexGridSizer->Add(employerName, common::sizers::ControlCenterVertical);
 
-    pNameTextCtrl = new wxTextCtrl(
-        employerDetailsPanel, IDC_EMPLOYERTEXT, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
+    wxTextValidator nameValidator(wxFILTER_ALPHANUMERIC | wxFILTER_INCLUDE_CHAR_LIST);
+    wxArrayString allowedChars;
+    allowedChars.Add(wxT(" "));
+    nameValidator.SetIncludes(allowedChars);
+
+    pNameTextCtrl = new wxTextCtrl(employerDetailsPanel,
+        IDC_EMPLOYERTEXT,
+        wxGetEmptyString(),
+        wxDefaultPosition,
+        wxSize(150, -1),
+        wxTE_LEFT,
+        nameValidator);
     pNameTextCtrl->SetHint(wxT("Employer name"));
     pNameTextCtrl->SetToolTip(wxT("Enter a name for the employer"));
     taskFlexGridSizer->Add(pNameTextCtrl, common::sizers::ControlDefault);
@@ -158,11 +168,6 @@ void EmployerDialog::CreateControls()
 // clang-format off
 void EmployerDialog::ConfigureEventBindings()
 {
-    pNameTextCtrl->Bind(
-        wxEVT_TEXT,
-        &EmployerDialog::OnNameChange,
-        this
-    );
 
     pOkButton->Bind(
         wxEVT_BUTTON,
@@ -197,7 +202,7 @@ void EmployerDialog::DataToControls()
         pLogger->error("Error occured in GetById() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    pNameTextCtrl->SetValue(employer->GetName());
+    pNameTextCtrl->ChangeValue(employer->GetName());
 
     pDateTextCtrl->SetLabel(wxString::Format(EmployerDialog::DateLabel,
         employer->GetDateCreated().FormatISOCombined(),
@@ -206,30 +211,9 @@ void EmployerDialog::DataToControls()
     pIsActiveCtrl->SetValue(employer->IsActive());
 }
 
-void EmployerDialog::OnNameChange(wxCommandEvent& event)
-{
-    wxString name = pNameTextCtrl->GetValue();
-    pEmployer->SetName(name);
-}
-
-bool EmployerDialog::Validate()
-{
-    if (!pEmployer->IsNameValid()) {
-        common::validations::ForRequiredText(pNameTextCtrl, wxT("employer name"));
-        return false;
-    }
-
-    return true;
-}
-
-bool EmployerDialog::AreControlsEmpty()
-{
-    return pNameTextCtrl->GetValue().empty();
-}
-
 void EmployerDialog::OnOk(wxCommandEvent& event)
 {
-    if (Validate()) {
+    if (TransferDataAndValidate()) {
         if (!bIsEdit) {
             model::EmployerModel::Create(std::move(pEmployer));
         }
@@ -248,15 +232,7 @@ void EmployerDialog::OnOk(wxCommandEvent& event)
 
 void EmployerDialog::OnCancel(wxCommandEvent& event)
 {
-    bool areControlsEmpty = AreControlsEmpty();
-    if (!areControlsEmpty) {
-        int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
-        if (answer == wxYES) {
-            EndModal(wxID_CANCEL);
-        }
-    } else {
-        EndModal(wxID_CANCEL);
-    }
+    EndModal(wxID_CANCEL);
 }
 
 void EmployerDialog::OnIsActiveCheck(wxCommandEvent& event)
@@ -266,5 +242,17 @@ void EmployerDialog::OnIsActiveCheck(wxCommandEvent& event)
     } else {
         pNameTextCtrl->Disable();
     }
+}
+
+bool EmployerDialog::TransferDataAndValidate()
+{
+    wxString name = pNameTextCtrl->GetValue();
+    if (name.empty() || name.length() < 2 || name.length() > 255) {
+        common::validations::ForRequiredText(pNameTextCtrl, wxT("employer name"));
+        return false;
+    }
+    pEmployer->SetName(name);
+
+    return true;
 }
 } // namespace app::dialog

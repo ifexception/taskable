@@ -33,12 +33,9 @@ class EmployerModel final
 public:
     EmployerModel();
     EmployerModel(const int employerId);
-    EmployerModel(const int employerId, bool loadFromDb);
+    EmployerModel(const int employerId, bool initializeFromDatabase);
     EmployerModel(int employerId, wxString name, int dateCreated, int dateModified, bool isActive);
     ~EmployerModel() = default;
-
-
-    bool IsNameValid();
 
     const int GetEmployerId() const;
     const wxString GetName() const;
@@ -53,7 +50,7 @@ public:
     void IsActive(const bool isActive);
 
     static void Create(std::unique_ptr<EmployerModel> employer);
-    static std::unique_ptr<EmployerModel> GetById(const int id);
+    static std::unique_ptr<EmployerModel> GetById(const int employerId);
     static std::vector<std::unique_ptr<EmployerModel>> GetAll();
     static void Update(std::unique_ptr<EmployerModel> employer);
     static void Delete(std::unique_ptr<EmployerModel> employer);

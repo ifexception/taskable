@@ -40,10 +40,10 @@ EmployerModel::EmployerModel(const int employerId)
     mEmployerId = employerId;
 }
 
-EmployerModel::EmployerModel(const int employerId, bool loadFromDb)
+EmployerModel::EmployerModel(const int employerId, bool initializeFromDatabase)
     : EmployerModel()
 {
-    assert(loadFromDb == true);
+    assert(initializeFromDatabase == true);
     auto employer = EmployerModel::GetById(employerId);
     mEmployerId = employer->GetEmployerId();
     mName = employer->GetName();
@@ -60,11 +60,6 @@ EmployerModel::EmployerModel(int employerId, wxString name, int dateCreated, int
     mDateCreated = util::ToDateTime(dateCreated);
     mDateModified = util::ToDateTime(dateModified);
     bIsActive = isActive;
-}
-
-bool EmployerModel::IsNameValid()
-{
-    return !mName.empty() && mName.length() >= 2 && mName.length() <= 255;
 }
 
 const int EmployerModel::GetEmployerId() const
@@ -120,7 +115,7 @@ void EmployerModel::IsActive(const bool isActive)
 void EmployerModel::Create(std::unique_ptr<EmployerModel> employer)
 {
     auto db = services::db_connection::get_instance().get_handle();
-    db << EmployerModel::createEmployer << employer->GetName();
+    db << EmployerModel::createEmployer << employer->GetName().ToStdString();
 }
 
 std::unique_ptr<EmployerModel> EmployerModel::GetById(const int id)
@@ -130,7 +125,8 @@ std::unique_ptr<EmployerModel> EmployerModel::GetById(const int id)
     auto db = services::db_connection::get_instance().get_handle();
     db << EmployerModel::getEmployer << id >>
         [&](int employerId, std::string employerName, int dateCreated, int dateModified, int isActive) {
-            employer = std::make_unique<EmployerModel>(employerId, employerName, dateCreated, dateModified, isActive);
+            employer = std::make_unique<EmployerModel>(
+                employerId, wxString(employerName), dateCreated, dateModified, isActive);
         };
 
     return std::move(employer);
@@ -143,8 +139,8 @@ std::vector<std::unique_ptr<EmployerModel>> EmployerModel::GetAll()
     auto db = services::db_connection::get_instance().get_handle();
     db << model::EmployerModel::getEmployers >>
         [&](int employerId, std::string employerName, int dateCreated, int dateModified, int isActive) {
-            auto employer =
-                std::make_unique<EmployerModel>(employerId, employerName, dateCreated, dateModified, isActive);
+            auto employer = std::make_unique<EmployerModel>(
+                employerId, wxString(employerName), dateCreated, dateModified, isActive);
             employers.push_back(std::move(employer));
         };
 
@@ -154,7 +150,7 @@ std::vector<std::unique_ptr<EmployerModel>> EmployerModel::GetAll()
 void EmployerModel::Update(std::unique_ptr<EmployerModel> employer)
 {
     auto db = services::db_connection::get_instance().get_handle();
-    db << EmployerModel::updateEmployer << std::string(employer->GetName().ToUTF8()) << util::UnixTimestamp()
+    db << EmployerModel::updateEmployer << employer->GetName().ToStdString() << util::UnixTimestamp()
        << employer->GetEmployerId();
 }
 
@@ -166,10 +162,26 @@ void EmployerModel::Delete(std::unique_ptr<EmployerModel> employer)
 }
 
 const std::string EmployerModel::createEmployer = "INSERT INTO employers (name, is_active) VALUES (?, 1);";
-const std::string EmployerModel::getEmployers = "SELECT * FROM employers WHERE is_active = 1;";
-const std::string EmployerModel::getEmployer = "SELECT * FROM employers WHERE employer_id = ?";
+
+const std::string EmployerModel::getEmployers = "SELECT employer_id, "
+                                                "name, "
+                                                "date_created, "
+                                                "date_modified, "
+                                                "is_active "
+                                                "FROM employers "
+                                                "WHERE is_active = 1;";
+
+const std::string EmployerModel::getEmployer = "SELECT employer_id, "
+                                               "name, "
+                                               "date_created, "
+                                               "date_modified, "
+                                               "is_active "
+                                               "FROM employers "
+                                               "WHERE employer_id = ?";
+
 const std::string EmployerModel::updateEmployer =
     "UPDATE employers SET name = ?, date_modified = ? WHERE employer_id = ?";
+
 const std::string EmployerModel::deleteEmployer =
     "UPDATE employers SET is_active = 0, date_modified = ? WHERE employer_id = ?";
 } // namespace app::model
