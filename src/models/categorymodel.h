@@ -24,9 +24,6 @@
 #include <wx/colour.h>
 #include <wx/string.h>
 
-#define FMT_HEADER_ONLY
-#include <spdlog/spdlog.h>
-
 #include "projectmodel.h"
 
 namespace app::model
@@ -35,17 +32,9 @@ class CategoryModel final
 {
 public:
     CategoryModel();
-    CategoryModel(int id);
-    CategoryModel(wxString name, wxColor color, int projectId, wxString projectDisplayName);
-    CategoryModel(int id,
-        wxString name,
-        wxColor color,
-        int dateCreated,
-        int dateModified,
-        bool isActive,
-        wxString projectDisplayName);
-
-    void Reset();
+    CategoryModel(int categoryId);
+    CategoryModel(wxString name, wxColor color, int projectId);
+    CategoryModel(int id, wxString name, wxColor color, int dateCreated, int dateModified, bool isActive);
 
     bool IsNameValid();
     bool IsProjectSelected();
@@ -58,7 +47,7 @@ public:
     const bool IsActive() const;
     const int GetProjectId() const;
 
-    ProjectModel& GetProject();
+    ProjectModel* GetProject();
 
     void SetCategoryId(const int categoryId);
     void SetName(const wxString& name);
@@ -68,16 +57,14 @@ public:
     void IsActive(const bool isActive);
     void SetProjectId(const int projectId);
 
-    void SetProject(const ProjectModel& project);
+    void SetProject(std::unique_ptr<ProjectModel> project);
 
-    static void Create(const CategoryModel& category);
-    static CategoryModel GetCategoryById(const int id);
-    static void Update(const CategoryModel& category);
-    static void Delete(const CategoryModel& category);
+    static void Create(std::unique_ptr<CategoryModel> category);
+    static std::unique_ptr<CategoryModel> GetCategoryById(const int id);
+    static void Update(std::unique_ptr<CategoryModel> category);
+    static void Delete(std::unique_ptr<CategoryModel> category);
 
 private:
-    std::shared_ptr<spdlog::logger> pLogger;
-
     int mCategoryId;
     wxString mName;
     wxColor mColor;
@@ -86,7 +73,7 @@ private:
     bool bIsActive;
     int mProjectId;
 
-    ProjectModel mProject;
+    std::unique_ptr<ProjectModel> pProject;
 
     static const std::string createCategory;
     static const std::string getCategoryById;

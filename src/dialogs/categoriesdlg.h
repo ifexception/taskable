@@ -53,15 +53,11 @@ private:
     void ConfigureEventBindings();
     void CreateControls();
     void FillControls();
-    void FillControls(model::CategoryModel category);
+    void FillControls(std::unique_ptr<model::CategoryModel> category);
     void PostInitializeProcedure();
 
-    void AppendListControlEntry(model::CategoryModel category);
-    void UpdateListControlEntry(model::CategoryModel category);
-
-    void OnProjectChoiceSelection(wxCommandEvent& event);
-    void OnNameChange(wxCommandEvent& event);
-    void OnColorChange(wxColourPickerEvent& event);
+    void AppendListControlEntry(model::CategoryModel* category);
+    void UpdateListControlEntry(model::CategoryModel* category);
 
     void OnClear(wxCommandEvent& event);
     void OnAdd(wxCommandEvent& event);
@@ -75,11 +71,11 @@ private:
     void OnItemUnchecked(wxListEvent& event);
     void OnItemRightClick(wxListEvent& event);
 
-    model::CategoryModel ExtractCategoryDataFromListIndex();
-    model::CategoryModel ExtractCategoryDataFromListIndex(long index);
+    std::unique_ptr<model::CategoryModel> ExtractCategoryDataFromListIndex();
+    std::unique_ptr<model::CategoryModel> ExtractCategoryDataFromListIndex(long index);
 
     bool HasPendingChanges();
-    bool Validate();
+    bool TransferDataAndValidate();
 
     void ResetControlValues();
 
@@ -102,8 +98,8 @@ private:
 
     long mItemIndex;
     std::vector<long> mItemIndexes;
-    model::CategoryModel mModel;
-    std::vector<model::CategoryModel> mCategories;
+    std::unique_ptr<model::CategoryModel> pCategory;
+    std::vector<std::unique_ptr<model::CategoryModel>> mCategories;
     bool bEditFromListCtrl;
 
     enum { IDC_PROJECTCHOICE = wxID_HIGHEST + 1, IDC_NAME, IDC_COLOR, IDC_ISACTIVE, IDC_LIST };

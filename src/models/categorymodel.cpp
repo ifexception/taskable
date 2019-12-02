@@ -33,9 +33,8 @@ CategoryModel::CategoryModel()
     , mDateModified(wxDefaultDateTime)
     , bIsActive(false)
     , mProjectId(0)
-    , mProject()
+    , pProject(std::make_unique<ProjectModel>())
 {
-    pLogger = spdlog::get(Constants::LoggerName);
 }
 
 CategoryModel::CategoryModel(int id)
@@ -44,22 +43,15 @@ CategoryModel::CategoryModel(int id)
     mCategoryId = id;
 }
 
-CategoryModel::CategoryModel(wxString name, wxColor color, int projectId, wxString projectDisplayName)
+CategoryModel::CategoryModel(wxString name, wxColor color, int projectId)
     : CategoryModel()
 {
     mName = name;
     mColor = color;
     mProjectId = projectId;
-    mProject.SetDisplayName(projectDisplayName);
 }
 
-CategoryModel::CategoryModel(int id,
-    wxString name,
-    wxColor color,
-    int dateCreated,
-    int dateModified,
-    bool isActive,
-    wxString projectDisplayName)
+CategoryModel::CategoryModel(int id, wxString name, wxColor color, int dateCreated, int dateModified, bool isActive)
     : CategoryModel()
 {
     mCategoryId = id;
@@ -68,20 +60,6 @@ CategoryModel::CategoryModel(int id,
     mDateCreated = util::ToDateTime(dateCreated);
     mDateModified = util::ToDateTime(dateModified);
     bIsActive = isActive;
-    mProject.SetDisplayName(projectDisplayName);
-}
-
-void CategoryModel::Reset()
-{
-    mCategoryId = 0;
-    mName = wxGetEmptyString();
-    mColor = wxColor(0, 0, 0);
-    mDateCreated = wxDefaultDateTime;
-    mDateModified = wxDefaultDateTime;
-    bIsActive = false;
-    mProjectId = 0;
-
-    mProject.Reset();
 }
 
 bool CategoryModel::IsNameValid()
@@ -129,9 +107,9 @@ const int CategoryModel::GetProjectId() const
     return mProjectId;
 }
 
-ProjectModel& CategoryModel::GetProject()
+ProjectModel* CategoryModel::GetProject()
 {
-    return mProject;
+    return pProject.get();
 }
 
 void CategoryModel::SetCategoryId(const int categoryId)
@@ -169,23 +147,22 @@ void CategoryModel::SetProjectId(const int projectId)
     mProjectId = projectId;
 }
 
-void CategoryModel::SetProject(const ProjectModel& project)
+void CategoryModel::SetProject(std::unique_ptr<ProjectModel> project)
 {
-    mProject = project;
+    pProject = std::move(project);
 }
 
-void CategoryModel::Create(const CategoryModel& category)
+void CategoryModel::Create(std::unique_ptr<CategoryModel> category)
 {
-    std::string name = std::string(category.GetName().ToUTF8());
-    unsigned int color = static_cast<unsigned int>(category.GetColor().GetRGB());
+    unsigned int color = static_cast<unsigned int>(category->GetColor().GetRGB());
 
     auto db = services::db_connection::get_instance().get_handle();
-    db << CategoryModel::createCategory << name << color << category.GetProjectId();
+    db << CategoryModel::createCategory << category->GetName().ToStdString() << color << category->GetProjectId();
 }
 
-CategoryModel CategoryModel::GetCategoryById(const int id)
+std::unique_ptr<CategoryModel> CategoryModel::GetCategoryById(const int id)
 {
-    CategoryModel category;
+    std::unique_ptr<CategoryModel> category = nullptr;
 
     auto db = services::db_connection::get_instance().get_handle();
     db << CategoryModel::getCategoryById << id >> [&](int categoryId,
@@ -194,27 +171,29 @@ CategoryModel CategoryModel::GetCategoryById(const int id)
                                                       int dateCreated,
                                                       int dateModified,
                                                       int isActive,
-                                                      std::string projectName) {
-        category = CategoryModel(categoryId, categoryName, color, dateCreated, dateModified, isActive, projectName);
+                                                      int projectId) {
+        category =
+            std::make_unique<CategoryModel>(categoryId, categoryName, color, dateCreated, dateModified, isActive);
+        auto project = std::make_unique<ProjectModel>(projectId, true);
+        category->SetProject(std::move(project));
     };
 
     return category;
 }
 
-void CategoryModel::Update(const CategoryModel& category)
+void CategoryModel::Update(std::unique_ptr<CategoryModel> category)
 {
-    std::string name = std::string(category.GetName().ToUTF8());
-    unsigned int color = static_cast<unsigned int>(category.GetColor().GetRGB());
+    unsigned int color = static_cast<unsigned int>(category->GetColor().GetRGB());
 
     auto db = services::db_connection::get_instance().get_handle();
-    db << CategoryModel::updateCategory << name << color
-       << category.GetProjectId() << util::UnixTimestamp() << category.GetCategoryId();
+    db << CategoryModel::updateCategory << category->GetName().ToStdString() << color << category->GetProjectId()
+       << util::UnixTimestamp() << category->GetCategoryId();
 }
 
-void CategoryModel::Delete(const CategoryModel& category)
+void CategoryModel::Delete(std::unique_ptr<CategoryModel> category)
 {
     auto db = services::db_connection::get_instance().get_handle();
-    db << CategoryModel::deleteCategory << util::UnixTimestamp() << category.GetCategoryId();
+    db << CategoryModel::deleteCategory << util::UnixTimestamp() << category->GetCategoryId();
 }
 
 const std::string CategoryModel::createCategory = "INSERT INTO categories (name, color, is_active, project_id) "
@@ -226,7 +205,7 @@ const std::string CategoryModel::getCategoryById = "SELECT categories.category_i
                                                    "categories.date_created, "
                                                    "categories.date_modified, "
                                                    "categories.is_active, "
-                                                   "projects.display_name "
+                                                   "projects.project_id "
                                                    "FROM categories "
                                                    "INNER JOIN projects ON categories.project_id = projects.project_id "
                                                    "WHERE categories.category_id = ?"

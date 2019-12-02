@@ -38,7 +38,7 @@ public:
     explicit CategoryDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
         int categoryId,
-        const wxString& name = "categorydialogdlg");
+        const wxString& name = "categorydlg");
     virtual ~CategoryDialog() = default;
 
 private:
@@ -56,15 +56,11 @@ private:
     void DataToControls();
     void PostInitializeProcedure();
 
-    void OnProjectChoiceSelection(wxCommandEvent& event);
-    void OnNameChange(wxCommandEvent& event);
-    void OnColorChange(wxColourPickerEvent& event);
-
     void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
 
-    bool Validate();
+    bool TransferDataAndValidate();
 
     std::shared_ptr<spdlog::logger> pLogger;
 
@@ -77,9 +73,8 @@ private:
     wxButton* pOkButton;
     wxButton* pCancelButton;
 
-    model::CategoryModel mCategory;
+    std::unique_ptr<model::CategoryModel> pCategory;
     int mCategoryId;
-    bool bTouched;
 
     enum { IDC_PROJECTCHOICE = wxID_HIGHEST + 1, IDC_NAME, IDC_COLOR, IDC_ISACTIVE };
 

@@ -47,7 +47,7 @@ CategoriesDialog::CategoriesDialog(wxWindow* parent, std::shared_ptr<spdlog::log
     , pCancelButton(nullptr)
     , mItemIndex(-1)
     , mItemIndexes()
-    , mModel()
+    , pCategory(std::make_unique<model::CategoryModel>())
     , mCategories()
     , bEditFromListCtrl(false)
 {
@@ -96,24 +96,6 @@ void CategoriesDialog::PostInitializeProcedure()
 // clang-format off
 void CategoriesDialog::ConfigureEventBindings()
 {
-    pProjectChoiceCtrl->Bind(
-        wxEVT_CHOICE,
-        &CategoriesDialog::OnProjectChoiceSelection,
-        this
-    );
-
-    pNameTextCtrl->Bind(
-        wxEVT_TEXT,
-        &CategoriesDialog::OnNameChange,
-        this
-    );
-
-    pColorPickerCtrl->Bind(
-        wxEVT_COLOURPICKER_CHANGED,
-        &CategoriesDialog::OnColorChange,
-        this
-    );
-
     pClearButton->Bind(
         wxEVT_BUTTON,
         &CategoriesDialog::OnClear,
@@ -266,13 +248,13 @@ void CategoriesDialog::CreateControls()
     centerButtonPanel->SetSizer(centerButtonPanelSizer);
     centerSizer->Add(centerButtonPanel, wxSizerFlags().Border(wxALL, 4));
 
-    pAddButton = new wxButton(centerButtonPanel, wxID_ADD, wxT("&Add >>"));
+    pAddButton = new wxButton(centerButtonPanel, wxID_ADD, wxT("Add >>"));
     centerButtonPanelSizer->Add(pAddButton, common::sizers::ControlDefault);
 
-    pRemoveButton = new wxButton(centerButtonPanel, wxID_REMOVE, wxT("&Remove"));
+    pRemoveButton = new wxButton(centerButtonPanel, wxID_REMOVE, wxT("Remove"));
     centerButtonPanelSizer->Add(pRemoveButton, common::sizers::ControlDefault);
 
-    pRemoveAllButton = new wxButton(centerButtonPanel, wxID_DELETE, wxT("Re&move All"));
+    pRemoveAllButton = new wxButton(centerButtonPanel, wxID_DELETE, wxT("Remove All"));
     centerButtonPanelSizer->Add(pRemoveAllButton, common::sizers::ControlDefault);
 
     /* Right Side */
@@ -321,78 +303,58 @@ void CategoriesDialog::CreateControls()
 
     bottomSizer->Add(buttonPanel, wxSizerFlags().Border(wxALL, 5).Center());
 
-    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
+    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("OK"));
     buttonPanelSizer->Add(pOkButton, wxSizerFlags().Border(wxALL, 5));
 
-    pCancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
+    pCancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("Cancel"));
     buttonPanelSizer->Add(pCancelButton, wxSizerFlags().Border(wxALL, 5));
 }
 
 void CategoriesDialog::FillControls()
 {
-    try {
-        auto projects = mModel.GetProject().GetAll();
+    std::vector<std::unique_ptr<model::ProjectModel>> projects;
 
-        for (auto p : projects) {
-            pProjectChoiceCtrl->Append(p.GetDisplayName(), util::IntToVoidPointer(p.GetProjectId()));
-        }
+    try {
+        projects = model::ProjectModel::GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in GetAllProjects() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in ProjectModel::GetAll()() - {0:d} : {1}", e.get_code(), e.what());
+    }
+
+    for (const auto& project : projects) {
+        pProjectChoiceCtrl->Append(project->GetDisplayName(), util::IntToVoidPointer(project->GetProjectId()));
     }
 }
 
-void CategoriesDialog::FillControls(model::CategoryModel category)
+void CategoriesDialog::FillControls(std::unique_ptr<model::CategoryModel> category)
 {
-    pProjectChoiceCtrl->SetStringSelection(category.GetProject().GetDisplayName());
-    pProjectChoiceCtrl->SendSelectionChangedEvent(wxEVT_CHOICE);
+    pProjectChoiceCtrl->SetStringSelection(category->GetProject()->GetDisplayName());
 
-    pNameTextCtrl->SetValue(category.GetName());
+    pNameTextCtrl->ChangeValue(category->GetName());
 
-    pColorPickerCtrl->SetColour(category.GetColor());
+    pColorPickerCtrl->SetColour(category->GetColor());
 }
 
-void CategoriesDialog::AppendListControlEntry(model::CategoryModel category)
+void CategoriesDialog::AppendListControlEntry(model::CategoryModel* category)
 {
     int listIndex = 0;
     int columnIndex = 0;
 
-    listIndex = pCategoryListCtrl->InsertItem(columnIndex++, category.GetProject().GetDisplayName());
-    pCategoryListCtrl->SetItem(listIndex, columnIndex++, category.GetName());
-    pCategoryListCtrl->SetItemBackgroundColour(listIndex, category.GetColor());
-    pCategoryListCtrl->SetItemPtrData(listIndex, category.GetProjectId());
+    listIndex = pCategoryListCtrl->InsertItem(columnIndex++, category->GetProject()->GetDisplayName());
+    pCategoryListCtrl->SetItem(listIndex, columnIndex++, category->GetName());
+    pCategoryListCtrl->SetItemBackgroundColour(listIndex, category->GetColor());
+    pCategoryListCtrl->SetItemPtrData(listIndex, category->GetProjectId());
 }
 
-void CategoriesDialog::UpdateListControlEntry(model::CategoryModel category)
+void CategoriesDialog::UpdateListControlEntry(model::CategoryModel* category)
 {
     int columnIndex = 0;
 
-    pCategoryListCtrl->SetItem(mItemIndex, columnIndex++, category.GetProject().GetDisplayName());
-    pCategoryListCtrl->SetItem(mItemIndex, columnIndex++, category.GetName());
-    pCategoryListCtrl->SetItemBackgroundColour(mItemIndex, category.GetColor());
-    pCategoryListCtrl->SetItemPtrData(mItemIndex, category.GetProjectId());
+    pCategoryListCtrl->SetItem(mItemIndex, columnIndex++, category->GetProject()->GetDisplayName());
+    pCategoryListCtrl->SetItem(mItemIndex, columnIndex++, category->GetName());
+    pCategoryListCtrl->SetItemBackgroundColour(mItemIndex, category->GetColor());
+    pCategoryListCtrl->SetItemPtrData(mItemIndex, category->GetProjectId());
 
     mItemIndex = -1;
-}
-
-void CategoriesDialog::OnProjectChoiceSelection(wxCommandEvent& event)
-{
-    int id = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
-    wxString name = pProjectChoiceCtrl->GetStringSelection();
-
-    mModel.SetProjectId(id);
-    mModel.GetProject().SetDisplayName(name);
-}
-
-void CategoriesDialog::OnNameChange(wxCommandEvent& event)
-{
-    wxString name = pNameTextCtrl->GetValue();
-    mModel.SetName(name);
-}
-
-void CategoriesDialog::OnColorChange(wxColourPickerEvent& event)
-{
-    wxColor color = pColorPickerCtrl->GetColour();
-    mModel.SetColor(color);
 }
 
 void CategoriesDialog::OnClear(wxCommandEvent& event)
@@ -402,25 +364,25 @@ void CategoriesDialog::OnClear(wxCommandEvent& event)
 
 void CategoriesDialog::OnAdd(wxCommandEvent& event)
 {
-    if (Validate()) {
+    if (TransferDataAndValidate()) {
         if (!bEditFromListCtrl) {
-            mCategories.push_back(mModel);
-            AppendListControlEntry(mModel);
-
+            AppendListControlEntry(pCategory.get());
+            mCategories.push_back(std::move(pCategory));
             pRemoveAllButton->Enable();
 
         } else {
-            auto iterator = std::find_if(mCategories.begin(), mCategories.end(), [=](model::CategoryModel category) {
-                return category.GetName() == mModel.GetName();
-            });
+            auto iterator = std::find_if(
+                mCategories.begin(), mCategories.end(), [&](std::unique_ptr<model::CategoryModel>& category) {
+                    return category->GetName() == pCategory->GetName();
+                });
             if (iterator != mCategories.end()) {
                 int index = std::distance(mCategories.begin(), iterator);
-                mCategories.at(index) = mModel;
-                UpdateListControlEntry(mModel);
+                UpdateListControlEntry(pCategory.get());
+                mCategories.at(index) = std::move(pCategory);
             }
         }
 
-        mModel.Reset();
+        pCategory = std::make_unique<model::CategoryModel>();
         ResetControlValues();
     }
 }
@@ -431,7 +393,7 @@ void CategoriesDialog::OnEdit(wxCommandEvent& event)
 
     auto category = ExtractCategoryDataFromListIndex();
 
-    FillControls(category);
+    FillControls(std::move(category));
 }
 
 void CategoriesDialog::OnRemove(wxCommandEvent& event)
@@ -439,9 +401,10 @@ void CategoriesDialog::OnRemove(wxCommandEvent& event)
     for (long index : mItemIndexes) {
         auto categoryAtIndex = ExtractCategoryDataFromListIndex(index);
 
-        mCategories.erase(std::remove_if(mCategories.begin(),
-            mCategories.end(),
-            [=](const model::CategoryModel& category) { return category.GetName() == categoryAtIndex.GetName(); }));
+        mCategories.erase(
+            std::remove_if(mCategories.begin(), mCategories.end(), [&](std::unique_ptr<model::CategoryModel>& category) {
+                return category->GetName() == categoryAtIndex->GetName();
+            }));
 
         pCategoryListCtrl->DeleteItem(index);
     }
@@ -459,11 +422,11 @@ void CategoriesDialog::OnRemoveAll(wxCommandEvent& event)
 
 void CategoriesDialog::OnOK(wxCommandEvent& event)
 {
-    for (const auto& category : mCategories) {
+    for (auto& category : mCategories) {
         try {
-            model::CategoryModel::Create(category);
+            model::CategoryModel::Create(std::move(category));
         } catch (const sqlite::sqlite_exception& e) {
-            pLogger->error("Error occured in category OnOK() - {0:d} : {1}", e.get_code(), e.what());
+            pLogger->error("Error occured in category CategoryModel::Create() - {0:d} : {1}", e.get_code(), e.what());
         }
     }
 
@@ -472,18 +435,7 @@ void CategoriesDialog::OnOK(wxCommandEvent& event)
 
 void CategoriesDialog::OnCancel(wxCommandEvent& event)
 {
-    if (HasPendingChanges()) {
-        int result = wxMessageBox(wxT("There are unsaved changes!\nAre you sure you want to exit?"),
-            common::GetProgramName(),
-            wxYES_NO | wxICON_WARNING);
-        if (result == wxYES) {
-            EndModal(wxID_CANCEL);
-        } else {
-            return;
-        }
-    } else {
-        EndModal(wxID_CANCEL);
-    }
+    EndModal(wxID_CANCEL);
 }
 
 void CategoriesDialog::OnItemChecked(wxListEvent& event)
@@ -521,7 +473,7 @@ void CategoriesDialog::OnItemRightClick(wxListEvent& event)
     PopupMenu(&menu);
 }
 
-model::CategoryModel CategoriesDialog::ExtractCategoryDataFromListIndex()
+std::unique_ptr<model::CategoryModel> CategoriesDialog::ExtractCategoryDataFromListIndex()
 {
     assert(mItemIndex != -1);
 
@@ -541,7 +493,7 @@ model::CategoryModel CategoriesDialog::ExtractCategoryDataFromListIndex()
     item.m_mask = wxLIST_MASK_TEXT;
     pCategoryListCtrl->GetItem(item);
 
-    // get associated category project name and project ID
+    // get associated category project ID
     projectName = item.GetText();
     projectId = item.GetData();
 
@@ -551,10 +503,13 @@ model::CategoryModel CategoriesDialog::ExtractCategoryDataFromListIndex()
     // get category name
     categoryName = item.GetText();
 
-    return model::CategoryModel(categoryName, color, projectId, projectName);
+    auto category = std::make_unique<model::CategoryModel>(categoryName, color, projectId);
+    category->GetProject()->SetProjectId(projectId);
+    category->GetProject()->SetDisplayName(projectName);
+    return std::move(category);
 }
 
-model::CategoryModel CategoriesDialog::ExtractCategoryDataFromListIndex(long index)
+std::unique_ptr<model::CategoryModel> CategoriesDialog::ExtractCategoryDataFromListIndex(long index)
 {
     // declare variables
     unsigned int color;
@@ -582,7 +537,10 @@ model::CategoryModel CategoriesDialog::ExtractCategoryDataFromListIndex(long ind
     // get category name
     categoryName = item.GetText();
 
-    return model::CategoryModel(categoryName, color, projectId, projectName);
+    auto category = std::make_unique<model::CategoryModel>(categoryName, color, projectId);
+    category->GetProject()->SetProjectId(projectId);
+    category->GetProject()->SetDisplayName(projectName);
+    return std::move(category);
 }
 
 bool CategoriesDialog::HasPendingChanges()
@@ -590,20 +548,29 @@ bool CategoriesDialog::HasPendingChanges()
     return mCategories.size() > 0;
 }
 
-bool CategoriesDialog::Validate()
+bool CategoriesDialog::TransferDataAndValidate()
 {
-    bool isValid = true;
-    if (!mModel.IsNameValid()) {
-        isValid = false;
+    wxString name = pNameTextCtrl->GetValue();
+    if (name.empty() || name.length() < 2 || name.length() > 255) {
         common::validations::ForRequiredText(pNameTextCtrl, wxT("category name"));
+        return false;
     }
+    pCategory->SetName(name);
 
-    if (!mModel.IsProjectSelected()) {
-        isValid = false;
+    int projectId = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
+    wxString displayName = pProjectChoiceCtrl->GetStringSelection();
+    if (projectId < 1) {
         common::validations::ForRequiredChoiceSelection(pProjectChoiceCtrl, wxT("project"));
+        return false;
     }
+    pCategory->SetProjectId(projectId);
+    pCategory->GetProject()->SetProjectId(projectId);
+    pCategory->GetProject()->SetDisplayName(displayName);
 
-    return isValid;
+    wxColor color = pColorPickerCtrl->GetColour();
+    pCategory->SetColor(color);
+
+    return true;
 }
 
 void CategoriesDialog::ResetControlValues()

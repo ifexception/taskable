@@ -46,9 +46,8 @@ CategoryDialog::CategoryDialog(wxWindow* parent,
     , pDateTextCtrl(nullptr)
     , pOkButton(nullptr)
     , pCancelButton(nullptr)
-    , mCategory(categoryId)
     , mCategoryId(categoryId)
-    , bTouched(false)
+    , pCategory(std::make_unique<model::CategoryModel>(categoryId))
     , pLogger(logger)
 {
     Create(parent,
@@ -88,24 +87,6 @@ bool CategoryDialog::Create(wxWindow* parent,
 // clang-format off
 void CategoryDialog::ConfigureEventBindings()
 {
-    pProjectChoiceCtrl->Bind(
-        wxEVT_CHOICE,
-        &CategoryDialog::OnProjectChoiceSelection,
-        this
-    );
-
-    pNameTextCtrl->Bind(
-        wxEVT_TEXT,
-        &CategoryDialog::OnNameChange,
-        this
-    );
-
-    pColorPickerCtrl->Bind(
-        wxEVT_COLOURPICKER_CHANGED,
-        &CategoryDialog::OnColorChange,
-        this
-    );
-
     pIsActiveCtrl->Bind(
         wxEVT_CHECKBOX,
         &CategoryDialog::OnIsActiveCheck,
@@ -198,8 +179,8 @@ void CategoryDialog::CreateControls()
     buttonPanel->SetSizer(buttonPanelSizer);
     mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
-    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
-    pCancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
+    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("OK"));
+    pCancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("Cancel"));
 
     buttonPanelSizer->Add(pOkButton, common::sizers::ControlDefault);
     buttonPanelSizer->Add(pCancelButton, common::sizers::ControlDefault);
@@ -207,36 +188,39 @@ void CategoryDialog::CreateControls()
 
 void CategoryDialog::FillControls()
 {
-    auto projects = model::ProjectModel::GetAll();
+    std::vector<std::unique_ptr<model::ProjectModel>> projects;
 
-    for (auto p : projects) {
-        pProjectChoiceCtrl->Append(p.GetDisplayName(), util::IntToVoidPointer(p.GetProjectId()));
+    try {
+        projects = model::ProjectModel::GetAll();
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in ProjectModel::GetAll()() - {0:d} : {1}", e.get_code(), e.what());
+    }
+
+    for (const auto& project : projects) {
+        pProjectChoiceCtrl->Append(project->GetDisplayName(), util::IntToVoidPointer(project->GetProjectId()));
     }
 }
 
 void CategoryDialog::DataToControls()
 {
-    model::CategoryModel category;
+    std::unique_ptr<model::CategoryModel> category = nullptr;
     try {
         category = model::CategoryModel::GetCategoryById(mCategoryId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in get_category_by_id() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    pProjectChoiceCtrl->SetStringSelection(category.GetProject().GetDisplayName());
-    pProjectChoiceCtrl->SendSelectionChangedEvent(wxEVT_CHOICE);
+    pProjectChoiceCtrl->SetStringSelection(category->GetProject()->GetDisplayName());
 
-    pNameTextCtrl->SetValue(category.GetName());
+    pNameTextCtrl->SetValue(category->GetName());
 
-    pColorPickerCtrl->SetColour(category.GetColor());
-    wxColourPickerEvent event(this, IDC_COLOR, category.GetColor());
-    wxPostEvent(this, event);
+    pColorPickerCtrl->SetColour(category->GetColor());
 
     pDateTextCtrl->SetLabel(wxString::Format(CategoryDialog::DateLabel,
-        category.GetDateCreated().FormatISOCombined(),
-        category.GetDateModified().FormatISOCombined()));
+        category->GetDateCreated().FormatISOCombined(),
+        category->GetDateModified().FormatISOCombined()));
 
-    pIsActiveCtrl->SetValue(category.IsActive());
+    pIsActiveCtrl->SetValue(category->IsActive());
 }
 
 void CategoryDialog::PostInitializeProcedure()
@@ -244,54 +228,35 @@ void CategoryDialog::PostInitializeProcedure()
     pOkButton->Disable();
 }
 
-bool CategoryDialog::Validate()
-{
-    bool isValid = true;
-    if (!mCategory.IsNameValid()) {
-        isValid = false;
-        common::validations::ForRequiredText(pNameTextCtrl, wxT("category name"));
-    }
-
-    if (!mCategory.IsProjectSelected()) {
-        isValid = false;
-        common::validations::ForRequiredChoiceSelection(pProjectChoiceCtrl, wxT("project"));
-    }
-
-    return isValid;
-}
-
-void CategoryDialog::OnProjectChoiceSelection(wxCommandEvent& event)
-{
-    int id = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
-    wxString name = pProjectChoiceCtrl->GetStringSelection();
-
-    mCategory.SetProjectId(id);
-    mCategory.GetProject().SetDisplayName(name);
-    bTouched = true;
-}
-
-void CategoryDialog::OnNameChange(wxCommandEvent& event)
+bool CategoryDialog::TransferDataAndValidate()
 {
     wxString name = pNameTextCtrl->GetValue();
-    mCategory.SetName(name);
-    bTouched = true;
-}
+    if (name.empty() || name.length() < 2 || name.length() > 255) {
+        common::validations::ForRequiredText(pNameTextCtrl, wxT("category name"));
+        return false;
+    }
+    pCategory->SetName(name);
 
-void CategoryDialog::OnColorChange(wxColourPickerEvent& event)
-{
+    int employerId = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
+    if (employerId < 1) {
+        common::validations::ForRequiredChoiceSelection(pProjectChoiceCtrl, wxT("project"));
+        return false;
+    }
+    pCategory->SetProjectId(employerId);
+
     wxColor color = pColorPickerCtrl->GetColour();
-    mCategory.SetColor(color);
-    bTouched = true;
+    pCategory->SetColor(color);
+
+    return true;
 }
 
 void CategoryDialog::OnOk(wxCommandEvent& event)
 {
-    if (Validate()) {
-        mCategory.SetDateModified(wxDateTime::Now());
+    if (TransferDataAndValidate()) {
         if (pIsActiveCtrl->IsChecked()) {
-            model::CategoryModel::Update(mCategory);
+            model::CategoryModel::Update(std::move(pCategory));
         } else {
-            model::CategoryModel::Delete(mCategory);
+            model::CategoryModel::Delete(std::move(pCategory));
         }
 
         EndModal(wxID_OK);
@@ -300,14 +265,7 @@ void CategoryDialog::OnOk(wxCommandEvent& event)
 
 void CategoryDialog::OnCancel(wxCommandEvent& event)
 {
-    if (bTouched) {
-        int answer = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
-        if (answer == wxYES) {
-            EndModal(wxID_CANCEL);
-        }
-    } else {
-        EndModal(wxID_CANCEL);
-    }
+    EndModal(wxID_CANCEL);
 }
 
 void CategoryDialog::OnIsActiveCheck(wxCommandEvent& event)
