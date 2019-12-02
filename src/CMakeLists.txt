@@ -29,7 +29,6 @@ set (SRC
     "common/util.cpp"
     "config/configuration.cpp"
     "common/constants.cpp"
-    "services/models/client.cpp"
     "services/models/project.cpp"
     "services/models/category.cpp"
     "services/models/task_item.cpp"

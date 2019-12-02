@@ -48,7 +48,7 @@ bool SetupTables::Create()
         return true;
 
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured: Database Setup Procedure - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured: Database Create Table Procedure - {0:d} : {1}", e.get_code(), e.what());
         return false;
     }
 }
@@ -61,7 +61,7 @@ bool SetupTables::Seed()
         SeedTaskItemTypesTable();
         return true;
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured: Database Setup Procedure - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured: Database Seed Table Procedure - {0:d} : {1}", e.get_code(), e.what());
         return false;
     }
 }
@@ -131,17 +131,18 @@ void SetupTables::CreateProjectsTable()
                               "    name TEXT NOT NULL UNIQUE,"
                               "    display_name TEXT NOT NULL,"
                               "    billable INTEGER NOT NULL,"
+                              "    rate REAL NULL,"
                               "    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),"
                               "    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),"
                               "    is_active INTEGER NOT NULL,"
                               "    employer_id INTEGER NOT NULL,"
                               "    client_id INTEGER NULL,"
                               "    rate_type_id INTEGER NULL,"
-                              "    currency_id INTEGER NULL,                      "
+                              "    currency_id INTEGER NULL,"
                               "    FOREIGN KEY (employer_id) REFERENCES employers(employer_id),"
-                              "    FOREIGN KEY (client_id) REFERENCES clients(client_id)"
-                              "    FOREIGN KEY(rate_type_id) REFERENCES rate_types(rate_type_id),"
-                              "    FOREIGN KEY(currency_id) REFERENCES currencies(currency_id)"
+                              "    FOREIGN KEY (client_id) REFERENCES clients(client_id),"
+                              "    FOREIGN KEY (rate_type_id) REFERENCES rate_types(rate_type_id),"
+                              "    FOREIGN KEY (currency_id) REFERENCES currencies(currency_id)"
                               ");";
 
     auto db = services::db_connection::get_instance().get_handle();
@@ -222,9 +223,9 @@ void SetupTables::CreateTaskItemsTable()
 
 void SetupTables::SeedRateTypesTable()
 {
-    const std::string query1 = "INSERT INTO rate_type (name) VALUES ('Minute')";
-    const std::string query2 = "INSERT INTO rate_type (name) VALUES ('Hour')";
-    const std::string query3 = "INSERT INTO rate_type (name) VALUES ('Day')";
+    const std::string query1 = "INSERT INTO rate_types (name) VALUES ('Unknown');";
+    const std::string query2 = "INSERT INTO rate_types (name) VALUES ('Hourly');";
+    const std::string query3 = "INSERT INTO rate_types (name) VALUES ('Daily');";
 
     auto db = services::db_connection::get_instance().get_handle();
     db << query1;
@@ -235,8 +236,8 @@ void SetupTables::SeedRateTypesTable()
 void SetupTables::SeedCurrenciesTable()
 {
     const std::string query1 = "INSERT INTO currencies (name, code, symbol) VALUES ('Zlotych', 'PLN', 'zł');";
-    const std::string query2 = "INSERT INTO currency (name, code, symbol) VALUES ('Rand', 'ZAR', 'R');";
-    const std::string query3 = "INSERT INTO currency (name, code, symbol) VALUES ('Dollars', 'USD', '$');";
+    const std::string query2 = "INSERT INTO currencies (name, code, symbol) VALUES ('Rand', 'ZAR', 'R');";
+    const std::string query3 = "INSERT INTO currencies (name, code, symbol) VALUES ('Dollars', 'USD', '$');";
 
     auto db = services::db_connection::get_instance().get_handle();
     db << query1;
@@ -272,7 +273,7 @@ bool SetupEntities::CreateEntities(std::string employerName,
         CreateProject(projectName, projectDisplayName, employerId, clientId);
         return true;
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured: Database Setup Procedure - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured: Database Entity Setup Procedure - {0:d} : {1}", e.get_code(), e.what());
         return false;
     }
 }
@@ -300,11 +301,11 @@ void SetupEntities::CreateProject(std::string projectName, std::string projectDi
     auto db = services::db_connection::get_instance().get_handle();
     bool isAssociatedWithClient = clientId != 0;
     if (isAssociatedWithClient) {
-        db << "INSERT INTO projects(name, display_name, is_active, employer_id, client_id) VALUES(? , ? , 1, ? , ? )"
-           << projectName << projectDisplayName << employerId << clientId;
+        db << "INSERT INTO projects(name, display_name, billable, is_active, employer_id, client_id) VALUES(?, ?, ?, 1, ?, ?)"
+           << projectName << projectDisplayName << false << employerId << clientId;
     } else {
-        db << "INSERT INTO projects(name, display_name, is_active, employer_id, client_id) VALUES(? , ? , 1, ? , ? )"
-           << projectName << projectDisplayName << employerId << nullptr;
+        db << "INSERT INTO projects(name, display_name, billable, is_active, employer_id, client_id) VALUES(?, ?, ?, 1, ?, ?)"
+           << projectName << projectDisplayName << false << employerId << nullptr;
     }
 }
 } // namespace app::wizard

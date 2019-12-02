@@ -21,38 +21,45 @@
 
 #include <sqlite_modern_cpp/errors.h>
 #include <wx/statline.h>
+#include <wx/valnum.h>
 
 #include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
 #include "../common/util.h"
 #include "../models/employermodel.h"
+#include "../models/clientmodel.h"
 #include "../services/db_service.h"
 
 namespace app::dialog
 {
-// clang-format off
-wxBEGIN_EVENT_TABLE(ProjectDialog, wxDialog)
-EVT_BUTTON(wxID_OK, ProjectDialog::OnOk)
-EVT_BUTTON(wxID_CANCEL, ProjectDialog::OnCancel)
-EVT_CHOICE(ProjectDialog::IDC_EMPLOYERCHOICE, ProjectDialog::OnEmployerSelect)
-EVT_CHECKBOX(ProjectDialog::IDC_ISACTIVE, ProjectDialog::OnIsActiveCheck)
-EVT_TEXT(ProjectDialog::IDC_NAME, ProjectDialog::OnNameTextEntered)
-wxEND_EVENT_TABLE()
+const wxString& ProjectDialog::DateLabel = wxT("Created %s | Updated %s");
 
-ProjectDialog::ProjectDialog(wxWindow* parent,
-    std::shared_ptr<spdlog::logger> logger,
-    const wxString& name)
+ProjectDialog::ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, const wxString& name)
     : pLogger(logger)
-    , mNameText(wxGetEmptyString())
-    , mDisplayNameText(wxGetEmptyString())
-    , mEmployerId(-1)
-    , mClientId(-1)
+    , pNameTextCtrl(nullptr)
+    , pDisplayNameCtrl(nullptr)
+    , pEmployerChoiceCtrl(nullptr)
+    , pClientChoiceCtrl(nullptr)
+    , pBillableCtrl(nullptr)
+    , pRateChoiceCtrl(nullptr)
+    , pRateTextCtrl(nullptr)
+    , pCurrencyComboBoxCtrl(nullptr)
+    , pIsActiveCtrl(nullptr)
+    , pDateTextCtrl(nullptr)
+    , pOkButton(nullptr)
+    , pCancelButton(nullptr)
+    , pProject(std::make_unique<model::ProjectModel>())
     , mProjectId(0)
     , bIsEdit(false)
-// clang-format on
 {
-    Create(parent, wxID_ANY, wxT("Add Project"), wxDefaultPosition, wxSize(420, 380), wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU, name);
+    Create(parent,
+        wxID_ANY,
+        wxT("Add Project"),
+        wxDefaultPosition,
+        wxSize(420, 380),
+        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        name);
 }
 
 ProjectDialog::ProjectDialog(wxWindow* parent,
@@ -61,13 +68,21 @@ ProjectDialog::ProjectDialog(wxWindow* parent,
     int projectId,
     const wxString& name)
     : pLogger(logger)
-    , mNameText(wxGetEmptyString())
-    , mDisplayNameText(wxGetEmptyString())
-    , mEmployerId(-1)
-    , mClientId(-1)
+    , pNameTextCtrl(nullptr)
+    , pDisplayNameCtrl(nullptr)
+    , pEmployerChoiceCtrl(nullptr)
+    , pClientChoiceCtrl(nullptr)
+    , pBillableCtrl(nullptr)
+    , pRateChoiceCtrl(nullptr)
+    , pRateTextCtrl(nullptr)
+    , pCurrencyComboBoxCtrl(nullptr)
+    , pIsActiveCtrl(nullptr)
+    , pDateTextCtrl(nullptr)
+    , pOkButton(nullptr)
+    , pCancelButton(nullptr)
+    , pProject(std::make_unique<model::ProjectModel>(projectId))
     , mProjectId(projectId)
     , bIsEdit(isEdit)
-// clang-format on
 {
     Create(parent,
         wxID_ANY,
@@ -86,10 +101,12 @@ bool ProjectDialog::Create(wxWindow* parent,
     long style,
     const wxString& name)
 {
+    SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS);
     bool created = wxDialog::Create(parent, windowId, title, position, size, style, name);
 
     if (created) {
         CreateControls();
+        ConfigureEventBindings();
         FillControls();
 
         if (bIsEdit) {
@@ -97,6 +114,7 @@ bool ProjectDialog::Create(wxWindow* parent,
         }
 
         GetSizer()->Fit(this);
+        GetSizer()->SetSizeHints(this);
         SetIcon(common::GetProgramIcon());
         Center();
     }
@@ -115,7 +133,7 @@ void ProjectDialog::CreateControls()
     auto detailsBoxSizer = new wxStaticBoxSizer(detailsBox, wxVERTICAL);
     mainSizer->Add(detailsBoxSizer, common::sizers::ControlExpand);
 
-    auto projectDetailsPanel = new wxPanel(this, wxID_STATIC);
+    auto projectDetailsPanel = new wxPanel(this, wxID_ANY);
     detailsBoxSizer->Add(projectDetailsPanel, common::sizers::ControlExpand);
 
     auto taskFlexGridSizer = new wxFlexGridSizer(0, 2, 0, 0);
@@ -126,15 +144,23 @@ void ProjectDialog::CreateControls()
     auto projectName = new wxStaticText(projectDetailsPanel, wxID_STATIC, wxT("Name"));
     taskFlexGridSizer->Add(projectName, common::sizers::ControlCenterVertical);
 
-    pNameCtrl = new wxTextCtrl(projectDetailsPanel,
+    wxTextValidator nameValidator(wxFILTER_ALPHANUMERIC | wxFILTER_INCLUDE_CHAR_LIST);
+    wxArrayString allowedChars;
+    allowedChars.Add(wxT(">"));
+    allowedChars.Add(wxT("<"));
+    allowedChars.Add(wxT(" "));
+    nameValidator.SetIncludes(allowedChars);
+
+    pNameTextCtrl = new wxTextCtrl(projectDetailsPanel,
         IDC_NAME,
         wxGetEmptyString(),
         wxDefaultPosition,
         wxSize(150, -1),
-        wxTE_LEFT);
-    pNameCtrl->Bind(wxEVT_KILL_FOCUS, &ProjectDialog::OnProjectNameLostFocus, this);
-    pNameCtrl->SetToolTip(wxT("Enter a name for the project"));
-    taskFlexGridSizer->Add(pNameCtrl, common::sizers::ControlDefault);
+        wxTE_LEFT,
+        nameValidator);
+    pNameTextCtrl->SetHint(wxT("Project name"));
+    pNameTextCtrl->SetToolTip(wxT("Enter a name for the project"));
+    taskFlexGridSizer->Add(pNameTextCtrl, common::sizers::ControlDefault);
 
     /* Project Display Name Control */
     auto projectDisplayName = new wxStaticText(projectDetailsPanel, wxID_STATIC, wxT("Display Name"));
@@ -145,8 +171,9 @@ void ProjectDialog::CreateControls()
         wxGetEmptyString(),
         wxDefaultPosition,
         wxSize(150, -1),
-        wxTE_LEFT);
-    pDisplayNameCtrl->Bind(wxEVT_KILL_FOCUS, &ProjectDialog::OnDisplayNameLostFocus, this);
+        wxTE_LEFT,
+        nameValidator);
+    pDisplayNameCtrl->SetHint(wxT("Display name"));
     pDisplayNameCtrl->SetToolTip(wxT("Enter a shortened, convenient display name for the project"));
     taskFlexGridSizer->Add(pDisplayNameCtrl, common::sizers::ControlDefault);
 
@@ -178,18 +205,78 @@ void ProjectDialog::CreateControls()
         /* Is Active Checkbox Control */
         pIsActiveCtrl = new wxCheckBox(projectDetailsPanel, IDC_ISACTIVE, wxT("Is Active"));
         taskFlexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
+    }
 
-        /* Date Created Text Control */
-        pDateCreatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
-        auto font = pDateCreatedTextCtrl->GetFont();
-        font.MakeItalic();
+    /* Billable Controls */
+    /* Billable Project Details Box */
+    auto billabilityBox = new wxStaticBox(this, wxID_ANY, wxT("Billable Details"));
+    auto billabilityBoxSizer = new wxStaticBoxSizer(billabilityBox, wxVERTICAL);
+    mainSizer->Add(billabilityBoxSizer, common::sizers::ControlExpand);
+
+    auto billablePanel = new wxPanel(this, wxID_ANY);
+    billabilityBoxSizer->Add(billablePanel, common::sizers::ControlExpand);
+
+    auto billableFlexGridSizer = new wxFlexGridSizer(2, 1, 1);
+    billablePanel->SetSizer(billableFlexGridSizer);
+
+    /* Billable Checkbox */
+    auto billableFiller = new wxStaticText(billablePanel, wxID_STATIC, wxGetEmptyString());
+    billableFlexGridSizer->Add(billableFiller, common::sizers::ControlDefault);
+
+    pBillableCtrl = new wxCheckBox(billablePanel, IDC_BILLABLE, wxT("Billable"));
+    pBillableCtrl->SetToolTip(wxT("Indicates that work on this project is billable"));
+    billableFlexGridSizer->Add(pBillableCtrl, common::sizers::ControlDefault);
+
+    /* Rate Choice Control */
+    auto rateText = new wxStaticText(billablePanel, wxID_STATIC, wxT("Rate"));
+    billableFlexGridSizer->Add(rateText, common::sizers::ControlDefault);
+
+    pRateChoiceCtrl = new wxChoice(billablePanel, IDC_RATECHOICE, wxDefaultPosition, wxDefaultSize);
+    pRateChoiceCtrl->SetToolTip(wxT("Select a rate at which to charge work at"));
+    pRateChoiceCtrl->AppendString(wxT("Select a rate"));
+    pRateChoiceCtrl->SetSelection(0);
+    pRateChoiceCtrl->Disable();
+    billableFlexGridSizer->Add(pRateChoiceCtrl, common::sizers::ControlDefault);
+
+    /* Rate Text Control */
+    auto rateValueText = new wxStaticText(billablePanel, wxID_STATIC, wxT("Rate Value"));
+    billableFlexGridSizer->Add(rateValueText, common::sizers::ControlDefault);
+
+    wxFloatingPointValidator<double> rateValueValidator(2, nullptr, wxNUM_VAL_ZERO_AS_BLANK);
+    rateValueValidator.SetRange(0.0, 1000000.0);
+
+    pRateTextCtrl = new wxTextCtrl(billablePanel,
+        IDC_RATEVALUE,
+        wxGetEmptyString(),
+        wxDefaultPosition,
+        wxSize(150, -1),
+        wxTE_LEFT,
+        rateValueValidator);
+    pRateTextCtrl->SetHint(wxT("Rate value"));
+    pRateTextCtrl->SetToolTip(wxT("Enter the rate at which to charge work at"));
+    pRateTextCtrl->Disable();
+    billableFlexGridSizer->Add(pRateTextCtrl, common::sizers::ControlDefault);
+
+    /* Currency ComboBox Control */
+    auto currencyText = new wxStaticText(billablePanel, wxID_STATIC, wxT("Currency"));
+    billableFlexGridSizer->Add(currencyText, common::sizers::ControlDefault);
+
+    wxArrayString choices;
+    choices.Add(wxT("Select a currency"));
+    pCurrencyComboBoxCtrl = new wxComboBox(
+        billablePanel, IDC_CURRENCYCHOICE, wxEmptyString, wxDefaultPosition, wxDefaultSize, choices, wxCB_DROPDOWN);
+    pCurrencyComboBoxCtrl->SetToolTip(wxT("Select a currency to associate the rate value with"));
+    pCurrencyComboBoxCtrl->SetSelection(0);
+    pCurrencyComboBoxCtrl->Disable();
+    billableFlexGridSizer->Add(pCurrencyComboBoxCtrl, common::sizers::ControlExpand);
+
+    if (bIsEdit) {
+        /* Date Text Control */
+        pDateTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
+        auto font = pDateTextCtrl->GetFont();
         font.SetPointSize(8);
-        pDateCreatedTextCtrl->SetFont(font);
-        detailsBoxSizer->Add(pDateCreatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
-
-        /* Date Updated Text Control */
-        pDateUpdatedTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Updated on: %s"));
-        detailsBoxSizer->Add(pDateUpdatedTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+        pDateTextCtrl->SetFont(font);
+        mainSizer->Add(pDateTextCtrl, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
     }
 
     /* Horizontal Line*/
@@ -202,244 +289,380 @@ void ProjectDialog::CreateControls()
     buttonPanel->SetSizer(buttonPanelSizer);
     mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
-    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
-    auto cancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
+    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("OK"));
+    pCancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("Cancel"));
 
     buttonPanelSizer->Add(pOkButton, common::sizers::ControlDefault);
-    buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
+    buttonPanelSizer->Add(pCancelButton, common::sizers::ControlDefault);
 }
+
+// clang-format off
+void ProjectDialog::ConfigureEventBindings()
+{
+    pNameTextCtrl->Bind(
+        wxEVT_TEXT,
+        &ProjectDialog::OnNameChange,
+        this
+    );
+
+    pEmployerChoiceCtrl->Bind(
+        wxEVT_CHOICE,
+        &ProjectDialog::OnEmployerChoiceSelection,
+        this
+    );
+
+    pBillableCtrl->Bind(
+        wxEVT_CHECKBOX,
+        &ProjectDialog::OnBillableCheck,
+        this
+    );
+
+    pRateChoiceCtrl->Bind(
+        wxEVT_CHOICE,
+        &ProjectDialog::OnRateChoiceSelection,
+        this
+    );
+
+    if (bIsEdit) {
+        pIsActiveCtrl->Bind(
+            wxEVT_CHECKBOX,
+            &ProjectDialog::OnIsActiveCheck,
+            this
+        );
+    }
+
+    pOkButton->Bind(
+        wxEVT_BUTTON,
+        &ProjectDialog::OnOk,
+        this,
+        wxID_OK
+    );
+
+    pCancelButton->Bind(
+        wxEVT_BUTTON,
+        &ProjectDialog::OnCancel,
+        this,
+        wxID_CANCEL
+    );
+}
+// clang-format on
 
 void ProjectDialog::FillControls()
 {
+    /* Load Employers */
     std::vector<std::unique_ptr<model::EmployerModel>> employers;
     try {
         employers = model::EmployerModel::GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in GetAll()() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in EmployerModel::GetAll()() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    for (int i = 0; i < employers.size(); i++) {
-        pEmployerChoiceCtrl->Append(employers[i]->GetName(), util::IntToVoidPointer(employers[i]->GetEmployerId()));
+    for (const auto& employer : employers) {
+        pEmployerChoiceCtrl->Append(employer->GetName(), util::IntToVoidPointer(employer->GetEmployerId()));
+    }
+
+    /* Load Rate Types */
+    std::vector<std::unique_ptr<model::RateTypeModel>> rateTypes;
+    try {
+        rateTypes = model::RateTypeModel::GetAll();
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in RateTypeModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
+    }
+
+    for (const auto& rateType : rateTypes) {
+        pRateChoiceCtrl->Append(rateType->GetName(), util::IntToVoidPointer(rateType->GetRateTypeId()));
+    }
+
+    /* Load Currencies */
+    std::vector<std::unique_ptr<model::CurrencyModel>> curriencies;
+    try {
+        curriencies = model::CurrencyModel::GetAll();
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in CurrencyModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
+    }
+
+    for (const auto& currency : curriencies) {
+        pCurrencyComboBoxCtrl->Append(wxString::Format(wxT("%s (%s)"), currency->GetName(), currency->GetCode()),
+            util::IntToVoidPointer(currency->GetCurrencyId()));
     }
 }
 
 void ProjectDialog::DataToControls()
 {
-    services::db_service dbService;
-    models::project project;
+    std::unique_ptr<model::ProjectModel> project;
 
     try {
-        project = dbService.get_project_by_id(mProjectId);
+        project = model::ProjectModel::GetById(mProjectId);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in get_project_by_id() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in ProjectModel::GetById() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    pNameCtrl->ChangeValue(project.project_name);
-    pDisplayNameCtrl->ChangeValue(project.display_name);
-    pEmployerChoiceCtrl->SetStringSelection(project.employer_name);
+    /* Set project names */
+    pNameTextCtrl->ChangeValue(project->GetName());
+    pDisplayNameCtrl->ChangeValue(project->GetDisplayName());
 
-    if (!project.client_name.empty()) {
+    /* Set employer associated with project */
+    pEmployerChoiceCtrl->SetStringSelection(project->GetEmployer()->GetName());
+
+    /* Set client (if any) associated with project */
+    if (project->HasClientLinked()) {
         pClientChoiceCtrl->Clear();
         pClientChoiceCtrl->AppendString(wxT("Select a client"));
-        std::vector<models::client> clients;
+        std::vector<std::unique_ptr<model::ClientModel>> clients;
         try {
-            services::db_service clientService;
-            clients = clientService.get_clients_by_employer_id(project.employer_id);
+            clients = model::ClientModel::GetByEmployerId(project->GetEmployer()->GetEmployerId());
         } catch (const sqlite::sqlite_exception& e) {
-            pLogger->error("Error occured in get_clients_by_employer_id() - {0:d} : {1}", e.get_code(), e.what());
+            pLogger->error("Error occured in ClientModel::GetByEmployerId() - {0:d} : {1}", e.get_code(), e.what());
         }
 
-        for (auto client : clients) {
-            pClientChoiceCtrl->Append(client.client_name, util::IntToVoidPointer(client.client_id));
+        for (const auto& client : clients) {
+            pClientChoiceCtrl->Append(client->GetName(), util::IntToVoidPointer(client->GetClientId()));
         }
 
         pClientChoiceCtrl->SetSelection(0);
         if (!pClientChoiceCtrl->IsEnabled()) {
             pClientChoiceCtrl->Enable();
         }
-        pClientChoiceCtrl->SetStringSelection(project.client_name);
+        pClientChoiceCtrl->SetStringSelection(project->GetClient()->GetName());
     }
 
-    wxString dateCreatedString = util::ConvertUnixTimestampToString(project.date_created_utc);
-    wxString dateCreatedLabel = pDateCreatedTextCtrl->GetLabelText();
-    pDateCreatedTextCtrl->SetLabel(wxString::Format(dateCreatedLabel, dateCreatedString));
+    /* Set project billable check */
+    pBillableCtrl->SetValue(project->IsBillable());
 
-    wxString dateUpdatedString = util::ConvertUnixTimestampToString(project.date_modified_utc);
-    wxString dateUpdatedLabel = pDateUpdatedTextCtrl->GetLabelText();
-    pDateUpdatedTextCtrl->SetLabel(wxString::Format(dateUpdatedLabel, dateUpdatedString));
+    if (project->IsBillableWithUnknownRateScenario()) {
+        /* Project is billable, set the billable attributes */
+        pRateChoiceCtrl->Enable();
+        /* Set the rate choice */
+        pRateChoiceCtrl->SetStringSelection(project->GetRateType()->GetName());
+    }
 
-    pIsActiveCtrl->SetValue(project.is_active);
+    if (project->IsBillableScenario()) {
+        /* Project is billable, set the billable attributes */
+        pRateChoiceCtrl->Enable();
+        /* Set the rate choice */
+        pRateChoiceCtrl->SetStringSelection(project->GetRateType()->GetName());
+        pRateTextCtrl->Enable();
+        /* Set the rate value */
+        pRateTextCtrl->SetValue(wxString(std::to_string(*project->GetRate())));
+
+        pCurrencyComboBoxCtrl->Enable();
+        /* Set the currency for project */
+        pCurrencyComboBoxCtrl->SetStringSelection(
+            wxString::Format(wxT("%s (%s)"), project->GetCurrency()->GetName(), project->GetCurrency()->GetCode()));
+    }
+
+    /* Is the project active (i.e. not deleted) */
+    pIsActiveCtrl->SetValue(project->IsActive());
+
+    /* When was the project created and modified */
+    pDateTextCtrl->SetLabel(wxString::Format(ProjectDialog::DateLabel,
+        project->GetDateCreated().FormatISOCombined(),
+        project->GetDateModified().FormatISOCombined()));
 }
 
-bool ProjectDialog::Validate()
+void ProjectDialog::OnNameChange(wxCommandEvent& event)
 {
-    if (mNameText.empty()) {
-        auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Project name"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    wxString name = pNameTextCtrl->GetValue();
+    pDisplayNameCtrl->ChangeValue(name);
+}
+
+void ProjectDialog::OnEmployerChoiceSelection(wxCommandEvent& event)
+{
+    int employerId = util::VoidPointerToInt(pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()));
+
+    if (event.GetSelection() == 0) {
+        pClientChoiceCtrl->Clear();
+        pClientChoiceCtrl->Disable();
+    } else {
+        pClientChoiceCtrl->Clear();
+        pClientChoiceCtrl->AppendString(wxT("Select a client"));
+        pClientChoiceCtrl->SetSelection(0);
+
+        std::vector<std::unique_ptr<model::ClientModel>> clients;
+        try {
+            clients = model::ClientModel::GetByEmployerId(employerId);
+        } catch (const sqlite::sqlite_exception& e) {
+            pLogger->error("Error occured in ClientModel::GetByEmployerId() - {0:d} : {1}", e.get_code(), e.what());
+        }
+
+        if (!clients.empty()) {
+            for (const auto& client : clients) {
+                pClientChoiceCtrl->Append(client->GetName(), util::IntToVoidPointer(client->GetClientId()));
+            }
+
+            if (!pClientChoiceCtrl->IsEnabled()) {
+                pClientChoiceCtrl->Enable();
+            }
+        } else {
+            pClientChoiceCtrl->Disable();
+        }
+    }
+}
+
+void ProjectDialog::OnBillableCheck(wxCommandEvent& event)
+{
+    pProject->IsBillable(event.IsChecked());
+    if (event.IsChecked()) {
+        pRateChoiceCtrl->Enable();
+        pRateTextCtrl->Enable();
+        pCurrencyComboBoxCtrl->Enable();
+    } else {
+        pRateChoiceCtrl->Disable();
+        pRateTextCtrl->Disable();
+        pCurrencyComboBoxCtrl->Disable();
+
+        {
+            pProject->SwitchOutOfBillableScenario();
+
+            pRateChoiceCtrl->SetSelection(0);
+            pRateTextCtrl->ChangeValue(wxGetEmptyString());
+            pCurrencyComboBoxCtrl->SetSelection(0);
+        }
+    }
+}
+
+void ProjectDialog::OnRateChoiceSelection(wxCommandEvent& event)
+{
+    int selection = util::VoidPointerToInt(pRateChoiceCtrl->GetClientData(pRateChoiceCtrl->GetSelection()));
+    if (selection == 1) {
+        pRateTextCtrl->Disable();
+        pCurrencyComboBoxCtrl->Disable();
+
+        pProject->SwitchInToUnknownRateBillableScenario();
+        pRateTextCtrl->ChangeValue(wxGetEmptyString());
+        pCurrencyComboBoxCtrl->SetSelection(0);
+    } else {
+        pRateTextCtrl->Enable();
+        pCurrencyComboBoxCtrl->Enable();
+    }
+}
+
+void ProjectDialog::OnOk(wxCommandEvent& WXUNUSED(event))
+{
+    if (TryTransferValuesFromControls()) {
+        if (!bIsEdit) {
+            try {
+                model::ProjectModel::Create(std::move(pProject));
+            } catch (const sqlite::sqlite_exception& e) {
+                pLogger->error("Error occured in ProjectModel::Create() - {0:d} : {1}", e.get_code(), e.what());
+            }
+        }
+
+        if (bIsEdit && pIsActiveCtrl->IsChecked()) {
+            try {
+                model::ProjectModel::Update(std::move(pProject));
+            } catch (const sqlite::sqlite_exception& e) {
+                pLogger->error("Error occured in ProjectModel::Update() - {0:d} : {1}", e.get_code(), e.what());
+            }
+        }
+
+        if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
+            try {
+                model::ProjectModel::Delete(std::move(pProject));
+            } catch (const sqlite::sqlite_exception& e) {
+                pLogger->error("Error occured in ProjectModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
+            }
+        }
+
+        EndModal(wxID_OK);
+    }
+}
+
+void ProjectDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
+{
+    EndModal(wxID_CANCEL);
+}
+
+void ProjectDialog::OnIsActiveCheck(wxCommandEvent& event)
+{
+    if (event.IsChecked()) {
+        pNameTextCtrl->Enable();
+        pDisplayNameCtrl->Enable();
+        pEmployerChoiceCtrl->Enable();
+
+        if (pProject->HasClientLinked()) {
+            pClientChoiceCtrl->Enable();
+        }
+
+        pBillableCtrl->Enable();
+
+        if (pProject->IsBillableWithUnknownRateScenario()) {
+            pRateChoiceCtrl->Enable();
+        }
+
+        if (pProject->IsBillableScenario()) {
+            pRateChoiceCtrl->Enable();
+            pRateTextCtrl->Enable();
+            pCurrencyComboBoxCtrl->Enable();
+        }
+
+    } else {
+        pNameTextCtrl->Disable();
+        pDisplayNameCtrl->Disable();
+        pEmployerChoiceCtrl->Disable();
+        pClientChoiceCtrl->Disable();
+        pBillableCtrl->Disable();
+        pRateChoiceCtrl->Disable();
+        pRateTextCtrl->Disable();
+        pCurrencyComboBoxCtrl->Disable();
+    }
+}
+
+bool ProjectDialog::TryTransferValuesFromControls()
+{
+    wxString name = pNameTextCtrl->GetValue();
+    if (name.empty() || name.length() < 2 || name.length() > 255) {
+        common::validations::ForRequiredText(pNameTextCtrl, wxT("project name"));
         return false;
     }
 
-    if (mDisplayNameText.empty()) {
-        auto message = wxString::Format(Constants::Messages::IsEmpty, wxT("Display name"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    pProject->SetName(name);
+
+    wxString displayName = pDisplayNameCtrl->GetValue();
+    if (displayName.empty() || displayName.length() < 2 || displayName.length() > 255) {
+        common::validations::ForRequiredText(pDisplayNameCtrl, wxT("display name"));
         return false;
     }
+    pProject->SetDisplayName(displayName);
 
-    if (mEmployerId == -1 || mEmployerId == 0) {
-        auto message = wxString::Format(Constants::Messages::SelectionRequired, wxT("Employer"));
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
+    if (pEmployerChoiceCtrl->GetSelection() == 0) {
+        common::validations::ForRequiredChoiceSelection(pEmployerChoiceCtrl, wxT("employer"));
         return false;
+    }
+    pProject->SetEmployerId(
+        util::VoidPointerToInt(pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection())));
+
+    if (pClientChoiceCtrl->IsEnabled()) {
+        pProject->SetClientId(
+            util::VoidPointerToInt(pClientChoiceCtrl->GetClientData(pClientChoiceCtrl->GetSelection())));
+    }
+
+    pProject->IsBillable(pBillableCtrl->GetValue());
+    if (pProject->IsBillable()) {
+        if (pRateChoiceCtrl->GetSelection() == 0) {
+            common::validations::ForRequiredChoiceSelection(pRateChoiceCtrl, wxT("rate"));
+            return false;
+        }
+        pProject->SetRateTypeId(
+            util::VoidPointerToInt(pRateChoiceCtrl->GetClientData(pRateChoiceCtrl->GetSelection())));
+
+        if (pRateTextCtrl->IsEnabled() && pCurrencyComboBoxCtrl->IsEnabled()) {
+            wxString value = pRateTextCtrl->GetValue();
+            if (value.empty()) {
+                common::validations::ForRequiredNumber(pRateTextCtrl, wxT("Rate amount"));
+                return false;
+            }
+            pProject->SetRate(std::move(std::make_unique<double>(std::stod(pRateTextCtrl->GetValue().ToStdString()))));
+            if (pCurrencyComboBoxCtrl->GetSelection() == 0) {
+                common::validations::ForRequiredChoiceSelection(pCurrencyComboBoxCtrl, wxT("currency"));
+                return false;
+            }
+            pProject->SetCurrencyId(
+                util::VoidPointerToInt(pCurrencyComboBoxCtrl->GetClientData(pCurrencyComboBoxCtrl->GetSelection())));
+        }
     }
 
     return true;
 }
 
-bool ProjectDialog::AreControlsEmpty()
-{
-    bool isEmpty = mNameText.empty() && mDisplayNameText.empty() && (mEmployerId == -1 || mEmployerId == 0);
-    return isEmpty;
-}
-
-void ProjectDialog::OnProjectNameLostFocus(wxFocusEvent& event)
-{
-    if (pNameCtrl->GetValue().length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Project name"), 2);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        pOkButton->Disable();
-    } else if (pNameCtrl->GetValue().length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Project name"), 255);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        pOkButton->Disable();
-    } else {
-        pOkButton->Enable();
-    }
-
-    event.Skip();
-}
-
-void ProjectDialog::OnDisplayNameLostFocus(wxFocusEvent& event)
-{
-    if (pDisplayNameCtrl->GetValue().length() < 2) {
-        auto message = wxString::Format(Constants::Messages::TooShort, wxT("Display name"), 2);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        pOkButton->Disable();
-    } else if (pDisplayNameCtrl->GetValue().length() > 255) {
-        auto message = wxString::Format(Constants::Messages::TooLong, wxT("Display name"), 255);
-        wxMessageBox(message, wxT("Validation failure"), wxOK | wxICON_EXCLAMATION);
-        pOkButton->Disable();
-    } else {
-        pOkButton->Enable();
-    }
-
-    event.Skip();
-}
-
-void ProjectDialog::OnEmployerSelect(wxCommandEvent& event)
-{
-    pClientChoiceCtrl->Clear(); // only run if clients > 0
-    pClientChoiceCtrl->AppendString(wxT("Select a client"));
-    int employerId = util::VoidPointerToInt(event.GetClientData());
-    std::vector<models::client> clients;
-    try {
-        services::db_service clientService;
-        clients = clientService.get_clients_by_employer_id(employerId);
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in get_clients_by_employer_id() - {0:d} : {1}", e.get_code(), e.what());
-    }
-
-    pClientChoiceCtrl->SetSelection(0);
-    if (!clients.empty()) {
-        for (auto client : clients) {
-            pClientChoiceCtrl->Append(client.client_name, util::IntToVoidPointer(client.client_id));
-        }
-
-        if (!pClientChoiceCtrl->IsEnabled()) {
-            pClientChoiceCtrl->Enable();
-        }
-    }
-}
-
-void ProjectDialog::OnNameTextEntered(wxCommandEvent& WXUNUSED(event))
-{
-    auto currentNameText = pNameCtrl->GetValue();
-    pDisplayNameCtrl->ChangeValue(currentNameText);
-}
-
-void ProjectDialog::OnOk(wxCommandEvent& WXUNUSED(event))
-{
-    mNameText = pNameCtrl->GetValue();
-    mDisplayNameText = pDisplayNameCtrl->GetValue();
-
-    mEmployerId = util::VoidPointerToInt(pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()));
-    if (pClientChoiceCtrl->IsEnabled()) {
-        mClientId = util::VoidPointerToInt(
-            pClientChoiceCtrl->GetClientData(pClientChoiceCtrl->GetSelection())); // TODO if statement
-    }
-
-    bool isValid = Validate();
-    if (!isValid) {
-        return;
-    }
-
-    try {
-        services::db_service dbService;
-        if (bIsEdit && pIsActiveCtrl->IsChecked()) {
-            models::project project;
-            project.project_id = mProjectId;
-            project.project_name = std::string(mNameText.ToUTF8());
-            project.display_name = std::string(mDisplayNameText.ToUTF8());
-            project.date_modified_utc = util::UnixTimestamp();
-            project.employer_id = mEmployerId;
-            if (mClientId == -1 || mClientId == 0) {
-                project.client_id = 0;
-            } else {
-                project.client_id = mClientId;
-            }
-            dbService.update_project(project);
-        }
-        if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            dbService.delete_project(mProjectId, util::UnixTimestamp());
-        }
-        if (!bIsEdit) {
-            if (mClientId == -1 || mClientId == 0) {
-                dbService.create_new_project(
-                    std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerId, nullptr);
-            } else {
-                dbService.create_new_project(
-                    std::string(mNameText.ToUTF8()), std::string(mDisplayNameText.ToUTF8()), mEmployerId, &mClientId);
-            }
-        }
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in project OnSave() - {0:d} : {1}", e.get_code(), e.what());
-    }
-
-    EndModal(ids::ID_SAVE);
-}
-
-void ProjectDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
-{
-    bool areControlsEmpty = AreControlsEmpty();
-    if (!areControlsEmpty) {
-        int answer = wxMessageBox(wxT("Are you sure you want to cancel?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
-        if (answer == wxYES) {
-            EndModal(wxID_CANCEL);
-        }
-    } else {
-        EndModal(wxID_CANCEL);
-    }
-}
-void ProjectDialog::OnIsActiveCheck(wxCommandEvent& event)
-{
-    if (event.IsChecked()) {
-        pNameCtrl->Enable();
-        pDisplayNameCtrl->Enable();
-        pEmployerChoiceCtrl->Enable();
-        pClientChoiceCtrl->Enable();
-    } else {
-        pNameCtrl->Disable();
-        pDisplayNameCtrl->Disable();
-        pEmployerChoiceCtrl->Disable();
-        pClientChoiceCtrl->Disable();
-    }
-}
 } // namespace app::dialog

@@ -112,6 +112,7 @@ void SetupWizard::CreateDatabaseFile()
     const wxString& databaseFilename = common::GetDbFileName();
     wxFile file;
     file.Create(databaseFilename);
+    file.Close();
 }
 
 void SetupWizard::DeleteDatabaseFile()

@@ -20,10 +20,15 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include <wx/wx.h>
+#include <wx/combobox.h>
+
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
+
+#include "../models/projectmodel.h"
 
 namespace app::dialog
 {
@@ -33,17 +38,15 @@ public:
     ProjectDialog() = default;
     explicit ProjectDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
-        const wxString& name = "ProjectDialog");
+        const wxString& name = "projectdlg");
     explicit ProjectDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
         bool isEdit,
         int projectId,
-        const wxString& name = "ProjectDialog");
+        const wxString& name = "projectdlg");
     virtual ~ProjectDialog() = default;
 
 private:
-    wxDECLARE_EVENT_TABLE();
-
     bool Create(wxWindow* parent,
         wxWindowID windowId,
         const wxString& title,
@@ -53,38 +56,53 @@ private:
         const wxString& name);
 
     void CreateControls();
+    void ConfigureEventBindings();
     void FillControls();
     void DataToControls();
 
-    bool Validate();
-    bool AreControlsEmpty();
+    void OnNameChange(wxCommandEvent& event);
+    void OnEmployerChoiceSelection(wxCommandEvent& event);
+    void OnBillableCheck(wxCommandEvent& event);
+    void OnRateChoiceSelection(wxCommandEvent& event);
 
-    void OnProjectNameLostFocus(wxFocusEvent& event);
-    void OnDisplayNameLostFocus(wxFocusEvent& event);
-    void OnEmployerSelect(wxCommandEvent& event);
-    void OnNameTextEntered(wxCommandEvent& event);
     void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
 
+    bool TryTransferValuesFromControls();
+
     std::shared_ptr<spdlog::logger> pLogger;
 
-    wxButton* pOkButton;
-    wxTextCtrl* pNameCtrl;
+    wxTextCtrl* pNameTextCtrl;
     wxTextCtrl* pDisplayNameCtrl;
     wxChoice* pEmployerChoiceCtrl;
     wxChoice* pClientChoiceCtrl;
+    wxCheckBox* pBillableCtrl;
+    wxChoice* pRateChoiceCtrl;
+    wxTextCtrl* pRateTextCtrl;
+    wxComboBox* pCurrencyComboBoxCtrl;
     wxCheckBox* pIsActiveCtrl;
-    wxStaticText* pDateCreatedTextCtrl;
-    wxStaticText* pDateUpdatedTextCtrl;
+    wxStaticText* pDateTextCtrl;
+    wxButton* pOkButton;
+    wxButton* pCancelButton;
 
-    wxString mNameText;
-    wxString mDisplayNameText;
-    int mEmployerId;
-    int mClientId;
+    std::unique_ptr<model::ProjectModel> pProject;
     int mProjectId;
     bool bIsEdit;
 
-    enum { IDC_NAME = wxID_HIGHEST + 1, IDC_DISPLAYNAME, IDC_EMPLOYERCHOICE, IDC_CLIENTCHOICE, IDC_ISACTIVE };
+    enum {
+        IDC_NAME = wxID_HIGHEST + 1,
+        IDC_DISPLAYNAME,
+        IDC_EMPLOYERCHOICE,
+        IDC_CLIENTCHOICE,
+        IDC_BILLABLE,
+        IDC_BILLABLEXRATE,
+        IDC_RATECHOICE,
+        IDC_RATEVALUE,
+        IDC_CURRENCYCHOICE,
+        IDC_ISACTIVE
+    };
+
+    static const wxString& DateLabel;
 };
 } // namespace app::dialog

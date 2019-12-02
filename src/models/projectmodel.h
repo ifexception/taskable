@@ -30,8 +30,6 @@
 
 namespace app::model
 {
-enum class RateTypes : int { Minute = 1, Hour = 2, Day = 3 };
-
 class RateTypeModel final
 {
 public:
@@ -94,17 +92,37 @@ class ProjectModel final
 {
 public:
     ProjectModel();
+    ProjectModel(int projectId);
+    ProjectModel(int projectId, bool initializeFromDatabase);
     ProjectModel(int projectId, wxString name, wxString displayName);
+    ProjectModel(int projectId,
+        wxString name,
+        wxString displayName,
+        bool billable,
+        int dateCreated,
+        int dateModified,
+        bool isActive);
 
-    void Reset();
+    bool IsNonBillableScenario();
+    bool IsBillableScenario();
+    bool IsBillableWithUnknownRateScenario();
+    bool HasClientLinked();
+
+    void SwitchOutOfBillableScenario();
+    void SwitchInToUnknownRateBillableScenario();
 
     const int GetProjectId() const;
     const wxString GetName() const;
     const wxString GetDisplayName() const;
     const bool IsBillable() const;
+    const double* GetRate() const;
     const wxDateTime GetDateCreated();
-    const wxDateTime GetDateUpdated();
+    const wxDateTime GetDateModified();
     const bool IsActive() const;
+    const int GetEmployerId() const;
+    const int GetClientId() const;
+    const int GetRateTypeId() const;
+    const int GetCurrencyId() const;
 
     EmployerModel* GetEmployer();
     ClientModel* GetClient();
@@ -115,9 +133,14 @@ public:
     void SetName(const wxString& name);
     void SetDisplayName(const wxString& displayName);
     void IsBillable(const bool billable);
+    void SetRate(std::unique_ptr<double> rate);
     void SetDateCreated(const wxDateTime& dateCreated);
     void SetDateUpdated(const wxDateTime& dateUpdated);
     void IsActive(const bool isActive);
+    void SetEmployerId(const int employerId);
+    void SetClientId(const int clientId);
+    void SetRateTypeId(const int rateTypeId);
+    void SetCurrencyId(const int currencyId);
 
     void SetEmployer(std::unique_ptr<EmployerModel> employer);
     void SetClient(std::unique_ptr<ClientModel> client);
@@ -128,16 +151,21 @@ public:
     static std::unique_ptr<ProjectModel> GetById(const int projectId);
     static void Update(std::unique_ptr<ProjectModel> project);
     static void Delete(std::unique_ptr<ProjectModel> project);
-    static std::vector<model::ProjectModel> GetAll();
+    static std::vector<std::unique_ptr<ProjectModel>> GetAll();
 
 private:
     int mProjectId;
     wxString mName;
     wxString mDisplayName;
     bool bIsBillable;
+    std::unique_ptr<double> pRate;
     wxDateTime mDateCreated;
-    wxDateTime mDateUpdated;
+    wxDateTime mDateModified;
     bool bIsActive;
+    int mEmployerId;
+    int mClientId;
+    int mRateTypeId;
+    int mCurrencyId;
 
     std::unique_ptr<EmployerModel> pEmployer;
     std::unique_ptr<ClientModel> pClient;

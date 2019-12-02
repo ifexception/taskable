@@ -19,6 +19,7 @@
 
 #include "projectmodel.h"
 
+#include "../common/util.h"
 #include "../services/db_connection.h"
 
 namespace app::model
@@ -98,7 +99,7 @@ std::vector<std::unique_ptr<RateTypeModel>> RateTypeModel::GetAll()
 
 const std::string RateTypeModel::getRateTypeById = "SELECT rate_type_id, "
                                                    "name "
-                                                   "FROM rate_types"
+                                                   "FROM rate_types "
                                                    "WHERE rate_type_id = ?";
 
 const std::string RateTypeModel::getRateTypes = "SELECT rate_type_id, "
@@ -106,7 +107,8 @@ const std::string RateTypeModel::getRateTypes = "SELECT rate_type_id, "
                                                 "FROM rate_types";
 
 CurrencyModel::CurrencyModel()
-    : mName(wxGetEmptyString())
+    : mCurrencyId(-1)
+    , mName(wxGetEmptyString())
     , mCode(wxGetEmptyString())
     , mSymbol(wxGetEmptyString())
 {
@@ -219,14 +221,39 @@ ProjectModel::ProjectModel()
     : mProjectId(-1)
     , mName(wxGetEmptyString())
     , mDisplayName(wxGetEmptyString())
+    , bIsBillable(false)
+    , pRate(nullptr)
     , mDateCreated(wxDefaultDateTime)
-    , mDateUpdated(wxDefaultDateTime)
+    , mDateModified(wxDefaultDateTime)
     , bIsActive(false)
-    , pEmployer()
+    , mEmployerId(-1)
+    , mClientId(-1)
+    , mRateTypeId(-1)
+    , mCurrencyId(-1)
+    , pEmployer(std::make_unique<EmployerModel>())
     , pClient(nullptr)
     , pRateType(nullptr)
     , pCurrency(nullptr)
 {
+}
+
+ProjectModel::ProjectModel(int projectId)
+    : ProjectModel()
+{
+    mProjectId = projectId;
+}
+
+ProjectModel::ProjectModel(int projectId, bool initializeFromDatabase)
+    : ProjectModel()
+{
+    assert(initializeFromDatabase == true);
+    auto project = ProjectModel::GetById(projectId);
+    mProjectId = project->GetProjectId();
+    mName = project->GetName();
+    mDisplayName = project->GetDisplayName();
+    mDateCreated = project->GetDateCreated();
+    mDateModified = project->GetDateModified();
+    bIsActive = project->IsActive();
 }
 
 ProjectModel::ProjectModel(int projectId, wxString name, wxString displayName)
@@ -237,14 +264,55 @@ ProjectModel::ProjectModel(int projectId, wxString name, wxString displayName)
     mDisplayName = displayName;
 }
 
-void ProjectModel::Reset()
+ProjectModel::ProjectModel(int projectId,
+    wxString name,
+    wxString displayName,
+    bool billable,
+    int dateCreated,
+    int dateModified,
+    bool isActive)
+    : ProjectModel()
 {
-    mProjectId = 0;
-    mName = wxGetEmptyString();
-    mDisplayName = wxGetEmptyString();
-    mDateCreated = wxDefaultDateTime;
-    mDateUpdated = wxDefaultDateTime;
-    bIsActive = false;
+    mProjectId = projectId;
+    mName = name;
+    mDisplayName = displayName;
+    bIsBillable = billable;
+    mDateCreated = util::ToDateTime(dateCreated);
+    mDateModified = util::ToDateTime(dateModified);
+    bIsActive = isActive;
+}
+
+bool ProjectModel::IsNonBillableScenario()
+{
+    return bIsBillable == false && pRate == nullptr && mRateTypeId == -1 && mCurrencyId == -1;
+}
+
+bool ProjectModel::IsBillableScenario()
+{
+    return bIsBillable == true && pRate != nullptr && mRateTypeId > 0 && mCurrencyId > 0;
+}
+
+bool ProjectModel::IsBillableWithUnknownRateScenario()
+{
+    return bIsBillable == true && mRateTypeId == 1 && pRate == nullptr && mCurrencyId == -1;
+}
+
+bool ProjectModel::HasClientLinked()
+{
+    return pClient != nullptr || mClientId > 0;
+}
+
+void ProjectModel::SwitchOutOfBillableScenario()
+{
+    pRate.reset();
+    mRateTypeId = -1;
+    mCurrencyId = -1;
+}
+
+void ProjectModel::SwitchInToUnknownRateBillableScenario()
+{
+    pRate.reset();
+    mCurrencyId = -1;
 }
 
 const int ProjectModel::GetProjectId() const
@@ -267,19 +335,44 @@ const bool ProjectModel::IsBillable() const
     return bIsBillable;
 }
 
+const double* ProjectModel::GetRate() const
+{
+    return pRate.get();
+}
+
 const wxDateTime ProjectModel::GetDateCreated()
 {
     return mDateCreated;
 }
 
-const wxDateTime ProjectModel::GetDateUpdated()
+const wxDateTime ProjectModel::GetDateModified()
 {
-    return mDateUpdated;
+    return mDateModified;
 }
 
 const bool ProjectModel::IsActive() const
 {
     return bIsActive;
+}
+
+const int ProjectModel::GetEmployerId() const
+{
+    return mEmployerId;
+}
+
+const int ProjectModel::GetClientId() const
+{
+    return mClientId;
+}
+
+const int ProjectModel::GetRateTypeId() const
+{
+    return mRateTypeId;
+}
+
+const int ProjectModel::GetCurrencyId() const
+{
+    return mCurrencyId;
 }
 
 EmployerModel* ProjectModel::GetEmployer()
@@ -322,6 +415,11 @@ void ProjectModel::IsBillable(const bool billable)
     bIsBillable = billable;
 }
 
+void ProjectModel::SetRate(std::unique_ptr<double> rate)
+{
+    pRate = std::move(rate);
+}
+
 void ProjectModel::SetDateCreated(const wxDateTime& dateCreated)
 {
     mDateCreated = dateCreated;
@@ -329,12 +427,32 @@ void ProjectModel::SetDateCreated(const wxDateTime& dateCreated)
 
 void ProjectModel::SetDateUpdated(const wxDateTime& dateUpdated)
 {
-    mDateUpdated = dateUpdated;
+    mDateModified = dateUpdated;
 }
 
 void ProjectModel::IsActive(const bool isActive)
 {
     bIsActive = isActive;
+}
+
+void ProjectModel::SetEmployerId(const int employerId)
+{
+    mEmployerId = employerId;
+}
+
+void ProjectModel::SetClientId(const int clientId)
+{
+    mClientId = clientId;
+}
+
+void ProjectModel::SetRateTypeId(const int rateTypeId)
+{
+    mRateTypeId = rateTypeId;
+}
+
+void ProjectModel::SetCurrencyId(const int currencyId)
+{
+    mCurrencyId = currencyId;
 }
 
 void ProjectModel::SetEmployer(std::unique_ptr<EmployerModel> employer)
@@ -360,36 +478,205 @@ void ProjectModel::SetCurrency(std::unique_ptr<CurrencyModel> currency)
 void ProjectModel::Create(std::unique_ptr<ProjectModel> project)
 {
     auto db = services::db_connection::get_instance().get_handle();
+    auto ps = db << ProjectModel::createProject;
+    ps << project->GetName() << project->GetDisplayName() << project->IsBillable() << project->GetEmployerId();
+
+    if (project->HasClientLinked())
+        ps << project->GetClientId();
+    else
+        ps << nullptr;
+
+    if (project->IsNonBillableScenario())
+        ps << nullptr << nullptr << nullptr;
+
+    if (project->IsBillableWithUnknownRateScenario())
+        ps << nullptr << project->GetRateTypeId() << nullptr;
+
+    if (project->IsBillableScenario())
+        ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId();
+
+    ps.execute();
 }
 
-void ProjectModel::Update(std::unique_ptr<ProjectModel> project) {}
-
-void ProjectModel::Delete(std::unique_ptr<ProjectModel> project) {}
-
-std::vector<model::ProjectModel> ProjectModel::GetAll()
+std::unique_ptr<ProjectModel> ProjectModel::GetById(const int projectId)
 {
-    std::vector<model::ProjectModel> projects;
-
+    std::unique_ptr<ProjectModel> project = nullptr;
     auto db = services::db_connection::get_instance().get_handle();
-    db << ProjectModel::getProjects >> [&](int projectId, std::string name, std::string displayName) {
-        model::ProjectModel project(projectId, wxString(name), wxString(displayName));
-        projects.push_back(project);
+    db << ProjectModel::getProject << projectId >> [&](int projectId,
+                                                       std::string name,
+                                                       std::string displayName,
+                                                       int billable,
+                                                       std::unique_ptr<double> rate,
+                                                       int dateCreated,
+                                                       int dateModified,
+                                                       int isActive,
+                                                       int employerId,
+                                                       std::unique_ptr<int> clientId,
+                                                       std::unique_ptr<int> rateTypeId,
+                                                       std::unique_ptr<int> currencyId) {
+        project = std::make_unique<ProjectModel>(
+            projectId, wxString(name), wxString(displayName), billable, dateCreated, dateModified, isActive);
+
+        if (rate != nullptr) {
+            project->SetRate(std::move(rate));
+        }
+
+        project->SetEmployerId(employerId);
+        auto employer = std::make_unique<EmployerModel>(employerId, true);
+        project->SetEmployer(std::move(employer));
+        if (clientId != nullptr) {
+            project->SetClientId(*clientId);
+            auto client = std::make_unique<ClientModel>(*clientId, true);
+            project->SetClient(std::move(client));
+        }
+
+        if (rateTypeId != nullptr) {
+            project->SetRateTypeId(*rateTypeId);
+            auto rateType = std::make_unique<RateTypeModel>(*rateTypeId, true);
+            project->SetRateType(std::move(rateType));
+        }
+
+        if (currencyId != nullptr) {
+            project->SetCurrencyId(*currencyId);
+            auto currency = std::make_unique<CurrencyModel>(*currencyId, true);
+            project->SetCurrency(std::move(currency));
+        }
+    };
+
+    return project;
+}
+
+void ProjectModel::Update(std::unique_ptr<ProjectModel> project)
+{
+    auto db = services::db_connection::get_instance().get_handle();
+
+    auto ps = db << ProjectModel::updateProject << project->GetName() << project->GetDisplayName()
+                 << project->IsBillable() << util::UnixTimestamp() << project->GetEmployerId();
+
+    if (project->HasClientLinked())
+        ps << project->GetClientId();
+    else
+        ps << nullptr;
+
+    if (project->IsNonBillableScenario())
+        ps << nullptr << nullptr << nullptr;
+
+    if (project->IsBillableWithUnknownRateScenario())
+        ps << nullptr << project->GetRateTypeId() << nullptr;
+
+    if (project->IsBillableScenario())
+        ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId();
+
+    ps << project->GetProjectId();
+
+    ps.execute();
+}
+
+void ProjectModel::Delete(std::unique_ptr<ProjectModel> project)
+{
+    auto db = services::db_connection::get_instance().get_handle();
+    db << ProjectModel::deleteProject << util::UnixTimestamp() << project->GetProjectId();
+}
+
+std::vector<std::unique_ptr<ProjectModel>> ProjectModel::GetAll()
+{
+    std::vector<std::unique_ptr<ProjectModel>> projects;
+    auto db = services::db_connection::get_instance().get_handle();
+    db << ProjectModel::getProjects >> [&](int projectId,
+                                           std::string name,
+                                           std::string displayName,
+                                           int billable,
+                                           std::unique_ptr<double> rate,
+                                           int dateCreated,
+                                           int dateModified,
+                                           int isActive,
+                                           int employerId,
+                                           std::unique_ptr<int> clientId,
+                                           std::unique_ptr<int> rateTypeId,
+                                           std::unique_ptr<int> currencyId) {
+        auto project = std::make_unique<ProjectModel>(
+            projectId, wxString(name), wxString(displayName), billable, dateCreated, dateModified, isActive);
+
+        if (rate != nullptr) {
+            project->SetRate(std::move(rate));
+        }
+
+        project->SetEmployerId(employerId);
+        auto employer = std::make_unique<EmployerModel>(employerId, true);
+        project->SetEmployer(std::move(employer));
+        if (clientId != nullptr) {
+            project->SetClientId(*clientId);
+            auto client = std::make_unique<ClientModel>(*clientId, true);
+            project->SetClient(std::move(client));
+        }
+
+        if (rateTypeId != nullptr) {
+            project->SetRateTypeId(*rateTypeId);
+            auto rateType = std::make_unique<RateTypeModel>(*rateTypeId, true);
+            project->SetRateType(std::move(rateType));
+        }
+
+        if (currencyId != nullptr) {
+            project->SetCurrencyId(*currencyId);
+            auto currency = std::make_unique<CurrencyModel>(*currencyId, true);
+            project->SetCurrency(std::move(currency));
+        }
+
+        projects.push_back(std::move(project));
     };
 
     return projects;
 }
 
-const std::string ProjectModel::createProject;
+const std::string ProjectModel::createProject = "INSERT INTO "
+                                                "projects(name, display_name, billable, is_active, "
+                                                "employer_id, client_id, rate, rate_type_id, currency_id) "
+                                                "VALUES(?, ?, ?, 1, ?, ?, ?, ?, ?)";
 
-const std::string ProjectModel::getProject;
+const std::string ProjectModel::getProject = "SELECT projects.project_id, "
+                                             "projects.name AS project_name, "
+                                             "projects.display_name, "
+                                             "projects.billable, "
+                                             "projects.rate, "
+                                             "projects.date_created, "
+                                             "projects.date_modified, "
+                                             "projects.is_active, "
+                                             "employers.employer_id, "
+                                             "clients.client_id AS client_id, "
+                                             "rate_types.rate_type_id AS rate_type_id, "
+                                             "currencies.currency_id AS currency_id "
+                                             "FROM projects "
+                                             "INNER JOIN employers ON projects.employer_id = employers.employer_id "
+                                             "LEFT JOIN clients ON projects.client_id = clients.client_id "
+                                             "LEFT JOIN rate_types ON projects.rate_type_id = rate_types.rate_type_id "
+                                             "LEFT JOIN currencies ON projects.currency_id = currencies.currency_id "
+                                             "WHERE projects.project_id = ?";
 
-const std::string ProjectModel::updateProject;
+const std::string ProjectModel::updateProject =
+    "UPDATE projects "
+    "SET name = ?, display_name = ?, billable = ?, date_modified = ?, "
+    "employer_id = ?, client_id = ?, rate = ?, rate_type_id = ?, currency_id = ? "
+    "WHERE project_id = ?";
 
-const std::string ProjectModel::deleteProject;
+const std::string ProjectModel::deleteProject = "UPDATE projects"
+                                                "SET is_active = 0, date_modified = ?"
+                                                "WHERE project_id = ?";
 
 const std::string ProjectModel::getProjects = "SELECT projects.project_id, "
-                                              "projects.name, "
-                                              "projects.display_name "
+                                              "projects.name AS project_name, "
+                                              "projects.display_name, "
+                                              "projects.billable, "
+                                              "projects.rate, "
+                                              "projects.date_created, "
+                                              "projects.date_modified, "
+                                              "projects.is_active, "
+                                              "employers.employer_id, "
+                                              "clients.client_id AS client_id, "
+                                              "rate_types.rate_type_id AS rate_type_id, "
+                                              "currencies.currency_id AS currency_id "
                                               "FROM projects "
-                                              "WHERE projects.is_active = 1";
+                                              "INNER JOIN employers ON projects.employer_id = employers.employer_id "
+                                              "LEFT JOIN clients ON projects.client_id = clients.client_id "
+                                              "LEFT JOIN rate_types ON projects.rate_type_id = rate_types.rate_type_id "
+                                              "LEFT JOIN currencies ON projects.currency_id = currencies.currency_id";
 } // namespace app::model
