@@ -57,11 +57,7 @@ private:
     void FillControls();
     void DataToControls();
 
-    bool Validate();
-    bool AreControlsEmpty();
-
-    void OnNameChange(wxCommandEvent& event);
-    void OnEmployerChoiceSelection(wxCommandEvent& event);
+    bool TransferDataAndValidate();
 
     void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
@@ -80,7 +76,7 @@ private:
     int mClientId;
     bool bIsEdit;
 
-    enum { IDC_NAME = wxID_HIGHEST + 1, IDC_EMPLOYER, IDC_ISACTIVE };
+    enum { IDC_NAME = wxID_HIGHEST + 1, IDC_EMPLOYERCHOICE, IDC_ISACTIVE };
 
     static const wxString& DateLabel;
 };

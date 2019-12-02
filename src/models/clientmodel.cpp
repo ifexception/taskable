@@ -32,7 +32,7 @@ ClientModel::ClientModel()
     , mDateModified(wxDefaultDateTime)
     , bIsActive(false)
     , mEmployerId(-1)
-    , pEmployer(new EmployerModel())
+    , pEmployer(std::make_unique<EmployerModel>())
 {
 }
 
@@ -40,6 +40,18 @@ ClientModel::ClientModel(const int clientId)
     : ClientModel()
 {
     mClientId = clientId;
+}
+
+ClientModel::ClientModel(const int clientId, bool initializeFromDatabase)
+{
+    assert(initializeFromDatabase == true);
+
+    auto client = ClientModel::GetById(clientId);
+    mClientId = client->GetClientId();
+    mName = client->GetName();
+    mDateCreated = client->GetDateCreated();
+    mDateModified = client->GetDateModified();
+    bIsActive = client->IsActive();
 }
 
 ClientModel::ClientModel(int clientId, wxString name, int dateCreated, int dateModified, bool isActive)
@@ -50,16 +62,6 @@ ClientModel::ClientModel(int clientId, wxString name, int dateCreated, int dateM
     mDateCreated = util::ToDateTime(dateCreated);
     mDateModified = util::ToDateTime(dateModified);
     bIsActive = isActive;
-}
-
-bool ClientModel::IsNameValid()
-{
-    return !mName.empty() && mName.length() >= 2 && mName.length() <= 255;
-}
-
-bool ClientModel::IsEmployerSelected()
-{
-    return mEmployerId > 0;
 }
 
 const int ClientModel::GetClientId() const
@@ -171,13 +173,46 @@ void ClientModel::Delete(std::unique_ptr<model::ClientModel> client)
     db << model::ClientModel::deleteClient << util::UnixTimestamp() << client->GetClientId();
 }
 
-const std::string ClientModel::createClient = "INSERT INTO clients (name, is_active, employer_id) VALUES (?, 1, ?)";
+std::vector<std::unique_ptr<ClientModel>> ClientModel::GetByEmployerId(const int employerId)
+{
+    std::vector<std::unique_ptr<ClientModel>> clients;
+
+    auto db = services::db_connection::get_instance().get_handle();
+    db << ClientModel::getClientsByEmployerId << employerId >>
+        [&](int clientId, std::string name, int dateCreated, int dateModified, int isActive, int employerIdDb) {
+            auto client = std::make_unique<ClientModel>(clientId, wxString(name), dateCreated, dateModified, isActive);
+            client->SetEmployer(std::make_unique<EmployerModel>(employerIdDb, true));
+            clients.push_back(std::move(client));
+        };
+
+    return clients;
+}
+
+std::vector<std::unique_ptr<ClientModel>> ClientModel::GetAll()
+{
+    std::vector<std::unique_ptr<ClientModel>> clients;
+    auto db = services::db_connection::get_instance().get_handle();
+    db << ClientModel::getClients >>
+        [&](int clientId, std::string name, int dateCreatedUtc, int dateModifiedUtc, bool isActive, int employerId) {
+            auto client =
+                std::make_unique<ClientModel>(clientId, wxString(name), dateCreatedUtc, dateModifiedUtc, isActive);
+            client->SetEmployer(std::make_unique<EmployerModel>(employerId, true));
+            clients.push_back(std::move(client));
+        };
+
+    return clients;
+}
+
+const std::string ClientModel::createClient = "INSERT INTO "
+                                              "clients (name, is_active, employer_id) "
+                                              "VALUES (?, 1, ?)";
 ;
 const std::string ClientModel::getClientsByEmployerId = "SELECT clients.client_id, "
-                                                        "clients.name AS client_name, "
+                                                        "clients.name, "
                                                         "clients.date_created, "
                                                         "clients.date_modified, "
                                                         "clients.is_active, "
+                                                        "clients.employer_id "
                                                         "FROM clients "
                                                         "WHERE employer_id = ?";
 ;
@@ -186,9 +221,8 @@ const std::string ClientModel::getClients = "SELECT clients.client_id, "
                                             "clients.date_created, "
                                             "clients.date_modified, "
                                             "clients.is_active, "
-                                            "employers.name AS employer_name "
+                                            "clients.employer_id "
                                             "FROM clients "
-                                            "INNER JOIN employers ON clients.employer_id = employers.employer_id "
                                             "WHERE clients.is_active = 1";
 ;
 const std::string ClientModel::getClientById = "SELECT clients.client_id, "
@@ -196,13 +230,16 @@ const std::string ClientModel::getClientById = "SELECT clients.client_id, "
                                                "clients.date_created, "
                                                "clients.date_modified, "
                                                "clients.is_active, "
-                                               "employers.employer_id AS employer_id "
+                                               "clients.employer_id "
                                                "FROM clients "
-                                               "INNER JOIN employers ON clients.employer_id = employers.employer_id "
                                                "WHERE clients.client_id = ?";
 ;
-const std::string ClientModel::updateClient =
-    "UPDATE clients SET name = ?, date_modified = ?, employer_id = ? WHERE client_id = ?";
-const std::string ClientModel::deleteClient = "UPDATE clients SET is_active = 0, date_modified = ? WHERE client_id = ?";
+const std::string ClientModel::updateClient = "UPDATE clients "
+                                              "SET name = ?, date_modified = ?, employer_id = ? "
+                                              "WHERE client_id = ?";
+
+const std::string ClientModel::deleteClient = "UPDATE clients "
+                                              "SET is_active = 0, date_modified = ? "
+                                              "WHERE client_id = ?";
 
 } // namespace app::model

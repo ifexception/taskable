@@ -130,8 +130,13 @@ void ClientDialog::CreateControls()
     auto clientNameText = new wxStaticText(clientDetailsPanel, wxID_STATIC, wxT("Name"));
     taskFlexGridSizer->Add(clientNameText, common::sizers::ControlCenterVertical);
 
-    pNameTextCtrl =
-        new wxTextCtrl(clientDetailsPanel, IDC_NAME, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
+    wxTextValidator nameValidator(wxFILTER_ALPHANUMERIC | wxFILTER_INCLUDE_CHAR_LIST);
+    wxArrayString allowedChars;
+    allowedChars.Add(wxT(" "));
+    nameValidator.SetIncludes(allowedChars);
+
+    pNameTextCtrl = new wxTextCtrl(
+        clientDetailsPanel, IDC_NAME, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT, nameValidator);
     pNameTextCtrl->SetHint(wxT("Client name"));
     pNameTextCtrl->SetToolTip(wxT("Enter a name for the client"));
     taskFlexGridSizer->Add(pNameTextCtrl, common::sizers::ControlDefault);
@@ -140,7 +145,7 @@ void ClientDialog::CreateControls()
     auto employerNameText = new wxStaticText(clientDetailsPanel, wxID_STATIC, wxT("Employer"));
     taskFlexGridSizer->Add(employerNameText, common::sizers::ControlCenterVertical);
 
-    pEmployerChoiceCtrl = new wxChoice(clientDetailsPanel, IDC_EMPLOYER, wxDefaultPosition, wxDefaultSize);
+    pEmployerChoiceCtrl = new wxChoice(clientDetailsPanel, IDC_EMPLOYERCHOICE, wxDefaultPosition, wxDefaultSize);
     pEmployerChoiceCtrl->AppendString(wxT("Select a employer"));
     pEmployerChoiceCtrl->SetSelection(0);
     pEmployerChoiceCtrl->SetToolTip(wxT("Select a employer to associate the client with"));
@@ -182,18 +187,6 @@ void ClientDialog::CreateControls()
 // clang-format off
 void ClientDialog::ConfigureEventBindings()
 {
-    pEmployerChoiceCtrl->Bind(
-        wxEVT_CHOICE,
-        &ClientDialog::OnEmployerChoiceSelection,
-        this
-    );
-
-    pNameTextCtrl->Bind(
-        wxEVT_TEXT,
-        &ClientDialog::OnNameChange,
-        this
-    );
-
     if (bIsEdit) {
         pIsActiveCtrl->Bind(
             wxEVT_CHECKBOX,
@@ -227,8 +220,8 @@ void ClientDialog::FillControls()
         pLogger->error("Error occured on GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    for (int i = 0; i < employers.size(); i++) {
-        pEmployerChoiceCtrl->Append(employers[i]->GetName(), util::IntToVoidPointer(employers[i]->GetEmployerId()));
+    for (const auto& employer : employers) {
+        pEmployerChoiceCtrl->Append(employer->GetName(), util::IntToVoidPointer(employer->GetEmployerId()));
     }
 }
 
@@ -241,10 +234,9 @@ void ClientDialog::DataToControls()
         pLogger->error("Error occured on GetById() - {0:d} : {1}", e.get_code(), e.what());
     }
 
-    pNameTextCtrl->SetValue(client->GetName());
+    pNameTextCtrl->ChangeValue(client->GetName());
 
     pEmployerChoiceCtrl->SetStringSelection(client->GetEmployer()->GetName());
-    pEmployerChoiceCtrl->SendSelectionChangedEvent(wxEVT_CHOICE);
 
     pDateTextCtrl->SetLabel(wxString::Format(ClientDialog::DateLabel,
         client->GetDateCreated().FormatISOCombined(),
@@ -253,45 +245,29 @@ void ClientDialog::DataToControls()
     pIsActiveCtrl->SetValue(client->IsActive());
 }
 
-bool ClientDialog::Validate()
-{
-    bool isValid = true;
-    if (!pClient->IsNameValid()) {
-        isValid = false;
-        common::validations::ForRequiredText(pNameTextCtrl, wxT("client name"));
-    }
-
-    if (!pClient->IsEmployerSelected()) {
-        isValid = false;
-        common::validations::ForRequiredChoiceSelection(pEmployerChoiceCtrl, wxT("employer"));
-    }
-
-    return isValid;
-}
-
-bool ClientDialog::AreControlsEmpty()
-{
-    return pNameTextCtrl->GetValue().empty() && pEmployerChoiceCtrl->GetSelection() == 0;
-}
-
-void ClientDialog::OnNameChange(wxCommandEvent& event)
+bool ClientDialog::TransferDataAndValidate()
 {
     wxString name = pNameTextCtrl->GetValue();
+    if (name.empty() || name.length() < 2 || name.length() > 255) {
+        common::validations::ForRequiredText(pNameTextCtrl, wxT("client name"));
+        return false;
+    }
+
     pClient->SetName(name);
-}
 
-void ClientDialog::OnEmployerChoiceSelection(wxCommandEvent& event)
-{
-    int id = util::VoidPointerToInt(pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()));
-    wxString name = pEmployerChoiceCtrl->GetStringSelection();
+    int employerId = util::VoidPointerToInt(pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()));
+    if (employerId < 1) {
+        common::validations::ForRequiredChoiceSelection(pEmployerChoiceCtrl, wxT("employer"));
+        return false;
+    }
+    pClient->SetEmployerId(employerId);
 
-    pClient->SetEmployerId(id);
-    pClient->GetEmployer()->SetName(name);
+    return true;
 }
 
 void ClientDialog::OnOk(wxCommandEvent& event)
 {
-    if (Validate()) {
+    if (TransferDataAndValidate()) {
         if (!bIsEdit) {
             model::ClientModel::Create(std::move(pClient));
         }
@@ -310,15 +286,7 @@ void ClientDialog::OnOk(wxCommandEvent& event)
 
 void ClientDialog::OnCancel(wxCommandEvent& event)
 {
-    bool areControlsEmpty = AreControlsEmpty();
-    if (!areControlsEmpty) {
-        int answer = wxMessageBox(wxT("Are you sure you want to exit?"), wxT("Confirm"), wxYES_NO | wxICON_QUESTION);
-        if (answer == wxYES) {
-            EndModal(wxID_CANCEL);
-        }
-    } else {
-        EndModal(wxID_CANCEL);
-    }
+    EndModal(wxID_CANCEL);
 }
 
 void ClientDialog::OnIsActiveCheck(wxCommandEvent& event)

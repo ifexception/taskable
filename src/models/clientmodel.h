@@ -19,7 +19,9 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
+#include <vector>
 
 #include <wx/string.h>
 #include <wx/datetime.h>
@@ -33,11 +35,9 @@ class ClientModel final
 public:
     ClientModel();
     ClientModel(const int clientId);
+    ClientModel(const int clientId, bool initializeFromDatabase);
     ClientModel(int clientId, wxString name, int dateCreated, int dateModified, bool isActive);
     ~ClientModel() = default;
-
-    bool IsNameValid();
-    bool IsEmployerSelected();
 
     const int GetClientId() const;
     const wxString GetName() const;
@@ -58,9 +58,11 @@ public:
     void SetEmployer(std::unique_ptr<EmployerModel> employer);
 
     static void Create(std::unique_ptr<model::ClientModel> client);
-    static std::unique_ptr<ClientModel > GetById(const int clientId);
+    static std::unique_ptr<ClientModel> GetById(const int clientId);
     static void Update(std::unique_ptr<model::ClientModel> client);
     static void Delete(std::unique_ptr<model::ClientModel> client);
+    static std::vector<std::unique_ptr<ClientModel>> GetByEmployerId(const int employerId);
+    static std::vector<std::unique_ptr<ClientModel>> GetAll();
 
 private:
     int mClientId;
