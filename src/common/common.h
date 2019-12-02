@@ -40,6 +40,7 @@ namespace validations
 {
 void ForRequiredChoiceSelection(wxWindow* window, wxString forType);
 void ForRequiredText(wxWindow* window, wxString forType);
+void ForRequiredNumber(wxWindow* window, wxString forType);
 } // namespace validations
 
 // TODO Check licensing https://icons8.com/icon/pack/time-and-date/cute-clipart

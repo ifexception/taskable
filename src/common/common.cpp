@@ -120,3 +120,17 @@ void app::common::validations::ForRequiredText(wxWindow* window, wxString forTyp
     tooltip.SetIcon(wxICON_WARNING);
     tooltip.ShowFor(window);
 }
+
+void app::common::validations::ForRequiredNumber(wxWindow* window, wxString forType)
+{
+    const wxString errorHeader = wxT("Invalid amount");
+    const wxString errorMessage =
+        wxString::Format(wxT("%s is required \nand must be greater than %d"),
+            forType,
+            Constants::MinLength,
+            Constants::MaxLength);
+
+    wxRichToolTip tooltip(errorHeader, errorMessage);
+    tooltip.SetIcon(wxICON_WARNING);
+    tooltip.ShowFor(window);
+}
