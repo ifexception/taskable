@@ -19,12 +19,20 @@
 
 #include "editlistdlg.h"
 
+#include <memory>
+#include <vector>
+
 #include <sqlite_modern_cpp/errors.h>
 
 #include "employerdlg.h"
 #include "clientdlg.h"
 #include "projectdlg.h"
 #include "categorydlg.h"
+
+#include "../models/employermodel.h"
+#include "../models/clientmodel.h"
+#include "../models/projectmodel.h"
+#include "../models/categorymodel.h"
 
 #include "../common/common.h"
 #include "../common/util.h"
@@ -210,15 +218,15 @@ void EmployerStrategy::DataToControl(wxListCtrl* control)
     try {
         employers = model::EmployerModel::GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in get_employers() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in EmployerModel::GetAll(); - {0:d} : {1}", e.get_code(), e.what());
     }
 
     int listIndex = 0;
     int columnIndex = 0;
-    for (int i = 0; i < employers.size(); i++) {
-        listIndex = control->InsertItem(columnIndex++, employers[i]->GetName());
-        control->SetItem(listIndex, columnIndex++, employers[i]->GetDateModified().FormatISOCombined());
-        control->SetItemPtrData(listIndex, employers[i]->GetEmployerId());
+    for (auto& employer : employers) {
+        listIndex = control->InsertItem(columnIndex++, employer->GetName());
+        control->SetItem(listIndex, columnIndex++, employer->GetDateModified().FormatISOCombined());
+        control->SetItemPtrData(listIndex, employer->GetEmployerId());
         columnIndex = 0;
     }
 }
@@ -258,20 +266,20 @@ void ClientStrategy::CreateControl(wxListCtrl* control)
 
 void ClientStrategy::DataToControl(wxListCtrl* control)
 {
-    std::vector<models::client> clients;
+    std::vector<std::unique_ptr<model::ClientModel>> clients;
     try {
-        clients = dbService.get_clients();
+        clients = model::ClientModel::GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in get_clients() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in ClientModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     int listIndex = 0;
     int columnIndex = 0;
-    for (auto client : clients) {
-        listIndex = control->InsertItem(columnIndex++, client.employer_name);
-        control->SetItem(listIndex, columnIndex++, client.client_name);
-        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(client.date_modified_utc));
-        control->SetItemPtrData(listIndex, client.client_id);
+    for (auto& client : clients) {
+        listIndex = control->InsertItem(columnIndex++, client->GetEmployer()->GetName());
+        control->SetItem(listIndex, columnIndex++, client->GetName());
+        control->SetItem(listIndex, columnIndex++, client->GetDateModified().FormatISOCombined());
+        control->SetItemPtrData(listIndex, client->GetClientId());
         columnIndex = 0;
     }
 }
@@ -288,6 +296,8 @@ ProjectStrategy::ProjectStrategy(std::shared_ptr<spdlog::logger> logger)
 
 void ProjectStrategy::CreateControl(wxListCtrl* control)
 {
+    control->SetSize(wxSize(450, 100));
+
     wxListItem employerColumn;
     employerColumn.SetId(0);
     employerColumn.SetText(wxT("Employer"));
@@ -306,35 +316,31 @@ void ProjectStrategy::CreateControl(wxListCtrl* control)
     clientColumn.SetWidth(100);
     control->InsertColumn(2, clientColumn);
 
-    wxListItem dateCreatedColumn;
-    dateCreatedColumn.SetId(3);
-    dateCreatedColumn.SetText(wxT("Date Created"));
-    control->InsertColumn(3, dateCreatedColumn);
-
     wxListItem dateModifiedColumn;
-    dateModifiedColumn.SetId(4);
+    dateModifiedColumn.SetId(3);
     dateModifiedColumn.SetText(wxT("Date Modified"));
-    control->InsertColumn(4, dateModifiedColumn);
+    dateModifiedColumn.SetWidth(148);
+    control->InsertColumn(3, dateModifiedColumn);
 }
 
 void ProjectStrategy::DataToControl(wxListCtrl* control)
 {
-    std::vector<models::project> projects;
+    std::vector<std::unique_ptr<model::ProjectModel>> projects;
     try {
-        projects = dbService.get_projects();
+        projects = model::ProjectModel::GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in get_projects() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in ProjectModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     int listIndex = 0;
     int columnIndex = 0;
-    for (auto project : projects) {
-        listIndex = control->InsertItem(columnIndex++, project.employer_name);
-        control->SetItem(listIndex, columnIndex++, project.client_name);
-        control->SetItem(listIndex, columnIndex++, project.project_name);
-        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(project.date_created_utc));
-        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(project.date_modified_utc));
-        control->SetItemPtrData(listIndex, project.project_id);
+    for (const auto& project : projects) {
+        listIndex = control->InsertItem(columnIndex++, project->GetEmployer()->GetName());
+        control->SetItem(
+            listIndex, columnIndex++, project->HasClientLinked() ? project->GetClient()->GetName() : wxT("n/a"));
+        control->SetItem(listIndex, columnIndex++, project->GetName());
+        control->SetItem(listIndex, columnIndex++, project->GetDateModified().FormatISOCombined());
+        control->SetItemPtrData(listIndex, project->GetProjectId());
         columnIndex = 0;
     }
 }

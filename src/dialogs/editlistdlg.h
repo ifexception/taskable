@@ -24,8 +24,6 @@
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
-#include "../models/employermodel.h"
-
 #include "../services/db_service.h"
 
 namespace app::dialog
