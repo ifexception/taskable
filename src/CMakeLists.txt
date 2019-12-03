@@ -41,7 +41,6 @@ set (SRC
     "app.manifest"
     "frame/mainframe.cpp"
     "frame/taskbaricon.cpp"
-    "dialogs/taskitemdlg.cpp"
     "dialogs/editlistdlg.cpp"
     "dialogs/settingsdialog.cpp"
     "dialogs/stopwatchtaskdlg.cpp"
@@ -56,12 +55,15 @@ set (SRC
     "dialogs/clientdlg.cpp"
     "models/clientmodel.cpp"
 
+    "dialogs/projectdlg.cpp"
+    "models/projectmodel.cpp"
+
     "dialogs/categorydlg.cpp"
     "dialogs/categoriesdlg.cpp"
     "models/categorymodel.cpp"
 
-    "dialogs/projectdlg.cpp"
-    "models/projectmodel.cpp"
+    "models/taskmodel.cpp"
+    "dialogs/taskitemdlg.cpp"
     )
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
