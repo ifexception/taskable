@@ -30,6 +30,13 @@
 
 namespace app::model
 {
+enum class RateTypes : int {
+    Unknown = 1,
+    Hourly = 2,
+    Daily = 3,
+    None = 9,
+};
+
 class RateTypeModel final
 {
 public:
@@ -41,6 +48,7 @@ public:
 
     const int GetRateTypeId() const;
     const wxString GetName() const;
+    const RateTypes GetType() const;
 
     void SetRateTypeId(const int rateTypeId);
     void SetName(const wxString& name);
@@ -51,6 +59,7 @@ public:
 private:
     int mRateTypeId;
     wxString mName;
+    RateTypes mRateType;
 
     static const std::string getRateTypeById;
     static const std::string getRateTypes;
@@ -104,18 +113,21 @@ public:
         bool isActive);
 
     bool IsNonBillableScenario();
-    bool IsBillableScenario();
     bool IsBillableWithUnknownRateScenario();
+    bool IsBillableScenarioWithHourlyRate();
+    bool IsBillableScenarioWithDailyRate();
     bool HasClientLinked();
 
     void SwitchOutOfBillableScenario();
     void SwitchInToUnknownRateBillableScenario();
+    void SwitchInToHourlyRateBillableScenario();
 
     const int GetProjectId() const;
     const wxString GetName() const;
     const wxString GetDisplayName() const;
     const bool IsBillable() const;
     const double* GetRate() const;
+    const int* GetHours() const;
     const wxDateTime GetDateCreated();
     const wxDateTime GetDateModified();
     const bool IsActive() const;
@@ -134,6 +146,7 @@ public:
     void SetDisplayName(const wxString& displayName);
     void IsBillable(const bool billable);
     void SetRate(std::unique_ptr<double> rate);
+    void SetHours(std::unique_ptr<int> hours);
     void SetDateCreated(const wxDateTime& dateCreated);
     void SetDateUpdated(const wxDateTime& dateUpdated);
     void IsActive(const bool isActive);
@@ -159,6 +172,7 @@ private:
     wxString mDisplayName;
     bool bIsBillable;
     std::unique_ptr<double> pRate;
+    std::unique_ptr<int> pHours;
     wxDateTime mDateCreated;
     wxDateTime mDateModified;
     bool bIsActive;

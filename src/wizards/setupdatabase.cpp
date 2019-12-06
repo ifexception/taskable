@@ -132,6 +132,7 @@ void SetupTables::CreateProjectsTable()
                               "    display_name TEXT NOT NULL,"
                               "    billable INTEGER NOT NULL,"
                               "    rate REAL NULL,"
+                              "    hours INTEGER NULL,"
                               "    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),"
                               "    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),"
                               "    is_active INTEGER NOT NULL,"
@@ -204,8 +205,9 @@ void SetupTables::CreateTaskItemsTable()
                               "    duration TEXT NOT NULL,"
                               "    description TEXT NOT NULL,"
                               "    billable INTEGER NOT NULL, "
-                              "    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
-                              "    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    calculated_rate REAL NULL,"
+                              "    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+                              "    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
                               "    is_active INTEGER NOT NULL,"
                               "    task_item_type_id INTEGER NOT NULL,"
                               "    project_id INTEGER NOT NULL,"
@@ -282,7 +284,7 @@ int SetupEntities::CreateEmployer(std::string employerName)
 {
     auto db = services::db_connection::get_instance().get_handle();
     db << "INSERT INTO employers (name, is_active) VALUES (?, 1)" << employerName;
-    return db.last_insert_rowid();
+    return (int) db.last_insert_rowid();
 }
 
 int SetupEntities::CreateClient(std::string clientName, int employerId)
@@ -292,7 +294,7 @@ int SetupEntities::CreateClient(std::string clientName, int employerId)
         return 0;
     } else {
         db << "INSERT INTO clients (name, is_active, employer_id) VALUES (?, 1, ?)" << clientName << employerId;
-        return db.last_insert_rowid();
+        return (int) db.last_insert_rowid();
     }
 }
 
@@ -301,10 +303,12 @@ void SetupEntities::CreateProject(std::string projectName, std::string projectDi
     auto db = services::db_connection::get_instance().get_handle();
     bool isAssociatedWithClient = clientId != 0;
     if (isAssociatedWithClient) {
-        db << "INSERT INTO projects(name, display_name, billable, is_active, employer_id, client_id) VALUES(?, ?, ?, 1, ?, ?)"
+        db << "INSERT INTO projects(name, display_name, billable, is_active, employer_id, client_id) VALUES(?, ?, ?, "
+              "1, ?, ?)"
            << projectName << projectDisplayName << false << employerId << clientId;
     } else {
-        db << "INSERT INTO projects(name, display_name, billable, is_active, employer_id, client_id) VALUES(?, ?, ?, 1, ?, ?)"
+        db << "INSERT INTO projects(name, display_name, billable, is_active, employer_id, client_id) VALUES(?, ?, ?, "
+              "1, ?, ?)"
            << projectName << projectDisplayName << false << employerId << nullptr;
     }
 }
