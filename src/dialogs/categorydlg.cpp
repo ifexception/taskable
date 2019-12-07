@@ -193,7 +193,7 @@ void CategoryDialog::FillControls()
     try {
         projects = model::ProjectModel::GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in ProjectModel::GetAll()() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in ProjectModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (const auto& project : projects) {
@@ -205,7 +205,7 @@ void CategoryDialog::DataToControls()
 {
     std::unique_ptr<model::CategoryModel> category = nullptr;
     try {
-        category = model::CategoryModel::GetCategoryById(mCategoryId);
+        category = model::CategoryModel::GetById(mCategoryId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in get_category_by_id() - {0:d} : {1}", e.get_code(), e.what());
     }
@@ -237,12 +237,12 @@ bool CategoryDialog::TransferDataAndValidate()
     }
     pCategory->SetName(name);
 
-    int employerId = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
-    if (employerId < 1) {
+    int projectId = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
+    if (projectId < 1) {
         common::validations::ForRequiredChoiceSelection(pProjectChoiceCtrl, wxT("project"));
         return false;
     }
-    pCategory->SetProjectId(employerId);
+    pCategory->SetProjectId(projectId);
 
     wxColor color = pColorPickerCtrl->GetColour();
     pCategory->SetColor(color);

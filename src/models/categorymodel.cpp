@@ -43,6 +43,18 @@ CategoryModel::CategoryModel(int id)
     mCategoryId = id;
 }
 
+CategoryModel::CategoryModel(int categoryId, bool initializeFromDatabase)
+    : CategoryModel()
+{
+    auto category = CategoryModel::GetById(categoryId);
+    mCategoryId = category->GetCategoryId();
+    mName = category->GetName();
+    mColor = category->GetColor();
+    mDateCreated = category->GetDateCreated();
+    mDateModified = category->GetDateModified();
+    bIsActive = category->IsActive();
+}
+
 CategoryModel::CategoryModel(wxString name, wxColor color, int projectId)
     : CategoryModel()
 {
@@ -160,7 +172,7 @@ void CategoryModel::Create(std::unique_ptr<CategoryModel> category)
     db << CategoryModel::createCategory << category->GetName().ToStdString() << color << category->GetProjectId();
 }
 
-std::unique_ptr<CategoryModel> CategoryModel::GetCategoryById(const int id)
+std::unique_ptr<CategoryModel> CategoryModel::GetById(const int id)
 {
     std::unique_ptr<CategoryModel> category = nullptr;
 
@@ -196,6 +208,27 @@ void CategoryModel::Delete(std::unique_ptr<CategoryModel> category)
     db << CategoryModel::deleteCategory << util::UnixTimestamp() << category->GetCategoryId();
 }
 
+std::vector<std::unique_ptr<CategoryModel>> CategoryModel::GetByProjectId(const int projectId)
+{
+    std::vector<std::unique_ptr<CategoryModel>> categories;
+    auto db = services::db_connection::get_instance().get_handle();
+    db << CategoryModel::getCategoryById << projectId >> [&](int categoryId,
+                                                             std::string categoryName,
+                                                             unsigned int color,
+                                                             int dateCreated,
+                                                             int dateModified,
+                                                             int isActive,
+                                                             int projectId) {
+        auto category =
+            std::make_unique<CategoryModel>(categoryId, categoryName, color, dateCreated, dateModified, isActive);
+        auto project = std::make_unique<ProjectModel>(projectId, true);
+        category->SetProject(std::move(project));
+        categories.push_back(std::move(category));
+    };
+
+    return categories;
+}
+
 const std::string CategoryModel::createCategory = "INSERT INTO categories (name, color, is_active, project_id) "
                                                   "VALUES (?, ?, 1, ?)";
 
@@ -216,4 +249,14 @@ const std::string CategoryModel::updateCategory = "UPDATE categories SET name = 
 
 const std::string CategoryModel::deleteCategory = "UPDATE categories SET is_active = 0, date_modified = ? "
                                                   "WHERE category_id = ?";
+
+const std::string CategoryModel::getCategoriesByProjectId = "SELECT categories.category_id, "
+                                                            "categories.name, "
+                                                            "categories.color, "
+                                                            "categories.date_created, "
+                                                            "categories.date_modified, "
+                                                            "categories.is_active, "
+                                                            "categories.project_id "
+                                                            "FROM categories "
+                                                            "WHERE categories.project_id = ?";
 } // namespace app::model

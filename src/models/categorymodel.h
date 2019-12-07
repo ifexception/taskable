@@ -33,6 +33,7 @@ class CategoryModel final
 public:
     CategoryModel();
     CategoryModel(int categoryId);
+    CategoryModel(int categoryId, bool initializeFromDatabase);
     CategoryModel(wxString name, wxColor color, int projectId);
     CategoryModel(int id, wxString name, wxColor color, int dateCreated, int dateModified, bool isActive);
 
@@ -60,9 +61,10 @@ public:
     void SetProject(std::unique_ptr<ProjectModel> project);
 
     static void Create(std::unique_ptr<CategoryModel> category);
-    static std::unique_ptr<CategoryModel> GetCategoryById(const int id);
+    static std::unique_ptr<CategoryModel> GetById(const int id);
     static void Update(std::unique_ptr<CategoryModel> category);
     static void Delete(std::unique_ptr<CategoryModel> category);
+    static std::vector<std::unique_ptr<CategoryModel>> GetByProjectId(const int projectId);
 
 private:
     int mCategoryId;
@@ -79,5 +81,6 @@ private:
     static const std::string getCategoryById;
     static const std::string updateCategory;
     static const std::string deleteCategory;
+    static const std::string getCategoriesByProjectId;
 };
 } // namespace app::model
