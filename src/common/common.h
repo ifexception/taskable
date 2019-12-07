@@ -38,9 +38,11 @@ const wxSizerFlags ControlExpandProp = wxSizerFlags(ControlDefault).Align(wxEXPA
 
 namespace validations
 {
-void ForRequiredChoiceSelection(wxWindow* window, wxString forType);
-void ForRequiredText(wxWindow* window, wxString forType);
-void ForRequiredNumber(wxWindow* window, wxString forType);
+void ForRequiredChoiceSelection(wxWindow* window, wxString label);
+void ForRequiredText(wxWindow* window, wxString label);
+void ForRequiredLongText(wxWindow* window, wxString label);
+void ForRequiredNumber(wxWindow* window, wxString label);
+void ForInvalidTime(wxWindow* window, wxString message);
 } // namespace validations
 
 // TODO Check licensing https://icons8.com/icon/pack/time-and-date/cute-clipart

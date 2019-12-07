@@ -97,38 +97,61 @@ wxString app::common::GetConfigFileName()
     return wxT("taskable.ini");
 }
 
-void app::common::validations::ForRequiredChoiceSelection(wxWindow* window, wxString forType)
+void app::common::validations::ForRequiredChoiceSelection(wxWindow* window, wxString label)
 {
     const wxString errorHeader = wxT("Invalid selection");
-    const wxString errorMessage = wxString::Format(wxT("A %s selection is required"), forType);
+    const wxString errorMessage = wxString::Format(wxT("A %s selection is required"), label);
 
     wxRichToolTip tooltip(errorHeader, errorMessage);
     tooltip.SetIcon(wxICON_WARNING);
     tooltip.ShowFor(window);
 }
 
-void app::common::validations::ForRequiredText(wxWindow* window, wxString forType)
+void app::common::validations::ForRequiredText(wxWindow* window, wxString label)
 {
     const wxString errorHeader = wxT("Invalid input");
     const wxString errorMessage =
         wxString::Format(wxT("A %s is required \nand must be within %d to %d characters long"),
-            forType,
-            Constants::MinLength,
-            Constants::MaxLength);
+            label,
+            constants::MinLength,
+            constants::MaxLength);
 
     wxRichToolTip tooltip(errorHeader, errorMessage);
     tooltip.SetIcon(wxICON_WARNING);
     tooltip.ShowFor(window);
 }
 
-void app::common::validations::ForRequiredNumber(wxWindow* window, wxString forType)
+void app::common::validations::ForRequiredLongText(wxWindow* window, wxString label)
+{
+    const wxString errorHeader = wxT("Invalid input");
+    const wxString errorMessage =
+        wxString::Format(wxT("A %s is required \nand must be within %d to %d characters long"),
+            label,
+            constants::MinLength2,
+            constants::MaxLength2);
+
+    wxRichToolTip tooltip(errorHeader, errorMessage);
+    tooltip.SetIcon(wxICON_WARNING);
+    tooltip.ShowFor(window);
+}
+
+void app::common::validations::ForRequiredNumber(wxWindow* window, wxString label)
 {
     const wxString errorHeader = wxT("Invalid amount");
     const wxString errorMessage =
-        wxString::Format(wxT("%s is required \nand must be greater than %d"),
-            forType,
-            Constants::MinLength,
-            Constants::MaxLength);
+        wxString::Format(wxT("%s is required \nand must be greater than %d"), label,
+            constants::MinLength,
+            constants::MaxLength);
+
+    wxRichToolTip tooltip(errorHeader, errorMessage);
+    tooltip.SetIcon(wxICON_WARNING);
+    tooltip.ShowFor(window);
+}
+
+void app::common::validations::ForInvalidTime(wxWindow* window, wxString message)
+{
+    const wxString errorHeader = wxT("Invalid time");
+    const wxString errorMessage = message;
 
     wxRichToolTip tooltip(errorHeader, errorMessage);
     tooltip.SetIcon(wxICON_WARNING);
