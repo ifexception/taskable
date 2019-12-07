@@ -15,8 +15,8 @@ CREATE TABLE clients
 (
     client_id INTEGER PRIMARY KEY NOT NULL,
     name TEXT NOT NULL,
-    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now')),
-    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
+    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
     is_active INTEGER NOT NULL,
 
     employer_id INTEGER NOT NULL,
@@ -48,6 +48,7 @@ CREATE TABLE projects
     display_name TEXT NOT NULL,
     billable INTEGER NOT NULL,
     rate REAL NULL,
+    hours INTEGER NULL,
     date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
     date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
     is_active INTEGER NOT NULL,
@@ -68,8 +69,8 @@ CREATE TABLE tasks
 (
     task_id INTEGER PRIMARY KEY NOT NULL,
     task_date TEXT NOT NULL UNIQUE,
-    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
-    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
+    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
     is_active INTEGER NOT NULL
 );
 
@@ -88,6 +89,14 @@ CREATE TABLE categories
     FOREIGN KEY (project_id) REFERENCES projects(project_id)
 );
 
+-- task item types table
+CREATE TABLE task_item_types
+(
+    task_item_type_id INTEGER PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL
+);
+
+
 -- task items table
 CREATE TABLE task_items
 (
@@ -97,8 +106,9 @@ CREATE TABLE task_items
     duration TEXT NOT NULL,
     description TEXT NOT NULL,
     billable INTEGER NOT NULL,
-    date_created_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
-    date_modified_utc INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+    calculated_rate REAL NULL,
+    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
+    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
     is_active INTEGER NOT NULL,
 
     task_item_type_id INTEGER NOT NULL,
@@ -110,11 +120,4 @@ CREATE TABLE task_items
     FOREIGN KEY (project_id) REFERENCES projects(project_id),
     FOREIGN KEY (task_id) REFERENCES tasks(task_id),
     FOREIGN KEY (category_id) REFERENCES categories(category_id)
-);
-
--- task item types table
-CREATE TABLE task_item_types
-(
-    task_item_type_id INTEGER PRIMARY KEY NOT NULL,
-    name TEXT NOT NULL
 );
