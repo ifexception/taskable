@@ -1,4 +1,4 @@
-﻿{
+{
   "configurations": [
     {
       "name": "x86-Debug",
@@ -14,7 +14,9 @@
           "type": "STRING"
         }
       ],
-      "inheritEnvironments": [],
+      "inheritEnvironments": [ "msvc_x86" ],
+      "clangTidyChecks": "-*,cppcoreguidelines-*",
+      "enableMicrosoftCodeAnalysis": true,
       "intelliSenseMode": "windows-msvc-x86"
     },
     {
@@ -31,7 +33,9 @@
           "type": "STRING"
         }
       ],
-      "inheritEnvironments": [],
+      "inheritEnvironments": [ "msvc_x86" ],
+      "clangTidyChecks": "-*,cppcoreguidelines-*",
+      "enableMicrosoftCodeAnalysis": true,
       "intelliSenseMode": "windows-msvc-x86"
     }
   ]
