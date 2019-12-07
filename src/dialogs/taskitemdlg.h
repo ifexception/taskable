@@ -26,25 +26,19 @@
 #include <spdlog/spdlog.h>
 
 #include "../config/configuration.h"
-#include "../services/models/task_item.h"
+
+#include "../models/projectmodel.h"
+#include "../models/taskmodel.h"
+#include "../models/taskitemmodel.h"
 
 class wxDateEvent;
 class wxDatePickerCtrl;
 class wxTimePickerCtrl;
 
-wxDECLARE_EVENT(TASK_INSERTED, wxCommandEvent);
+wxDECLARE_EVENT(EVT_TASK_ITEM_INSERTED, wxCommandEvent);
 
 namespace app::dialog
 {
-enum class TaskItemType : int {
-    EntryTask = 1,
-    TimedTask = 2,
-};
-
-struct TimeValidators {
-    bool Validate(wxDateTime startTime, wxDateTime endTime);
-};
-
 class TaskItemDialog : public wxDialog
 {
 public:
@@ -52,17 +46,19 @@ public:
     explicit TaskItemDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
         std::shared_ptr<cfg::Configuration> config,
-        TaskItemType taskItemType,
+        constants::TaskItemTypes taskItemType,
         wxDateTime dateTimeContext = wxDateTime::Now(),
         const wxString& name = wxT("taskitemdlg"));
+
     explicit TaskItemDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
         std::shared_ptr<cfg::Configuration> config,
-        TaskItemType editTaskItemType,
+        constants::TaskItemTypes taskItemType,
         bool edit,
         int taskId,
         wxDateTime dateTimeContext = wxDateTime::Now(),
         const wxString& name = wxT("taskitemdlg"));
+
     virtual ~TaskItemDialog() = default;
 
     void SetDurationFromStopwatchTask(wxTimeSpan duration);
@@ -70,8 +66,6 @@ public:
     void SetDescriptionFromStopwatchTask(const wxString& value);
 
 private:
-    wxDECLARE_EVENT_TABLE();
-
     bool Create(wxWindow* parent,
         wxWindowID windowId,
         const wxString& title,
@@ -81,29 +75,30 @@ private:
         const wxString& name);
 
     void CreateControls();
+    void ConfigureEventBindings();
     void FillControls();
     void DataToControls();
-
-    int GetTaskId();
-    void CalculateTimeDiff(wxDateTime start, wxDateTime end);
-
-    bool PostValidate();
-    bool AreControlsEmpty();
 
     void OnDateContextChange(wxDateEvent& event);
     void OnProjectChoice(wxCommandEvent& event);
     void OnStartTimeChange(wxDateEvent& event);
     void OnEndTimeChange(wxDateEvent& event);
-    void OnIsActiveCheck(wxCommandEvent& event);
     void OnDurationTimeChange(wxDateEvent& event);
-    void OnDescriptionControlFocusLost(wxFocusEvent& event);
+    void OnIsActiveCheck(wxCommandEvent& event);
+    void OnStartTimeFocusLost(wxFocusEvent& event);
+    void OnEndTimeFocusLost(wxFocusEvent& event);
     void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
 
     void FillCategoryControl(int projectId);
 
+    void CalculateTimeDiff(wxDateTime start, wxDateTime end);
+    void CalculateRate();
+    void CalculateRate(wxDateTime start, wxDateTime end);
+
     void GenerateTaskSavedEvent();
-    void ProcessTaskItem(const models::task_item& taskItem);
+
+    bool TransferDataAndValidate();
 
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
@@ -117,28 +112,23 @@ private:
     wxStaticText* pDurationCtrl;
     wxTimePickerCtrl* pDurationTimeCtrl;
     wxCheckBox* pBillableCtrl;
+    wxStaticText* pCalculatedRateTextCtrl;
     wxTextCtrl* pDescriptionCtrl;
     wxChoice* pCategoryChoiceCtrl;
     wxStaticText* pDateCreatedTextCtrl;
-    wxStaticText* pDateUpdatedTextCtrl;
+    wxStaticText* pDateModifiedTextCtrl;
     wxCheckBox* pIsActiveCtrl;
+    wxButton* pOkButton;
+    wxButton* pCancelButton;
 
-    TimeValidators mValidator;
-    TaskItemType mType;
+    constants::TaskItemTypes mType;
     int mTaskItemId;
     bool bIsEdit;
-    bool isFormValid;
     wxDateTime mDateContext;
-    wxTimeSpan mDurationSpan;
+    double mCalculatedRate;
 
-    int mProjectId;
-    wxDateTime mStartTime;
-    wxDateTime mEndTime;
-    wxDateTime mDurationTime;
-    wxString mDurationText;
-    bool bBillable;
-    wxString mDescriptionText;
-    int mCategoryId;
+    std::unique_ptr<model::TaskItemModel> pTaskItem;
+    std::unique_ptr<model::ProjectModel> pProject;
 
     enum {
         IDC_TASKCONTEXTINFO = wxID_HIGHEST + 1,
@@ -151,9 +141,17 @@ private:
         IDC_CATEGORYCHOICE,
         IDC_DESCRIPTION,
         IDC_BILLABLE,
+        IDC_CALCULATEDRATE,
         IDC_DATECREATED,
         IDC_DATEUPDATED,
         IDC_ISACTIVE
     };
+
+    static const wxString DateCreatedLabel;
+    static const wxString DateModifiedLabel;
+    static const wxString CalculatedRateLabelNonBillable;
+    static const wxString CalculatedRateLabelBillableUnknownRate;
+    static const wxString CalculatedRateLabelBillableHourlyRate;
+    static const wxString CalculatedRateLabelBillableDailyRate;
 };
 } // namespace app::dialog

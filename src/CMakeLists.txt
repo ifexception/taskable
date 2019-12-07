@@ -63,6 +63,7 @@ set (SRC
     "models/categorymodel.cpp"
 
     "models/taskmodel.cpp"
+    "models/taskitemmodel.cpp"
     "dialogs/taskitemdlg.cpp"
     )
 
