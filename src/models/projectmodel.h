@@ -25,18 +25,12 @@
 #include <wx/datetime.h>
 #include <wx/string.h>
 
+#include "../common/constants.h"
 #include "employermodel.h"
 #include "clientmodel.h"
 
 namespace app::model
 {
-enum class RateTypes : int {
-    Unknown = 1,
-    Hourly = 2,
-    Daily = 3,
-    None = 9,
-};
-
 class RateTypeModel final
 {
 public:
@@ -48,7 +42,7 @@ public:
 
     const int GetRateTypeId() const;
     const wxString GetName() const;
-    const RateTypes GetType() const;
+    const constants::RateTypes GetType() const;
 
     void SetRateTypeId(const int rateTypeId);
     void SetName(const wxString& name);
@@ -59,7 +53,7 @@ public:
 private:
     int mRateTypeId;
     wxString mName;
-    RateTypes mRateType;
+    constants::RateTypes mRateType;
 
     static const std::string getRateTypeById;
     static const std::string getRateTypes;

@@ -27,7 +27,7 @@ namespace app::model
 RateTypeModel::RateTypeModel()
     : mRateTypeId(-1)
     , mName(wxGetEmptyString())
-    , mRateType()
+    , mRateType(constants::RateTypes::None)
 {
 }
 
@@ -44,7 +44,7 @@ RateTypeModel::RateTypeModel(const int rateTypeId, bool initializeFromDatabase)
     auto rateType = RateTypeModel::GetById(rateTypeId);
     mRateTypeId = rateType->GetRateTypeId();
     mName = rateType->GetName();
-    mRateType = static_cast<RateTypes>(mRateTypeId);
+    mRateType = static_cast<constants::RateTypes>(mRateTypeId);
 }
 
 RateTypeModel::RateTypeModel(const int rateTypeId, wxString name)
@@ -52,7 +52,7 @@ RateTypeModel::RateTypeModel(const int rateTypeId, wxString name)
 {
     mRateTypeId = rateTypeId;
     mName = name;
-    mRateType = static_cast<RateTypes>(mRateTypeId);
+    mRateType = static_cast<constants::RateTypes>(mRateTypeId);
 }
 
 const int RateTypeModel::GetRateTypeId() const
@@ -65,7 +65,7 @@ const wxString RateTypeModel::GetName() const
     return mName;
 }
 
-const RateTypes RateTypeModel::GetType() const
+const constants::RateTypes RateTypeModel::GetType() const
 {
     return mRateType;
 }
@@ -240,7 +240,7 @@ ProjectModel::ProjectModel()
     , mCurrencyId(-1)
     , pEmployer(std::make_unique<EmployerModel>())
     , pClient(nullptr)
-    , pRateType(nullptr)
+    , pRateType(std::make_unique<RateTypeModel>())
     , pCurrency(nullptr)
 {
 }
@@ -302,13 +302,13 @@ bool ProjectModel::IsBillableWithUnknownRateScenario()
 
 bool ProjectModel::IsBillableScenarioWithHourlyRate()
 {
-    return bIsBillable == true && mRateTypeId == static_cast<int>(RateTypes::Hourly) && pRate != nullptr &&
+    return bIsBillable == true && mRateTypeId == static_cast<int>(constants::RateTypes::Hourly) && pRate != nullptr &&
            mCurrencyId > 0;
 }
 
 bool ProjectModel::IsBillableScenarioWithDailyRate()
 {
-    return bIsBillable == true && mRateTypeId == static_cast<int>(RateTypes::Daily) && pRate != nullptr &&
+    return bIsBillable == true && mRateTypeId == static_cast<int>(constants::RateTypes::Daily) && pRate != nullptr &&
            mCurrencyId > 0;
 }
 

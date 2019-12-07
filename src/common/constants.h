@@ -22,7 +22,7 @@
 
 #include <string>
 
-namespace app::Constants
+namespace app::constants
 {
 static const std::string LoggerName = "Taskable_Daily";
 static const char* LogsDirectory = "logs";
@@ -31,18 +31,19 @@ static const char* LogsFilename = "Taskable.log.txt";
 static const char* TotalHours = "Total Hours %H:%M:%S";
 
 static const int MinLength = 2;
+static const int MinLength2 = 4;
 static const int MaxLength = 255;
+static const int MaxLength2 = 1024;
 
-namespace Messages
-{
-static const char* SelectionRequired = "A %s selection is required!";
-static const char* IsEmpty = "%s is required. Please provide a value";
-static const char* TooShort = "%s provided is too short. Minimum length is %d";
-static const char* TooLong = "%s provided is too long. Maximum length is %d";
-} // namespace Messages
+enum class RateTypes : int {
+    Unknown = 1,
+    Hourly = 2,
+    Daily = 3,
+    None = 9,
+};
 
-namespace Info
-{
-static std::string LoggerInitialized = "Logger initialized.";
-} // namespace Info
+enum class TaskItemTypes : int {
+    EntryTask = 1,
+    TimedTask = 2,
+};
 } // namespace app::Constants
