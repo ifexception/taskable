@@ -541,12 +541,11 @@ void ProjectDialog::OnBillableCheck(wxCommandEvent& event)
     pProject->IsBillable(event.IsChecked());
     if (event.IsChecked()) {
         pRateChoiceCtrl->Enable();
-        pRateTextCtrl->Enable();
-        pCurrencyComboBoxCtrl->Enable();
     } else {
         pRateChoiceCtrl->Disable();
         pRateTextCtrl->Disable();
         pCurrencyComboBoxCtrl->Disable();
+        pHoursTextCtrl->Disable();
 
         {
             pProject->SwitchOutOfBillableScenario();
@@ -554,6 +553,7 @@ void ProjectDialog::OnBillableCheck(wxCommandEvent& event)
             pRateChoiceCtrl->SetSelection(0);
             pRateTextCtrl->ChangeValue(wxGetEmptyString());
             pCurrencyComboBoxCtrl->SetSelection(0);
+            pHoursTextCtrl->ChangeValue(wxGetEmptyString());
         }
     }
 }
@@ -700,7 +700,7 @@ bool ProjectDialog::TryTransferValuesFromControls()
 
         int selection = pRateChoiceCtrl->GetSelection();
         if (selection == static_cast<int>(model::RateTypes::Unknown)) {
-            // nothing to do5
+            // nothing to do
         }
         if (selection == static_cast<int>(model::RateTypes::Hourly)) {
             wxString value = pRateTextCtrl->GetValue();

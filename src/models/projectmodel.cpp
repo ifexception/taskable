@@ -519,10 +519,10 @@ void ProjectModel::Create(std::unique_ptr<ProjectModel> project)
         ps << nullptr;
 
     if (project->IsNonBillableScenario())
-        ps << nullptr << nullptr << nullptr;
+        ps << nullptr << nullptr << nullptr << nullptr;
 
     if (project->IsBillableWithUnknownRateScenario())
-        ps << nullptr << project->GetRateTypeId() << nullptr;
+        ps << nullptr << project->GetRateTypeId() << nullptr << nullptr;
 
     if (project->IsBillableScenarioWithHourlyRate())
         ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId() << nullptr;
@@ -599,10 +599,10 @@ void ProjectModel::Update(std::unique_ptr<ProjectModel> project)
         ps << nullptr;
 
     if (project->IsNonBillableScenario())
-        ps << nullptr << nullptr << nullptr;
+        ps << nullptr << nullptr << nullptr << nullptr;
 
     if (project->IsBillableWithUnknownRateScenario())
-        ps << nullptr << project->GetRateTypeId() << nullptr;
+        ps << nullptr << project->GetRateTypeId() << nullptr << nullptr;
 
     if (project->IsBillableScenarioWithHourlyRate())
         ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId() << nullptr;
@@ -677,9 +677,9 @@ std::vector<std::unique_ptr<ProjectModel>> ProjectModel::GetAll()
 }
 
 const std::string ProjectModel::createProject = "INSERT INTO "
-                                                "projects(name, display_name, billable, hours, is_active, "
-                                                "employer_id, client_id, rate, rate_type_id, currency_id) "
-                                                "VALUES(?, ?, ?, 1, ?, ?, ?, ?, ?)";
+                                                "projects(name, display_name, billable, is_active, "
+                                                "employer_id, client_id, rate, rate_type_id, currency_id, hours) "
+                                                "VALUES(?, ?, ?, 1, ?, ?, ?, ?, ?, ?)";
 
 const std::string ProjectModel::getProject = "SELECT projects.project_id, "
                                              "projects.name AS project_name, "
