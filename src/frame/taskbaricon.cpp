@@ -55,7 +55,7 @@ wxMenu* TaskBarIcon::CreatePopupMenu()
 {
     auto menu = new wxMenu();
 
-    menu->Append(ID_ADD_ENTRY_TASK, wxT("Add Task Entry"));
+    menu->Append(ID_ADD_ENTRY_TASK, wxT("Add Entry Task"));
     menu->Append(ID_ADD_TIMED_TASK, wxT("Add Timed Task"));
     menu->AppendSeparator();
     menu->Append(ID_SETTINGS, wxT("Settings"));
@@ -67,13 +67,13 @@ wxMenu* TaskBarIcon::CreatePopupMenu()
 
 void TaskBarIcon::OnNewEntryTask(wxCommandEvent& WXUNUSED(event))
 {
-    dialog::TaskItemDialog entryTask(pParent, pLogger, pConfig, dialog::TaskItemType::EntryTask);
+    dialog::TaskItemDialog entryTask(pParent, pLogger, pConfig, constants::TaskItemTypes::EntryTask);
     entryTask.ShowModal();
 }
 
 void TaskBarIcon::OnNewTimedTask(wxCommandEvent& WXUNUSED(event))
 {
-    dialog::TaskItemDialog timedTask(pParent, pLogger, pConfig, dialog::TaskItemType::TimedTask);
+    dialog::TaskItemDialog timedTask(pParent, pLogger, pConfig, constants::TaskItemTypes::TimedTask);
     timedTask.ShowModal();
 }
 

@@ -561,7 +561,7 @@ void ProjectDialog::OnBillableCheck(wxCommandEvent& event)
 void ProjectDialog::OnRateChoiceSelection(wxCommandEvent& event)
 {
     int selection = util::VoidPointerToInt(pRateChoiceCtrl->GetClientData(pRateChoiceCtrl->GetSelection()));
-    if (selection == static_cast<int>(model::RateTypes::Unknown)) {
+    if (selection == static_cast<int>(constants::RateTypes::Unknown)) {
         pRateTextCtrl->Disable();
         pCurrencyComboBoxCtrl->Disable();
 
@@ -569,12 +569,12 @@ void ProjectDialog::OnRateChoiceSelection(wxCommandEvent& event)
         pCurrencyComboBoxCtrl->SetSelection(0);
         pHoursTextCtrl->Disable();
     }
-    if (selection == static_cast<int>(model::RateTypes::Hourly)) {
+    if (selection == static_cast<int>(constants::RateTypes::Hourly)) {
         pRateTextCtrl->Enable();
         pCurrencyComboBoxCtrl->Enable();
         pHoursTextCtrl->Disable();
     }
-    if (selection == static_cast<int>(model::RateTypes::Daily)) {
+    if (selection == static_cast<int>(constants::RateTypes::Daily)) {
         pRateTextCtrl->Enable();
         pCurrencyComboBoxCtrl->Enable();
         pHoursTextCtrl->Enable();
@@ -699,10 +699,10 @@ bool ProjectDialog::TryTransferValuesFromControls()
             util::VoidPointerToInt(pRateChoiceCtrl->GetClientData(pRateChoiceCtrl->GetSelection())));
 
         int selection = pRateChoiceCtrl->GetSelection();
-        if (selection == static_cast<int>(model::RateTypes::Unknown)) {
+        if (selection == static_cast<int>(constants::RateTypes::Unknown)) {
             // nothing to do
         }
-        if (selection == static_cast<int>(model::RateTypes::Hourly)) {
+        if (selection == static_cast<int>(constants::RateTypes::Hourly)) {
             wxString value = pRateTextCtrl->GetValue();
             if (value.empty()) {
                 common::validations::ForRequiredNumber(pRateTextCtrl, wxT("Rate amount"));
@@ -716,7 +716,7 @@ bool ProjectDialog::TryTransferValuesFromControls()
             pProject->SetCurrencyId(
                 util::VoidPointerToInt(pCurrencyComboBoxCtrl->GetClientData(pCurrencyComboBoxCtrl->GetSelection())));
         }
-        if (selection == static_cast<int>(model::RateTypes::Daily)) {
+        if (selection == static_cast<int>(constants::RateTypes::Daily)) {
             wxString value = pRateTextCtrl->GetValue();
             if (value.empty()) {
                 common::validations::ForRequiredNumber(pRateTextCtrl, wxT("Rate amount"));

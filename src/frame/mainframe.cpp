@@ -66,7 +66,7 @@ EVT_MENU(ids::ID_STOPWATCH_TASK, MainFrame::OnTaskStopwatch)
 EVT_MENU(ids::ID_CHECK_FOR_UPDATE, MainFrame::OnCheckForUpdate)
 EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
 EVT_LIST_ITEM_RIGHT_CLICK(MainFrame::IDC_LIST, MainFrame::OnItemRightClick)
-EVT_COMMAND(wxID_ANY, TASK_INSERTED, MainFrame::OnTaskInserted)
+EVT_COMMAND(wxID_ANY, EVT_TASK_ITEM_INSERTED, MainFrame::OnTaskInserted)
 EVT_COMMAND(wxID_ANY, START_NEW_STOPWATCH_TASK, MainFrame::OnNewStopwatchTaskFromPausedStopwatchTask)
 EVT_ICONIZE(MainFrame::OnIconize)
 EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
@@ -313,13 +313,13 @@ void MainFrame::OnClose(wxCloseEvent& event)
 
 void MainFrame::OnNewEntryTask(wxCommandEvent& event)
 {
-    dialog::TaskItemDialog entryTask(this, pLogger, pConfig, dialog::TaskItemType::EntryTask);
+    dialog::TaskItemDialog entryTask(this, pLogger, pConfig, constants::TaskItemTypes::EntryTask);
     entryTask.ShowModal();
 }
 
 void MainFrame::OnNewTimedTask(wxCommandEvent& event)
 {
-    dialog::TaskItemDialog timedTask(this, pLogger, pConfig, dialog::TaskItemType::TimedTask);
+    dialog::TaskItemDialog timedTask(this, pLogger, pConfig, constants::TaskItemTypes :: TimedTask);
     timedTask.ShowModal();
 }
 
@@ -386,7 +386,7 @@ void MainFrame::OnItemDoubleClick(wxListEvent& event)
     unsigned int taskItemDataPtr = (unsigned int) event.GetData();
     auto taskItemId = (taskItemDataPtr & 0x000000FF);
     auto taskItemTypeId = (taskItemDataPtr & 0x0000FF00) >> 8;
-    dialog::TaskItemType type = static_cast<dialog::TaskItemType>(taskItemTypeId);
+    constants::TaskItemTypes type = static_cast<constants::TaskItemTypes>(taskItemTypeId);
     wxDateTime dateContext = pDatePickerCtrl->GetValue();
 
     dialog::TaskItemDialog editTask(this, pLogger, pConfig, type, true, taskItemId, dateContext);
@@ -511,7 +511,7 @@ void MainFrame::CalculateTotalTime(wxDateTime date)
         totalDuration += currentDuration;
     }
 
-    pTotalHoursText->SetLabel(totalDuration.Format(Constants::TotalHours));
+    pTotalHoursText->SetLabel(totalDuration.Format(constants::TotalHours));
 }
 
 void MainFrame::RefreshItems(wxDateTime date)

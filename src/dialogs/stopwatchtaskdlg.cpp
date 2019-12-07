@@ -348,13 +348,13 @@ void StopwatchTaskDialog::ExecuteStopProcedure()
         auto durationOfTask = pTaskState->GetAccumulatedTime();
 
         /* launch dialog */
-        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, TaskItemType::EntryTask);
+        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, constants::TaskItemTypes::EntryTask);
         newTask.SetDurationFromStopwatchTask(durationOfTask);
         newTask.SetDescriptionFromStopwatchTask(pStopwatchDescription->GetValue());
         newTask.ShowModal();
     } else {
         /* launch dialog */
-        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, TaskItemType::TimedTask);
+        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, constants::TaskItemTypes::TimedTask);
         newTask.SetTimesFromStopwatchTask(mStartTime, mEndTime);
         newTask.SetDescriptionFromStopwatchTask(pStopwatchDescription->GetValue());
         newTask.ShowModal();
