@@ -105,16 +105,18 @@ bool App::InitializeLogging()
 #endif
 
     std::string logDirectory =
-        std::string(Constants::LogsDirectory) + std::string("/") + std::string(Constants::LogsFilename);
+        std::string(constants::LogsDirectory) + std::string("/") + std::string(constants::LogsFilename);
     spdlog::flush_every(std::chrono::seconds(3));
     try {
-        pLogger = spdlog::daily_logger_st(Constants::LoggerName, logDirectory);
+        pLogger = spdlog::daily_logger_st(constants::LoggerName, logDirectory);
     } catch (const spdlog::spdlog_ex& e) {
         wxMessageBox(wxString::Format(wxT("Error initializing logger: %s"), e.what()),
             wxT("Error"),
             wxOK_DEFAULT | wxICON_EXCLAMATION);
         return false;
     }
+
+    //pLogger->enable_backtrace(32);
 
     return true;
 }

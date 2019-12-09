@@ -555,7 +555,7 @@ const std::string TaskItemModel::getTaskItemById = "SELECT task_items.task_item_
 
 const std::string TaskItemModel::updateTaskItem = "UPDATE task_items "
                                                   "SET start_time = ?, end_time = ?, duration = ?, "
-                                                  "description = ?, billable = ?, calculated_rate = ? "
+                                                  "description = ?, billable = ?, calculated_rate = ?, "
                                                   "date_modified = ?, "
                                                   "project_id = ?, category_id = ? "
                                                   "WHERE task_item_id = ?";

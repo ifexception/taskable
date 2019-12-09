@@ -457,7 +457,7 @@ void TaskItemDialog::ConfigureEventBindings()
     }
 
     if (mType == constants::TaskItemTypes::EntryTask) {
-        pDurationCtrl->Bind(
+        pDurationTimeCtrl->Bind(
             wxEVT_TIME_CHANGED,
             &TaskItemDialog::OnDurationTimeChange,
             this
@@ -617,6 +617,8 @@ void TaskItemDialog::DataToControls()
         taskItem->GetDateModified().FormatISOTime()));
 
     pIsActiveCtrl->SetValue(taskItem->IsActive());
+
+    pProject = model::ProjectModel::GetById(taskItem->GetProjectId());
 }
 
 void TaskItemDialog::CalculateTimeDiff(wxDateTime start, wxDateTime end)
@@ -842,8 +844,8 @@ void TaskItemDialog::OnOk(wxCommandEvent& event)
             }
         }
 
-        // GenerateTaskSavedEvent();
-        // EndModal(wxID_OK);
+        GenerateTaskSavedEvent();
+        EndModal(wxID_OK);
     }
 }
 
@@ -887,6 +889,10 @@ bool TaskItemDialog::TransferDataAndValidate()
         return false;
     }
     pTaskItem->SetProjectId(projectId);
+
+    if (bIsEdit) {
+        pTaskItem->SetProject(std::move(model::ProjectModel::GetById(projectId)));
+    }
 
     if (mType == constants::TaskItemTypes::TimedTask) {
         auto startTime = pStartTimeCtrl->GetValue();
