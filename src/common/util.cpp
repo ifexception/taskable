@@ -21,7 +21,6 @@
 
 #include <chrono>
 #include <ctime>
-#include <fstream>
 #include <sstream>
 
 #include <wx/datetime.h>
@@ -46,7 +45,7 @@ wxDateTime ToDateTime(int timestamp)
 wxDateTime RoundToNearestInterval(wxDateTime value, int interval)
 {
     auto seconds = value.GetTicks();
-    auto timeRoundToInterval = std::round((double)seconds / (interval * 60)) * (interval * 60);
+    auto timeRoundToInterval = std::round((double)seconds / (interval * 60.0)) * (interval * 60.0);
     std::time_t time = timeRoundToInterval;
     wxDateTime roundedTime(time);
     roundedTime.SetSecond(0);

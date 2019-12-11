@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <wx/wx.h>
-
 namespace app::ids
 {
 enum class MenuIds : int {
@@ -36,7 +34,7 @@ enum class MenuIds : int {
     EditCategoryId = 10,
     SettingsId = 11,
     StopwatchTaskId = 12,
-    CheckForUpdateId=13
+    CheckForUpdateId = 13
 };
 
 static const int ID_NEW_ENTRY_TASK = static_cast<int>(ids::MenuIds::NewEntryTaskId);
@@ -55,11 +53,4 @@ static const int ID_EDIT_CATEGORY = static_cast<int>(MenuIds::EditCategoryId);
 static const int ID_SETTINGS = static_cast<int>(MenuIds::SettingsId);
 
 static const int ID_CHECK_FOR_UPDATE = static_cast<int>(MenuIds::CheckForUpdateId);
-
-enum class Events : int { ID_SAVE = wxID_HIGHEST + 1, ID_TASK_INSERTED, ID_START_PAUSE, ID_STOP };
-
-static const int ID_SAVE = static_cast<int>(Events::ID_SAVE);
-static const int ID_TASK_INSERTED = static_cast<int>(Events::ID_TASK_INSERTED);
-static const int ID_START_PAUSE = static_cast<int>(Events::ID_START_PAUSE);
-static const int ID_STOP = static_cast<int>(Events::ID_STOP);
 } // namespace app::ids
