@@ -212,7 +212,7 @@ std::vector<std::unique_ptr<CategoryModel>> CategoryModel::GetByProjectId(const 
 {
     std::vector<std::unique_ptr<CategoryModel>> categories;
     auto db = services::db_connection::get_instance().get_handle();
-    db << CategoryModel::getCategoryById << projectId >> [&](int categoryId,
+    db << CategoryModel::getCategoriesByProjectId << projectId >> [&](int categoryId,
                                                              std::string categoryName,
                                                              unsigned int color,
                                                              int dateCreated,
@@ -241,7 +241,7 @@ const std::string CategoryModel::getCategoryById = "SELECT categories.category_i
                                                    "projects.project_id "
                                                    "FROM categories "
                                                    "INNER JOIN projects ON categories.project_id = projects.project_id "
-                                                   "WHERE categories.category_id = ?"
+                                                   "WHERE categories.category_id = ? "
                                                    "AND categories.is_active = 1";
 
 const std::string CategoryModel::updateCategory = "UPDATE categories SET name = ?, color = ?, project_id = "
