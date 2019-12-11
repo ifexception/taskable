@@ -352,6 +352,8 @@ void TaskItemDialog::CreateControls()
     allowedChars.Add(wxT(">"));
     allowedChars.Add(wxT("<"));
     allowedChars.Add(wxT(" "));
+    allowedChars.Add(wxT(","));
+    allowedChars.Add(wxT("."));
     descriptionValidator.SetIncludes(allowedChars);
 
     pDescriptionCtrl = new wxTextCtrl(taskDescriptionPanel,
