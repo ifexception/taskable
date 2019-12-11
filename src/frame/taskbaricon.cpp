@@ -48,7 +48,7 @@ TaskBarIcon::TaskBarIcon(wxFrame* parent,
 
 void TaskBarIcon::SetTaskBarIcon()
 {
-    SetIcon(wxIcon(common::GetProgramIcon()), wxT("Taskable"));
+    SetIcon(wxIcon(common::GetProgramIcon()), common::GetProgramName());
 }
 
 wxMenu* TaskBarIcon::CreatePopupMenu()
