@@ -65,6 +65,7 @@ public:
     static void Update(std::unique_ptr<CategoryModel> category);
     static void Delete(std::unique_ptr<CategoryModel> category);
     static std::vector<std::unique_ptr<CategoryModel>> GetByProjectId(const int projectId);
+    static std::vector<std::unique_ptr<CategoryModel>> GetAll();
 
 private:
     int mCategoryId;
@@ -82,5 +83,6 @@ private:
     static const std::string updateCategory;
     static const std::string deleteCategory;
     static const std::string getCategoriesByProjectId;
+    static const std::string getCategories;
 };
 } // namespace app::model

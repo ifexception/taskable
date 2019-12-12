@@ -31,6 +31,9 @@
 #include "../common/ids.h"
 #include "../common/util.h"
 #include "../common/version.h"
+
+#include "../models/taskitemmodel.h"
+
 #include "../dialogs/taskitemdlg.h"
 #include "../dialogs/employerdlg.h"
 #include "../dialogs/clientdlg.h"
@@ -40,9 +43,9 @@
 #include "../dialogs/settingsdialog.h"
 #include "../dialogs/stopwatchtaskdlg.h"
 #include "../dialogs/checkforupdatedlg.h"
-#include "../services/db_service.h"
-#include "../wizards/setupwizard.h"
 #include "../dialogs/categoriesdlg.h"
+
+#include "../wizards/setupwizard.h"
 #include "taskbaricon.h"
 
 namespace app::frame
@@ -323,7 +326,7 @@ void MainFrame::OnNewEntryTask(wxCommandEvent& event)
 
 void MainFrame::OnNewTimedTask(wxCommandEvent& event)
 {
-    dialog::TaskItemDialog timedTask(this, pLogger, pConfig, constants::TaskItemTypes ::TimedTask);
+    dialog::TaskItemDialog timedTask(this, pLogger, pConfig, constants::TaskItemTypes::TimedTask);
     timedTask.ShowModal();
 }
 
@@ -493,20 +496,19 @@ void MainFrame::OnResize(wxSizeEvent& event)
 
 void MainFrame::CalculateTotalTime(wxDateTime date)
 {
-    std::vector<std::string> taskDurations;
-    services::db_service dbService;
+    std::vector<wxString> taskDurations;
 
     auto dateString = date.FormatISODate();
 
     try {
-        taskDurations = dbService.get_task_hours_by_id(dateString);
+        taskDurations = model::TaskItemModel::GetHours(dateString);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on get_task_hours_by_id() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on TaskItemModel::GetHours() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     wxTimeSpan totalDuration;
     for (auto duration : taskDurations) {
-        std::vector<std::string> durationSplit = util::lib::split(duration, ':');
+        std::vector<std::string> durationSplit = util::lib::split(duration.ToStdString(), ':');
 
         wxTimeSpan currentDuration(std::atol(durationSplit[0].c_str()),
             std::atol(durationSplit[1].c_str()),
@@ -521,10 +523,9 @@ void MainFrame::CalculateTotalTime(wxDateTime date)
 void MainFrame::RefreshItems(wxDateTime date)
 {
     wxString dateString = date.FormatISODate();
-    std::vector<models::task_item> taskItems;
+    std::vector<std::unique_ptr<model::TaskItemModel>> taskItems;
     try {
-        services::db_service dbService;
-        taskItems = dbService.get_all_task_items_by_date(std::string(dateString.ToUTF8()));
+        taskItems = model::TaskItemModel::GetByDate(dateString);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured on get_all_task_items_by_date() - {0:d} : {1}", e.get_code(), e.what());
         return;
@@ -532,25 +533,24 @@ void MainFrame::RefreshItems(wxDateTime date)
 
     int listIndex = 0;
     int columnIndex = 0;
-    for (auto taskItem : taskItems) {
-        listIndex = pListCtrl->InsertItem(columnIndex++, taskItem.project_name);
-        pListCtrl->SetItem(listIndex, columnIndex++, taskItem.task_date);
+    for (const auto& taskItem : taskItems) {
+        listIndex = pListCtrl->InsertItem(columnIndex++, taskItem->GetProject()->GetDisplayName());
+        pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetTask()->GetTaskDate().FormatISODate());
         pListCtrl->SetItem(
-            listIndex, columnIndex++, taskItem.start_time ? wxString(*taskItem.start_time) : wxGetEmptyString());
+            listIndex, columnIndex++, taskItem->GetStartTime() ? wxString(taskItem->GetStartTime()->FormatISOTime()) : wxGetEmptyString());
         pListCtrl->SetItem(
-            listIndex, columnIndex++, taskItem.end_time ? wxString(*taskItem.end_time) : wxGetEmptyString());
-        pListCtrl->SetItem(listIndex, columnIndex++, taskItem.duration);
-        pListCtrl->SetItem(listIndex, columnIndex++, taskItem.category_name);
-        pListCtrl->SetItem(listIndex, columnIndex++, taskItem.description);
+            listIndex, columnIndex++, taskItem->GetEndTime() ? wxString(taskItem->GetEndTime()->FormatISOTime()) : wxGetEmptyString());
+        pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDuration());
+        pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetCategory()->GetName());
+        pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDescription());
 
-        pListCtrl->SetItemBackgroundColour(listIndex, wxColour(taskItem.category_color));
+        pListCtrl->SetItemBackgroundColour(listIndex, taskItem->GetCategory()->GetColor());
         unsigned int data = 0;
-        data |= taskItem.task_item_id;
-        data |= (taskItem.task_item_type_id << 8);
+        data |= taskItem->GetTaskItemId();
+        data |= (taskItem->GetTaskItemTypeId() << 8);
         pListCtrl->SetItemPtrData(listIndex, (wxUIntPtr) data);
 
         columnIndex = 0;
-        taskItem.cleanup();
     }
 }
 } // namespace app::frame

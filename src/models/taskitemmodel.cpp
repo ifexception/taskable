@@ -527,7 +527,71 @@ void TaskItemModel::Delete(std::unique_ptr<TaskItemModel> taskItem)
 
 std::vector<std::unique_ptr<TaskItemModel>> TaskItemModel::GetByDate(const wxString& date)
 {
-    return std::vector<std::unique_ptr<TaskItemModel>>();
+    std::vector<std::unique_ptr<TaskItemModel>> taskItems;
+
+    auto db = services::db_connection::get_instance().get_handle();
+    db << TaskItemModel::getTaskItemsByDate << date >> [&](int taskItemId,
+                                                           std::string taskDate,
+                                                           std::unique_ptr<std::string> startTime,
+                                                           std::unique_ptr<std::string> endTime,
+                                                           std::string duration,
+                                                           std::string description,
+                                                           bool billable,
+                                                           std::unique_ptr<double> calculatedRate,
+                                                           int dateCreated,
+                                                           int dateModified,
+                                                           bool isActive,
+                                                           int taskItemTypeId,
+                                                           int projectId,
+                                                           int categoryId,
+                                                           int taskId) {
+        auto taskItem = std::make_unique<TaskItemModel>(
+            taskItemId, duration, description, billable, dateCreated, dateModified, isActive);
+
+        if (startTime == nullptr && endTime == nullptr) {
+            taskItem->SetDurationTime(wxString(duration));
+        }
+
+        if (startTime != nullptr && endTime != nullptr) {
+            taskItem->SetStartTime(wxString(*startTime));
+            taskItem->SetEndTime(wxString(*endTime));
+        }
+
+        if (calculatedRate != nullptr) {
+            taskItem->SetCalculatedRate(std::move(calculatedRate));
+        }
+
+        taskItem->SetTaskItemTypeId(taskItemTypeId);
+        auto taskItemType = TaskItemTypeModel::GetById(taskItemTypeId);
+        taskItem->SetTaskItemType(std::move(taskItemType));
+
+        taskItem->SetProjectId(projectId);
+        auto project = ProjectModel::GetById(projectId);
+        taskItem->SetProject(std::move(project));
+
+        taskItem->SetCategoryId(categoryId);
+        auto category = CategoryModel::GetById(categoryId);
+        taskItem->SetCategory(std::move(category));
+
+        taskItem->SetTaskId(taskId);
+        auto task = TaskModel::GetById(taskId);
+        taskItem->SetTask(std::move(task));
+
+        taskItems.push_back(std::move(taskItem));
+    };
+
+    return taskItems;
+}
+
+std::vector<wxString> TaskItemModel::GetHours(const wxString& date)
+{
+    std::vector<wxString> taskDurations;
+
+    auto db = services::db_connection::get_instance().get_handle();
+    db << TaskItemModel::getTaskHoursByTaskId << date >>
+        [&](std::string duration) { taskDurations.push_back(wxString(duration)); };
+
+    return taskDurations;
 }
 
 const std::string TaskItemModel::createTaskItem = "INSERT INTO task_items "
@@ -564,7 +628,32 @@ const std::string TaskItemModel::deleteTaskItem = "UPDATE task_items "
                                                   "SET is_active = 0, date_modified_utc = ? "
                                                   "WHERE task_item_id = ?";
 
-const std::string TaskItemModel::getTaskItemsByDate;
+const std::string TaskItemModel::getTaskItemsByDate =
+    "SELECT task_items.task_item_id, "
+    "tasks.task_date, "
+    "task_items.start_time, "
+    "task_items.end_time, "
+    "task_items.duration, "
+    "task_items.description as description, "
+    "task_items.billable, "
+    "task_items.calculated_rate, "
+    "task_items.date_created, "
+    "task_items.date_modified, "
+    "task_items.is_active, "
+    "task_items.task_item_type_id, "
+    "task_items.project_id, "
+    "task_items.category_id,"
+    "task_items.task_id "
+    "FROM task_items "
+    "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
+    "INNER JOIN categories ON task_items.category_id = categories.category_id "
+    "INNER JOIN projects ON task_items.project_id = projects.project_id "
+    "INNER JOIN task_item_types ON task_items.task_item_type_id = task_item_types.task_item_type_id "
+    "WHERE task_date = ?";
 
-const std::string TaskItemModel::getTaskHoursByTaskId;
+const std::string TaskItemModel::getTaskHoursByTaskId = "SELECT task_items.duration "
+                                                        "FROM task_items "
+                                                        "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
+                                                        "WHERE task_date = ?";
+;
 } // namespace app::model

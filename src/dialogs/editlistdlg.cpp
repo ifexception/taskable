@@ -186,7 +186,6 @@ std::string EditListDialog::MapEnumToValue()
 }
 
 Strategy::Strategy()
-    : dbService()
 {
 }
 
@@ -369,34 +368,28 @@ void CategoryStrategy::CreateControl(wxListCtrl* control)
     nameColumn.SetWidth(100);
     control->InsertColumn(1, nameColumn);
 
-    wxListItem dateCreatedColumn;
-    dateCreatedColumn.SetId(2);
-    dateCreatedColumn.SetText(wxT("Date Created"));
-    control->InsertColumn(2, dateCreatedColumn);
-
     wxListItem dateModifiedColumn;
-    dateModifiedColumn.SetId(3);
+    dateModifiedColumn.SetId(2);
     dateModifiedColumn.SetText(wxT("Date Modified"));
-    control->InsertColumn(3, dateModifiedColumn);
+    control->InsertColumn(2, dateModifiedColumn);
 }
 
 void CategoryStrategy::DataToControl(wxListCtrl* control)
 {
-    std::vector<models::category> categories;
+    std::vector<std::unique_ptr<model::CategoryModel>> categories;
     try {
-        categories = dbService.get_categories();
+        categories = model::CategoryModel::GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in get_categories() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     int listIndex = 0;
     int columnIndex = 0;
-    for (auto category : categories) {
-        listIndex = control->InsertItem(columnIndex++, category.project_name);
-        control->SetItem(listIndex, columnIndex++, category.category_name);
-        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(category.date_created_utc));
-        control->SetItem(listIndex, columnIndex++, util::ConvertUnixTimestampToString(category.date_modified_utc));
-        control->SetItemPtrData(listIndex, category.category_id);
+    for (auto& category : categories) {
+        listIndex = control->InsertItem(columnIndex++, category->GetProject()->GetDisplayName());
+        control->SetItem(listIndex, columnIndex++, category->GetName());
+        control->SetItem(listIndex, columnIndex++, category->GetDateModified().FormatISOCombined());
+        control->SetItemPtrData(listIndex, category->GetCategoryId());
         columnIndex = 0;
     }
 }

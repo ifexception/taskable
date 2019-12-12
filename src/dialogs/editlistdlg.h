@@ -24,8 +24,6 @@
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
-#include "../services/db_service.h"
-
 namespace app::dialog
 {
 enum class DialogType { Employer, Client, Project, Category };
@@ -39,9 +37,6 @@ public:
     virtual void CreateControl(wxListCtrl* control) = 0;
     virtual void DataToControl(wxListCtrl* control) = 0;
     virtual wxSize GetSize() = 0;
-
-protected:
-    services::db_service dbService;
 };
 
 struct EmployerStrategy final : public Strategy

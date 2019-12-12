@@ -213,12 +213,34 @@ std::vector<std::unique_ptr<CategoryModel>> CategoryModel::GetByProjectId(const 
     std::vector<std::unique_ptr<CategoryModel>> categories;
     auto db = services::db_connection::get_instance().get_handle();
     db << CategoryModel::getCategoriesByProjectId << projectId >> [&](int categoryId,
-                                                             std::string categoryName,
-                                                             unsigned int color,
-                                                             int dateCreated,
-                                                             int dateModified,
-                                                             int isActive,
-                                                             int projectId) {
+                                                                      std::string categoryName,
+                                                                      unsigned int color,
+                                                                      int dateCreated,
+                                                                      int dateModified,
+                                                                      int isActive,
+                                                                      int projectId) {
+        auto category =
+            std::make_unique<CategoryModel>(categoryId, categoryName, color, dateCreated, dateModified, isActive);
+        auto project = std::make_unique<ProjectModel>(projectId, true);
+        category->SetProject(std::move(project));
+        categories.push_back(std::move(category));
+    };
+
+    return categories;
+}
+
+std::vector<std::unique_ptr<CategoryModel>> CategoryModel::GetAll()
+{
+    std::vector<std::unique_ptr<CategoryModel>> categories;
+
+    auto db = services::db_connection::get_instance().get_handle();
+    db << CategoryModel::getCategoryById >> [&](int categoryId,
+                                                      std::string categoryName,
+                                                      unsigned int color,
+                                                      int dateCreated,
+                                                      int dateModified,
+                                                      int isActive,
+                                                      int projectId) {
         auto category =
             std::make_unique<CategoryModel>(categoryId, categoryName, color, dateCreated, dateModified, isActive);
         auto project = std::make_unique<ProjectModel>(projectId, true);
@@ -259,4 +281,13 @@ const std::string CategoryModel::getCategoriesByProjectId = "SELECT categories.c
                                                             "categories.project_id "
                                                             "FROM categories "
                                                             "WHERE categories.project_id = ?";
+
+const std::string CategoryModel::getCategories = "SELECT categories.category_id, "
+                                                 "categories.name, "
+                                                 "categories.date_created, "
+                                                 "categories.date_modified, "
+                                                 "categories.is_active, "
+                                                 "categories.project_id "
+                                                 "FROM categories "
+                                                 "WHERE categories.is_active = 1";
 } // namespace app::model

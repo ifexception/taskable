@@ -29,7 +29,6 @@
 #include "../common/common.h"
 #include "../common/ids.h"
 #include "../common/util.h"
-#include "../services/db_service.h"
 
 wxDEFINE_EVENT(EVT_TASK_ITEM_INSERTED, wxCommandEvent);
 

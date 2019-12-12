@@ -27,7 +27,6 @@
 #include "../common/common.h"
 #include "../common/ids.h"
 #include "../common/util.h"
-#include "../services/db_service.h"
 
 namespace app::dialog
 {
