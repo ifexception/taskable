@@ -81,9 +81,13 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
     , pConfig(config)
     , pTaskState(std::make_shared<services::TaskStateService>())
     , pTaskStorage(std::make_unique<services::TaskStorage>())
+    , pDatePickerCtrl(nullptr)
+    , pTotalHoursText(nullptr)
+    , pListCtrl(nullptr)
+    , pStatusBar(nullptr)
+    , pTaskBarIcon(nullptr)
     , bHasPendingTaskToResume(false)
     , bHasInitialized(false)
-    , pTaskBarIcon(nullptr)
 // clang-format on
 {
 }
@@ -140,16 +144,17 @@ void MainFrame::CreateControls()
     auto fileMenu = new wxMenu();
 
     auto entryTaskMenuItem =
-        fileMenu->Append(ids::ID_NEW_ENTRY_TASK, wxT("New &Entry Task\tCtrl-N"), wxT("Create new entry task"));
+        fileMenu->Append(ids::ID_NEW_ENTRY_TASK, wxT("New &Entry Task"), wxT("Create new entry task"));
     entryTaskMenuItem->SetBitmap(common::GetEntryTaskIcon());
 
     auto timedTaskMenuItem =
-        fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("New &Timed Task\tCtrl-T"), wxT("Create new timed task"));
+        fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("New &Timed Task"), wxT("Create new timed task"));
     timedTaskMenuItem->SetBitmap(common::GetTimedTaskIcon());
 
     fileMenu->AppendSeparator();
 
-    auto stopwatchMenuItem = fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("&Stopwatch Task\tCtrl-Q"), wxT("Start task stopwatch"));
+    auto stopwatchMenuItem =
+        fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("&Stopwatch Task"), wxT("Start task stopwatch"));
     stopwatchMenuItem->SetBitmap(common::GetStopwatchIcon());
 
     fileMenu->AppendSeparator();
@@ -167,7 +172,7 @@ void MainFrame::CreateControls()
     editMenu->Append(ids::ID_EDIT_PROJECT, wxT("Edit &Project"), wxT("Select a project to edit"));
     editMenu->Append(ids::ID_EDIT_CATEGORY, wxT("Edit C&ategory"), wxT("Select a category to edit"));
     editMenu->AppendSeparator();
-    editMenu->Append(ids::ID_SETTINGS, wxT("&Settings\tCtrl-P"), wxT("Edit application settings"));
+    editMenu->Append(ids::ID_SETTINGS, wxT("&Settings"), wxT("Edit application settings"));
 
     /* Export Menu Control */
     auto exportMenu = new wxMenu();
@@ -192,10 +197,9 @@ void MainFrame::CreateControls()
     /* Accelerator Table */
     wxAcceleratorEntry entries[4];
     entries[0].Set(wxACCEL_CTRL, (int) 'N', ids::ID_NEW_ENTRY_TASK);
-    entries[0].Set(wxACCEL_CTRL, (int) 'T', ids::ID_NEW_TIMED_TASK);
-    entries[1].Set(wxACCEL_CTRL, (int) 'P', ids::ID_SETTINGS);
-    entries[2].Set(wxACCEL_CTRL, (int) 'H', wxID_ABOUT);
-    entries[3].Set(wxACCEL_CTRL, (int) 'Q', ids::ID_STOPWATCH_TASK);
+    entries[1].Set(wxACCEL_CTRL, (int) 'T', ids::ID_NEW_TIMED_TASK);
+    entries[2].Set(wxACCEL_CTRL, (int) 'P', ids::ID_SETTINGS);
+    entries[3].Set(wxACCEL_CTRL, (int) 'W', ids::ID_STOPWATCH_TASK);
 
     wxAcceleratorTable table(ARRAYSIZE(entries), entries);
     SetAcceleratorTable(table);
@@ -319,7 +323,7 @@ void MainFrame::OnNewEntryTask(wxCommandEvent& event)
 
 void MainFrame::OnNewTimedTask(wxCommandEvent& event)
 {
-    dialog::TaskItemDialog timedTask(this, pLogger, pConfig, constants::TaskItemTypes :: TimedTask);
+    dialog::TaskItemDialog timedTask(this, pLogger, pConfig, constants::TaskItemTypes ::TimedTask);
     timedTask.ShowModal();
 }
 

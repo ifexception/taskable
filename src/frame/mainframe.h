@@ -84,15 +84,15 @@ private:
     void CalculateTotalTime(wxDateTime date = wxDateTime::Now());
     void RefreshItems(wxDateTime date = wxDateTime::Now());
 
+    std::shared_ptr<spdlog::logger> pLogger;
+    std::shared_ptr<cfg::Configuration> pConfig;
+    std::shared_ptr<services::TaskStateService> pTaskState;
+    std::unique_ptr<services::TaskStorage> pTaskStorage;
     wxDatePickerCtrl* pDatePickerCtrl;
     wxStaticText* pTotalHoursText;
     wxListCtrl* pListCtrl;
     wxStatusBar* pStatusBar;
     TaskBarIcon* pTaskBarIcon;
-    std::shared_ptr<spdlog::logger> pLogger;
-    std::shared_ptr<cfg::Configuration> pConfig;
-    std::shared_ptr<services::TaskStateService> pTaskState;
-    std::unique_ptr<services::TaskStorage> pTaskStorage;
     bool bHasPendingTaskToResume;
     bool bHasInitialized;
 
