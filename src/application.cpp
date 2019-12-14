@@ -21,7 +21,7 @@
 //  Contact:
 //    szymonwelgus at gmail dot com
 
-#include "app.h"
+#include "application.h"
 
 #include <wx/msw/registry.h>
 
@@ -31,23 +31,23 @@
 
 namespace app
 {
-App::App()
+Application::Application()
     : pInstanceChecker(std::make_unique<wxSingleInstanceChecker>())
     , pConfig(std::make_shared<cfg::Configuration>())
 {
 }
 
-App::~App() {}
+Application::~Application() {}
 
-bool App::OnInit()
+bool Application::OnInit()
 {
-    bool isInstanceAlreadyRunning = pInstanceChecker->IsAnotherRunning();
+    /*bool isInstanceAlreadyRunning = pInstanceChecker->IsAnotherRunning();
     if (isInstanceAlreadyRunning) {
         wxMessageBox(wxT("Another instance of the application is already running."),
             common::GetProgramName(),
             wxOK_DEFAULT | wxICON_WARNING);
         return false;
-    }
+    }*/
 
     bool logDirectoryCreated = CreateLogsDirectory();
     if (!logDirectoryCreated) {
@@ -85,18 +85,24 @@ bool App::OnInit()
     return true;
 }
 
-bool App::CreateLogsDirectory()
+bool Application::OnInitializationChecks()
+{
+
+    return false;
+}
+
+bool Application::CreateLogsDirectory()
 {
     wxString logDirectory(wxT("logs"));
     bool logDirectoryExists = wxDirExists(logDirectory);
     if (!logDirectoryExists) {
         bool success = wxMkDir(logDirectory);
-        return success;
+        return !success;
     }
     return logDirectoryExists;
 }
 
-bool App::InitializeLogging()
+bool Application::InitializeLogging()
 {
 #ifdef _DEBUG
     spdlog::set_level(spdlog::level::info);
@@ -121,13 +127,32 @@ bool App::InitializeLogging()
     return true;
 }
 
-bool App::DatabaseFileExists()
+bool Application::DatabaseFileExists()
 {
     bool dbFileExists = wxFileExists(common::GetDbFileName());
+    if (!dbFileExists) {
+        int ret = wxMessageBox(wxT("Error: Missing database file!\nRestore from backup?"),
+            common::GetProgramName(),
+            wxYES_NO | wxICON_WARNING);
+        if (ret == wxYES) {
+            // run database restore wizard
+        }
+    }
     return dbFileExists;
 }
 
-bool App::IsInstalled()
+bool Application::ConfigurationFileExists()
+{
+    bool configFileExists = wxFileExists(common::GetConfigFileName());
+    if (!configFileExists) {
+        wxMessageBox(wxT("Error: Missing configuration file!\nCannot proceed."),
+            common::GetProgramName(),
+            wxOK_DEFAULT | wxICON_ERROR);
+    }
+    return configFileExists;
+}
+
+bool Application::IsInstalled()
 {
 #if _DEBUG
     wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\Taskabled");
@@ -137,18 +162,14 @@ bool App::IsInstalled()
 
     if (key.Exists()) {
         long value = -1;
-#if _DEBUG
-        key.QueryValue(wxT("Installedd"), &value);
-#else
         key.QueryValue(wxT("Installed"), &value);
-#endif // _DEBUG
 
         return !!value;
     }
     return false;
 }
 
-bool App::ConfigureRegistry()
+bool Application::ConfigureRegistry()
 {
 #if _DEBUG
     wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\Taskabled");
@@ -157,17 +178,13 @@ bool App::ConfigureRegistry()
 #endif // _DEBUG
 
     bool result = key.Create();
-#if _DEBUG
-    result = key.SetValue("Installedd", 1);
-#else
     result = key.SetValue("Installed", 1);
-#endif // _DEBUG
     if (!result) {
-        pLogger->critical("Unable to set registry");
+        pLogger->critical("Unable to set registry value: \"Installed\"");
         return false;
     }
     return true;
 }
 } // namespace app
 
-wxIMPLEMENT_APP(app::App);
+wxIMPLEMENT_APP(app::Application);

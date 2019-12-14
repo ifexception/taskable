@@ -36,18 +36,20 @@
 
 namespace app
 {
-class App : public wxApp
+class Application : public wxApp
 {
 public:
-    App();
-    virtual ~App();
+    Application();
+    virtual ~Application();
 
     bool OnInit() override;
 
 private:
+    bool OnInitializationChecks();
     bool CreateLogsDirectory();
     bool InitializeLogging();
     bool DatabaseFileExists();
+    bool ConfigurationFileExists();
     bool IsInstalled();
     bool ConfigureRegistry();
 

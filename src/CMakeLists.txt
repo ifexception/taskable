@@ -32,7 +32,7 @@ set (SRC
     "services/db_connection.cpp"
     "services/taskstateservice.cpp"
     "services/taskstorageservice.cpp"
-    "app.cpp"
+    "application.cpp"
     "resources.rc"
     "app.manifest"
     "frame/mainframe.cpp"
