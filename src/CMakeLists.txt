@@ -34,7 +34,7 @@ set (SRC
     "services/taskstorageservice.cpp"
     "application.cpp"
     "resources.rc"
-    "app.manifest"
+    "application.manifest"
     "frame/mainframe.cpp"
     "frame/taskbaricon.cpp"
     "dialogs/editlistdlg.cpp"
