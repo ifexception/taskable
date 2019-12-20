@@ -31,5 +31,5 @@ void app::services::TaskStorage::Store(std::shared_ptr<TaskStateService> taskSta
 
 void app::services::TaskStorage::Restore(std::shared_ptr<TaskStateService> taskState)
 {
-    taskState->mTimes = (mTimes);
+    taskState->mTimes = mTimes;
 }

@@ -34,7 +34,7 @@ void TaskStateService::PushTimes(wxDateTime startTime, wxDateTime endTime)
     mTimes.push_back(tuple);
 }
 
-void TaskStateService::StoreDescription(const std::string& description)
+void TaskStateService::StoreDescription(const wxString& description)
 {
     mDescription = description;
 }
@@ -50,7 +50,8 @@ wxTimeSpan TaskStateService::GetAccumulatedTime()
 
     return accumulated;
 }
-std::string TaskStateService::GetStoredDescription() const
+
+wxString TaskStateService::GetStoredDescription() const
 {
     return mDescription;
 }

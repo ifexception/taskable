@@ -34,11 +34,11 @@ public:
     ~TaskStateService() = default;
 
     void PushTimes(wxDateTime startTime, wxDateTime endTime);
-    void StoreDescription(const std::string& description);
+    void StoreDescription(const wxString& description);
     wxTimeSpan GetAccumulatedTime();
-    std::string GetStoredDescription() const;
+    wxString GetStoredDescription() const;
 
     std::vector<std::tuple<wxDateTime, wxDateTime>> mTimes;
-    std::string mDescription;
+    wxString mDescription;
 };
 } // namespace app::services
