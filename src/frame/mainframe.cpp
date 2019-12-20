@@ -40,10 +40,11 @@
 #include "../dialogs/projectdlg.h"
 #include "../dialogs/categorydlg.h"
 #include "../dialogs/editlistdlg.h"
-#include "../dialogs/settingsdialog.h"
 #include "../dialogs/stopwatchtaskdlg.h"
 #include "../dialogs/checkforupdatedlg.h"
 #include "../dialogs/categoriesdlg.h"
+
+#include "../dialogs/preferencesdlg.h"
 
 #include "../wizards/setupwizard.h"
 #include "taskbaricon.h"
@@ -64,7 +65,7 @@ EVT_MENU(ids::ID_EDIT_EMPLOYER, MainFrame::OnEditEmployer)
 EVT_MENU(ids::ID_EDIT_CLIENT, MainFrame::OnEditClient)
 EVT_MENU(ids::ID_EDIT_PROJECT, MainFrame::OnEditProject)
 EVT_MENU(ids::ID_EDIT_CATEGORY, MainFrame::OnEditCategory)
-EVT_MENU(ids::ID_SETTINGS, MainFrame::OnSettings)
+EVT_MENU(ids::ID_SETTINGS, MainFrame::OnPreferences)
 EVT_MENU(ids::ID_STOPWATCH_TASK, MainFrame::OnTaskStopwatch)
 EVT_MENU(ids::ID_CHECK_FOR_UPDATE, MainFrame::OnCheckForUpdate)
 EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
@@ -147,17 +148,17 @@ void MainFrame::CreateControls()
     auto fileMenu = new wxMenu();
 
     auto entryTaskMenuItem =
-        fileMenu->Append(ids::ID_NEW_ENTRY_TASK, wxT("New &Entry Task"), wxT("Create new entry task"));
+        fileMenu->Append(ids::ID_NEW_ENTRY_TASK, wxT("New &Entry Task\tCtrl-E"), wxT("Create new entry task"));
     entryTaskMenuItem->SetBitmap(common::GetEntryTaskIcon());
 
     auto timedTaskMenuItem =
-        fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("New &Timed Task"), wxT("Create new timed task"));
+        fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("New &Timed Task\tCtrl-T"), wxT("Create new timed task"));
     timedTaskMenuItem->SetBitmap(common::GetTimedTaskIcon());
 
     fileMenu->AppendSeparator();
 
     auto stopwatchMenuItem =
-        fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("&Stopwatch Task"), wxT("Start task stopwatch"));
+        fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("&Stopwatch Task\tCtrl-W"), wxT("Start task stopwatch"));
     stopwatchMenuItem->SetBitmap(common::GetStopwatchIcon());
 
     fileMenu->AppendSeparator();
@@ -175,7 +176,7 @@ void MainFrame::CreateControls()
     editMenu->Append(ids::ID_EDIT_PROJECT, wxT("Edit &Project"), wxT("Select a project to edit"));
     editMenu->Append(ids::ID_EDIT_CATEGORY, wxT("Edit C&ategory"), wxT("Select a category to edit"));
     editMenu->AppendSeparator();
-    editMenu->Append(ids::ID_SETTINGS, wxT("&Settings"), wxT("Edit application settings"));
+    editMenu->Append(ids::ID_SETTINGS, wxT("&Preferences\tCtrl-P"), wxT("Edit application preferences"));
 
     /* Export Menu Control */
     auto exportMenu = new wxMenu();
@@ -190,10 +191,10 @@ void MainFrame::CreateControls()
 
     /* Menu Bar */
     wxMenuBar* menuBar = new wxMenuBar();
-    menuBar->Append(fileMenu, wxT("&File"));
-    menuBar->Append(editMenu, wxT("&Edit"));
-    menuBar->Append(exportMenu, wxT("E&xport"));
-    menuBar->Append(helpMenu, wxT("&Help"));
+    menuBar->Append(fileMenu, wxT("File"));
+    menuBar->Append(editMenu, wxT("Edit"));
+    menuBar->Append(exportMenu, wxT("Export"));
+    menuBar->Append(helpMenu, wxT("Help"));
 
     SetMenuBar(menuBar);
 
@@ -424,10 +425,10 @@ void MainFrame::OnIconize(wxIconizeEvent& event)
     }
 }
 
-void MainFrame::OnSettings(wxCommandEvent& event)
+void MainFrame::OnPreferences(wxCommandEvent& event)
 {
-    dialog::SettingsDialog settings(this, pConfig);
-    settings.ShowModal();
+    dialog::PreferencesDialog preferences(this, pConfig, pTaskBarIcon);
+    preferences.ShowModal();
 }
 
 void MainFrame::OnTaskStopwatch(wxCommandEvent& event)

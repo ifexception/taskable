@@ -74,7 +74,7 @@ private:
     void OnItemDoubleClick(wxListEvent& event);
     void OnItemRightClick(wxListEvent& event);
     void OnIconize(wxIconizeEvent& event);
-    void OnSettings(wxCommandEvent& event);
+    void OnPreferences(wxCommandEvent& event);
     void OnTaskStopwatch(wxCommandEvent& event);
     void OnDateChanged(wxDateEvent& event);
     void OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event);
