@@ -356,6 +356,8 @@ CategoryStrategy::CategoryStrategy(std::shared_ptr<spdlog::logger> logger)
 
 void CategoryStrategy::CreateControl(wxListCtrl* control)
 {
+    control->SetSize(wxSize(350, 100));
+
     wxListItem projectColumn;
     projectColumn.SetId(0);
     projectColumn.SetText(wxT("Project"));
@@ -371,6 +373,7 @@ void CategoryStrategy::CreateControl(wxListCtrl* control)
     wxListItem dateModifiedColumn;
     dateModifiedColumn.SetId(2);
     dateModifiedColumn.SetText(wxT("Date Modified"));
+    dateModifiedColumn.SetWidth(148);
     control->InsertColumn(2, dateModifiedColumn);
 }
 
