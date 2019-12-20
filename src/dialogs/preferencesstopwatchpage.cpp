@@ -41,7 +41,7 @@ StopwatchPage::StopwatchPage(wxWindow* parent, std::shared_ptr<cfg::Configuratio
 
 void StopwatchPage::Apply()
 {
-    pConfig->SetMinimizeTimedTaskWindow(pMinimizeStopwatchWindowCtrl->GetValue());
+    pConfig->SetMinimizeStopwatchWindow(pMinimizeStopwatchWindowCtrl->GetValue());
     pConfig->SetHideWindowTimerInterval(std::stoi(pHideWindowTimeChoiceCtrl->GetStringSelection().ToStdString()));
     pConfig->SetNotificationTimerInterval(std::stoi(pNotificationTimeChoiceCtrl->GetStringSelection().ToStdString()));
     pConfig->SetPausedTaskReminderInterval(
@@ -136,8 +136,8 @@ void StopwatchPage::ConfigureEventBindings()
 
 void StopwatchPage::FillControls()
 {
-    pMinimizeStopwatchWindowCtrl->SetValue(pConfig->IsMinimizeTimedTaskWindow());
-    if (!pConfig->IsMinimizeTimedTaskWindow()) {
+    pMinimizeStopwatchWindowCtrl->SetValue(pConfig->IsMinimizeStopwatchWindow());
+    if (!pConfig->IsMinimizeStopwatchWindow()) {
         pHideWindowTimeChoiceCtrl->Disable();
     }
 

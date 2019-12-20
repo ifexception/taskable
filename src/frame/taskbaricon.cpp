@@ -23,7 +23,7 @@
 
 #include "../common/common.h"
 #include "../dialogs/taskitemdlg.h"
-#include "../dialogs/settingsdialog.h"
+#include "../dialogs/preferencesdlg.h"
 
 namespace app::frame
 {
@@ -31,7 +31,7 @@ namespace app::frame
 wxBEGIN_EVENT_TABLE(TaskBarIcon, wxTaskBarIcon)
     EVT_MENU(TaskBarIcon::ID_ADD_ENTRY_TASK, TaskBarIcon::OnNewEntryTask)
     EVT_MENU(TaskBarIcon::ID_ADD_TIMED_TASK, TaskBarIcon::OnNewTimedTask)
-    EVT_MENU(TaskBarIcon::ID_SETTINGS, TaskBarIcon::OnSettings)
+    EVT_MENU(TaskBarIcon::ID_SETTINGS, TaskBarIcon::OnPreferences)
     EVT_MENU(wxID_EXIT, TaskBarIcon::OnExit)
     EVT_TASKBAR_LEFT_DOWN(TaskBarIcon::OnLeftButtonDown)
 wxEND_EVENT_TABLE()
@@ -58,7 +58,7 @@ wxMenu* TaskBarIcon::CreatePopupMenu()
     menu->Append(ID_ADD_ENTRY_TASK, wxT("Add Entry Task"));
     menu->Append(ID_ADD_TIMED_TASK, wxT("Add Timed Task"));
     menu->AppendSeparator();
-    menu->Append(ID_SETTINGS, wxT("Settings"));
+    menu->Append(ID_SETTINGS, wxT("Preferences"));
     menu->AppendSeparator();
     menu->Append(wxID_EXIT, wxT("Exit"));
 
@@ -77,10 +77,10 @@ void TaskBarIcon::OnNewTimedTask(wxCommandEvent& WXUNUSED(event))
     timedTask.ShowModal();
 }
 
-void TaskBarIcon::OnSettings(wxCommandEvent& WXUNUSED(event))
+void TaskBarIcon::OnPreferences(wxCommandEvent& WXUNUSED(event))
 {
-    dialog::SettingsDialog settings(pParent, pConfig);
-    settings.ShowModal();
+    dialog::PreferencesDialog preferences(pParent, pConfig, this);
+    preferences.ShowModal();
 }
 
 void TaskBarIcon::OnExit(wxCommandEvent& WXUNUSED(event))
@@ -95,5 +95,4 @@ void TaskBarIcon::OnLeftButtonDown(wxTaskBarIconEvent& WXUNUSED(event))
     pParent->Raise();
     pParent->Show();
 }
-
 } // namespace app::frame

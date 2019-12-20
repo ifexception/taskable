@@ -113,14 +113,14 @@ void Configuration::SetBackupPath(const wxString& value)
     Set<wxString>(wxT("settings"), wxT("backupPath"), value);
 }
 
-bool Configuration::IsMinimizeTimedTaskWindow() const
+bool Configuration::IsMinimizeStopwatchWindow() const
 {
-    return Get<bool>(wxT("settings"), wxT("minimizeTimedTaskWindow"));
+    return Get<bool>(wxT("settings"), wxT("minimizeStopwatchWindow"));
 }
 
-void Configuration::SetMinimizeTimedTaskWindow(bool value)
+void Configuration::SetMinimizeStopwatchWindow(bool value)
 {
-    Set<bool>(wxT("settings"), wxT("minimizeTimedTaskWindow"), value);
+    Set<bool>(wxT("settings"), wxT("minimizeStopwatchWindow"), value);
 }
 
 int Configuration::GetHideWindowTimerInterval() const

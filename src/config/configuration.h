@@ -55,8 +55,8 @@ public:
     wxString GetBackupPath() const;
     void SetBackupPath(const wxString& value);
 
-    bool IsMinimizeTimedTaskWindow() const;
-    void SetMinimizeTimedTaskWindow(bool value);
+    bool IsMinimizeStopwatchWindow() const;
+    void SetMinimizeStopwatchWindow(bool value);
 
     int GetHideWindowTimerInterval() const;
     void SetHideWindowTimerInterval(int value);

@@ -43,7 +43,7 @@ private:
 
     void OnNewEntryTask(wxCommandEvent& event);
     void OnNewTimedTask(wxCommandEvent& event);
-    void OnSettings(wxCommandEvent& event);
+    void OnPreferences(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnLeftButtonDown(wxTaskBarIconEvent& event);
 
