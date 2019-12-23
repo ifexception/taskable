@@ -91,6 +91,7 @@ private:
     void OnCancel(wxCommandEvent& event);
 
     void FillCategoryControl(int projectId);
+    void SetRateLabel(model::ProjectModel* project);
 
     void CalculateTimeDiff(wxDateTime start, wxDateTime end);
     void CalculateRate();

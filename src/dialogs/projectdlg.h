@@ -64,6 +64,7 @@ private:
     void OnEmployerChoiceSelection(wxCommandEvent& event);
     void OnBillableCheck(wxCommandEvent& event);
     void OnRateChoiceSelection(wxCommandEvent& event);
+    void OnIsDefaultCheck(wxCommandEvent& event);
 
     void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
@@ -83,6 +84,7 @@ private:
     wxComboBox* pCurrencyComboBoxCtrl;
     wxTextCtrl* pHoursTextCtrl;
     wxCheckBox* pIsActiveCtrl;
+    wxCheckBox* pIsDefaultCtrl;
     wxStaticText* pDateTextCtrl;
     wxButton* pOkButton;
     wxButton* pCancelButton;
@@ -102,6 +104,7 @@ private:
         IDC_RATEVALUE,
         IDC_CURRENCYCHOICE,
         IDC_HOURS,
+        IDC_ISDEFAULT,
         IDC_ISACTIVE
     };
 

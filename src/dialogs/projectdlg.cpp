@@ -46,6 +46,7 @@ ProjectDialog::ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> l
     , pCurrencyComboBoxCtrl(nullptr)
     , pHoursTextCtrl(nullptr)
     , pIsActiveCtrl(nullptr)
+    , pIsDefaultCtrl(nullptr)
     , pDateTextCtrl(nullptr)
     , pOkButton(nullptr)
     , pCancelButton(nullptr)
@@ -78,6 +79,7 @@ ProjectDialog::ProjectDialog(wxWindow* parent,
     , pCurrencyComboBoxCtrl(nullptr)
     , pHoursTextCtrl(nullptr)
     , pIsActiveCtrl(nullptr)
+    , pIsDefaultCtrl(nullptr)
     , pDateTextCtrl(nullptr)
     , pOkButton(nullptr)
     , pCancelButton(nullptr)
@@ -137,19 +139,18 @@ void ProjectDialog::CreateControls()
     auto projectDetailsPanel = new wxPanel(this, wxID_ANY);
     detailsBoxSizer->Add(projectDetailsPanel, common::sizers::ControlExpand);
 
-    auto taskFlexGridSizer = new wxFlexGridSizer(0, 2, 0, 0);
-    projectDetailsPanel->SetSizer(taskFlexGridSizer);
+    auto flexGridSizer = new wxFlexGridSizer(0, 2, 0, 0);
+    projectDetailsPanel->SetSizer(flexGridSizer);
 
     /* ---Controls--- */
     /* Project Name Control */
     auto projectName = new wxStaticText(projectDetailsPanel, wxID_STATIC, wxT("Name"));
-    taskFlexGridSizer->Add(projectName, common::sizers::ControlCenterVertical);
+    flexGridSizer->Add(projectName, common::sizers::ControlCenterVertical);
 
     wxTextValidator nameValidator(wxFILTER_ALPHANUMERIC | wxFILTER_INCLUDE_CHAR_LIST);
     wxArrayString allowedChars;
-    allowedChars.Add(wxT(">"));
-    allowedChars.Add(wxT("<"));
     allowedChars.Add(wxT(" "));
+    allowedChars.Add(wxT(":"));
     nameValidator.SetIncludes(allowedChars);
 
     pNameTextCtrl = new wxTextCtrl(projectDetailsPanel,
@@ -161,11 +162,11 @@ void ProjectDialog::CreateControls()
         nameValidator);
     pNameTextCtrl->SetHint(wxT("Project name"));
     pNameTextCtrl->SetToolTip(wxT("Enter a name for the project"));
-    taskFlexGridSizer->Add(pNameTextCtrl, common::sizers::ControlDefault);
+    flexGridSizer->Add(pNameTextCtrl, common::sizers::ControlDefault);
 
     /* Project Display Name Control */
     auto projectDisplayName = new wxStaticText(projectDetailsPanel, wxID_STATIC, wxT("Display Name"));
-    taskFlexGridSizer->Add(projectDisplayName, common::sizers::ControlCenterVertical);
+    flexGridSizer->Add(projectDisplayName, common::sizers::ControlCenterVertical);
 
     pDisplayNameCtrl = new wxTextCtrl(projectDetailsPanel,
         IDC_DISPLAYNAME,
@@ -176,36 +177,42 @@ void ProjectDialog::CreateControls()
         nameValidator);
     pDisplayNameCtrl->SetHint(wxT("Display name"));
     pDisplayNameCtrl->SetToolTip(wxT("Enter a shortened, convenient display name for the project"));
-    taskFlexGridSizer->Add(pDisplayNameCtrl, common::sizers::ControlDefault);
+    flexGridSizer->Add(pDisplayNameCtrl, common::sizers::ControlDefault);
 
     /* Employer Choice Ctrl */
     auto employerText = new wxStaticText(projectDetailsPanel, wxID_STATIC, wxT("Employer"));
-    taskFlexGridSizer->Add(employerText, common::sizers::ControlCenterVertical);
+    flexGridSizer->Add(employerText, common::sizers::ControlCenterVertical);
 
     pEmployerChoiceCtrl = new wxChoice(projectDetailsPanel, IDC_EMPLOYERCHOICE, wxDefaultPosition, wxSize(150, -1));
     pEmployerChoiceCtrl->AppendString(wxT("Select a employer"));
     pEmployerChoiceCtrl->SetSelection(0);
     pEmployerChoiceCtrl->SetToolTip(wxT("Select a employer to associate the project with"));
-    taskFlexGridSizer->Add(pEmployerChoiceCtrl, common::sizers::ControlDefault);
+    flexGridSizer->Add(pEmployerChoiceCtrl, common::sizers::ControlDefault);
 
     /* Client Choice Ctrl */
     auto clientText = new wxStaticText(projectDetailsPanel, wxID_STATIC, wxT("Client"));
-    taskFlexGridSizer->Add(clientText, common::sizers::ControlCenterVertical);
+    flexGridSizer->Add(clientText, common::sizers::ControlCenterVertical);
 
     pClientChoiceCtrl = new wxChoice(projectDetailsPanel, IDC_CLIENTCHOICE, wxDefaultPosition, wxSize(150, -1));
     pClientChoiceCtrl->SetToolTip(wxT("Select a client to associate this project with"));
     pClientChoiceCtrl->AppendString(wxT("Select a client"));
     pClientChoiceCtrl->SetSelection(0);
     pClientChoiceCtrl->Disable();
-    taskFlexGridSizer->Add(pClientChoiceCtrl, common::sizers::ControlDefault);
+    flexGridSizer->Add(pClientChoiceCtrl, common::sizers::ControlDefault);
+
+    flexGridSizer->Add(0, 0);
+
+    pIsDefaultCtrl = new wxCheckBox(projectDetailsPanel, IDC_ISDEFAULT, wxT("Default"));
+    pIsDefaultCtrl->SetToolTip(wxT("Enabling this option will pre-select this project when adding tasks"));
+    flexGridSizer->Add(pIsDefaultCtrl, common::sizers::ControlDefault);
 
     if (bIsEdit) {
         auto isActiveFiller = new wxStaticText(projectDetailsPanel, wxID_STATIC, wxT(""));
-        taskFlexGridSizer->Add(isActiveFiller, common::sizers::ControlDefault);
+        flexGridSizer->Add(isActiveFiller, common::sizers::ControlDefault);
 
         /* Is Active Checkbox Control */
         pIsActiveCtrl = new wxCheckBox(projectDetailsPanel, IDC_ISACTIVE, wxT("Is Active"));
-        taskFlexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
+        flexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
     }
 
     /* Billable Controls */
@@ -442,6 +449,9 @@ void ProjectDialog::DataToControls()
     /* Set project billable check */
     pBillableCtrl->SetValue(project->IsBillable());
 
+    /* Set project is default check */
+    pIsDefaultCtrl->SetValue(project->IsDefault());
+
     if (project->IsBillableWithUnknownRateScenario()) {
         /* Project is billable, set the billable attributes */
         pRateChoiceCtrl->Enable();
@@ -456,7 +466,7 @@ void ProjectDialog::DataToControls()
         pRateChoiceCtrl->SetStringSelection(project->GetRateType()->GetName());
         pRateTextCtrl->Enable();
         /* Set the rate value */
-        pRateTextCtrl->SetValue(wxString(std::to_string(*project->GetRate())));
+        pRateTextCtrl->SetValue(wxString::Format(wxT("%.2f"), wxString(std::to_string(*project->GetRate()))));
 
         pCurrencyComboBoxCtrl->Enable();
         /* Set the currency for project */
@@ -475,7 +485,7 @@ void ProjectDialog::DataToControls()
 
         /* Set the rate value */
         pRateTextCtrl->Enable();
-        pRateTextCtrl->SetValue(wxString(std::to_string(*project->GetRate())));
+        pRateTextCtrl->SetValue(wxString::Format(wxT("%.2f"), wxString(std::to_string(*project->GetRate()))));
 
         /* Set the currency */
         pCurrencyComboBoxCtrl->Enable();
@@ -580,6 +590,13 @@ void ProjectDialog::OnRateChoiceSelection(wxCommandEvent& event)
     }
 }
 
+void ProjectDialog::OnIsDefaultCheck(wxCommandEvent& event)
+{
+    if (event.IsChecked()) {
+        model::ProjectModel::UnmarkDefaultProjects();
+    }
+}
+
 void ProjectDialog::OnOk(wxCommandEvent& WXUNUSED(event))
 {
     if (TryTransferValuesFromControls()) {
@@ -628,6 +645,7 @@ void ProjectDialog::OnIsActiveCheck(wxCommandEvent& event)
         }
 
         pBillableCtrl->Enable();
+        pIsDefaultCtrl->Enable();
 
         if (pProject->IsBillableWithUnknownRateScenario()) {
             pRateChoiceCtrl->Enable();
@@ -652,6 +670,7 @@ void ProjectDialog::OnIsActiveCheck(wxCommandEvent& event)
         pEmployerChoiceCtrl->Disable();
         pClientChoiceCtrl->Disable();
         pBillableCtrl->Disable();
+        pIsDefaultCtrl->Disable();
         pRateChoiceCtrl->Disable();
         pRateTextCtrl->Disable();
         pCurrencyComboBoxCtrl->Disable();
@@ -689,6 +708,8 @@ bool ProjectDialog::TryTransferValuesFromControls()
     }
 
     pProject->IsBillable(pBillableCtrl->GetValue());
+    pProject->IsDefault(pIsDefaultCtrl->GetValue());
+
     if (pProject->IsBillable()) {
         if (pRateChoiceCtrl->GetSelection() == 0) {
             common::validations::ForRequiredChoiceSelection(pRateChoiceCtrl, wxT("rate"));

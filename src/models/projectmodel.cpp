@@ -231,6 +231,8 @@ ProjectModel::ProjectModel()
     , mDisplayName(wxGetEmptyString())
     , bIsBillable(false)
     , pRate(nullptr)
+    , pHours(nullptr)
+    , bIsDefault(nullptr)
     , mDateCreated(wxDefaultDateTime)
     , mDateModified(wxDefaultDateTime)
     , bIsActive(false)
@@ -276,6 +278,7 @@ ProjectModel::ProjectModel(int projectId,
     wxString name,
     wxString displayName,
     bool billable,
+    bool isDefault,
     int dateCreated,
     int dateModified,
     bool isActive)
@@ -285,6 +288,7 @@ ProjectModel::ProjectModel(int projectId,
     mName = name;
     mDisplayName = displayName;
     bIsBillable = billable;
+    bIsDefault = isDefault;
     mDateCreated = util::ToDateTime(dateCreated);
     mDateModified = util::ToDateTime(dateModified);
     bIsActive = isActive;
@@ -365,6 +369,11 @@ const double* ProjectModel::GetRate() const
 const int* ProjectModel::GetHours() const
 {
     return pHours.get();
+}
+
+const bool ProjectModel::IsDefault() const
+{
+    return bIsDefault;
 }
 
 const wxDateTime ProjectModel::GetDateCreated()
@@ -452,6 +461,11 @@ void ProjectModel::SetHours(std::unique_ptr<int> hours)
     pHours = std::move(hours);
 }
 
+void ProjectModel::IsDefault(const bool isDefault)
+{
+    bIsDefault = isDefault;
+}
+
 void ProjectModel::SetDateCreated(const wxDateTime& dateCreated)
 {
     mDateCreated = dateCreated;
@@ -511,7 +525,8 @@ void ProjectModel::Create(std::unique_ptr<ProjectModel> project)
 {
     auto db = services::db_connection::get_instance().get_handle();
     auto ps = db << ProjectModel::createProject;
-    ps << project->GetName() << project->GetDisplayName() << project->IsBillable() << project->GetEmployerId();
+    ps << project->GetName() << project->GetDisplayName() << project->IsBillable() << project->IsDefault()
+       << project->GetEmployerId();
 
     if (project->HasClientLinked())
         ps << project->GetClientId();
@@ -541,6 +556,7 @@ std::unique_ptr<ProjectModel> ProjectModel::GetById(const int projectId)
                                                        std::string name,
                                                        std::string displayName,
                                                        int billable,
+                                                       int isDefault,
                                                        std::unique_ptr<double> rate,
                                                        std::unique_ptr<int> hours,
                                                        int dateCreated,
@@ -551,7 +567,7 @@ std::unique_ptr<ProjectModel> ProjectModel::GetById(const int projectId)
                                                        std::unique_ptr<int> rateTypeId,
                                                        std::unique_ptr<int> currencyId) {
         project = std::make_unique<ProjectModel>(
-            projectId, wxString(name), wxString(displayName), billable, dateCreated, dateModified, isActive);
+            projectId, wxString(name), wxString(displayName), billable, isDefault, dateCreated, dateModified, isActive);
 
         if (rate != nullptr) {
             project->SetRate(std::move(rate));
@@ -591,7 +607,7 @@ void ProjectModel::Update(std::unique_ptr<ProjectModel> project)
     auto db = services::db_connection::get_instance().get_handle();
 
     auto ps = db << ProjectModel::updateProject << project->GetName() << project->GetDisplayName()
-                 << project->IsBillable() << util::UnixTimestamp() << project->GetEmployerId();
+                 << project->IsBillable() << project->IsDefault() << util::UnixTimestamp() << project->GetEmployerId();
 
     if (project->HasClientLinked())
         ps << project->GetClientId();
@@ -629,6 +645,7 @@ std::vector<std::unique_ptr<ProjectModel>> ProjectModel::GetAll()
                                            std::string name,
                                            std::string displayName,
                                            int billable,
+                                           int isDefault,
                                            std::unique_ptr<double> rate,
                                            std::unique_ptr<int> hours,
                                            int dateCreated,
@@ -639,7 +656,7 @@ std::vector<std::unique_ptr<ProjectModel>> ProjectModel::GetAll()
                                            std::unique_ptr<int> rateTypeId,
                                            std::unique_ptr<int> currencyId) {
         auto project = std::make_unique<ProjectModel>(
-            projectId, wxString(name), wxString(displayName), billable, dateCreated, dateModified, isActive);
+            projectId, wxString(name), wxString(displayName), billable, isDefault, dateCreated, dateModified, isActive);
 
         if (rate != nullptr) {
             project->SetRate(std::move(rate));
@@ -676,15 +693,22 @@ std::vector<std::unique_ptr<ProjectModel>> ProjectModel::GetAll()
     return projects;
 }
 
+void ProjectModel::UnmarkDefaultProjects()
+{
+    auto db = services::db_connection::get_instance().get_handle();
+    db << ProjectModel::unmarkDefaultProjects << util::UnixTimestamp();
+}
+
 const std::string ProjectModel::createProject = "INSERT INTO "
-                                                "projects(name, display_name, billable, is_active, "
+                                                "projects(name, display_name, billable, is_default, is_active, "
                                                 "employer_id, client_id, rate, rate_type_id, currency_id, hours) "
-                                                "VALUES(?, ?, ?, 1, ?, ?, ?, ?, ?, ?)";
+                                                "VALUES(?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)";
 
 const std::string ProjectModel::getProject = "SELECT projects.project_id, "
                                              "projects.name AS project_name, "
                                              "projects.display_name, "
                                              "projects.billable, "
+                                             "projects.is_default,"
                                              "projects.rate, "
                                              "projects.hours,"
                                              "projects.date_created, "
@@ -703,7 +727,7 @@ const std::string ProjectModel::getProject = "SELECT projects.project_id, "
 
 const std::string ProjectModel::updateProject =
     "UPDATE projects "
-    "SET name = ?, display_name = ?, billable = ?, date_modified = ?, "
+    "SET name = ?, display_name = ?, billable = ?, is_default = ?, date_modified = ?, "
     "employer_id = ?, client_id = ?, rate = ?, rate_type_id = ?, currency_id = ?, "
     "hours = ? "
     "WHERE project_id = ?";
@@ -716,6 +740,7 @@ const std::string ProjectModel::getProjects = "SELECT projects.project_id, "
                                               "projects.name AS project_name, "
                                               "projects.display_name, "
                                               "projects.billable, "
+                                              "projects.is_default,"
                                               "projects.rate, "
                                               "projects.hours,"
                                               "projects.date_created, "
@@ -730,4 +755,8 @@ const std::string ProjectModel::getProjects = "SELECT projects.project_id, "
                                               "LEFT JOIN clients ON projects.client_id = clients.client_id "
                                               "LEFT JOIN rate_types ON projects.rate_type_id = rate_types.rate_type_id "
                                               "LEFT JOIN currencies ON projects.currency_id = currencies.currency_id";
+
+const std::string ProjectModel::unmarkDefaultProjects = "UPDATE projects "
+                                                        "SET is_default = 0, "
+                                                        "date_modified = ?";
 } // namespace app::model

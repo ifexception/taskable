@@ -19,6 +19,8 @@
 
 #include "taskitemdlg.h"
 
+#include <algorithm>
+
 #include <sqlite_modern_cpp/errors.h>
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
@@ -504,6 +506,17 @@ void TaskItemDialog::FillControls()
         pProjectChoiceCtrl->Append(project->GetDisplayName(), util::IntToVoidPointer(project->GetProjectId()));
     }
 
+    auto iterator = std::find_if(projects.begin(), projects.end(), [&](std::unique_ptr<model::ProjectModel>& project) {
+        return project->IsDefault() == true;
+    });
+
+    if (iterator != projects.end()) {
+        pProjectChoiceCtrl->SetStringSelection(iterator->get()->GetDisplayName());
+        FillCategoryControl(iterator->get()->GetProjectId());
+
+        SetRateLabel(iterator->get());
+    }
+
     wxDateTime timeInitializedToZero = wxDateTime::Now();
     if (mType == constants::TaskItemTypes::TimedTask) {
         timeInitializedToZero.SetSecond(0);
@@ -568,44 +581,7 @@ void TaskItemDialog::DataToControls()
 
     pBillableCtrl->SetValue(taskItem->IsBillable());
 
-    if (taskItem->GetProject()->IsNonBillableScenario()) {
-        pBillableCtrl->Disable();
-        wxString label =
-            wxString::Format(TaskItemDialog::CalculatedRateLabelNonBillable, taskItem->GetProject()->GetDisplayName());
-        pCalculatedRateTextCtrl->SetLabel(label);
-    }
-
-    if (taskItem->GetProject()->IsBillableWithUnknownRateScenario()) {
-        pBillableCtrl->Enable();
-        pBillableCtrl->SetValue(true);
-        wxString label = wxString::Format(
-            TaskItemDialog::CalculatedRateLabelBillableUnknownRate, taskItem->GetProject()->GetDisplayName());
-        pCalculatedRateTextCtrl->SetLabel(label);
-    }
-
-    if (taskItem->GetProject()->IsBillableScenarioWithHourlyRate()) {
-        pBillableCtrl->Enable();
-        pBillableCtrl->SetValue(true);
-
-        auto font = pCalculatedRateTextCtrl->GetFont();
-        font.SetPointSize(11);
-        font.SetWeight(wxFONTWEIGHT_BOLD);
-        pCalculatedRateTextCtrl->SetFont(font);
-
-        mCalculatedRate = *taskItem->GetCalculatedRate();
-        wxString rate = wxString::Format(TaskItemDialog::CalculatedRateLabelBillableHourlyRate,
-            taskItem->GetProject()->GetCurrency()->GetSymbol(),
-            mCalculatedRate);
-        pCalculatedRateTextCtrl->SetLabel(rate);
-    }
-
-    if (taskItem->GetProject()->IsBillableScenarioWithDailyRate()) {
-        pBillableCtrl->Enable();
-        pBillableCtrl->SetValue(true);
-        wxString label = wxString::Format(
-            TaskItemDialog::CalculatedRateLabelBillableDailyRate, taskItem->GetProject()->GetDisplayName());
-        pCalculatedRateTextCtrl->SetLabel(label);
-    }
+    SetRateLabel(taskItem->GetProject());
 
     pDescriptionCtrl->SetValue(taskItem->GetDescription());
 
@@ -684,47 +660,7 @@ void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
             wxString::Format(TaskContextWithoutClient, wxString(pProject->GetEmployer()->GetName())));
     }
 
-    auto font = pCalculatedRateTextCtrl->GetFont();
-    if (font.GetWeight() == wxFONTWEIGHT_BOLD) {
-        font.SetWeight(wxFONTWEIGHT_NORMAL);
-        font.SetPointSize(9);
-    }
-
-    if (pProject->IsNonBillableScenario()) {
-        pBillableCtrl->Disable();
-        wxString label = wxString::Format(TaskItemDialog::CalculatedRateLabelNonBillable, pProject->GetDisplayName());
-        pCalculatedRateTextCtrl->SetLabel(label);
-    }
-
-    if (pProject->IsBillableWithUnknownRateScenario()) {
-        pBillableCtrl->Enable();
-        pBillableCtrl->SetValue(true);
-        wxString label =
-            wxString::Format(TaskItemDialog::CalculatedRateLabelBillableUnknownRate, pProject->GetDisplayName());
-        pCalculatedRateTextCtrl->SetLabel(label);
-    }
-
-    if (pProject->IsBillableScenarioWithHourlyRate()) {
-        pBillableCtrl->Enable();
-        pBillableCtrl->SetValue(true);
-
-        if (font.GetWeight() != wxFONTWEIGHT_BOLD) {
-            font.SetPointSize(11);
-            font.SetWeight(wxFONTWEIGHT_BOLD);
-        }
-
-        CalculateRate();
-    }
-
-    if (pProject->IsBillableScenarioWithDailyRate()) {
-        pBillableCtrl->Enable();
-        pBillableCtrl->SetValue(true);
-        wxString label =
-            wxString::Format(TaskItemDialog::CalculatedRateLabelBillableDailyRate, pProject->GetDisplayName());
-        pCalculatedRateTextCtrl->SetLabel(label);
-    }
-
-    pCalculatedRateTextCtrl->SetFont(font);
+    SetRateLabel(pProject.get());
 }
 
 void TaskItemDialog::OnStartTimeChange(wxDateEvent& event)
@@ -872,6 +808,52 @@ void TaskItemDialog::FillCategoryControl(int projectId)
     if (!pCategoryChoiceCtrl->IsEnabled()) {
         pCategoryChoiceCtrl->Enable();
     }
+}
+
+void TaskItemDialog::SetRateLabel(model::ProjectModel* project)
+{
+    auto font = pCalculatedRateTextCtrl->GetFont();
+    if (font.GetWeight() == wxFONTWEIGHT_BOLD) {
+        font.SetWeight(wxFONTWEIGHT_NORMAL);
+        font.SetPointSize(9);
+    }
+
+    if (project->IsNonBillableScenario()) {
+        pBillableCtrl->Disable();
+        wxString label =
+            wxString::Format(TaskItemDialog::CalculatedRateLabelNonBillable, project->GetDisplayName());
+        pCalculatedRateTextCtrl->SetLabel(label);
+    }
+
+    if (project->IsBillableWithUnknownRateScenario()) {
+        pBillableCtrl->Enable();
+        pBillableCtrl->SetValue(true);
+        wxString label =
+            wxString::Format(TaskItemDialog::CalculatedRateLabelBillableUnknownRate, project->GetDisplayName());
+        pCalculatedRateTextCtrl->SetLabel(label);
+    }
+
+    if (project->IsBillableScenarioWithHourlyRate()) {
+        pBillableCtrl->Enable();
+        pBillableCtrl->SetValue(true);
+
+        if (font.GetWeight() != wxFONTWEIGHT_BOLD) {
+            font.SetPointSize(11);
+            font.SetWeight(wxFONTWEIGHT_BOLD);
+        }
+
+        CalculateRate();
+    }
+
+    if (project->IsBillableScenarioWithDailyRate()) {
+        pBillableCtrl->Enable();
+        pBillableCtrl->SetValue(true);
+        wxString label =
+            wxString::Format(TaskItemDialog::CalculatedRateLabelBillableDailyRate, project->GetDisplayName());
+        pCalculatedRateTextCtrl->SetLabel(label);
+    }
+
+    pCalculatedRateTextCtrl->SetFont(font);
 }
 
 void TaskItemDialog::GenerateTaskSavedEvent()

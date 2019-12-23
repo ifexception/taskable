@@ -102,6 +102,7 @@ public:
         wxString name,
         wxString displayName,
         bool billable,
+        bool isDefault,
         int dateCreated,
         int dateModified,
         bool isActive);
@@ -122,6 +123,7 @@ public:
     const bool IsBillable() const;
     const double* GetRate() const;
     const int* GetHours() const;
+    const bool IsDefault() const;
     const wxDateTime GetDateCreated();
     const wxDateTime GetDateModified();
     const bool IsActive() const;
@@ -141,6 +143,7 @@ public:
     void IsBillable(const bool billable);
     void SetRate(std::unique_ptr<double> rate);
     void SetHours(std::unique_ptr<int> hours);
+    void IsDefault(const bool isDefault);
     void SetDateCreated(const wxDateTime& dateCreated);
     void SetDateUpdated(const wxDateTime& dateUpdated);
     void IsActive(const bool isActive);
@@ -159,6 +162,7 @@ public:
     static void Update(std::unique_ptr<ProjectModel> project);
     static void Delete(std::unique_ptr<ProjectModel> project);
     static std::vector<std::unique_ptr<ProjectModel>> GetAll();
+    static void UnmarkDefaultProjects();
 
 private:
     int mProjectId;
@@ -167,6 +171,7 @@ private:
     bool bIsBillable;
     std::unique_ptr<double> pRate;
     std::unique_ptr<int> pHours;
+    bool bIsDefault;
     wxDateTime mDateCreated;
     wxDateTime mDateModified;
     bool bIsActive;
@@ -185,5 +190,6 @@ private:
     static const std::string updateProject;
     static const std::string deleteProject;
     static const std::string getProjects;
+    static const std::string unmarkDefaultProjects;
 };
 } // namespace app::model
