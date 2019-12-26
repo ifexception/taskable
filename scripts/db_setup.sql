@@ -65,16 +65,6 @@ CREATE TABLE projects
     FOREIGN KEY (currency_id) REFERENCES currencies(currency_id)
 );
 
--- tasks table
-CREATE TABLE tasks
-(
-    task_id INTEGER PRIMARY KEY NOT NULL,
-    task_date TEXT NOT NULL UNIQUE,
-    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
-    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
-    is_active INTEGER NOT NULL
-);
-
 -- categories table
 CREATE TABLE categories
 (
@@ -88,6 +78,16 @@ CREATE TABLE categories
     project_id INTEGER NOT NULL,
 
     FOREIGN KEY (project_id) REFERENCES projects(project_id)
+);
+
+-- tasks table
+CREATE TABLE tasks
+(
+    task_id INTEGER PRIMARY KEY NOT NULL,
+    task_date TEXT NOT NULL UNIQUE,
+    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
+    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
+    is_active INTEGER NOT NULL
 );
 
 -- task item types table
