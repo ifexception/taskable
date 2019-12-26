@@ -53,18 +53,27 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
     std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<services::TaskStateService> taskState,
+    frame::TaskBarIcon *taskBarIcon,
     const wxString& name)
     : pLogger(logger)
     , pParent(parent)
     , pElapsedTimeText(nullptr)
+    , pAccumulatedTimeText(nullptr)
+    , pStartNewTask(nullptr)
+    , pStopwatchDescription(nullptr)
+    , pStartButton(nullptr)
+    , pPauseButton(nullptr)
+    , pStopButton(nullptr)
+    , pCancelButton(nullptr)
     , pElapsedTimer(std::make_unique<wxTimer>(this, IDC_ELAPSED_TIMER))
     , pNotificationTimer(std::make_unique<wxTimer>(this, IDC_NOTIFICATION_TIMER))
     , pHideWindowTimer(std::make_unique<wxTimer>(this, IDC_HIDE_WINDOW_TIMER))
     , pPausedTaskReminder(std::make_unique<wxTimer>(this, IDC_PAUSED_TASK_REMINDER))
     , pConfig(config)
     , pTaskState(taskState)
-    , mStartTime()
-    , mEndTime()
+    , pTaskBarIcon(taskBarIcon)
+    , mStartTime(wxDefaultDateTime)
+    , mEndTime(wxDefaultDateTime)
     , bWasTaskPaused(false)
     , bHasPendingPausedTask(false)
 // clang-format on
@@ -82,19 +91,28 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
     std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<services::TaskStateService> taskState,
+    frame::TaskBarIcon *taskBarIcon,
     bool hasPendingPausedTask,
     const wxString& name)
     : pLogger(logger)
     , pParent(parent)
     , pElapsedTimeText(nullptr)
+    , pAccumulatedTimeText(nullptr)
+    , pStartNewTask(nullptr)
+    , pStopwatchDescription(nullptr)
+    , pStartButton(nullptr)
+    , pPauseButton(nullptr)
+    , pStopButton(nullptr)
+    , pCancelButton(nullptr)
     , pElapsedTimer(std::make_unique<wxTimer>(this, IDC_ELAPSED_TIMER))
     , pNotificationTimer(std::make_unique<wxTimer>(this, IDC_NOTIFICATION_TIMER))
     , pHideWindowTimer(std::make_unique<wxTimer>(this, IDC_HIDE_WINDOW_TIMER))
     , pPausedTaskReminder(std::make_unique<wxTimer>(this, IDC_PAUSED_TASK_REMINDER))
     , pConfig(config)
     , pTaskState(taskState)
-    , mStartTime()
-    , mEndTime()
+    , pTaskBarIcon(taskBarIcon)
+    , mStartTime(wxDefaultDateTime)
+    , mEndTime(wxDefaultDateTime)
     , bWasTaskPaused(false)
     , bHasPendingPausedTask(hasPendingPausedTask)
 {
@@ -131,7 +149,7 @@ void StopwatchTaskDialog::Relaunch()
 
         // and disable pause button
         pPauseButton->Disable();
-        pStartNewTask->Disable(); // CHECK: Should this be disabled?
+        pStartNewTask->Disable();
     }
 
     /* set state */
@@ -160,8 +178,16 @@ bool StopwatchTaskDialog::Create(wxWindow* parent,
         CreateControls();
 
         GetSizer()->Fit(this);
+        GetSizer()->SetSizeHints(this);
         SetIcon(common::GetProgramIcon());
         Center();
+
+        if (pConfig->IsShowInTray()) {
+            wxNotificationMessage::UseTaskBarIcon(pTaskBarIcon);
+        } else {
+            // Need to implement installing application with shortcut
+            // wxNotificationMessage::MSWUseToasts(wxGetEmptyString(), wxGetEmptyString());
+        }
     }
 
     return created;
@@ -318,7 +344,7 @@ void StopwatchTaskDialog::ExecuteStopProcedure()
 {
     /* did the user go from pause to stop state? */
     if (!bIsPaused) {
-    /* get the current end time */
+        /* get the current end time */
         mEndTime = wxDateTime::Now();
 
         /* push state */
@@ -373,6 +399,7 @@ void StopwatchTaskDialog::OnTimer(wxTimerEvent& WXUNUSED(event))
     auto current = wxDateTime::Now();
     auto elapsed = current - mStartTime;
     auto message = wxString::Format(TaskRunningForText, elapsed.Format());
+
     wxNotificationMessage taskElaspedMessage(common::GetProgramName(), message, this);
     taskElaspedMessage.Show();
 }

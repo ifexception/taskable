@@ -102,7 +102,7 @@ MainFrame::~MainFrame()
     pConfig->SetFrameSize(size);
 
     if (pTaskBarIcon != nullptr) {
-        delete pTaskBarIcon; // TODO Wrap TaskBarIcon in a std::unique_ptr
+        delete pTaskBarIcon;
     }
 }
 
@@ -433,7 +433,7 @@ void MainFrame::OnPreferences(wxCommandEvent& event)
 
 void MainFrame::OnTaskStopwatch(wxCommandEvent& event)
 {
-    dialog::StopwatchTaskDialog stopwatchTask(this, pConfig, pLogger, pTaskState);
+    dialog::StopwatchTaskDialog stopwatchTask(this, pConfig, pLogger, pTaskState, pTaskBarIcon);
     stopwatchTask.Launch();
 }
 
@@ -454,13 +454,13 @@ void MainFrame::OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event)
     pTaskStorage->Store(pTaskState);
     pTaskState->mTimes.clear();
 
-    dialog::StopwatchTaskDialog stopwatchTask(this, pConfig, pLogger, pTaskState, /* hasPendingPausedTask */ true);
+    dialog::StopwatchTaskDialog stopwatchTask(this, pConfig, pLogger, pTaskState, pTaskBarIcon, /* hasPendingPausedTask */ true);
     stopwatchTask.Launch();
 
     pTaskState->mTimes.clear();
     pTaskStorage->Restore(pTaskState);
 
-    dialog::StopwatchTaskDialog stopwatchPausedTask(this, pConfig, pLogger, pTaskState);
+    dialog::StopwatchTaskDialog stopwatchPausedTask(this, pConfig, pLogger, pTaskState, pTaskBarIcon);
     stopwatchPausedTask.Relaunch();
 
     pTaskStorage->mTimes.clear();

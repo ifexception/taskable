@@ -22,11 +22,13 @@
 #include <memory>
 
 #include <wx/wx.h>
+
 #define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
 #include "../config/configuration.h"
 #include "../services/taskstateservice.h"
+#include "../frame/taskbaricon.h"
 
 wxDECLARE_EVENT(START_NEW_STOPWATCH_TASK, wxCommandEvent);
 
@@ -36,17 +38,22 @@ class StopwatchTaskDialog : public wxDialog
 {
 public:
     StopwatchTaskDialog() = delete;
+
     explicit StopwatchTaskDialog(wxWindow* parent,
         std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
         std::shared_ptr<services::TaskStateService> taskState,
+        frame::TaskBarIcon *taskBarIcon,
         const wxString& name = wxT("stopwatchtaskdlg"));
+
     explicit StopwatchTaskDialog(wxWindow* parent,
         std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
         std::shared_ptr<services::TaskStateService> taskState,
+        frame::TaskBarIcon *taskBarIcon,
         bool hasPendingPausedTask,
         const wxString& name = wxT("stopwatchtaskdlg"));
+
     virtual ~StopwatchTaskDialog() = default;
 
     void Launch();
@@ -84,10 +91,10 @@ private:
     std::shared_ptr<services::TaskStateService> pTaskState;
 
     wxWindow* pParent;
-    wxTextCtrl* pStopwatchDescription;
     wxStaticText* pElapsedTimeText;
     wxStaticText* pAccumulatedTimeText;
     wxCheckBox* pStartNewTask;
+    wxTextCtrl* pStopwatchDescription;
     wxButton* pStartButton;
     wxButton* pPauseButton;
     wxButton* pStopButton;
@@ -96,6 +103,7 @@ private:
     std::unique_ptr<wxTimer> pNotificationTimer;
     std::unique_ptr<wxTimer> pHideWindowTimer;
     std::unique_ptr<wxTimer> pPausedTaskReminder;
+    frame::TaskBarIcon* pTaskBarIcon;
 
     wxDateTime mStartTime;
     wxDateTime mEndTime;
