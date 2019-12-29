@@ -158,7 +158,7 @@ void MainFrame::CreateControls()
     fileMenu->AppendSeparator();
 
     auto stopwatchMenuItem =
-        fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("&Stopwatch Task\tCtrl-W"), wxT("Start task stopwatch"));
+        fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("Stop&watch Task\tCtrl-W"), wxT("Start task stopwatch"));
     stopwatchMenuItem->SetBitmap(common::GetStopwatchIcon());
 
     fileMenu->AppendSeparator();
