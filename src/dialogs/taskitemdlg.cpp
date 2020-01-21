@@ -350,11 +350,12 @@ void TaskItemDialog::CreateControls()
     /* Task Description Text Control */
     wxTextValidator descriptionValidator(wxFILTER_ALPHANUMERIC | wxFILTER_INCLUDE_CHAR_LIST);
     wxArrayString allowedChars;
-    allowedChars.Add(wxT(">"));
-    allowedChars.Add(wxT("<"));
     allowedChars.Add(wxT(" "));
     allowedChars.Add(wxT(","));
     allowedChars.Add(wxT("."));
+    allowedChars.Add(wxT("'"));
+    allowedChars.Add(wxT("("));
+    allowedChars.Add(wxT(")"));
     descriptionValidator.SetIncludes(allowedChars);
 
     pDescriptionCtrl = new wxTextCtrl(taskDescriptionPanel,
