@@ -21,7 +21,7 @@
 
 #include <wx/wx.h>
 #include <wx/listctrl.h>
-#define FMT_HEADER_ONLY
+
 #include <spdlog/spdlog.h>
 
 namespace app::dialog

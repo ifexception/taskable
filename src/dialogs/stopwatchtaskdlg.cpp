@@ -53,7 +53,7 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
     std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<services::TaskStateService> taskState,
-    frame::TaskBarIcon *taskBarIcon,
+    frm::TaskBarIcon *taskBarIcon,
     const wxString& name)
     : pLogger(logger)
     , pParent(parent)
@@ -91,7 +91,7 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
     std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<services::TaskStateService> taskState,
-    frame::TaskBarIcon *taskBarIcon,
+    frm::TaskBarIcon *taskBarIcon,
     bool hasPendingPausedTask,
     const wxString& name)
     : pLogger(logger)

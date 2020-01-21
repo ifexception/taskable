@@ -21,7 +21,6 @@
 
 #include <string>
 
-#define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
 #include "../services/db_connection.h"

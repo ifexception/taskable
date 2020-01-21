@@ -23,7 +23,6 @@
 
 #include <wx/wx.h>
 
-#define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
 #include "../config/configuration.h"
@@ -43,14 +42,14 @@ public:
         std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
         std::shared_ptr<services::TaskStateService> taskState,
-        frame::TaskBarIcon *taskBarIcon,
+        frm::TaskBarIcon *taskBarIcon,
         const wxString& name = wxT("stopwatchtaskdlg"));
 
     explicit StopwatchTaskDialog(wxWindow* parent,
         std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
         std::shared_ptr<services::TaskStateService> taskState,
-        frame::TaskBarIcon *taskBarIcon,
+        frm::TaskBarIcon *taskBarIcon,
         bool hasPendingPausedTask,
         const wxString& name = wxT("stopwatchtaskdlg"));
 
@@ -103,7 +102,7 @@ private:
     std::unique_ptr<wxTimer> pNotificationTimer;
     std::unique_ptr<wxTimer> pHideWindowTimer;
     std::unique_ptr<wxTimer> pPausedTaskReminder;
-    frame::TaskBarIcon* pTaskBarIcon;
+    frm::TaskBarIcon* pTaskBarIcon;
 
     wxDateTime mStartTime;
     wxDateTime mEndTime;

@@ -25,7 +25,7 @@
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/clrpicker.h>
-#define FMT_HEADER_ONLY
+
 #include <spdlog/spdlog.h>
 
 #include "../models/categorymodel.h"

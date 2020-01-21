@@ -22,7 +22,7 @@
 #include <memory>
 
 #include <wx/wx.h>
-#define FMT_HEADER_ONLY
+
 #include <spdlog/spdlog.h>
 
 #include "../config/configuration.h"

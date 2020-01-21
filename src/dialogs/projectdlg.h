@@ -25,7 +25,6 @@
 #include <wx/wx.h>
 #include <wx/combobox.h>
 
-#define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
 #include "../models/projectmodel.h"

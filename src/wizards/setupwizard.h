@@ -16,10 +16,8 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//
-//
-//  Contact:
-//    szymonwelgus at gmail dot com
+
+#pragma once
 
 #include <memory>
 
@@ -27,7 +25,6 @@
 #include <wx/textctrl.h>
 #include <wx/wizard.h>
 
-#define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 
 #include "setupdatabase.h"

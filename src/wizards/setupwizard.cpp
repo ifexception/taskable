@@ -16,10 +16,6 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//
-//
-//  Contact:
-//    szymonwelgus at gmail dot com
 
 #include "setupwizard.h"
 
@@ -109,7 +105,7 @@ void SetupWizard::SetProjectDisplayName(const wxString& displayName)
 
 void SetupWizard::CreateDatabaseFile()
 {
-    const wxString& databaseFilename = common::GetDbFileName();
+    const wxString& databaseFilename = common::GetDatabaseFileName();
     wxFile file;
     file.Create(databaseFilename);
     file.Close();
@@ -117,7 +113,7 @@ void SetupWizard::CreateDatabaseFile()
 
 void SetupWizard::DeleteDatabaseFile()
 {
-    const wxString& databaseFilename = common::GetDbFileName();
+    const wxString& databaseFilename = common::GetDatabaseFileName();
     if (wxFileExists(databaseFilename)) {
         wxRemoveFile(databaseFilename);
     }
