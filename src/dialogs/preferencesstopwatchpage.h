@@ -28,7 +28,7 @@ namespace app::cfg
 class Configuration;
 }
 
-namespace app::dialog
+namespace app::dlg
 {
 class StopwatchPage final : public wxPanel
 {

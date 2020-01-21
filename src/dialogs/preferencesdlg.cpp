@@ -26,7 +26,7 @@
 #include "../config/configuration.h"
 #include "../frame/taskbaricon.h"
 
-namespace app::dialog
+namespace app::dlg
 {
 // clang-format off
 wxBEGIN_EVENT_TABLE(PreferencesDialog, wxPropertySheetDialog)
@@ -106,4 +106,4 @@ void PreferencesDialog::OnOk(wxCommandEvent& event)
 
     EndModal(wxID_OK);
 }
-} // namespace app::dialog
+} // namespace app::dlg

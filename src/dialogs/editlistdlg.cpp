@@ -37,7 +37,7 @@
 #include "../common/common.h"
 #include "../common/util.h"
 
-namespace app::dialog
+namespace app::dlg
 {
 // clang-format off
 wxBEGIN_EVENT_TABLE(EditListDialog, wxDialog)
@@ -402,4 +402,4 @@ wxSize CategoryStrategy::GetSize()
     return wxSize(360, 260);
 }
 
-} // namespace app::dialog
+} // namespace app::dlg

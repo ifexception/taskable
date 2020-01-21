@@ -22,7 +22,7 @@
 #include "../common/common.h"
 #include "../config/configuration.h"
 
-namespace app::dialog
+namespace app::dlg
 {
 GeneralPage::GeneralPage(wxWindow* parent, std::shared_ptr<cfg::Configuration> config)
     : wxPanel(parent, wxID_ANY)
@@ -135,4 +135,4 @@ void GeneralPage::OnShowInTrayCheck(wxCommandEvent& event)
         pCloseToTrayCtrl->Disable();
     }
 }
-} // namespace app::dialog
+} // namespace app::dlg

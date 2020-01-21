@@ -28,7 +28,7 @@ namespace app::cfg
 class Configuration;
 }
 
-namespace app::dialog
+namespace app::dlg
 {
 class DatabasePage final : public wxPanel
 {
@@ -61,4 +61,4 @@ private:
         IDC_BACKUP_PATH_BUTTON,
     };
 };
-} // namespace app::dialog
+} // namespace app::dlg

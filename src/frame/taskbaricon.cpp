@@ -67,19 +67,19 @@ wxMenu* TaskBarIcon::CreatePopupMenu()
 
 void TaskBarIcon::OnNewEntryTask(wxCommandEvent& WXUNUSED(event))
 {
-    dialog::TaskItemDialog entryTask(pParent, pLogger, pConfig, constants::TaskItemTypes::EntryTask);
+    dlg::TaskItemDialog entryTask(pParent, pLogger, pConfig, constants::TaskItemTypes::EntryTask);
     entryTask.ShowModal();
 }
 
 void TaskBarIcon::OnNewTimedTask(wxCommandEvent& WXUNUSED(event))
 {
-    dialog::TaskItemDialog timedTask(pParent, pLogger, pConfig, constants::TaskItemTypes::TimedTask);
+    dlg::TaskItemDialog timedTask(pParent, pLogger, pConfig, constants::TaskItemTypes::TimedTask);
     timedTask.ShowModal();
 }
 
 void TaskBarIcon::OnPreferences(wxCommandEvent& WXUNUSED(event))
 {
-    dialog::PreferencesDialog preferences(pParent, pConfig, this);
+    dlg::PreferencesDialog preferences(pParent, pConfig, this);
     preferences.ShowModal();
 }
 

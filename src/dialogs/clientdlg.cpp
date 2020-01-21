@@ -28,7 +28,7 @@
 #include "../common/util.h"
 #include "../models/employermodel.h"
 
-namespace app::dialog
+namespace app::dlg
 {
 const wxString& ClientDialog::DateLabel = wxT("Created %s | Updated %s");
 
@@ -299,4 +299,4 @@ void ClientDialog::OnIsActiveCheck(wxCommandEvent& event)
         pEmployerChoiceCtrl->Disable();
     }
 }
-} // namespace app::dialog
+} // namespace app::dlg

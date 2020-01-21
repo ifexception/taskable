@@ -29,7 +29,7 @@
 
 wxDEFINE_EVENT(START_NEW_STOPWATCH_TASK, wxCommandEvent);
 
-namespace app::dialog
+namespace app::dlg
 {
 static const wxString ElapsedTimeText = wxT("Elapsed Time: %s");
 static const wxString AccumulatedTimeText = wxT("Time accumulated thus far: %s");
@@ -374,13 +374,13 @@ void StopwatchTaskDialog::ExecuteStopProcedure()
         auto durationOfTask = pTaskState->GetAccumulatedTime();
 
         /* launch dialog */
-        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, constants::TaskItemTypes::EntryTask);
+        dlg::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, constants::TaskItemTypes::EntryTask);
         newTask.SetDurationFromStopwatchTask(durationOfTask);
         newTask.SetDescriptionFromStopwatchTask(pStopwatchDescription->GetValue());
         newTask.ShowModal();
     } else {
         /* launch dialog */
-        dialog::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, constants::TaskItemTypes::TimedTask);
+        dlg::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, constants::TaskItemTypes::TimedTask);
         newTask.SetTimesFromStopwatchTask(mStartTime, mEndTime);
         newTask.SetDescriptionFromStopwatchTask(pStopwatchDescription->GetValue());
         newTask.ShowModal();
@@ -445,4 +445,4 @@ void StopwatchTaskDialog::OnClose(wxCloseEvent& event)
     EndModal(wxID_CLOSE);
 }
 
-} // namespace app::dialog
+} // namespace app::dlg

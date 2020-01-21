@@ -37,7 +37,7 @@ class wxTimePickerCtrl;
 
 wxDECLARE_EVENT(EVT_TASK_ITEM_INSERTED, wxCommandEvent);
 
-namespace app::dialog
+namespace app::dlg
 {
 class TaskItemDialog : public wxDialog
 {
@@ -155,4 +155,4 @@ private:
     static const wxString CalculatedRateLabelBillableHourlyRate;
     static const wxString CalculatedRateLabelBillableDailyRate;
 };
-} // namespace app::dialog
+} // namespace app::dlg

@@ -28,7 +28,7 @@
 #include "../common/ids.h"
 #include "../common/util.h"
 
-namespace app::dialog
+namespace app::dlg
 {
 const wxString& EmployerDialog::DateLabel = wxT("Created %s | Updated %s");
 
@@ -254,4 +254,4 @@ bool EmployerDialog::TransferDataAndValidate()
 
     return true;
 }
-} // namespace app::dialog
+} // namespace app::dlg

@@ -30,7 +30,7 @@
 
 #include "../models/categorymodel.h"
 
-namespace app::dialog
+namespace app::dlg
 {
 class CategoriesDialog final : public wxDialog
 {
@@ -104,4 +104,4 @@ private:
 
     enum { IDC_PROJECTCHOICE = wxID_HIGHEST + 1, IDC_NAME, IDC_COLOR, IDC_ISACTIVE, IDC_LIST };
 };
-} // namespace app::dialog
+} // namespace app::dlg

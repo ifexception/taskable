@@ -30,7 +30,7 @@
 #include "../models/employermodel.h"
 #include "../models/clientmodel.h"
 
-namespace app::dialog
+namespace app::dlg
 {
 const wxString& ProjectDialog::DateLabel = wxT("Created %s | Updated %s");
 
@@ -761,4 +761,4 @@ bool ProjectDialog::TryTransferValuesFromControls()
     return true;
 }
 
-} // namespace app::dialog
+} // namespace app::dlg

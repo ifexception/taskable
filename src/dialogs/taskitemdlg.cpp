@@ -34,7 +34,7 @@
 
 wxDEFINE_EVENT(EVT_TASK_ITEM_INSERTED, wxCommandEvent);
 
-namespace app::dialog
+namespace app::dlg
 {
 static const wxString TaskContextWithoutClient = wxT("Capturing task for employer %s");
 static const wxString TaskContextWithClient = wxT("Capturing task for employer %s and client %s");
@@ -947,4 +947,4 @@ bool TaskItemDialog::TransferDataAndValidate()
 
     return true;
 }
-} // namespace app::dialog
+} // namespace app::dlg

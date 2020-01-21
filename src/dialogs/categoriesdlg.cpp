@@ -27,7 +27,7 @@
 #include "../common/common.h"
 #include "../common/util.h"
 
-namespace app::dialog
+namespace app::dlg
 {
 CategoriesDialog::CategoriesDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, const wxString& name)
     : pLogger(logger)
@@ -579,4 +579,4 @@ void CategoriesDialog::ResetControlValues()
     pNameTextCtrl->ChangeValue(wxGetEmptyString());
     pColorPickerCtrl->SetColour(*wxBLACK);
 }
-} // namespace app::dialog
+} // namespace app::dlg

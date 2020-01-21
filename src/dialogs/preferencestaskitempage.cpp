@@ -22,7 +22,7 @@
 #include "../common/common.h"
 #include "../config/configuration.h"
 
-namespace app::dialog
+namespace app::dlg
 {
 TaskItemPage::TaskItemPage(wxWindow* parent, std::shared_ptr<cfg::Configuration> config)
     : wxPanel(parent, wxID_ANY)
@@ -99,4 +99,4 @@ void TaskItemPage::OnTimeRoundingCheck(wxCommandEvent& event)
         pRoundOffToChoiceCtrl->Disable();
     }
 }
-} // namespace app::dialog
+} // namespace app::dlg

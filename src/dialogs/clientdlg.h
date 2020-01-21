@@ -27,7 +27,7 @@
 
 #include "../models/clientmodel.h"
 
-namespace app::dialog
+namespace app::dlg
 {
 class ClientDialog : public wxDialog
 {
@@ -80,4 +80,4 @@ private:
 
     static const wxString& DateLabel;
 };
-} // namespace app::dialog
+} // namespace app::dlg

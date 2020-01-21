@@ -28,7 +28,7 @@ namespace app::cfg
 class Configuration;
 }
 
-namespace app::dialog
+namespace app::dlg
 {
 class TaskItemPage final : public wxPanel
 {
@@ -55,4 +55,4 @@ private:
 
     enum { IDC_ENABLE_TIME_ROUNDING = wxID_HIGHEST + 1, IDC_ROUND_OFF_TO };
 };
-} // namespace app::dialog
+} // namespace app::dlg

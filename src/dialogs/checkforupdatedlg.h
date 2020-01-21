@@ -25,7 +25,7 @@
 
 wxDECLARE_EVENT(CHECK_UPDATE_THREAD_COMPLETED, wxThreadEvent);
 
-namespace app::dialog
+namespace app::dlg
 {
 class CheckForUpdateDialog;
 
@@ -89,4 +89,4 @@ private:
 
     enum { IDC_CHECK_NEW_RELEASE = wxID_HIGHEST + 1, IDC_NEW_RELEASE_AVAILABLE, IDC_NEW_RELEASE_LINK, IDC_GAUGE };
 };
-} // namespace app::dialog
+} // namespace app::dlg

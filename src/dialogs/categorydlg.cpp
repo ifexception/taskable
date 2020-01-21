@@ -29,7 +29,7 @@
 #include "../common/common.h"
 #include "../common/util.h"
 
-namespace app::dialog
+namespace app::dlg
 {
 const wxString& CategoryDialog::DateLabel = wxT("Created %s | Updated %s");
 
@@ -280,4 +280,4 @@ void CategoryDialog::OnIsActiveCheck(wxCommandEvent& event)
     }
 }
 
-} // namespace app::dialog
+} // namespace app::dlg

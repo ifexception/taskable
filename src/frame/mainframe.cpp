@@ -339,61 +339,61 @@ void MainFrame::OnClose(wxCloseEvent& event)
 
 void MainFrame::OnNewEntryTask(wxCommandEvent& event)
 {
-    dialog::TaskItemDialog entryTask(this, pLogger, pConfig, constants::TaskItemTypes::EntryTask);
+    dlg::TaskItemDialog entryTask(this, pLogger, pConfig, constants::TaskItemTypes::EntryTask);
     entryTask.ShowModal();
 }
 
 void MainFrame::OnNewTimedTask(wxCommandEvent& event)
 {
-    dialog::TaskItemDialog timedTask(this, pLogger, pConfig, constants::TaskItemTypes::TimedTask);
+    dlg::TaskItemDialog timedTask(this, pLogger, pConfig, constants::TaskItemTypes::TimedTask);
     timedTask.ShowModal();
 }
 
 void MainFrame::OnNewEmployer(wxCommandEvent& event)
 {
-    dialog::EmployerDialog newEmployer(this, pLogger);
+    dlg::EmployerDialog newEmployer(this, pLogger);
     newEmployer.ShowModal();
 }
 
 void MainFrame::OnNewClient(wxCommandEvent& event)
 {
-    dialog::ClientDialog newClient(this, pLogger);
+    dlg::ClientDialog newClient(this, pLogger);
     newClient.ShowModal();
 }
 
 void MainFrame::OnNewProject(wxCommandEvent& event)
 {
-    dialog::ProjectDialog newProject(this, pLogger);
+    dlg::ProjectDialog newProject(this, pLogger);
     newProject.ShowModal();
 }
 
 void MainFrame::OnNewCategory(wxCommandEvent& event)
 {
-    dialog::CategoriesDialog categoriesDialog(this, pLogger);
+    dlg::CategoriesDialog categoriesDialog(this, pLogger);
     categoriesDialog.ShowModal();
 }
 
 void MainFrame::OnEditEmployer(wxCommandEvent& event)
 {
-    dialog::EditListDialog employerEdit(this, dialog::DialogType::Employer, pLogger);
+    dlg::EditListDialog employerEdit(this, dlg::DialogType::Employer, pLogger);
     employerEdit.ShowModal();
 }
 
 void MainFrame::OnEditClient(wxCommandEvent& event)
 {
-    dialog::EditListDialog clientEdit(this, dialog::DialogType::Client, pLogger);
+    dlg::EditListDialog clientEdit(this, dlg::DialogType::Client, pLogger);
     clientEdit.ShowModal();
 }
 
 void MainFrame::OnEditProject(wxCommandEvent& event)
 {
-    dialog::EditListDialog projectEdit(this, dialog::DialogType::Project, pLogger);
+    dlg::EditListDialog projectEdit(this, dlg::DialogType::Project, pLogger);
     projectEdit.ShowModal();
 }
 
 void MainFrame::OnEditCategory(wxCommandEvent& event)
 {
-    dialog::EditListDialog categoryEdit(this, dialog::DialogType::Category, pLogger);
+    dlg::EditListDialog categoryEdit(this, dlg::DialogType::Category, pLogger);
     categoryEdit.ShowModal();
 }
 
@@ -415,7 +415,7 @@ void MainFrame::OnItemDoubleClick(wxListEvent& event)
     constants::TaskItemTypes type = static_cast<constants::TaskItemTypes>(taskItemTypeId);
     wxDateTime dateContext = pDatePickerCtrl->GetValue();
 
-    dialog::TaskItemDialog editTask(this, pLogger, pConfig, type, true, taskItemId, dateContext);
+    dlg::TaskItemDialog editTask(this, pLogger, pConfig, type, true, taskItemId, dateContext);
     editTask.ShowModal();
 }
 
@@ -445,13 +445,13 @@ void MainFrame::OnIconize(wxIconizeEvent& event)
 
 void MainFrame::OnPreferences(wxCommandEvent& event)
 {
-    dialog::PreferencesDialog preferences(this, pConfig, pTaskBarIcon);
+    dlg::PreferencesDialog preferences(this, pConfig, pTaskBarIcon);
     preferences.ShowModal();
 }
 
 void MainFrame::OnTaskStopwatch(wxCommandEvent& event)
 {
-    dialog::StopwatchTaskDialog stopwatchTask(this, pConfig, pLogger, pTaskState, pTaskBarIcon);
+    dlg::StopwatchTaskDialog stopwatchTask(this, pConfig, pLogger, pTaskState, pTaskBarIcon);
     stopwatchTask.Launch();
 }
 
@@ -472,14 +472,14 @@ void MainFrame::OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event)
     pTaskStorage->Store(pTaskState);
     pTaskState->mTimes.clear();
 
-    dialog::StopwatchTaskDialog stopwatchTask(
+    dlg::StopwatchTaskDialog stopwatchTask(
         this, pConfig, pLogger, pTaskState, pTaskBarIcon, /* hasPendingPausedTask */ true);
     stopwatchTask.Launch();
 
     pTaskState->mTimes.clear();
     pTaskStorage->Restore(pTaskState);
 
-    dialog::StopwatchTaskDialog stopwatchPausedTask(this, pConfig, pLogger, pTaskState, pTaskBarIcon);
+    dlg::StopwatchTaskDialog stopwatchPausedTask(this, pConfig, pLogger, pTaskState, pTaskBarIcon);
     stopwatchPausedTask.Relaunch();
 
     pTaskStorage->mTimes.clear();
@@ -487,7 +487,7 @@ void MainFrame::OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event)
 
 void MainFrame::OnCheckForUpdate(wxCommandEvent& event)
 {
-    dialog::CheckForUpdateDialog checkForUpdate(this);
+    dlg::CheckForUpdateDialog checkForUpdate(this);
     checkForUpdate.LaunchModal();
 }
 

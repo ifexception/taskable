@@ -41,7 +41,7 @@ class TaskBarIcon;
 }
 } // namespace app
 
-namespace app::dialog
+namespace app::dlg
 {
 class PreferencesDialog final : public wxPropertySheetDialog
 {
@@ -77,4 +77,4 @@ private:
     StopwatchPage* pStopwatchPage;
     TaskItemPage* pTaskItemPage;
 };
-} // namespace app::dialog
+} // namespace app::dlg

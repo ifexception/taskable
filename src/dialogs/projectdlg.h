@@ -29,7 +29,7 @@
 
 #include "../models/projectmodel.h"
 
-namespace app::dialog
+namespace app::dlg
 {
 class ProjectDialog final : public wxDialog
 {
@@ -109,4 +109,4 @@ private:
 
     static const wxString& DateLabel;
 };
-} // namespace app::dialog
+} // namespace app::dlg

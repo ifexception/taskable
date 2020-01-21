@@ -31,7 +31,7 @@
 
 wxDECLARE_EVENT(START_NEW_STOPWATCH_TASK, wxCommandEvent);
 
-namespace app::dialog
+namespace app::dlg
 {
 class StopwatchTaskDialog : public wxDialog
 {
@@ -125,4 +125,4 @@ private:
         IDC_CANCEL
     };
 };
-} // namespace app::dialog
+} // namespace app::dlg

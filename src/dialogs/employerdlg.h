@@ -27,7 +27,7 @@
 
 #include "../models/employermodel.h"
 
-namespace app::dialog
+namespace app::dlg
 {
 class EmployerDialog final : public wxDialog
 {
@@ -86,4 +86,4 @@ private:
 
     static const wxString& DateLabel;
 };
-} // namespace app::dialog
+} // namespace app::dlg

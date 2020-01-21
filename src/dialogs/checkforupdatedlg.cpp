@@ -32,7 +32,7 @@ using json = nlohmann::json;
 
 wxDEFINE_EVENT(CHECK_UPDATE_THREAD_COMPLETED, wxThreadEvent);
 
-namespace app::dialog
+namespace app::dlg
 {
 CheckForUpdateThread::CheckForUpdateThread(CheckForUpdateDialog* handler)
     : wxThread(wxTHREAD_DETACHED)
@@ -260,4 +260,4 @@ void CheckForUpdateDialog::OnClose(wxCloseEvent& event)
     ThreadCleanupProcedure();
 }
 
-} // namespace app::dialog
+} // namespace app::dlg

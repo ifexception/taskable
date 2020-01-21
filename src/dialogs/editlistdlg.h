@@ -24,7 +24,7 @@
 
 #include <spdlog/spdlog.h>
 
-namespace app::dialog
+namespace app::dlg
 {
 enum class DialogType { Employer, Client, Project, Category };
 
@@ -132,4 +132,4 @@ private:
 
     enum { IDC_LIST  = wxID_HIGHEST + 1};
 };
-} // namespace app::dialog
+} // namespace app::dlg
