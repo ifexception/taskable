@@ -16,19 +16,16 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//
-//
-//  Contact:
-//    szymonwelgus at gmail dot com
 
 #pragma once
 
 #include <memory>
 
+#include <sqlite_modern_cpp.h>
+
 #include <wx/wx.h>
 #include <wx/snglinst.h>
 
-#define FMT_HEADER_ONLY
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/daily_file_sink.h>
 
@@ -45,16 +42,23 @@ public:
     bool OnInit() override;
 
 private:
-    bool OnInitializationChecks();
+    bool FirstStartupInitialization();
+    bool StartupInitialization();
+
     bool CreateLogsDirectory();
     bool InitializeLogging();
     bool DatabaseFileExists();
     bool ConfigurationFileExists();
+    void InitializeSqlite();
     bool IsInstalled();
     bool ConfigureRegistry();
+    bool ConfigureBackups();
+    bool CreateBackupDirectoryIfNotExists();
 
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
     std::unique_ptr<wxSingleInstanceChecker> pInstanceChecker;
+
+    sqlite::database* pDatabase;
 };
 } // namespace app

@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <sqlite_modern_cpp/errors.h>
+
 #include <wx/aboutdlg.h>
 #include <wx/clipbrd.h>
 #include <wx/taskbarbutton.h>
@@ -46,10 +47,10 @@
 
 #include "../dialogs/preferencesdlg.h"
 
-#include "../wizards/setupwizard.h"
+#include "../wizards/databaserestorewizard.h"
 #include "taskbaricon.h"
 
-namespace app::frame
+namespace app::frm
 {
 // clang-format off
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
@@ -65,9 +66,10 @@ EVT_MENU(ids::ID_EDIT_EMPLOYER, MainFrame::OnEditEmployer)
 EVT_MENU(ids::ID_EDIT_CLIENT, MainFrame::OnEditClient)
 EVT_MENU(ids::ID_EDIT_PROJECT, MainFrame::OnEditProject)
 EVT_MENU(ids::ID_EDIT_CATEGORY, MainFrame::OnEditCategory)
-EVT_MENU(ids::ID_SETTINGS, MainFrame::OnPreferences)
+EVT_MENU(ids::ID_PREFERENCES, MainFrame::OnPreferences)
 EVT_MENU(ids::ID_STOPWATCH_TASK, MainFrame::OnTaskStopwatch)
 EVT_MENU(ids::ID_CHECK_FOR_UPDATE, MainFrame::OnCheckForUpdate)
+EVT_MENU(ids::ID_RESTORE_DATABASE, MainFrame::OnRestoreDatabase)
 EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
 EVT_LIST_ITEM_RIGHT_CLICK(MainFrame::IDC_LIST, MainFrame::OnItemRightClick)
 EVT_COMMAND(wxID_ANY, EVT_TASK_ITEM_INSERTED, MainFrame::OnTaskInserted)
@@ -77,12 +79,9 @@ EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 EVT_SIZE(MainFrame::OnResize)
 wxEND_EVENT_TABLE()
 
-MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
-    std::shared_ptr<spdlog::logger> logger,
-    const wxString& name)
-    : wxFrame(nullptr, wxID_ANY, common::GetProgramName(), wxDefaultPosition, wxSize(600, 500), wxDEFAULT_FRAME_STYLE, name)
-    , pLogger(logger)
-    , pConfig(config)
+MainFrame::MainFrame()
+    : pLogger(nullptr)
+    , pConfig(nullptr)
     , pTaskState(std::make_shared<services::TaskStateService>())
     , pTaskStorage(std::make_unique<services::TaskStorage>())
     , pDatePickerCtrl(nullptr)
@@ -90,10 +89,23 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
     , pListCtrl(nullptr)
     , pStatusBar(nullptr)
     , pTaskBarIcon(nullptr)
+    , pDatabase(nullptr)
     , bHasPendingTaskToResume(false)
     , bHasInitialized(false)
+{}
 // clang-format on
+
+MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
+    std::shared_ptr<spdlog::logger> logger,
+    sqlite::database* database,
+    const wxString& name)
+    : MainFrame()
 {
+    pLogger = logger;
+    pConfig = config;
+    wxFrame::Create(
+        nullptr, wxID_ANY, common::GetProgramName(), wxDefaultPosition, wxSize(600, 500), wxDEFAULT_FRAME_STYLE, name);
+    pDatabase = database;
 }
 
 MainFrame::~MainFrame()
@@ -104,14 +116,6 @@ MainFrame::~MainFrame()
     if (pTaskBarIcon != nullptr) {
         delete pTaskBarIcon;
     }
-}
-
-bool MainFrame::RunWizard()
-{
-    auto wizard = new wizard::SetupWizard(this, pLogger);
-    wizard->CenterOnParent();
-    bool wizardSetupSuccess = wizard->Run();
-    return wizardSetupSuccess;
 }
 
 bool MainFrame::CreateFrame()
@@ -127,13 +131,20 @@ bool MainFrame::CreateFrame()
     if (pConfig->IsShowInTray()) {
         pTaskBarIcon->SetTaskBarIcon();
     }
+
     return success;
+}
+
+void MainFrame::ResetDatabaseHandleOnDatabaseRestore(sqlite::database* database)
+{
+    pDatabase = database;
 }
 
 bool MainFrame::Create()
 {
     CreateControls();
     DataToControls();
+
     return true;
 }
 
@@ -167,7 +178,7 @@ void MainFrame::CreateControls()
     fileMenu->Append(ids::ID_NEW_PROJECT, wxT("New &Project"), wxT("Create new project"));
     fileMenu->Append(ids::ID_NEW_CATEGORY, wxT("New C&ategory"), wxT("Create new category"));
     fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_EXIT);
+    fileMenu->Append(wxID_EXIT, wxT("Exit"), wxT("Exit the application"));
 
     /* Edit Menu Control */
     auto editMenu = new wxMenu();
@@ -176,10 +187,16 @@ void MainFrame::CreateControls()
     editMenu->Append(ids::ID_EDIT_PROJECT, wxT("Edit &Project"), wxT("Select a project to edit"));
     editMenu->Append(ids::ID_EDIT_CATEGORY, wxT("Edit C&ategory"), wxT("Select a category to edit"));
     editMenu->AppendSeparator();
-    editMenu->Append(ids::ID_SETTINGS, wxT("&Preferences\tCtrl-P"), wxT("Edit application preferences"));
+    editMenu->Append(ids::ID_PREFERENCES, wxT("&Preferences\tCtrl-P"), wxT("Edit application preferences"));
 
     /* Export Menu Control */
     auto exportMenu = new wxMenu();
+
+    /* Tools Menu Control */
+    auto toolsMenu = new wxMenu();
+    auto restoreMenuItem = toolsMenu->Append(
+        ids::ID_RESTORE_DATABASE, wxT("Restore Database"), wxT("Restore database to a previous point"));
+    restoreMenuItem->SetBitmap(common::GetDatabaseRestoreIcon());
 
     /* Help Menu Control */
     wxMenu* helpMenu = new wxMenu();
@@ -194,6 +211,7 @@ void MainFrame::CreateControls()
     menuBar->Append(fileMenu, wxT("File"));
     menuBar->Append(editMenu, wxT("Edit"));
     menuBar->Append(exportMenu, wxT("Export"));
+    menuBar->Append(toolsMenu, wxT("Tools"));
     menuBar->Append(helpMenu, wxT("Help"));
 
     SetMenuBar(menuBar);
@@ -202,7 +220,7 @@ void MainFrame::CreateControls()
     wxAcceleratorEntry entries[4];
     entries[0].Set(wxACCEL_CTRL, (int) 'N', ids::ID_NEW_ENTRY_TASK);
     entries[1].Set(wxACCEL_CTRL, (int) 'T', ids::ID_NEW_TIMED_TASK);
-    entries[2].Set(wxACCEL_CTRL, (int) 'P', ids::ID_SETTINGS);
+    entries[2].Set(wxACCEL_CTRL, (int) 'P', ids::ID_PREFERENCES);
     entries[3].Set(wxACCEL_CTRL, (int) 'W', ids::ID_STOPWATCH_TASK);
 
     wxAcceleratorTable table(ARRAYSIZE(entries), entries);
@@ -454,7 +472,8 @@ void MainFrame::OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event)
     pTaskStorage->Store(pTaskState);
     pTaskState->mTimes.clear();
 
-    dialog::StopwatchTaskDialog stopwatchTask(this, pConfig, pLogger, pTaskState, pTaskBarIcon, /* hasPendingPausedTask */ true);
+    dialog::StopwatchTaskDialog stopwatchTask(
+        this, pConfig, pLogger, pTaskState, pTaskBarIcon, /* hasPendingPausedTask */ true);
     stopwatchTask.Launch();
 
     pTaskState->mTimes.clear();
@@ -493,6 +512,24 @@ void MainFrame::OnResize(wxSizeEvent& event)
     }
 
     event.Skip();
+}
+
+void MainFrame::OnRestoreDatabase(wxCommandEvent& event)
+{
+    if (pConfig->IsBackupEnabled()) {
+        auto wizard = new wizard::DatabaseRestoreWizard(this, pLogger, pConfig, pDatabase);
+        wizard->CenterOnParent();
+        bool wizardSetupSuccess = wizard->Run();
+        if (wizardSetupSuccess) {
+            pListCtrl->ClearAll();
+            RefreshItems();
+        }
+    } else {
+        wxMessageBox(wxT("Error! Backup option is turned off\n"
+                         "and database cannot be restored."),
+            common::GetProgramName(),
+            wxICON_WARNING | wxOK_DEFAULT);
+    }
 }
 
 void MainFrame::CalculateTotalTime(wxDateTime date)
@@ -537,10 +574,12 @@ void MainFrame::RefreshItems(wxDateTime date)
     for (const auto& taskItem : taskItems) {
         listIndex = pListCtrl->InsertItem(columnIndex++, taskItem->GetProject()->GetDisplayName());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetTask()->GetTaskDate().FormatISODate());
-        pListCtrl->SetItem(
-            listIndex, columnIndex++, taskItem->GetStartTime() ? wxString(taskItem->GetStartTime()->FormatISOTime()) : wxGetEmptyString());
-        pListCtrl->SetItem(
-            listIndex, columnIndex++, taskItem->GetEndTime() ? wxString(taskItem->GetEndTime()->FormatISOTime()) : wxGetEmptyString());
+        pListCtrl->SetItem(listIndex,
+            columnIndex++,
+            taskItem->GetStartTime() ? wxString(taskItem->GetStartTime()->FormatISOTime()) : wxGetEmptyString());
+        pListCtrl->SetItem(listIndex,
+            columnIndex++,
+            taskItem->GetEndTime() ? wxString(taskItem->GetEndTime()->FormatISOTime()) : wxGetEmptyString());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDuration());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetCategory()->GetName());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDescription());
@@ -554,4 +593,4 @@ void MainFrame::RefreshItems(wxDateTime date)
         columnIndex = 0;
     }
 }
-} // namespace app::frame
+} // namespace app::frm

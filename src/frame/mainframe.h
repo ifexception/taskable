@@ -21,34 +21,39 @@
 
 #include <memory>
 
+#include <sqlite_modern_cpp.h>
+
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
-#define FMT_HEADER_ONLY
+
 #include <spdlog/spdlog.h>
 
 #include "../config/configuration.h"
 #include "../services/taskstateservice.h"
 #include "../services/taskstorageservice.h"
 
-namespace app::frame
+namespace app::frm
 {
 class TaskBarIcon;
 
 class MainFrame : public wxFrame
 {
 public:
+    MainFrame();
     MainFrame(std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
+        sqlite::database* database,
         const wxString& name = wxT("mainframe"));
     MainFrame(const MainFrame&) = delete;
     virtual ~MainFrame();
 
     MainFrame& operator=(const MainFrame&) = delete;
 
-    bool RunWizard();
     bool CreateFrame();
+
+    void ResetDatabaseHandleOnDatabaseRestore(sqlite::database* database);
 
 private:
     wxDECLARE_EVENT_TABLE();
@@ -80,6 +85,7 @@ private:
     void OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event);
     void OnCheckForUpdate(wxCommandEvent& event);
     void OnResize(wxSizeEvent& event);
+    void OnRestoreDatabase(wxCommandEvent& event);
 
     void CalculateTotalTime(wxDateTime date = wxDateTime::Now());
     void RefreshItems(wxDateTime date = wxDateTime::Now());
@@ -93,9 +99,12 @@ private:
     wxListCtrl* pListCtrl;
     wxStatusBar* pStatusBar;
     TaskBarIcon* pTaskBarIcon;
+
+    sqlite::database* pDatabase;
+
     bool bHasPendingTaskToResume;
     bool bHasInitialized;
 
     enum { IDC_GO_TO_DATE = wxID_HIGHEST + 1, IDC_HOURS_TEXT, IDC_LIST };
 };
-} // namespace app::frame
+} // namespace app::frm

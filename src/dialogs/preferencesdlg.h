@@ -35,7 +35,7 @@ namespace cfg
 {
 class Configuration;
 }
-namespace frame
+namespace frm
 {
 class TaskBarIcon;
 }
@@ -49,7 +49,7 @@ public:
     PreferencesDialog() = delete;
     PreferencesDialog(wxWindow* parent,
         std::shared_ptr<cfg::Configuration> config,
-        frame::TaskBarIcon* taskBarIcon,
+        frm::TaskBarIcon* taskBarIcon,
         const wxString& name = wxT("preferencesdlg"));
     virtual ~PreferencesDialog() = default;
 
@@ -69,7 +69,7 @@ private:
     void OnOk(wxCommandEvent& event);
 
     std::shared_ptr<cfg::Configuration> pConfig;
-    frame::TaskBarIcon* pTaskBarIcon;
+    frm::TaskBarIcon* pTaskBarIcon;
 
     wxWindow* pParent;
     GeneralPage* pGeneralPage;

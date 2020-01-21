@@ -49,6 +49,7 @@ set (SRC
 
     "wizards/setupwizard.cpp"
     "wizards/setupdatabase.cpp"
+    "wizards/databaserestorewizard.cpp"
 
     "dialogs/employerdlg.cpp"
     "models/employermodel.cpp"

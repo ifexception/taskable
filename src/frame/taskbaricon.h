@@ -23,12 +23,12 @@
 
 #include <wx/wx.h>
 #include <wx/taskbar.h>
-#define FMT_HEADER_ONLY
+
 #include <spdlog/spdlog.h>
 
 #include "../config/configuration.h"
 
-namespace app::frame
+namespace app::frm
 {
 class TaskBarIcon : public wxTaskBarIcon
 {
@@ -55,4 +55,4 @@ private:
 
     enum { ID_ADD_ENTRY_TASK = wxID_HIGHEST + 1, ID_ADD_TIMED_TASK, ID_SETTINGS };
 };
-} // namespace app::frame
+} // namespace app::frm

@@ -35,7 +35,7 @@ wxEND_EVENT_TABLE()
 
 PreferencesDialog::PreferencesDialog(wxWindow* parent,
     std::shared_ptr<cfg::Configuration> config,
-    frame::TaskBarIcon* taskBarIcon,
+    frm::TaskBarIcon* taskBarIcon,
     const wxString& name)
     : pConfig(config)
     , pTaskBarIcon(taskBarIcon)

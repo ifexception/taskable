@@ -28,6 +28,7 @@
 #include "../../res/entry-task.xpm"
 #include "../../res/timed-task.xpm"
 #include "../../res/stopwatch.xpm"
+#include "../../res/database-restore.xpm"
 
 const char** app::common::GetProgramIcon()
 {
@@ -59,6 +60,11 @@ const char** app::common::GetStopwatchIcon()
     return stopwatchxpm;
 }
 
+const char** app::common::GetDatabaseRestoreIcon()
+{
+    return database_restore;
+}
+
 std::string app::common::GetLicense()
 {
     return "Taskable is a desktop that aids you in tracking your timesheets"
@@ -87,7 +93,7 @@ wxString app::common::GetProgramName()
     return wxT("Taskable");
 }
 
-wxString app::common::GetDbFileName()
+wxString app::common::GetDatabaseFileName()
 {
     return wxT("taskable.db");
 }

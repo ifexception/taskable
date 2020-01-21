@@ -68,7 +68,7 @@ void DatabasePage::CreateControls()
     pBackupPathTextCtrl->SetEditable(false);
     gridSizer->Add(pBackupPathTextCtrl, common::sizers::ControlDefault);
 
-    pBrowseBackupPathButton = new wxButton(databaseSettingsBox, IDC_BACKUP_PATH_BUTTON, wxT("Browse"));
+    pBrowseBackupPathButton = new wxButton(databaseSettingsBox, IDC_BACKUP_PATH_BUTTON, wxT("Browse..."));
     gridSizer->Add(pBrowseBackupPathButton, common::sizers::ControlDefault);
 
     sizer->Add(databaseSettingsSizer, 0, wxLEFT | wxRIGHT | wxEXPAND, 5);
@@ -107,14 +107,22 @@ void DatabasePage::OnBackupDatabaseCheck(wxCommandEvent& event)
 
 void DatabasePage::OnOpenDirectory(wxCommandEvent& event)
 {
-    auto openDirDialog =
-        new wxDirDialog(this, wxT("Select a Backup directory"), wxEmptyString, wxDD_DEFAULT_STYLE, wxDefaultPosition);
-    auto res = openDirDialog->ShowModal();
-    if (res == wxID_OK) {
-        auto fileLocation = openDirDialog->GetPath(); // TODO: append file name with bak extension
-        pBackupPathTextCtrl->SetValue(fileLocation);
-        pBackupPathTextCtrl->SetToolTip(fileLocation);
+    wxString pathDirectory;
+    if (pConfig->GetBackupPath().length() == 0) {
+        pathDirectory = wxStandardPaths::Get().GetUserLocalDataDir();
+    } else {
+        pathDirectory = pConfig->GetBackupPath();
     }
+    auto openDirDialog =
+        new wxDirDialog(this, wxT("Select a Backup Directory"), pathDirectory, wxDD_DEFAULT_STYLE, wxDefaultPosition);
+    int res = openDirDialog->ShowModal();
+
+    if (res == wxID_OK) {
+        auto selectedBackupPath = openDirDialog->GetPath();
+        pBackupPathTextCtrl->SetValue(selectedBackupPath);
+        pBackupPathTextCtrl->SetToolTip(selectedBackupPath);
+    }
+
     openDirDialog->Destroy();
 }
 } // namespace app::dialog

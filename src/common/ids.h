@@ -22,35 +22,38 @@
 namespace app::ids
 {
 enum class MenuIds : int {
-    NewEmployerId = 1,
-    NewClientId = 2,
-    NewProjectId = 3,
-    NewEntryTaskId = 4,
-    NewTimedTaskId = 5,
-    NewCategoryId = 6,
-    EditEmployerId = 7,
-    EditClientId = 8,
-    EditProjectId = 9,
-    EditCategoryId = 10,
-    SettingsId = 11,
-    StopwatchTaskId = 12,
-    CheckForUpdateId = 13
+    File_NewEmployerId = 1,
+    File_NewClientId = 2,
+    File_NewProjectId = 3,
+    File_NewEntryTaskId = 4,
+    File_NewTimedTaskId = 5,
+    File_NewCategoryId = 6,
+    Edit_EditEmployerId = 7,
+    Edit_EditClientId = 8,
+    Edit_EditProjectId = 9,
+    Edit_EditCategoryId = 10,
+    Edit_PreferencesId = 11,
+    File_StopwatchTaskId = 12,
+    Help_CheckForUpdateId = 13,
+    Tools_RestoreDatabaseId=14,
 };
 
-static const int ID_NEW_ENTRY_TASK = static_cast<int>(ids::MenuIds::NewEntryTaskId);
-static const int ID_NEW_TIMED_TASK = static_cast<int>(ids::MenuIds::NewTimedTaskId);
-static const int ID_NEW_EMPLOYER = static_cast<int>(ids::MenuIds::NewEmployerId);
-static const int ID_NEW_CLIENT = static_cast<int>(ids::MenuIds::NewClientId);
-static const int ID_NEW_PROJECT = static_cast<int>(ids::MenuIds::NewProjectId);
-static const int ID_NEW_CATEGORY = static_cast<int>(ids::MenuIds::NewCategoryId);
-static const int ID_STOPWATCH_TASK = static_cast<int>(ids::MenuIds::StopwatchTaskId);
+static const int ID_NEW_ENTRY_TASK = static_cast<int>(ids::MenuIds::File_NewEntryTaskId);
+static const int ID_NEW_TIMED_TASK = static_cast<int>(ids::MenuIds::File_NewTimedTaskId);
+static const int ID_NEW_EMPLOYER = static_cast<int>(ids::MenuIds::File_NewEmployerId);
+static const int ID_NEW_CLIENT = static_cast<int>(ids::MenuIds::File_NewClientId);
+static const int ID_NEW_PROJECT = static_cast<int>(ids::MenuIds::File_NewProjectId);
+static const int ID_NEW_CATEGORY = static_cast<int>(ids::MenuIds::File_NewCategoryId);
+static const int ID_STOPWATCH_TASK = static_cast<int>(ids::MenuIds::File_StopwatchTaskId);
 
-static const int ID_EDIT_EMPLOYER = static_cast<int>(MenuIds::EditEmployerId);
-static const int ID_EDIT_CLIENT = static_cast<int>(MenuIds::EditClientId);
-static const int ID_EDIT_PROJECT = static_cast<int>(MenuIds::EditProjectId);
-static const int ID_EDIT_CATEGORY = static_cast<int>(MenuIds::EditCategoryId);
+static const int ID_EDIT_EMPLOYER = static_cast<int>(MenuIds::Edit_EditEmployerId);
+static const int ID_EDIT_CLIENT = static_cast<int>(MenuIds::Edit_EditClientId);
+static const int ID_EDIT_PROJECT = static_cast<int>(MenuIds::Edit_EditProjectId);
+static const int ID_EDIT_CATEGORY = static_cast<int>(MenuIds::Edit_EditCategoryId);
 
-static const int ID_SETTINGS = static_cast<int>(MenuIds::SettingsId);
+static const int ID_PREFERENCES = static_cast<int>(MenuIds::Edit_PreferencesId);
 
-static const int ID_CHECK_FOR_UPDATE = static_cast<int>(MenuIds::CheckForUpdateId);
+static const int ID_CHECK_FOR_UPDATE = static_cast<int>(MenuIds::Help_CheckForUpdateId);
+
+static const int ID_RESTORE_DATABASE = static_cast<int>(MenuIds::Tools_RestoreDatabaseId);
 } // namespace app::ids

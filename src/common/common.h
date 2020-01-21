@@ -52,6 +52,7 @@ extern const char** GetCheckForUpdateIcon();
 extern const char** GetEntryTaskIcon();
 extern const char** GetTimedTaskIcon();
 extern const char** GetStopwatchIcon();
+extern const char** GetDatabaseRestoreIcon();
 
 std::string GetLicense();
 
@@ -59,7 +60,7 @@ wxString GetVersion();
 
 wxString GetProgramName();
 
-wxString GetDbFileName();
+wxString GetDatabaseFileName();
 
 wxString GetConfigFileName();
 } // namespace app::common

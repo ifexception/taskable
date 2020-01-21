@@ -31,11 +31,12 @@ db_connection& db_connection::get_instance()
 
 sqlite::database db_connection::get_handle()
 {
+    auto con = mDatabase.connection();
     return mDatabase;
 }
 
 db_connection::db_connection()
-    : mDatabase(common::GetDbFileName().ToStdString(),
+    : mDatabase(common::GetDatabaseFileName().ToStdString(),
           sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 })
 {
 }

@@ -25,7 +25,7 @@
 #include "../dialogs/taskitemdlg.h"
 #include "../dialogs/preferencesdlg.h"
 
-namespace app::frame
+namespace app::frm
 {
 // clang-format off
 wxBEGIN_EVENT_TABLE(TaskBarIcon, wxTaskBarIcon)
@@ -95,4 +95,4 @@ void TaskBarIcon::OnLeftButtonDown(wxTaskBarIconEvent& WXUNUSED(event))
     pParent->Raise();
     pParent->Show();
 }
-} // namespace app::frame
+} // namespace app::frm
