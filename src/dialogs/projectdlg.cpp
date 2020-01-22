@@ -151,6 +151,7 @@ void ProjectDialog::CreateControls()
     wxArrayString allowedChars;
     allowedChars.Add(wxT(" "));
     allowedChars.Add(wxT(":"));
+    allowedChars.Add(wxT("-"));
     nameValidator.SetIncludes(allowedChars);
 
     pNameTextCtrl = new wxTextCtrl(projectDetailsPanel,
