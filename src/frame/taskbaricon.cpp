@@ -38,10 +38,12 @@ wxEND_EVENT_TABLE()
 
 TaskBarIcon::TaskBarIcon(wxFrame* parent,
     std::shared_ptr<cfg::Configuration> config,
-    std::shared_ptr<spdlog::logger> logger)
+    std::shared_ptr<spdlog::logger> logger,
+    sqlite::database* database)
     : pParent(parent)
     , pLogger(logger)
     , pConfig(config)
+    , pDatabase(database)
 // clang-format on
 {
 }
@@ -79,7 +81,7 @@ void TaskBarIcon::OnNewTimedTask(wxCommandEvent& WXUNUSED(event))
 
 void TaskBarIcon::OnPreferences(wxCommandEvent& WXUNUSED(event))
 {
-    dlg::PreferencesDialog preferences(pParent, pConfig, this);
+    dlg::PreferencesDialog preferences(pParent, pConfig, pLogger, this, pDatabase);
     preferences.ShowModal();
 }
 

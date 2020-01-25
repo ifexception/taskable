@@ -23,11 +23,14 @@
 
 #include "application.h"
 
+#include <algorithm>
+
 #include <wx/msw/registry.h>
 
 #include "common/common.h"
 #include "common/constants.h"
 #include "frame/mainframe.h"
+#include "services/databasebackup.h"
 #include "wizards/setupwizard.h"
 #include "wizards/databaserestorewizard.h"
 
@@ -57,46 +60,106 @@ bool Application::OnInit()
     }
 #endif // _DEBUG
 
-    bool logDirectoryCreated = CreateLogsDirectory();
-    if (!logDirectoryCreated) {
+    if (!InitializeLogging()) {
         return false;
     }
 
-    bool loggingInitialized = InitializeLogging();
-    if (!loggingInitialized) {
-        return false;
-    }
-
-    bool isInstalled = IsInstalled();
-    if (!isInstalled) {
-        auto wizard = new wizard::SetupWizard(nullptr, pLogger);
-        wizard->CenterOnParent();
-        bool wizardSetupSuccess = wizard->Run();
-
-        if (!wizardSetupSuccess) {
+    if (IsInstalled()) {
+        if (!StartupInitialization()) {
             return false;
         }
-
-        bool result = ConfigureRegistry();
-        if (!result) {
-            return false;
-        }
-    }
-
-    bool dbFileExists = DatabaseFileExists();
-    if (!dbFileExists) {
-        return false;
     } else {
-        InitializeSqlite();
+        if (!FirstStartupInitialization()) {
+            return false;
+        }
     }
 
     auto frame = new frm::MainFrame(pConfig, pLogger, pDatabase);
-
-    CreateBackupDirectoryIfNotExists();
-
     frame->CreateFrame();
     frame->Show(true);
     SetTopWindow(frame);
+
+    return true;
+}
+
+int Application::OnExit()
+{
+    if (pConfig->IsBackupEnabled()) {
+        if (!RunDatabaseBackup()) {
+            return false;
+        }
+    }
+    return wxApp::OnExit();
+}
+
+bool Application::FirstStartupInitialization()
+{
+    if (!RunSetupWizard()) {
+        return false;
+    }
+
+    if (!ConfigureRegistry()) {
+        return false;
+    }
+
+    if (!ConfigurationFileExists()) {
+        return false;
+    }
+
+    InitializeSqliteConnection();
+
+    return true;
+}
+
+bool Application::StartupInitialization()
+{
+    if (!ConfigurationFileExists()) {
+        return false;
+    }
+
+    if (!DatabaseFileExists()) {
+        return false;
+    }
+
+    InitializeSqliteConnection();
+
+    if (pConfig->IsBackupEnabled()) {
+        if (!CreateBackupsDirectory()) {
+            return false;
+        }
+        if (!RunDatabaseBackup()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Application::InitializeLogging()
+{
+    if (!CreateLogsDirectory()) {
+        return false;
+    }
+
+#ifdef _DEBUG
+    spdlog::set_level(spdlog::level::info);
+#else
+    spdlog::set_level(spdlog::level::warn);
+#endif
+
+    auto logDirectory = std::string(constants::LogsDirectory) + std::string("/") + std::string(constants::LogsFilename);
+
+    spdlog::flush_every(std::chrono::seconds(30));
+    try {
+        pLogger = spdlog::daily_logger_st(constants::LoggerName, logDirectory);
+    } catch (const spdlog::spdlog_ex& e) {
+        wxMessageBox(wxString::Format(wxT("Error initializing logger: %s"), e.what()),
+            common::GetProgramName(),
+            wxOK_DEFAULT | wxICON_EXCLAMATION);
+        return false;
+    }
+
+    pLogger->enable_backtrace(32);
 
     return true;
 }
@@ -111,83 +174,6 @@ bool Application::CreateLogsDirectory()
     }
 
     return logDirectoryExists;
-}
-
-bool Application::InitializeLogging()
-{
-#ifdef _DEBUG
-    spdlog::set_level(spdlog::level::info);
-#else
-    spdlog::set_level(spdlog::level::warn);
-#endif
-
-    auto logDirectory = std::string(constants::LogsDirectory) + std::string("/") + std::string(constants::LogsFilename);
-
-    spdlog::flush_every(std::chrono::seconds(30));
-    try {
-        pLogger = spdlog::daily_logger_st(constants::LoggerName, logDirectory);
-    } catch (const spdlog::spdlog_ex& e) {
-        wxMessageBox(wxString::Format(wxT("Error initializing logger: %s"), e.what()),
-            wxT("Error"),
-            wxOK_DEFAULT | wxICON_EXCLAMATION);
-        return false;
-    }
-
-    // pLogger->enable_backtrace(32);
-
-    return true;
-}
-
-bool Application::DatabaseFileExists()
-{
-    bool dbFileExists = wxFileExists(common::GetDatabaseFileName());
-    if (!dbFileExists && pConfig->IsBackupEnabled()) {
-        int ret = wxMessageBox(wxT("Error: Missing database file!\nRestore from backup?"),
-            common::GetProgramName(),
-            wxYES_NO | wxICON_WARNING);
-        if (ret == wxYES) {
-            auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pLogger, pConfig, pDatabase, true);
-            restoreDatabase->CenterOnParent();
-            restoreDatabase->Run();
-        }
-    }
-    if (!dbFileExists && !pConfig->IsBackupEnabled()) {
-        int ret = wxMessageBox(wxT("Error! Missing database file\n"
-                                   "and database backups are turned off.\n"
-                                   "Run setup wizard?"),
-            common::GetProgramName(),
-            wxYES_NO | wxICON_EXCLAMATION);
-        if (ret == wxYES) {
-            auto wizard = new wizard::SetupWizard(nullptr, pLogger);
-            wizard->CenterOnParent();
-            bool wizardSetupSuccess = wizard->Run();
-
-            if (!wizardSetupSuccess) {
-                return false;
-            }
-            return wizardSetupSuccess;
-        } else {
-            return false;
-        }
-    }
-    return dbFileExists;
-}
-
-bool Application::ConfigurationFileExists()
-{
-    bool configFileExists = wxFileExists(common::GetConfigFileName());
-    if (!configFileExists) {
-        wxMessageBox(wxT("Error: Missing configuration file!\nCannot proceed."),
-            common::GetProgramName(),
-            wxOK_DEFAULT | wxICON_ERROR);
-    }
-    return configFileExists;
-}
-
-void Application::InitializeSqlite()
-{
-    auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
-    pDatabase = new sqlite::database(common::GetDatabaseFileName().ToStdString(), config);
 }
 
 bool Application::IsInstalled()
@@ -207,6 +193,15 @@ bool Application::IsInstalled()
     return false;
 }
 
+bool Application::RunSetupWizard()
+{
+    auto wizard = new wizard::SetupWizard(nullptr, pLogger);
+    wizard->CenterOnScreen();
+    bool wizardSetupSuccess = wizard->Run();
+
+    return wizardSetupSuccess;
+}
+
 bool Application::ConfigureRegistry()
 {
 #if _DEBUG
@@ -223,20 +218,25 @@ bool Application::ConfigureRegistry()
     result = key.SetValue("Installed", 1);
     if (!result) {
         pLogger->critical("Unable to set registry value: \"Installed\"");
-        return result;
     }
     return result;
 }
 
-bool Application::ConfigureBackups()
+bool Application::ConfigurationFileExists()
 {
-    return false;
+    bool configFileExists = wxFileExists(common::GetConfigFileName());
+    if (!configFileExists) {
+        wxMessageBox(wxT("Error: Missing configuration file!\nCannot proceed."),
+            common::GetProgramName(),
+            wxOK_DEFAULT | wxICON_ERROR);
+    }
+    return configFileExists;
 }
 
-bool Application::CreateBackupDirectoryIfNotExists()
+bool Application::CreateBackupsDirectory()
 {
     wxString backupsDirectory;
-    if (IsInstalled()) {
+    if (IsInstalled() && !pConfig->GetBackupPath().empty()) {
         backupsDirectory = pConfig->GetBackupPath();
     } else {
         backupsDirectory = wxT("backups");
@@ -249,6 +249,55 @@ bool Application::CreateBackupDirectoryIfNotExists()
     }
 
     return backupsDirectoryExists;
+}
+
+bool Application::DatabaseFileExists()
+{
+    bool databaseFileExists = wxFileExists(common::GetDatabaseFileName());
+    if (!databaseFileExists && pConfig->IsBackupEnabled()) {
+        int ret = wxMessageBox(wxT("Error: Missing database file!\nRestore from backup?"),
+            common::GetProgramName(),
+            wxYES_NO | wxICON_WARNING);
+        if (ret == wxYES) {
+            auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pLogger, pConfig, pDatabase, true);
+            restoreDatabase->CenterOnParent();
+            restoreDatabase->Run();
+        }
+    }
+    if (!databaseFileExists && !pConfig->IsBackupEnabled()) {
+        int ret = wxMessageBox(wxT("Error! Missing database file\n"
+                                   "and database backups are turned off.\n"
+                                   "Run setup wizard?"),
+            common::GetProgramName(),
+            wxYES_NO | wxICON_ERROR);
+        if (ret == wxYES) {
+            auto setupWizard = new wizard::SetupWizard(nullptr, pLogger);
+            setupWizard->CenterOnParent();
+            bool wizardSetupSuccess = setupWizard->Run();
+
+            return wizardSetupSuccess;
+        } else {
+            return false;
+        }
+    }
+    return databaseFileExists;
+}
+
+void Application::InitializeSqliteConnection()
+{
+    auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
+    pDatabase = new sqlite::database(common::GetDatabaseFileName().ToStdString(), config);
+}
+
+bool Application::RunDatabaseBackup()
+{
+    if (pConfig->IsBackupEnabled()) {
+        svc::DatabaseBackup dbBackup(pConfig, pLogger, pDatabase);
+        bool result = dbBackup.Execute();
+        return result;
+    }
+
+    return true;
 }
 } // namespace app
 

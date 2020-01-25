@@ -127,7 +127,7 @@ bool MainFrame::CreateFrame()
     auto configSize = pConfig->GetFrameSize();
     SetSize(configSize);
 
-    pTaskBarIcon = new TaskBarIcon(this, pConfig, pLogger);
+    pTaskBarIcon = new TaskBarIcon(this, pConfig, pLogger, pDatabase);
     if (pConfig->IsShowInTray()) {
         pTaskBarIcon->SetTaskBarIcon();
     }
@@ -445,7 +445,7 @@ void MainFrame::OnIconize(wxIconizeEvent& event)
 
 void MainFrame::OnPreferences(wxCommandEvent& event)
 {
-    dlg::PreferencesDialog preferences(this, pConfig, pTaskBarIcon);
+    dlg::PreferencesDialog preferences(this, pConfig, pLogger, pTaskBarIcon, pDatabase);
     preferences.ShowModal();
 }
 

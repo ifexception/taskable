@@ -21,52 +21,32 @@
 
 #include <memory>
 
-#include <sqlite_modern_cpp.h>
-
-#include <wx/wx.h>
-#include <wx/snglinst.h>
-
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/daily_file_sink.h>
+#include <sqlite_modern_cpp.h>
+#include <wx/string.h>
 
-#include "config/configuration.h"
+#include "../config/configuration.h"
 
-namespace app
+namespace app::svc
 {
-class Application : public wxApp
+class DatabaseBackup final
 {
 public:
-    Application();
-    virtual ~Application();
+    DatabaseBackup() = delete;
+    DatabaseBackup(std::shared_ptr<cfg::Configuration> config,
+        std::shared_ptr<spdlog::logger> logger,
+        sqlite::database* database);
 
-    bool OnInit() override;
-    int OnExit() override;
+    bool Execute();
 
 private:
-    bool FirstStartupInitialization();
-    bool StartupInitialization();
-
-    bool InitializeLogging();
-    bool CreateLogsDirectory();
-
-    bool IsInstalled();
-    bool RunSetupWizard();
-    bool ConfigureRegistry();
-
-    bool ConfigurationFileExists();
-
-    bool CreateBackupsDirectory();
-
-    bool DatabaseFileExists();
-
-    void InitializeSqliteConnection();
-
-    bool RunDatabaseBackup();
+    wxString CreateBackupFileName();
+    bool CreateBackupFile(const wxString& fileName);
+    bool ExecuteBackup(const wxString& fileName);
+    bool MoveBackupFileToBackupDirectory(const wxString& fileName);
 
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
-    std::unique_ptr<wxSingleInstanceChecker> pInstanceChecker;
-
     sqlite::database* pDatabase;
 };
-} // namespace app
+} // namespace app::svc

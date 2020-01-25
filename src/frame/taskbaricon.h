@@ -21,6 +21,7 @@
 
 #include <memory>
 
+#include <sqlite_modern_cpp.h>
 #include <wx/wx.h>
 #include <wx/taskbar.h>
 
@@ -33,7 +34,10 @@ namespace app::frm
 class TaskBarIcon : public wxTaskBarIcon
 {
 public:
-    TaskBarIcon(wxFrame* parent, std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger);
+    TaskBarIcon(wxFrame* parent,
+        std::shared_ptr<cfg::Configuration> config,
+        std::shared_ptr<spdlog::logger> logger,
+        sqlite::database* database);
     virtual ~TaskBarIcon() = default;
 
     void SetTaskBarIcon();
@@ -50,6 +54,7 @@ private:
     void OnLeftButtonDown(wxTaskBarIconEvent& event);
 
     wxFrame* pParent;
+    sqlite::database* pDatabase;
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
 

@@ -32,6 +32,7 @@ set (SRC
     "services/db_connection.cpp"
     "services/taskstateservice.cpp"
     "services/taskstorageservice.cpp"
+    "services/databasebackup.cpp"
     "application.cpp"
     "resources.rc"
     "application.manifest"

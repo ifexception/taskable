@@ -21,8 +21,12 @@
 
 #include <memory>
 
+#include <spdlog/spdlog.h>
+#include <sqlite_modern_cpp.h>
 #include <wx/wx.h>
 #include <wx/propdlg.h>
+
+#include "../services/databasebackup.h"
 
 #include "preferencesgeneralpage.h"
 #include "preferencesdatabasepage.h"
@@ -49,7 +53,9 @@ public:
     PreferencesDialog() = delete;
     PreferencesDialog(wxWindow* parent,
         std::shared_ptr<cfg::Configuration> config,
+        std::shared_ptr<spdlog::logger> pLogger,
         frm::TaskBarIcon* taskBarIcon,
+        sqlite::database* database,
         const wxString& name = wxT("preferencesdlg"));
     virtual ~PreferencesDialog() = default;
 
@@ -69,7 +75,9 @@ private:
     void OnOk(wxCommandEvent& event);
 
     std::shared_ptr<cfg::Configuration> pConfig;
+    std::shared_ptr<spdlog::logger> pLogger;
     frm::TaskBarIcon* pTaskBarIcon;
+    svc::DatabaseBackup mDatabaseBackup;
 
     wxWindow* pParent;
     GeneralPage* pGeneralPage;
