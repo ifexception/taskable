@@ -314,9 +314,10 @@ void MainFrame::OnAbout(wxCommandEvent& event)
     aboutInfo.SetName(common::GetProgramName());
     aboutInfo.SetVersion(wxString::Format("%d.%d.%d", TASKABLE_MAJOR, TASKABLE_MINOR, TASKABLE_PATCH));
     aboutInfo.SetDescription(
-        wxT("A desktop application to help you manage how you've spent your time on tasks during the day\n"
-            " by tracking the time you've spent on those tasks throughout the day"));
-    aboutInfo.SetCopyright("(C) 2018-2019");
+        wxT("A desktop application to help you manage how you've spent\n"
+            "your time on tasks during the day by tracking the time\n"
+            "you've spent on those tasks throughout the day"));
+    aboutInfo.SetCopyright("(C) 2018-2020");
     aboutInfo.SetWebSite(wxT("https://github.com/ifexception/taskable"));
     aboutInfo.SetLicence(common::GetLicense());
     aboutInfo.AddDeveloper(wxT("Szymon Welgus"));
