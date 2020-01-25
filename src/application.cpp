@@ -127,9 +127,6 @@ bool Application::StartupInitialization()
         if (!CreateBackupsDirectory()) {
             return false;
         }
-        if (!RunDatabaseBackup()) {
-            return false;
-        }
     }
 
     return true;
