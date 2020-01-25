@@ -35,7 +35,8 @@ enum class MenuIds : int {
     Edit_PreferencesId = 11,
     File_StopwatchTaskId = 12,
     Help_CheckForUpdateId = 13,
-    Tools_RestoreDatabaseId=14,
+    Tools_RestoreDatabaseId = 14,
+    Tools_BackupDatabaseId = 15,
 };
 
 static const int ID_NEW_ENTRY_TASK = static_cast<int>(ids::MenuIds::File_NewEntryTaskId);
@@ -56,4 +57,5 @@ static const int ID_PREFERENCES = static_cast<int>(MenuIds::Edit_PreferencesId);
 static const int ID_CHECK_FOR_UPDATE = static_cast<int>(MenuIds::Help_CheckForUpdateId);
 
 static const int ID_RESTORE_DATABASE = static_cast<int>(MenuIds::Tools_RestoreDatabaseId);
+static const int ID_BACKUP_DATABASE = static_cast<int>(MenuIds::Tools_BackupDatabaseId);
 } // namespace app::ids

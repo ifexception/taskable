@@ -70,6 +70,7 @@ EVT_MENU(ids::ID_PREFERENCES, MainFrame::OnPreferences)
 EVT_MENU(ids::ID_STOPWATCH_TASK, MainFrame::OnTaskStopwatch)
 EVT_MENU(ids::ID_CHECK_FOR_UPDATE, MainFrame::OnCheckForUpdate)
 EVT_MENU(ids::ID_RESTORE_DATABASE, MainFrame::OnRestoreDatabase)
+EVT_MENU(ids::ID_BACKUP_DATABASE, MainFrame::OnBackupDatabase)
 EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
 EVT_LIST_ITEM_RIGHT_CLICK(MainFrame::IDC_LIST, MainFrame::OnItemRightClick)
 EVT_COMMAND(wxID_ANY, EVT_TASK_ITEM_INSERTED, MainFrame::OnTaskInserted)
@@ -197,6 +198,9 @@ void MainFrame::CreateControls()
     auto restoreMenuItem = toolsMenu->Append(
         ids::ID_RESTORE_DATABASE, wxT("Restore Database"), wxT("Restore database to a previous point"));
     restoreMenuItem->SetBitmap(common::GetDatabaseRestoreIcon());
+    auto backupMenuItem = toolsMenu->Append(
+        ids::ID_BACKUP_DATABASE, wxT("Backup Database"), wxT("Backup database at the current snapshot"));
+    backupMenuItem->SetBitmap(common::GetDatabaseBackupIcon());
 
     /* Help Menu Control */
     wxMenu* helpMenu = new wxMenu();
@@ -531,6 +535,8 @@ void MainFrame::OnRestoreDatabase(wxCommandEvent& event)
             wxICON_WARNING | wxOK_DEFAULT);
     }
 }
+
+void MainFrame::OnBackupDatabase(wxCommandEvent& event) {}
 
 void MainFrame::CalculateTotalTime(wxDateTime date)
 {

@@ -86,6 +86,7 @@ private:
     void OnCheckForUpdate(wxCommandEvent& event);
     void OnResize(wxSizeEvent& event);
     void OnRestoreDatabase(wxCommandEvent& event);
+    void OnBackupDatabase(wxCommandEvent& event);
 
     void CalculateTotalTime(wxDateTime date = wxDateTime::Now());
     void RefreshItems(wxDateTime date = wxDateTime::Now());

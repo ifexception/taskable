@@ -53,6 +53,7 @@ extern const char** GetEntryTaskIcon();
 extern const char** GetTimedTaskIcon();
 extern const char** GetStopwatchIcon();
 extern const char** GetDatabaseRestoreIcon();
+extern const char** GetDatabaseBackupIcon();
 
 std::string GetLicense();
 

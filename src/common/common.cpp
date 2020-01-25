@@ -29,6 +29,7 @@
 #include "../../res/timed-task.xpm"
 #include "../../res/stopwatch.xpm"
 #include "../../res/database-restore.xpm"
+#include "../../res/database-backup.xpm"
 
 const char** app::common::GetProgramIcon()
 {
@@ -63,6 +64,11 @@ const char** app::common::GetStopwatchIcon()
 const char** app::common::GetDatabaseRestoreIcon()
 {
     return database_restore;
+}
+
+const char** app::common::GetDatabaseBackupIcon()
+{
+    return database_backup_xpm;
 }
 
 std::string app::common::GetLicense()
