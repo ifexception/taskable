@@ -23,7 +23,7 @@
 
 #include <spdlog/spdlog.h>
 
-#include "../services/db_connection.h"
+#include "../services/databaseconnection.h"
 
 namespace app::wizard
 {

@@ -21,7 +21,7 @@
 
 #include "../common/constants.h"
 #include "../common/util.h"
-#include "../services/db_connection.h"
+#include "../services/databaseconnection.h"
 
 namespace app::model
 {
@@ -168,16 +168,16 @@ void CategoryModel::Create(std::unique_ptr<CategoryModel> category)
 {
     unsigned int color = static_cast<unsigned int>(category->GetColor().GetRGB());
 
-    auto db = services::db_connection::get_instance().get_handle();
-    db << CategoryModel::createCategory << category->GetName().ToStdString() << color << category->GetProjectId();
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << CategoryModel::createCategory << category->GetName().ToStdString() << color << category->GetProjectId();
 }
 
 std::unique_ptr<CategoryModel> CategoryModel::GetById(const int id)
 {
     std::unique_ptr<CategoryModel> category = nullptr;
 
-    auto db = services::db_connection::get_instance().get_handle();
-    db << CategoryModel::getCategoryById << id >> [&](int categoryId,
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << CategoryModel::getCategoryById << id >> [&](int categoryId,
                                                       std::string categoryName,
                                                       unsigned int color,
                                                       int dateCreated,
@@ -197,22 +197,22 @@ void CategoryModel::Update(std::unique_ptr<CategoryModel> category)
 {
     unsigned int color = static_cast<unsigned int>(category->GetColor().GetRGB());
 
-    auto db = services::db_connection::get_instance().get_handle();
-    db << CategoryModel::updateCategory << category->GetName().ToStdString() << color << category->GetProjectId()
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << CategoryModel::updateCategory << category->GetName().ToStdString() << color << category->GetProjectId()
        << util::UnixTimestamp() << category->GetCategoryId();
 }
 
 void CategoryModel::Delete(std::unique_ptr<CategoryModel> category)
 {
-    auto db = services::db_connection::get_instance().get_handle();
-    db << CategoryModel::deleteCategory << util::UnixTimestamp() << category->GetCategoryId();
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << CategoryModel::deleteCategory << util::UnixTimestamp() << category->GetCategoryId();
 }
 
 std::vector<std::unique_ptr<CategoryModel>> CategoryModel::GetByProjectId(const int projectId)
 {
     std::vector<std::unique_ptr<CategoryModel>> categories;
-    auto db = services::db_connection::get_instance().get_handle();
-    db << CategoryModel::getCategoriesByProjectId << projectId >> [&](int categoryId,
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << CategoryModel::getCategoriesByProjectId << projectId >> [&](int categoryId,
                                                                       std::string categoryName,
                                                                       unsigned int color,
                                                                       int dateCreated,
@@ -233,14 +233,14 @@ std::vector<std::unique_ptr<CategoryModel>> CategoryModel::GetAll()
 {
     std::vector<std::unique_ptr<CategoryModel>> categories;
 
-    auto db = services::db_connection::get_instance().get_handle();
-    db << CategoryModel::getCategoryById >> [&](int categoryId,
-                                                      std::string categoryName,
-                                                      unsigned int color,
-                                                      int dateCreated,
-                                                      int dateModified,
-                                                      int isActive,
-                                                      int projectId) {
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << CategoryModel::getCategoryById >> [&](int categoryId,
+                                                std::string categoryName,
+                                                unsigned int color,
+                                                int dateCreated,
+                                                int dateModified,
+                                                int isActive,
+                                                int projectId) {
         auto category =
             std::make_unique<CategoryModel>(categoryId, categoryName, color, dateCreated, dateModified, isActive);
         auto project = std::make_unique<ProjectModel>(projectId, true);

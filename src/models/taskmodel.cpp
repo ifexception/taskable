@@ -20,7 +20,7 @@
 #include "taskmodel.h"
 
 #include "../common/util.h"
-#include "../services/db_connection.h"
+#include "../services/databaseconnection.h"
 
 namespace app::model
 {
@@ -105,9 +105,9 @@ int TaskModel::GetId(const wxDateTime date)
 {
     int rTaskId = 0;
     bool taskDoesNotExistYet = true;
-    auto db = services::db_connection::get_instance().get_handle();
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
 
-    db << TaskModel::getTaskId << date.FormatISODate().ToStdString() >> [&](std::unique_ptr<int> taskId) {
+    *db << TaskModel::getTaskId << date.FormatISODate().ToStdString() >> [&](std::unique_ptr<int> taskId) {
         if (taskId != nullptr) {
             taskDoesNotExistYet = false;
             rTaskId = *taskId;
@@ -116,7 +116,7 @@ int TaskModel::GetId(const wxDateTime date)
 
     if (taskDoesNotExistYet) {
         TaskModel::Create(date);
-        rTaskId = db.last_insert_rowid();
+        rTaskId = db->last_insert_rowid();
     }
     return rTaskId;
 }
@@ -124,10 +124,10 @@ int TaskModel::GetId(const wxDateTime date)
 std::unique_ptr<TaskModel> TaskModel::GetByDate(const wxDateTime date)
 {
     std::unique_ptr<TaskModel> taskModel = nullptr;
-    auto db = services::db_connection::get_instance().get_handle();
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
     int taskId = GetId(date);
 
-    db << TaskModel::getTaskByDate << date.FormatISODate().ToStdString() >>
+    *db << TaskModel::getTaskByDate << date.FormatISODate().ToStdString() >>
         [&](int taskId, std::string date, int dateCreated, int dateModified, bool isActive) {
             taskModel = std::make_unique<TaskModel>(taskId, wxString(date), dateCreated, dateModified, isActive);
         };
@@ -138,8 +138,8 @@ std::unique_ptr<TaskModel> TaskModel::GetByDate(const wxDateTime date)
 std::unique_ptr<TaskModel> TaskModel::GetById(const int taskId)
 {
     std::unique_ptr<TaskModel> taskModel = nullptr;
-    auto db = services::db_connection::get_instance().get_handle();
-    db << TaskModel::getTaskById << taskId >>
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << TaskModel::getTaskById << taskId >>
         [&](int taskId, std::string date, int dateCreated, int dateModified, bool isActive) {
             taskModel = std::make_unique<TaskModel>(taskId, wxString(date), dateCreated, dateModified, isActive);
         };
@@ -149,8 +149,8 @@ std::unique_ptr<TaskModel> TaskModel::GetById(const int taskId)
 
 void TaskModel::Create(const wxDateTime date)
 {
-    auto db = services::db_connection::get_instance().get_handle();
-    db << TaskModel::createTask << date.FormatISODate().ToStdString();
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << TaskModel::createTask << date.FormatISODate().ToStdString();
 }
 
 const std::string TaskModel::getTaskId = "SELECT task_id "

@@ -20,7 +20,7 @@
 #include "taskitemmodel.h"
 
 #include "../common/util.h"
-#include "../services/db_connection.h"
+#include "../services/databaseconnection.h"
 
 namespace app::model
 {
@@ -84,8 +84,8 @@ void TaskItemTypeModel::SetName(const wxString& name)
 std::unique_ptr<TaskItemTypeModel> TaskItemTypeModel::GetById(const int taskItemTypeId)
 {
     std::unique_ptr<TaskItemTypeModel> taskItemType = nullptr;
-    auto db = services::db_connection::get_instance().get_handle();
-    db << TaskItemTypeModel::getTaskItemTypeById << taskItemTypeId >> [&](int taskItemTypeId, std::string name) {
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << TaskItemTypeModel::getTaskItemTypeById << taskItemTypeId >> [&](int taskItemTypeId, std::string name) {
         taskItemType = std::make_unique<TaskItemTypeModel>(taskItemTypeId, wxString(name));
     };
 
@@ -95,8 +95,8 @@ std::unique_ptr<TaskItemTypeModel> TaskItemTypeModel::GetById(const int taskItem
 std::vector<std::unique_ptr<TaskItemTypeModel>> TaskItemTypeModel::GetAll()
 {
     std::vector<std::unique_ptr<TaskItemTypeModel>> taskItemTypes;
-    auto db = services::db_connection::get_instance().get_handle();
-    db << TaskItemTypeModel::getTaskItemTypes >> [&](int taskItemTypeId, std::string name) {
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << TaskItemTypeModel::getTaskItemTypes >> [&](int taskItemTypeId, std::string name) {
         auto taskItemType = std::make_unique<TaskItemTypeModel>(taskItemTypeId, wxString(name));
         taskItemTypes.push_back(std::move(taskItemType));
     };
@@ -389,8 +389,8 @@ void TaskItemModel::SetTask(std::unique_ptr<TaskModel> task)
 
 void TaskItemModel::Create(std::unique_ptr<TaskItemModel> taskItem)
 {
-    auto db = services::db_connection::get_instance().get_handle();
-    auto ps = db << TaskItemModel::createTaskItem;
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto ps = *db << TaskItemModel::createTaskItem;
 
     if (taskItem->IsEntryTask()) {
         ps << nullptr << nullptr;
@@ -428,21 +428,21 @@ void TaskItemModel::Create(std::unique_ptr<TaskItemModel> taskItem)
 std::unique_ptr<TaskItemModel> TaskItemModel::GetById(const int taskItemId)
 {
     std::unique_ptr<TaskItemModel> taskItem = nullptr;
-    auto db = services::db_connection::get_instance().get_handle();
-    db << TaskItemModel::getTaskItemById << taskItemId >> [&](int taskItemId,
-                                                              std::unique_ptr<std::string> startTime,
-                                                              std::unique_ptr<std::string> endTime,
-                                                              std::string duration,
-                                                              std::string description,
-                                                              bool billable,
-                                                              std::unique_ptr<double> calculatedRate,
-                                                              int dateCreated,
-                                                              int dateModified,
-                                                              bool isActive,
-                                                              int taskItemTypeId,
-                                                              int projectId,
-                                                              int categoryId,
-                                                              int taskId) {
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << TaskItemModel::getTaskItemById << taskItemId >> [&](int taskItemId,
+                                                               std::unique_ptr<std::string> startTime,
+                                                               std::unique_ptr<std::string> endTime,
+                                                               std::string duration,
+                                                               std::string description,
+                                                               bool billable,
+                                                               std::unique_ptr<double> calculatedRate,
+                                                               int dateCreated,
+                                                               int dateModified,
+                                                               bool isActive,
+                                                               int taskItemTypeId,
+                                                               int projectId,
+                                                               int categoryId,
+                                                               int taskId) {
         taskItem = std::make_unique<TaskItemModel>(
             taskItemId, duration, description, billable, dateCreated, dateModified, isActive);
 
@@ -481,8 +481,8 @@ std::unique_ptr<TaskItemModel> TaskItemModel::GetById(const int taskItemId)
 
 void TaskItemModel::Update(std::unique_ptr<TaskItemModel> taskItem)
 {
-    auto db = services::db_connection::get_instance().get_handle();
-    auto ps = db << TaskItemModel::updateTaskItem;
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto ps = *db << TaskItemModel::updateTaskItem;
 
     if (taskItem->IsEntryTask()) {
         ps << nullptr << nullptr;
@@ -521,30 +521,30 @@ void TaskItemModel::Update(std::unique_ptr<TaskItemModel> taskItem)
 
 void TaskItemModel::Delete(std::unique_ptr<TaskItemModel> taskItem)
 {
-    auto db = services::db_connection::get_instance().get_handle();
-    db << TaskItemModel::deleteTaskItem << util::UnixTimestamp() << taskItem->GetTaskItemId();
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << TaskItemModel::deleteTaskItem << util::UnixTimestamp() << taskItem->GetTaskItemId();
 }
 
 std::vector<std::unique_ptr<TaskItemModel>> TaskItemModel::GetByDate(const wxString& date)
 {
     std::vector<std::unique_ptr<TaskItemModel>> taskItems;
 
-    auto db = services::db_connection::get_instance().get_handle();
-    db << TaskItemModel::getTaskItemsByDate << date >> [&](int taskItemId,
-                                                           std::string taskDate,
-                                                           std::unique_ptr<std::string> startTime,
-                                                           std::unique_ptr<std::string> endTime,
-                                                           std::string duration,
-                                                           std::string description,
-                                                           bool billable,
-                                                           std::unique_ptr<double> calculatedRate,
-                                                           int dateCreated,
-                                                           int dateModified,
-                                                           bool isActive,
-                                                           int taskItemTypeId,
-                                                           int projectId,
-                                                           int categoryId,
-                                                           int taskId) {
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << TaskItemModel::getTaskItemsByDate << date >> [&](int taskItemId,
+                                                            std::string taskDate,
+                                                            std::unique_ptr<std::string> startTime,
+                                                            std::unique_ptr<std::string> endTime,
+                                                            std::string duration,
+                                                            std::string description,
+                                                            bool billable,
+                                                            std::unique_ptr<double> calculatedRate,
+                                                            int dateCreated,
+                                                            int dateModified,
+                                                            bool isActive,
+                                                            int taskItemTypeId,
+                                                            int projectId,
+                                                            int categoryId,
+                                                            int taskId) {
         auto taskItem = std::make_unique<TaskItemModel>(
             taskItemId, duration, description, billable, dateCreated, dateModified, isActive);
 
@@ -587,8 +587,8 @@ std::vector<wxString> TaskItemModel::GetHours(const wxString& date)
 {
     std::vector<wxString> taskDurations;
 
-    auto db = services::db_connection::get_instance().get_handle();
-    db << TaskItemModel::getTaskHoursByTaskId << date >>
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << TaskItemModel::getTaskHoursByTaskId << date >>
         [&](std::string duration) { taskDurations.push_back(wxString(duration)); };
 
     return taskDurations;

@@ -167,7 +167,7 @@ bool Application::CreateLogsDirectory()
     bool logDirectoryExists = wxDirExists(logDirectory);
     if (!logDirectoryExists) {
         bool success = wxMkDir(logDirectory);
-        return success;
+        return !success;
     }
 
     return logDirectoryExists;

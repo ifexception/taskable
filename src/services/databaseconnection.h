@@ -1,7 +1,7 @@
 //  Taskable is a desktop that aids you in tracking your timesheets
 //  and seeing what work you have done.
 //
-//  Copyright(C) <2019> <Szymon Welgus>
+//  Copyright(C)<2019><Szymon Welgus>
 //
 //  This program is free software : you can redistribute it and /
 //  or modify it under the terms of the GNU General Public License as published
@@ -17,27 +17,29 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "db_connection.h"
+#pragma once
 
-#include "../common/common.h"
+#include <memory>
 
-namespace app::services
+#include <sqlite_modern_cpp.h>
+
+namespace app::svc
 {
-db_connection& db_connection::get_instance()
+class DatabaseConnection final
 {
-    static db_connection instance;
-    return instance;
+public:
+    static DatabaseConnection* Get();
+
+    sqlite::database* GetHandle();
+
+    void SetHandle(sqlite::database* database);
+    void ResetHandle(sqlite::database* database);
+
+private:
+    DatabaseConnection();
+
+    static DatabaseConnection* pInstance;
+
+    sqlite::database* pDatabase;
+};
 }
-
-sqlite::database db_connection::get_handle()
-{
-    auto con = mDatabase.connection();
-    return mDatabase;
-}
-
-db_connection::db_connection()
-    : mDatabase(common::GetDatabaseFileName().ToStdString(),
-          sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 })
-{
-}
-} // namespace app::services

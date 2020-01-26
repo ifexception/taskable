@@ -21,7 +21,7 @@
 
 #include "../common/constants.h"
 #include "../common/util.h"
-#include "../services/db_connection.h"
+#include "../services/databaseconnection.h"
 
 namespace app::model
 {
@@ -114,16 +114,16 @@ void EmployerModel::IsActive(const bool isActive)
 
 void EmployerModel::Create(std::unique_ptr<EmployerModel> employer)
 {
-    auto db = services::db_connection::get_instance().get_handle();
-    db << EmployerModel::createEmployer << employer->GetName().ToStdString();
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << EmployerModel::createEmployer << employer->GetName().ToStdString();
 }
 
 std::unique_ptr<EmployerModel> EmployerModel::GetById(const int id)
 {
     std::unique_ptr<EmployerModel> employer;
 
-    auto db = services::db_connection::get_instance().get_handle();
-    db << EmployerModel::getEmployer << id >>
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << EmployerModel::getEmployer << id >>
         [&](int employerId, std::string employerName, int dateCreated, int dateModified, int isActive) {
             employer = std::make_unique<EmployerModel>(
                 employerId, wxString(employerName), dateCreated, dateModified, isActive);
@@ -136,8 +136,8 @@ std::vector<std::unique_ptr<EmployerModel>> EmployerModel::GetAll()
 {
     std::vector<std::unique_ptr<EmployerModel>> employers;
 
-    auto db = services::db_connection::get_instance().get_handle();
-    db << model::EmployerModel::getEmployers >>
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << model::EmployerModel::getEmployers >>
         [&](int employerId, std::string employerName, int dateCreated, int dateModified, int isActive) {
             auto employer = std::make_unique<EmployerModel>(
                 employerId, wxString(employerName), dateCreated, dateModified, isActive);
@@ -149,16 +149,16 @@ std::vector<std::unique_ptr<EmployerModel>> EmployerModel::GetAll()
 
 void EmployerModel::Update(std::unique_ptr<EmployerModel> employer)
 {
-    auto db = services::db_connection::get_instance().get_handle();
-    db << EmployerModel::updateEmployer << employer->GetName().ToStdString() << util::UnixTimestamp()
-       << employer->GetEmployerId();
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    *db << EmployerModel::updateEmployer << employer->GetName().ToStdString() << util::UnixTimestamp()
+        << employer->GetEmployerId();
 }
 
 void EmployerModel::Delete(std::unique_ptr<EmployerModel> employer)
 {
-    auto db = services::db_connection::get_instance().get_handle();
+    auto db = svc::DatabaseConnection::Get()->GetHandle();
 
-    db << EmployerModel::deleteEmployer << util::UnixTimestamp() << employer->GetEmployerId();
+    *db << EmployerModel::deleteEmployer << util::UnixTimestamp() << employer->GetEmployerId();
 }
 
 const std::string EmployerModel::createEmployer = "INSERT INTO employers (name, is_active) VALUES (?, 1);";

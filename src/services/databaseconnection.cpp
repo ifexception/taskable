@@ -1,7 +1,7 @@
 //  Taskable is a desktop that aids you in tracking your timesheets
 //  and seeing what work you have done.
 //
-//  Copyright(C) <2019> <Szymon Welgus>
+//  Copyright(C)<2019><Szymon Welgus>
 //
 //  This program is free software : you can redistribute it and /
 //  or modify it under the terms of the GNU General Public License as published
@@ -17,27 +17,37 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
+#include "databaseconnection.h"
 
-#include <sqlite_modern_cpp.h>
-
-namespace app::services
+namespace app::svc
 {
-class db_connection final
+DatabaseConnection* DatabaseConnection::pInstance = nullptr;
+
+DatabaseConnection* DatabaseConnection::Get()
 {
-public:
-    static db_connection& get_instance();
+    if (pInstance == nullptr) {
+        pInstance = new DatabaseConnection();
+    }
+    return pInstance;
+}
 
-    ~db_connection() = default;
+sqlite::database* DatabaseConnection::GetHandle()
+{
+    return pDatabase;
+}
 
-    db_connection(const db_connection&) = delete;
-    db_connection& operator=(const db_connection&) = delete;
+void DatabaseConnection::SetHandle(sqlite::database* database)
+{
+    pDatabase = database;
+}
 
-    sqlite::database get_handle();
+void DatabaseConnection::ResetHandle(sqlite::database* database)
+{
+    pDatabase = nullptr;
+    pDatabase = database;
+}
 
-private:
-    db_connection();
-
-    sqlite::database mDatabase;
-};
-} // namespace app::services
+DatabaseConnection::DatabaseConnection()
+    : pDatabase(nullptr)
+{}
+} // namespace app::svc
