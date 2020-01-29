@@ -616,18 +616,20 @@ void TaskItemDialog::CalculateRate()
 
 void TaskItemDialog::CalculateRate(wxDateTime start, wxDateTime end)
 {
-    if (pProject->GetRateType()->GetType() == constants::RateTypes::Hourly) {
-        wxTimeSpan diff = end.Subtract(start);
-        // if (!diff.IsShorterThan(wxTimeSpan::Minutes(5))) {
-        int minutes = diff.GetMinutes();
-        double time = ((double) minutes / 60.0);
-        mCalculatedRate = time * *pProject->GetRate();
+    if (pProject != nullptr) {
+        if (pProject->GetRateType()->GetType() == constants::RateTypes::Hourly) {
+            wxTimeSpan diff = end.Subtract(start);
+            // if (!diff.IsShorterThan(wxTimeSpan::Minutes(5))) {
+            int minutes = diff.GetMinutes();
+            double time = ((double) minutes / 60.0);
+            mCalculatedRate = time * *pProject->GetRate();
 
-        wxString rate = wxString::Format(TaskItemDialog::CalculatedRateLabelBillableHourlyRate,
-            pProject->GetCurrency()->GetSymbol(),
-            mCalculatedRate);
-        pCalculatedRateTextCtrl->SetLabel(rate);
-        //}
+            wxString rate = wxString::Format(TaskItemDialog::CalculatedRateLabelBillableHourlyRate,
+                pProject->GetCurrency()->GetSymbol(),
+                mCalculatedRate);
+            pCalculatedRateTextCtrl->SetLabel(rate);
+            //}
+        }
     }
 }
 
@@ -867,6 +869,11 @@ bool TaskItemDialog::TransferDataAndValidate()
 {
     pTaskItem->SetTaskItemTypeId(static_cast<int>(mType));
 
+    if (pProjectChoiceCtrl->GetCount() <= 1) {
+        common::validations::ForRequiredChoiceSelection(pProjectChoiceCtrl, wxT("project"));
+        return false;
+    }
+
     int projectId = util::VoidPointerToInt(pProjectChoiceCtrl->GetClientData(pProjectChoiceCtrl->GetSelection()));
     if (projectId < 1) {
         common::validations::ForRequiredChoiceSelection(pProjectChoiceCtrl, wxT("project"));
@@ -915,6 +922,11 @@ bool TaskItemDialog::TransferDataAndValidate()
         }
 
         pTaskItem->SetDuration(pDurationTimeCtrl->GetValue().FormatISOTime());
+    }
+
+    if (pCategoryChoiceCtrl->GetCount() <= 1) {
+        common::validations::ForRequiredChoiceSelection(pCategoryChoiceCtrl, wxT("category"));
+        return false;
     }
 
     int categoryId = util::VoidPointerToInt(pCategoryChoiceCtrl->GetClientData(pCategoryChoiceCtrl->GetSelection()));
