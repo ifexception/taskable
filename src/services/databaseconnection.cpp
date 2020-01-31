@@ -47,6 +47,11 @@ void DatabaseConnection::ResetHandle(sqlite::database* database)
     pDatabase = database;
 }
 
+void DatabaseConnection::UnsetHandle()
+{
+    pDatabase = nullptr;
+}
+
 DatabaseConnection::DatabaseConnection()
     : pDatabase(nullptr)
 {}

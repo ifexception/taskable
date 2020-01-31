@@ -21,6 +21,8 @@
 
 #include <memory>
 
+#include <sqlite_modern_cpp.h>
+
 #include <wx/clrpicker.h>
 #include <wx/textctrl.h>
 #include <wx/wizard.h>
@@ -38,7 +40,7 @@ class SetupWizard final : public wxWizard
 public:
     SetupWizard() = default;
     explicit SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger);
-    virtual ~SetupWizard() = default;
+    virtual ~SetupWizard();
 
     bool Run();
 
@@ -52,12 +54,17 @@ public:
 
 private:
     void CreateDatabaseFile();
+
+    void InitializeSqliteConnection();
+    void Cleanup();
+
     void DeleteDatabaseFile();
     bool SetUpTables();
     bool SetUpEntities();
 
     std::shared_ptr<spdlog::logger> pLogger;
     wxFrame* pFrame;
+    sqlite::database* pDatabase;
     WelcomePage* pPage1;
 
     wxString mEmployer;

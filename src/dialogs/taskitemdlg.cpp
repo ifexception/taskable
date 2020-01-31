@@ -515,6 +515,17 @@ void TaskItemDialog::FillControls()
         pProjectChoiceCtrl->SetStringSelection(iterator->get()->GetDisplayName());
         FillCategoryControl(iterator->get()->GetProjectId());
 
+        pProject = model::ProjectModel::GetById(iterator->get()->GetProjectId());
+
+        if (iterator->get()->HasClientLinked()) {
+            pTaskContextTextCtrl->SetLabel(wxString::Format(TaskContextWithClient,
+                wxString(iterator->get()->GetEmployer()->GetName()),
+                wxString(iterator->get()->GetClient()->GetName())));
+        } else {
+            pTaskContextTextCtrl->SetLabel(
+                wxString::Format(TaskContextWithoutClient, wxString(iterator->get()->GetEmployer()->GetName())));
+        }
+
         SetRateLabel(iterator->get());
     }
 
@@ -823,8 +834,7 @@ void TaskItemDialog::SetRateLabel(model::ProjectModel* project)
 
     if (project->IsNonBillableScenario()) {
         pBillableCtrl->Disable();
-        wxString label =
-            wxString::Format(TaskItemDialog::CalculatedRateLabelNonBillable, project->GetDisplayName());
+        wxString label = wxString::Format(TaskItemDialog::CalculatedRateLabelNonBillable, project->GetDisplayName());
         pCalculatedRateTextCtrl->SetLabel(label);
     }
 

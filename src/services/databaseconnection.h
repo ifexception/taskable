@@ -34,6 +34,7 @@ public:
 
     void SetHandle(sqlite::database* database);
     void ResetHandle(sqlite::database* database);
+    void UnsetHandle();
 
 private:
     DatabaseConnection();

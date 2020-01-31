@@ -46,19 +46,28 @@ SetupWizard::SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger)
     wxWizardPageSimple::Chain(page2, page3);
 }
 
+SetupWizard::~SetupWizard()
+{
+    Cleanup();
+}
+
 bool SetupWizard::Run()
 {
     auto wizardSuccess = wxWizard::RunWizard(pPage1);
     if (wizardSuccess) {
         CreateDatabaseFile();
+
+        InitializeSqliteConnection();
         bool success = SetUpTables();
         if (!success) {
+            Cleanup();
             DeleteDatabaseFile();
             return false;
         }
 
         success = SetUpEntities();
         if (!success) {
+            Cleanup();
             DeleteDatabaseFile();
             return false;
         }
@@ -109,6 +118,20 @@ void SetupWizard::CreateDatabaseFile()
     wxFile file;
     file.Create(databaseFilename);
     file.Close();
+}
+
+void SetupWizard::InitializeSqliteConnection()
+{
+    auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
+    pDatabase = new sqlite::database(common::GetDatabaseFileName().ToStdString(), config);
+
+    svc::DatabaseConnection::Get()->SetHandle(pDatabase);
+}
+
+void SetupWizard::Cleanup()
+{
+    delete pDatabase;
+    svc::DatabaseConnection::Get()->UnsetHandle();
 }
 
 void SetupWizard::DeleteDatabaseFile()
