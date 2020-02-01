@@ -315,7 +315,7 @@ void MainFrame::DataToControls()
 void MainFrame::OnAbout(wxCommandEvent& event)
 {
     wxAboutDialogInfo aboutInfo;
-    aboutInfo.SetIcon(common::GetProgramIcon());
+    aboutInfo.SetIcon(common::GetProgramIcon64());
     aboutInfo.SetName(common::GetProgramName());
     aboutInfo.SetVersion(wxString::Format("%d.%d.%d", TASKABLE_MAJOR, TASKABLE_MINOR, TASKABLE_PATCH));
     aboutInfo.SetDescription(wxT("A desktop application to help you manage how you've spent\n"

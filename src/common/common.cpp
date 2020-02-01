@@ -30,6 +30,7 @@
 #include "../../res/stopwatch.xpm"
 #include "../../res/database-restore.xpm"
 #include "../../res/database-backup.xpm"
+#include "../../res/taskable-64.xpm"
 
 const char** app::common::GetProgramIcon()
 {
@@ -71,21 +72,26 @@ const char** app::common::GetDatabaseBackupIcon()
     return database_backup_xpm;
 }
 
+const char** app::common::GetProgramIcon64()
+{
+    return taskable_64_xpm;
+}
+
 std::string app::common::GetLicense()
 {
-    return "Taskable is a desktop that aids you in tracking your timesheets"
+    return "Taskable is a desktop that aids you in tracking your timesheets\n"
            "and seeing what work you have done.\n"
            "Copyright(C) 2019 Szymon Welgus\n"
-           "This program is free software : you can redistribute it and /"
-           "or modify it under the terms of the GNU General Public License as published"
-           "by the Free Software Foundation"
-           ", either version 3 of the License"
+           "This program is free software : you can redistribute it and /\n"
+           "or modify it under the terms of the GNU General Public License as published\n"
+           "by the Free Software Foundation\n"
+           ", either version 3 of the License\n"
            ", or (at your option) any later version.\n"
-           "This program is distributed in the hope that it will be useful"
-           ", but WITHOUT ANY WARRANTY; without even the implied warranty of"
-           "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the"
+           "This program is distributed in the hope that it will be useful\n"
+           ", but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+           "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the\n"
            "GNU General Public License for more details.\n"
-           "You should have received a copy of the GNU General Public License"
+           "You should have received a copy of the GNU General Public License\n"
            "along with this program.If not, see <https://www.gnu.org/licenses/>.";
 }
 
