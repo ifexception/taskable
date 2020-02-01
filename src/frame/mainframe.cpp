@@ -530,7 +530,7 @@ void MainFrame::OnRestoreDatabase(wxCommandEvent& event)
         wizard->CenterOnParent();
         bool wizardSetupSuccess = wizard->Run();
         if (wizardSetupSuccess) {
-            pListCtrl->ClearAll();
+            pListCtrl->DeleteAllItems();
             RefreshItems();
         }
     } else {
