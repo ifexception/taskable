@@ -110,7 +110,7 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
         nullptr, wxID_ANY, common::GetProgramName(), wxDefaultPosition, wxSize(600, 500), wxDEFAULT_FRAME_STYLE, name);
     pDatabase = database;
 
-    svc::DatabaseConnection::Get()->SetHandle(pDatabase);
+    svc::DatabaseConnection::Get().SetHandle(pDatabase);
 }
 
 MainFrame::~MainFrame()
@@ -143,7 +143,7 @@ bool MainFrame::CreateFrame()
 void MainFrame::ResetDatabaseHandleOnDatabaseRestore(sqlite::database* database)
 {
     pDatabase = database;
-    svc::DatabaseConnection::Get()->ResetHandle(database);
+    svc::DatabaseConnection::Get().ResetHandle(database);
 }
 
 bool MainFrame::Create()

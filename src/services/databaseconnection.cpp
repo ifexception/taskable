@@ -21,14 +21,10 @@
 
 namespace app::svc
 {
-DatabaseConnection* DatabaseConnection::pInstance = nullptr;
-
-DatabaseConnection* DatabaseConnection::Get()
+DatabaseConnection& DatabaseConnection::Get()
 {
-    if (pInstance == nullptr) {
-        pInstance = new DatabaseConnection();
-    }
-    return pInstance;
+    static DatabaseConnection instance;
+    return instance;
 }
 
 sqlite::database* DatabaseConnection::GetHandle()

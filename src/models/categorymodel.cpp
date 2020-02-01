@@ -168,7 +168,7 @@ void CategoryModel::Create(std::unique_ptr<CategoryModel> category)
 {
     unsigned int color = static_cast<unsigned int>(category->GetColor().GetRGB());
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << CategoryModel::createCategory << category->GetName().ToStdString() << color << category->GetProjectId();
 }
 
@@ -176,7 +176,7 @@ std::unique_ptr<CategoryModel> CategoryModel::GetById(const int id)
 {
     std::unique_ptr<CategoryModel> category = nullptr;
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << CategoryModel::getCategoryById << id >> [&](int categoryId,
                                                       std::string categoryName,
                                                       unsigned int color,
@@ -197,21 +197,21 @@ void CategoryModel::Update(std::unique_ptr<CategoryModel> category)
 {
     unsigned int color = static_cast<unsigned int>(category->GetColor().GetRGB());
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << CategoryModel::updateCategory << category->GetName().ToStdString() << color << category->GetProjectId()
        << util::UnixTimestamp() << category->GetCategoryId();
 }
 
 void CategoryModel::Delete(std::unique_ptr<CategoryModel> category)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << CategoryModel::deleteCategory << util::UnixTimestamp() << category->GetCategoryId();
 }
 
 std::vector<std::unique_ptr<CategoryModel>> CategoryModel::GetByProjectId(const int projectId)
 {
     std::vector<std::unique_ptr<CategoryModel>> categories;
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << CategoryModel::getCategoriesByProjectId << projectId >> [&](int categoryId,
                                                                       std::string categoryName,
                                                                       unsigned int color,
@@ -233,7 +233,7 @@ std::vector<std::unique_ptr<CategoryModel>> CategoryModel::GetAll()
 {
     std::vector<std::unique_ptr<CategoryModel>> categories;
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << CategoryModel::getCategoryById >> [&](int categoryId,
                                                 std::string categoryName,
                                                 unsigned int color,

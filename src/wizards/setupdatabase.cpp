@@ -76,7 +76,7 @@ void SetupTables::CreateEmployersTable()
                               "    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),"
                               "    is_active INTEGER NOT NULL"
                               ");";
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << query;
 }
 
@@ -93,7 +93,7 @@ void SetupTables::CreateClientsTable()
                               "    FOREIGN KEY (employer_id) REFERENCES employers(employer_id)"
                               ");";
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << query;
 }
 
@@ -105,7 +105,7 @@ void SetupTables::CreateRateTypesTable()
                               "    name TEXT NOT NULL"
                               ");";
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << query;
 }
 
@@ -119,7 +119,7 @@ void SetupTables::CreateCurrenciesTable()
                               "    symbol TEXT NOT NULL"
                               ");";
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << query;
 }
 
@@ -147,7 +147,7 @@ void SetupTables::CreateProjectsTable()
                               "    FOREIGN KEY (currency_id) REFERENCES currencies(currency_id)"
                               ");";
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << query;
 }
 
@@ -165,7 +165,7 @@ void SetupTables::CreateCategoriesTable()
                               "    FOREIGN KEY (project_id) REFERENCES projects(project_id)"
                               ");";
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << query;
 }
 
@@ -180,7 +180,7 @@ void SetupTables::CreateTasksTable()
                               "    is_active INTEGER NOT NULL"
                               ");";
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << query;
 }
 
@@ -192,7 +192,7 @@ void SetupTables::CreateTaskItemTypesTable()
                               "    name TEXT NOT NULL"
                               ");";
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << query;
 }
 
@@ -220,7 +220,7 @@ void SetupTables::CreateTaskItemsTable()
                               "    FOREIGN KEY (category_id) REFERENCES categories(category_id)"
                               ");";
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << query;
 }
 
@@ -230,7 +230,7 @@ void SetupTables::SeedRateTypesTable()
     const std::string query2 = "INSERT INTO rate_types (name) VALUES ('Hourly');";
     const std::string query3 = "INSERT INTO rate_types (name) VALUES ('Daily');";
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << query1;
     *db << query2;
     *db << query3;
@@ -242,7 +242,7 @@ void SetupTables::SeedCurrenciesTable()
     const std::string query2 = "INSERT INTO currencies (name, code, symbol) VALUES ('Rand', 'ZAR', 'R');";
     const std::string query3 = "INSERT INTO currencies (name, code, symbol) VALUES ('Dollars', 'USD', '$');";
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << query1;
     *db << query2;
     *db << query3;
@@ -253,7 +253,7 @@ void SetupTables::SeedTaskItemTypesTable()
     const std::string query1 = "INSERT INTO task_item_types (name) VALUES ('Entry');";
     const std::string query2 = "INSERT INTO task_item_types (name) VALUES ('Timed');";
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << query1;
     *db << query2;
 }
@@ -268,7 +268,7 @@ bool SetupEntities::CreateEntities(std::string employerName,
     std::string projectName,
     std::string projectDisplayName)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     // db << "begin transaction";
     try {
         int employerId = CreateEmployer(employerName);
@@ -283,14 +283,14 @@ bool SetupEntities::CreateEntities(std::string employerName,
 
 int SetupEntities::CreateEmployer(std::string employerName)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << "INSERT INTO employers (name, is_active) VALUES (?, 1)" << employerName;
     return (int) db->last_insert_rowid();
 }
 
 int SetupEntities::CreateClient(std::string clientName, int employerId)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     if (clientName.empty()) {
         return 0;
     } else {
@@ -301,7 +301,7 @@ int SetupEntities::CreateClient(std::string clientName, int employerId)
 
 void SetupEntities::CreateProject(std::string projectName, std::string projectDisplayName, int employerId, int clientId)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     bool isAssociatedWithClient = clientId != 0;
     if (isAssociatedWithClient) {
         *db << "INSERT INTO projects(name, display_name, billable, is_active, employer_id, client_id) VALUES(?, ?, ?, "

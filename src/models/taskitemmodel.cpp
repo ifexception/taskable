@@ -84,7 +84,7 @@ void TaskItemTypeModel::SetName(const wxString& name)
 std::unique_ptr<TaskItemTypeModel> TaskItemTypeModel::GetById(const int taskItemTypeId)
 {
     std::unique_ptr<TaskItemTypeModel> taskItemType = nullptr;
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << TaskItemTypeModel::getTaskItemTypeById << taskItemTypeId >> [&](int taskItemTypeId, std::string name) {
         taskItemType = std::make_unique<TaskItemTypeModel>(taskItemTypeId, wxString(name));
     };
@@ -95,7 +95,7 @@ std::unique_ptr<TaskItemTypeModel> TaskItemTypeModel::GetById(const int taskItem
 std::vector<std::unique_ptr<TaskItemTypeModel>> TaskItemTypeModel::GetAll()
 {
     std::vector<std::unique_ptr<TaskItemTypeModel>> taskItemTypes;
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << TaskItemTypeModel::getTaskItemTypes >> [&](int taskItemTypeId, std::string name) {
         auto taskItemType = std::make_unique<TaskItemTypeModel>(taskItemTypeId, wxString(name));
         taskItemTypes.push_back(std::move(taskItemType));
@@ -389,7 +389,7 @@ void TaskItemModel::SetTask(std::unique_ptr<TaskModel> task)
 
 void TaskItemModel::Create(std::unique_ptr<TaskItemModel> taskItem)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     auto ps = *db << TaskItemModel::createTaskItem;
 
     if (taskItem->IsEntryTask()) {
@@ -428,7 +428,7 @@ void TaskItemModel::Create(std::unique_ptr<TaskItemModel> taskItem)
 std::unique_ptr<TaskItemModel> TaskItemModel::GetById(const int taskItemId)
 {
     std::unique_ptr<TaskItemModel> taskItem = nullptr;
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << TaskItemModel::getTaskItemById << taskItemId >> [&](int taskItemId,
                                                                std::unique_ptr<std::string> startTime,
                                                                std::unique_ptr<std::string> endTime,
@@ -481,7 +481,7 @@ std::unique_ptr<TaskItemModel> TaskItemModel::GetById(const int taskItemId)
 
 void TaskItemModel::Update(std::unique_ptr<TaskItemModel> taskItem)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     auto ps = *db << TaskItemModel::updateTaskItem;
 
     if (taskItem->IsEntryTask()) {
@@ -521,7 +521,7 @@ void TaskItemModel::Update(std::unique_ptr<TaskItemModel> taskItem)
 
 void TaskItemModel::Delete(std::unique_ptr<TaskItemModel> taskItem)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << TaskItemModel::deleteTaskItem << util::UnixTimestamp() << taskItem->GetTaskItemId();
 }
 
@@ -529,7 +529,7 @@ std::vector<std::unique_ptr<TaskItemModel>> TaskItemModel::GetByDate(const wxStr
 {
     std::vector<std::unique_ptr<TaskItemModel>> taskItems;
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << TaskItemModel::getTaskItemsByDate << date >> [&](int taskItemId,
                                                             std::string taskDate,
                                                             std::unique_ptr<std::string> startTime,
@@ -587,7 +587,7 @@ std::vector<wxString> TaskItemModel::GetHours(const wxString& date)
 {
     std::vector<wxString> taskDurations;
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << TaskItemModel::getTaskHoursByTaskId << date >>
         [&](std::string duration) { taskDurations.push_back(wxString(duration)); };
 

@@ -136,7 +136,7 @@ void ClientModel::SetEmployer(std::unique_ptr<EmployerModel> employer)
 
 void ClientModel::Create(std::unique_ptr<model::ClientModel> client)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
 
     *db << model::ClientModel::createClient << std::string(client->GetName().ToUTF8()) << client->GetEmployerId();
 }
@@ -145,7 +145,7 @@ std::unique_ptr<ClientModel> ClientModel::GetById(const int clientId)
 {
     std::unique_ptr<ClientModel> client = nullptr;
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << model::ClientModel::getClientById << clientId >> [&](int clientId,
                                                                 std::string clientName,
                                                                 int dateCreatedUtc,
@@ -160,7 +160,7 @@ std::unique_ptr<ClientModel> ClientModel::GetById(const int clientId)
 
 void ClientModel::Update(std::unique_ptr<model::ClientModel> client)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
 
     *db << model::ClientModel::updateClient << std::string(client->GetName().ToUTF8()) << util::UnixTimestamp()
         << client->GetEmployerId() << client->GetClientId();
@@ -168,7 +168,7 @@ void ClientModel::Update(std::unique_ptr<model::ClientModel> client)
 
 void ClientModel::Delete(std::unique_ptr<model::ClientModel> client)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
 
     *db << model::ClientModel::deleteClient << util::UnixTimestamp() << client->GetClientId();
 }
@@ -177,7 +177,7 @@ std::vector<std::unique_ptr<ClientModel>> ClientModel::GetByEmployerId(const int
 {
     std::vector<std::unique_ptr<ClientModel>> clients;
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << ClientModel::getClientsByEmployerId << employerId >>
         [&](int clientId, std::string name, int dateCreated, int dateModified, int isActive, int employerIdDb) {
             auto client = std::make_unique<ClientModel>(clientId, wxString(name), dateCreated, dateModified, isActive);
@@ -191,7 +191,7 @@ std::vector<std::unique_ptr<ClientModel>> ClientModel::GetByEmployerId(const int
 std::vector<std::unique_ptr<ClientModel>> ClientModel::GetAll()
 {
     std::vector<std::unique_ptr<ClientModel>> clients;
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << ClientModel::getClients >>
         [&](int clientId, std::string name, int dateCreatedUtc, int dateModifiedUtc, bool isActive, int employerId) {
             auto client =

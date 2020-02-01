@@ -84,7 +84,7 @@ std::unique_ptr<RateTypeModel> RateTypeModel::GetById(const int rateTypeId)
 {
     std::unique_ptr<RateTypeModel> rateType = nullptr;
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << RateTypeModel::getRateTypeById << rateTypeId >> [&](int rateTypeId, std::string name) {
         rateType = std::make_unique<RateTypeModel>(rateTypeId, wxString(name));
     };
@@ -96,7 +96,7 @@ std::vector<std::unique_ptr<RateTypeModel>> RateTypeModel::GetAll()
 {
     std::vector<std::unique_ptr<RateTypeModel>> rateTypes;
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << RateTypeModel::getRateTypes >> [&](int rateTypeId, std::string name) {
         auto rateType = std::make_unique<RateTypeModel>(rateTypeId, wxString(name));
         rateTypes.push_back(std::move(rateType));
@@ -191,7 +191,7 @@ void CurrencyModel::SetSymbol(const wxString& symbol)
 std::unique_ptr<CurrencyModel> CurrencyModel::GetById(const int id)
 {
     std::unique_ptr<CurrencyModel> currency = nullptr;
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << CurrencyModel::getCurrencyById << id >>
         [&](int currencyId, std::string name, std::string code, std::string symbol) {
             currency = std::make_unique<CurrencyModel>(currencyId, wxString(name), wxString(code), wxString(symbol));
@@ -203,7 +203,7 @@ std::unique_ptr<CurrencyModel> CurrencyModel::GetById(const int id)
 std::vector<std::unique_ptr<CurrencyModel>> CurrencyModel::GetAll()
 {
     std::vector<std::unique_ptr<CurrencyModel>> currencies;
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << CurrencyModel::getCurrencies >> [&](int currencyId, std::string name, std::string code, std::string symbol) {
         auto currency = std::make_unique<CurrencyModel>(currencyId, wxString(name), wxString(code), wxString(symbol));
         currencies.push_back(std::move(currency));
@@ -523,7 +523,7 @@ void ProjectModel::SetCurrency(std::unique_ptr<CurrencyModel> currency)
 
 void ProjectModel::Create(std::unique_ptr<ProjectModel> project)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     auto ps = *db << ProjectModel::createProject;
     ps << project->GetName() << project->GetDisplayName() << project->IsBillable() << project->IsDefault()
        << project->GetEmployerId();
@@ -551,7 +551,7 @@ void ProjectModel::Create(std::unique_ptr<ProjectModel> project)
 std::unique_ptr<ProjectModel> ProjectModel::GetById(const int projectId)
 {
     std::unique_ptr<ProjectModel> project = nullptr;
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << ProjectModel::getProject << projectId >> [&](int projectId,
                                                        std::string name,
                                                        std::string displayName,
@@ -604,7 +604,7 @@ std::unique_ptr<ProjectModel> ProjectModel::GetById(const int projectId)
 
 void ProjectModel::Update(std::unique_ptr<ProjectModel> project)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
 
     auto ps = *db << ProjectModel::updateProject << project->GetName() << project->GetDisplayName()
                  << project->IsBillable() << project->IsDefault() << util::UnixTimestamp() << project->GetEmployerId();
@@ -633,14 +633,14 @@ void ProjectModel::Update(std::unique_ptr<ProjectModel> project)
 
 void ProjectModel::Delete(std::unique_ptr<ProjectModel> project)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << ProjectModel::deleteProject << util::UnixTimestamp() << project->GetProjectId();
 }
 
 std::vector<std::unique_ptr<ProjectModel>> ProjectModel::GetAll()
 {
     std::vector<std::unique_ptr<ProjectModel>> projects;
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << ProjectModel::getProjects >> [&](int projectId,
                                            std::string name,
                                            std::string displayName,
@@ -695,7 +695,7 @@ std::vector<std::unique_ptr<ProjectModel>> ProjectModel::GetAll()
 
 void ProjectModel::UnmarkDefaultProjects()
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << ProjectModel::unmarkDefaultProjects << util::UnixTimestamp();
 }
 

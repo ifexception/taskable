@@ -125,13 +125,13 @@ void SetupWizard::InitializeSqliteConnection()
     auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
     pDatabase = new sqlite::database(common::GetDatabaseFileName().ToStdString(), config);
 
-    svc::DatabaseConnection::Get()->SetHandle(pDatabase);
+    svc::DatabaseConnection::Get().SetHandle(pDatabase);
 }
 
 void SetupWizard::Cleanup()
 {
     delete pDatabase;
-    svc::DatabaseConnection::Get()->UnsetHandle();
+    svc::DatabaseConnection::Get().UnsetHandle();
 }
 
 void SetupWizard::DeleteDatabaseFile()

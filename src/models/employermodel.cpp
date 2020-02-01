@@ -114,7 +114,7 @@ void EmployerModel::IsActive(const bool isActive)
 
 void EmployerModel::Create(std::unique_ptr<EmployerModel> employer)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << EmployerModel::createEmployer << employer->GetName().ToStdString();
 }
 
@@ -122,7 +122,7 @@ std::unique_ptr<EmployerModel> EmployerModel::GetById(const int id)
 {
     std::unique_ptr<EmployerModel> employer;
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << EmployerModel::getEmployer << id >>
         [&](int employerId, std::string employerName, int dateCreated, int dateModified, int isActive) {
             employer = std::make_unique<EmployerModel>(
@@ -136,7 +136,7 @@ std::vector<std::unique_ptr<EmployerModel>> EmployerModel::GetAll()
 {
     std::vector<std::unique_ptr<EmployerModel>> employers;
 
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << model::EmployerModel::getEmployers >>
         [&](int employerId, std::string employerName, int dateCreated, int dateModified, int isActive) {
             auto employer = std::make_unique<EmployerModel>(
@@ -149,14 +149,14 @@ std::vector<std::unique_ptr<EmployerModel>> EmployerModel::GetAll()
 
 void EmployerModel::Update(std::unique_ptr<EmployerModel> employer)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << EmployerModel::updateEmployer << employer->GetName().ToStdString() << util::UnixTimestamp()
         << employer->GetEmployerId();
 }
 
 void EmployerModel::Delete(std::unique_ptr<EmployerModel> employer)
 {
-    auto db = svc::DatabaseConnection::Get()->GetHandle();
+    auto db = svc::DatabaseConnection::Get().GetHandle();
 
     *db << EmployerModel::deleteEmployer << util::UnixTimestamp() << employer->GetEmployerId();
 }

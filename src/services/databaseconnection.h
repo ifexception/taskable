@@ -28,7 +28,7 @@ namespace app::svc
 class DatabaseConnection final
 {
 public:
-    static DatabaseConnection* Get();
+    static DatabaseConnection& Get();
 
     sqlite::database* GetHandle();
 
@@ -38,8 +38,6 @@ public:
 
 private:
     DatabaseConnection();
-
-    static DatabaseConnection* pInstance;
 
     sqlite::database* pDatabase;
 };
