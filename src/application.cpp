@@ -268,11 +268,7 @@ bool Application::DatabaseFileExists()
             common::GetProgramName(),
             wxYES_NO | wxICON_ERROR);
         if (ret == wxYES) {
-            auto setupWizard = new wizard::SetupWizard(nullptr, pLogger);
-            setupWizard->CenterOnParent();
-            bool wizardSetupSuccess = setupWizard->Run();
-
-            return wizardSetupSuccess;
+            return RunSetupWizard();
         } else {
             return false;
         }

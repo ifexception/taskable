@@ -209,10 +209,8 @@ void SelectDatabaseVersionPage::ConfigureEventBindings()
 void SelectDatabaseVersionPage::FillControls()
 {
     const wxString& backupPath = pConfig->GetBackupPath();
-    auto execPath = wxPathOnly(wxStandardPaths::Get().GetExecutablePath());
-    auto fullBackupPath = wxString::Format(wxT("%s\\%s"), execPath, backupPath);
     wxArrayString files;
-    wxDir::GetAllFiles(fullBackupPath, &files, wxEmptyString, wxDIR_FILES);
+    wxDir::GetAllFiles(backupPath, &files, wxEmptyString, wxDIR_FILES);
 
     int listIndex = 0;
     int columnIndex = 0;
@@ -324,8 +322,6 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
     pGaugeCtrl->Pulse();
 
     auto fileToRestore = pParent->GetDatabaseFileVersionToRestore();
-
-    /* Reaching this point, it is safe to assume that the config option for backups is enabled */
 
     const wxString& backupPath = pConfig->GetBackupPath();
     auto execPath = wxPathOnly(wxStandardPaths::Get().GetExecutablePath());
