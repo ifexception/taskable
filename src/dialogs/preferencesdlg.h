@@ -26,8 +26,6 @@
 #include <wx/wx.h>
 #include <wx/propdlg.h>
 
-#include "../services/databasebackup.h"
-
 #include "preferencesgeneralpage.h"
 #include "preferencesdatabasepage.h"
 #include "preferencesstopwatchpage.h"
@@ -55,7 +53,6 @@ public:
         std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> pLogger,
         frm::TaskBarIcon* taskBarIcon,
-        sqlite::database* database,
         const wxString& name = wxT("preferencesdlg"));
     virtual ~PreferencesDialog() = default;
 
@@ -77,7 +74,6 @@ private:
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
     frm::TaskBarIcon* pTaskBarIcon;
-    svc::DatabaseBackup mDatabaseBackup;
 
     wxWindow* pParent;
     GeneralPage* pGeneralPage;

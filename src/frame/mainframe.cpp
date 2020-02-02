@@ -51,6 +51,7 @@
 #include "taskbaricon.h"
 
 #include "../services/databaseconnection.h"
+#include "../services/databasebackup.h"
 
 namespace app::frm
 {
@@ -82,9 +83,15 @@ EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 EVT_SIZE(MainFrame::OnResize)
 wxEND_EVENT_TABLE()
 
-MainFrame::MainFrame()
-    : pLogger(nullptr)
-    , pConfig(nullptr)
+MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
+    std::shared_ptr<spdlog::logger> logger,
+    sqlite::database* database,
+    const wxString& name)
+    :wxFrame(
+        nullptr, wxID_ANY, common::GetProgramName(), wxDefaultPosition, wxSize(600, 500), wxDEFAULT_FRAME_STYLE, name)
+    , pConfig(config)
+    , pLogger(logger)
+    , pDatabase(database)
     , pTaskState(std::make_shared<services::TaskStateService>())
     , pTaskStorage(std::make_unique<services::TaskStorage>())
     , pDatePickerCtrl(nullptr)
@@ -92,24 +99,10 @@ MainFrame::MainFrame()
     , pListCtrl(nullptr)
     , pStatusBar(nullptr)
     , pTaskBarIcon(nullptr)
-    , pDatabase(nullptr)
     , bHasPendingTaskToResume(false)
     , bHasInitialized(false)
-{}
 // clang-format on
-
-MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
-    std::shared_ptr<spdlog::logger> logger,
-    sqlite::database* database,
-    const wxString& name)
-    : MainFrame()
 {
-    pLogger = logger;
-    pConfig = config;
-    wxFrame::Create(
-        nullptr, wxID_ANY, common::GetProgramName(), wxDefaultPosition, wxSize(600, 500), wxDEFAULT_FRAME_STYLE, name);
-    pDatabase = database;
-
     svc::DatabaseConnection::Get().SetHandle(pDatabase);
 }
 
@@ -118,7 +111,7 @@ MainFrame::~MainFrame()
     auto size = GetSize();
     pConfig->SetFrameSize(size);
 
-    if (pTaskBarIcon != nullptr) {
+    if (pTaskBarIcon) {
         delete pTaskBarIcon;
     }
 
@@ -150,7 +143,6 @@ void MainFrame::ResetDatabaseHandleOnDatabaseRestore(sqlite::database* database)
 {
     pDatabase = database;
     svc::DatabaseConnection::Get().ResetHandle(database);
-
 }
 
 bool MainFrame::Create()
@@ -461,7 +453,7 @@ void MainFrame::OnIconize(wxIconizeEvent& event)
 
 void MainFrame::OnPreferences(wxCommandEvent& event)
 {
-    dlg::PreferencesDialog preferences(this, pConfig, pLogger, pTaskBarIcon, pDatabase);
+    dlg::PreferencesDialog preferences(this, pConfig, pLogger, pTaskBarIcon);
     preferences.ShowModal();
 }
 

@@ -81,7 +81,7 @@ void TaskBarIcon::OnNewTimedTask(wxCommandEvent& WXUNUSED(event))
 
 void TaskBarIcon::OnPreferences(wxCommandEvent& WXUNUSED(event))
 {
-    dlg::PreferencesDialog preferences(pParent, pConfig, pLogger, this, pDatabase);
+    dlg::PreferencesDialog preferences(pParent, pConfig, pLogger, this);
     preferences.ShowModal();
 }
 

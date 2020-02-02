@@ -37,12 +37,10 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent,
     std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     frm::TaskBarIcon* taskBarIcon,
-    sqlite::database* database,
     const wxString& name)
     : pConfig(config)
     , pLogger(logger)
     , pTaskBarIcon(taskBarIcon)
-    , mDatabaseBackup(pConfig, pLogger, database)
     , pParent(parent)
     , pGeneralPage(nullptr)
     , pDatabasePage(nullptr)
@@ -108,10 +106,6 @@ void PreferencesDialog::OnOk(wxCommandEvent& event)
         pTaskBarIcon->SetTaskBarIcon();
     } else if (!pConfig->IsShowInTray() && pTaskBarIcon->IsIconInstalled()) {
         pTaskBarIcon->RemoveIcon();
-    }
-
-    if (pConfig->IsBackupEnabled()) {
-        mDatabaseBackup.Execute();
     }
 
     EndModal(wxID_OK);

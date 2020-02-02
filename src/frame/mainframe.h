@@ -41,11 +41,10 @@ class TaskBarIcon;
 class MainFrame : public wxFrame
 {
 public:
-    MainFrame();
     MainFrame(std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
         sqlite::database* database,
-        const wxString& name = wxT("mainframe"));
+        const wxString& name = wxT("mainfrm"));
     MainFrame(const MainFrame&) = delete;
     virtual ~MainFrame();
 
