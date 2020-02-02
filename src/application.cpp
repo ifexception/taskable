@@ -43,11 +43,6 @@ Application::Application()
 {
 }
 
-Application::~Application()
-{
-    delete pDatabase;
-}
-
 bool Application::OnInit()
 {
 #ifndef _DEBUG
@@ -80,16 +75,6 @@ bool Application::OnInit()
     SetTopWindow(frame);
 
     return true;
-}
-
-int Application::OnExit()
-{
-    if (pConfig->IsBackupEnabled()) {
-        if (!RunDatabaseBackup()) {
-            return false;
-        }
-    }
-    return wxApp::OnExit();
 }
 
 bool Application::FirstStartupInitialization()
@@ -280,17 +265,6 @@ void Application::InitializeSqliteConnection()
 {
     auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
     pDatabase = new sqlite::database(common::GetDatabaseFileName().ToStdString(), config);
-}
-
-bool Application::RunDatabaseBackup()
-{
-    if (pConfig->IsBackupEnabled()) {
-        svc::DatabaseBackup dbBackup(pConfig, pLogger, pDatabase);
-        bool result = dbBackup.Execute();
-        return result;
-    }
-
-    return true;
 }
 } // namespace app
 

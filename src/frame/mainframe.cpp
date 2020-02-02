@@ -121,6 +121,12 @@ MainFrame::~MainFrame()
     if (pTaskBarIcon != nullptr) {
         delete pTaskBarIcon;
     }
+
+    RunDatabaseBackup();
+
+    if (pDatabase) {
+        delete pDatabase;
+    }
 }
 
 bool MainFrame::CreateFrame()
@@ -144,6 +150,7 @@ void MainFrame::ResetDatabaseHandleOnDatabaseRestore(sqlite::database* database)
 {
     pDatabase = database;
     svc::DatabaseConnection::Get().ResetHandle(database);
+
 }
 
 bool MainFrame::Create()
@@ -615,5 +622,16 @@ void MainFrame::RefreshItems(wxDateTime date)
 
         columnIndex = 0;
     }
+}
+
+bool MainFrame::RunDatabaseBackup()
+{
+    if (pConfig->IsBackupEnabled()) {
+        svc::DatabaseBackup dbBackup(pConfig, pLogger, pDatabase);
+        bool result = dbBackup.Execute();
+        return result;
+    }
+
+    return true;
 }
 } // namespace app::frm

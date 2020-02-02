@@ -37,10 +37,9 @@ class Application : public wxApp
 {
 public:
     Application();
-    virtual ~Application();
+    virtual ~Application() = default;
 
     bool OnInit() override;
-    int OnExit() override;
 
 private:
     bool FirstStartupInitialization();
@@ -60,8 +59,6 @@ private:
     bool DatabaseFileExists();
 
     void InitializeSqliteConnection();
-
-    bool RunDatabaseBackup();
 
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
