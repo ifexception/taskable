@@ -542,15 +542,21 @@ void MainFrame::OnRestoreDatabase(wxCommandEvent& event)
 
 void MainFrame::OnBackupDatabase(wxCommandEvent& event)
 {
-    svc::DatabaseBackup databaseBackup(pConfig, pLogger, pDatabase);
-    bool result = databaseBackup.Execute();
-    if (result) {
-        wxMessageBox(
-            wxT("Backup completed successfully!"), common::GetProgramName(), wxOK_DEFAULT | wxICON_INFORMATION);
+    if (pConfig->IsBackupEnabled()) {
+        svc::DatabaseBackup databaseBackup(pConfig, pLogger, pDatabase);
+        bool result = databaseBackup.Execute();
+        if (result) {
+            wxMessageBox(
+                wxT("Backup completed successfully!"), common::GetProgramName(), wxOK_DEFAULT | wxICON_INFORMATION);
+        } else {
+            wxMessageBox(wxT("Backup database operation encountered error(s)!"),
+                common::GetProgramName(),
+                wxOK_DEFAULT | wxICON_ERROR);
+        }
     } else {
-        wxMessageBox(wxT("Backup database operation encountered error(s)!"),
+        wxMessageBox(wxT("Error! Backup option is turned off"),
             common::GetProgramName(),
-            wxOK_DEFAULT | wxICON_ERROR);
+            wxICON_WARNING | wxOK_DEFAULT);
     }
 }
 
