@@ -20,3 +20,23 @@
 
 
 #include "constants.h"
+
+wxString app::constants::OnSuccessfulAdd(const wxString& item)
+{
+    return wxString::Format(wxT("Successfully added %s!"), item);
+}
+
+wxString app::constants::OnSuccessfulEdit(const wxString& item)
+{
+    return wxString::Format(wxT("Successfully edit %s!"), item);
+}
+
+wxString app::constants::OnErrorAdd(const wxString& item)
+{
+    return wxString::Format(wxT("Error adding %s."), item);
+}
+
+wxString app::constants::OnErrorEdit(const wxString& item)
+{
+    return wxString::Format(wxT("Error editing %s."), item);
+}

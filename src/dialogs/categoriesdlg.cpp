@@ -25,6 +25,7 @@
 
 #include "../common/constants.h"
 #include "../common/common.h"
+#include "../common/ids.h"
 #include "../common/util.h"
 
 namespace app::dlg
@@ -427,6 +428,7 @@ void CategoriesDialog::OnOK(wxCommandEvent& event)
             model::CategoryModel::Create(std::move(category));
         } catch (const sqlite::sqlite_exception& e) {
             pLogger->error("Error occured in category CategoryModel::Create() - {0:d} : {1}", e.get_code(), e.what());
+            EndModal(ids::ID_ERROR_OCCURED);
         }
     }
 

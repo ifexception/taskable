@@ -25,6 +25,7 @@
 
 #include "../common/constants.h"
 #include "../common/common.h"
+#include "../common/ids.h"
 #include "../common/util.h"
 #include "../models/employermodel.h"
 
@@ -269,15 +270,30 @@ void ClientDialog::OnOk(wxCommandEvent& event)
 {
     if (TransferDataAndValidate()) {
         if (!bIsEdit) {
-            model::ClientModel::Create(std::move(pClient));
+            try {
+                model::ClientModel::Create(std::move(pClient));
+            } catch (const sqlite::sqlite_exception& e) {
+                pLogger->error("Error occured in category CategoryModel::Create - {0:d} : {1}", e.get_code(), e.what());
+                EndModal(ids::ID_ERROR_OCCURED);
+            }
         }
 
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
-            model::ClientModel::Update(std::move(pClient));
+            try {
+                model::ClientModel::Update(std::move(pClient));
+            } catch (const sqlite::sqlite_exception& e) {
+                pLogger->error("Error occured in category CategoryModel::Update - {0:d} : {1}", e.get_code(), e.what());
+                EndModal(ids::ID_ERROR_OCCURED);
+            }
         }
 
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
-            model::ClientModel::Delete(std::move(pClient));
+            try {
+                model::ClientModel::Delete(std::move(pClient));
+            } catch (const sqlite::sqlite_exception& e) {
+                pLogger->error("Error occured in category CategoryModel::Delete - {0:d} : {1}", e.get_code(), e.what());
+                EndModal(ids::ID_ERROR_OCCURED);
+            }
         }
 
         EndModal(wxID_OK);

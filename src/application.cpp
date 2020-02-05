@@ -131,7 +131,6 @@ bool Application::InitializeLogging()
 
     auto logDirectory = std::string(constants::LogsDirectory) + std::string("/") + std::string(constants::LogsFilename);
 
-    spdlog::flush_every(std::chrono::seconds(30));
     try {
         pLogger = spdlog::daily_logger_st(constants::LoggerName, logDirectory);
     } catch (const spdlog::spdlog_ex& e) {
@@ -141,6 +140,7 @@ bool Application::InitializeLogging()
         return false;
     }
 
+    pLogger->flush_on(spdlog::level::err);
     pLogger->enable_backtrace(32);
 
     return true;

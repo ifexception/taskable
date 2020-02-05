@@ -606,6 +606,7 @@ void ProjectDialog::OnOk(wxCommandEvent& WXUNUSED(event))
                 model::ProjectModel::Create(std::move(pProject));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in ProjectModel::Create() - {0:d} : {1}", e.get_code(), e.what());
+                EndModal(ids::ID_ERROR_OCCURED);
             }
         }
 
@@ -614,6 +615,7 @@ void ProjectDialog::OnOk(wxCommandEvent& WXUNUSED(event))
                 model::ProjectModel::Update(std::move(pProject));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in ProjectModel::Update() - {0:d} : {1}", e.get_code(), e.what());
+                EndModal(ids::ID_ERROR_OCCURED);
             }
         }
 
@@ -622,6 +624,7 @@ void ProjectDialog::OnOk(wxCommandEvent& WXUNUSED(event))
                 model::ProjectModel::Delete(std::move(pProject));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in ProjectModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
+                EndModal(ids::ID_ERROR_OCCURED);
             }
         }
 

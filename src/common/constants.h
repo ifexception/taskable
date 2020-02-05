@@ -22,6 +22,8 @@
 
 #include <string>
 
+#include <wx/string.h>
+
 namespace app::constants
 {
 static const std::string LoggerName = "Taskable_Daily";
@@ -46,4 +48,10 @@ enum class TaskItemTypes : int {
     EntryTask = 1,
     TimedTask = 2,
 };
-} // namespace app::Constants
+
+wxString OnSuccessfulAdd(const wxString& item);
+wxString OnSuccessfulEdit(const wxString& item);
+
+wxString OnErrorAdd(const wxString& item);
+wxString OnErrorEdit(const wxString& item);
+} // namespace app::constants

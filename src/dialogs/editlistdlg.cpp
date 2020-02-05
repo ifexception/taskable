@@ -35,6 +35,7 @@
 #include "../models/categorymodel.h"
 
 #include "../common/common.h"
+#include "../common/ids.h"
 #include "../common/util.h"
 
 namespace app::dlg
@@ -116,33 +117,38 @@ void EditListDialog::DataToControls()
 void EditListDialog::OnItemDoubleClick(wxListEvent& event)
 {
     int id = event.GetData();
+    int retCode = -1;
 
     switch (mType) {
     case DialogType::Employer: {
         EmployerDialog editEmployer(this, pLogger, true, id);
-        editEmployer.ShowModal();
+        retCode = editEmployer.ShowModal();
         break;
     }
     case DialogType::Client: {
         ClientDialog editClient(this, pLogger, true, id);
-        editClient.ShowModal();
+        retCode = editClient.ShowModal();
         break;
     }
     case DialogType::Project: {
         ProjectDialog editProject(this, pLogger, true, id);
-        editProject.ShowModal();
+        retCode = editProject.ShowModal();
         break;
     }
     case DialogType::Category: {
         CategoryDialog editCategory(this, pLogger, id);
-        editCategory.ShowModal();
+        retCode = editCategory.ShowModal();
         break;
     }
     default:
         break;
     }
 
-    EndDialog(wxID_OK);
+    if (retCode == wxID_OK) {
+        EndDialog(wxID_OK);
+    } else {
+        EndModal(ids::ID_ERROR_OCCURED);
+    }
 }
 
 void EditListDialog::SetStrategy()

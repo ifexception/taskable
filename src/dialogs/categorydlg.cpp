@@ -27,6 +27,7 @@
 
 #include "../common/constants.h"
 #include "../common/common.h"
+#include "../common/ids.h"
 #include "../common/util.h"
 
 namespace app::dlg
@@ -252,10 +253,15 @@ bool CategoryDialog::TransferDataAndValidate()
 void CategoryDialog::OnOk(wxCommandEvent& event)
 {
     if (TransferDataAndValidate()) {
-        if (pIsActiveCtrl->IsChecked()) {
-            model::CategoryModel::Update(std::move(pCategory));
-        } else {
-            model::CategoryModel::Delete(std::move(pCategory));
+        try {
+            if (pIsActiveCtrl->IsChecked()) {
+                model::CategoryModel::Update(std::move(pCategory));
+            } else {
+                model::CategoryModel::Delete(std::move(pCategory));
+            }
+        } catch (const sqlite::sqlite_exception& e) {
+            pLogger->error("Error occured in category CategoryModel::Update | Delete - {0:d} : {1}", e.get_code(), e.what());
+            EndModal(ids::ID_ERROR_OCCURED);
         }
 
         EndModal(wxID_OK);

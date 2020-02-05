@@ -27,6 +27,8 @@
 #include <wx/listctrl.h>
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
+#include <wx/infobar.h>
+#include <wx/scrolwin.h>
 
 #include <spdlog/spdlog.h>
 
@@ -92,6 +94,9 @@ private:
 
     bool RunDatabaseBackup();
 
+    void ShowInfoBarMessageForAdd(int modalRetCode, const wxString& item);
+    void ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item);
+
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<services::TaskStateService> pTaskState;
@@ -100,6 +105,7 @@ private:
     wxStaticText* pTotalHoursText;
     wxListCtrl* pListCtrl;
     wxStatusBar* pStatusBar;
+    wxInfoBar* pInfoBar;
     TaskBarIcon* pTaskBarIcon;
 
     sqlite::database* pDatabase;

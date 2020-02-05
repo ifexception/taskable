@@ -58,4 +58,8 @@ static const int ID_CHECK_FOR_UPDATE = static_cast<int>(MenuIds::Help_CheckForUp
 
 static const int ID_RESTORE_DATABASE = static_cast<int>(MenuIds::Tools_RestoreDatabaseId);
 static const int ID_BACKUP_DATABASE = static_cast<int>(MenuIds::Tools_BackupDatabaseId);
+
+enum class DialogIds : int { ErrorOccured = 5999 };
+
+static const int ID_ERROR_OCCURED = static_cast<int>(ids::DialogIds::ErrorOccured);
 } // namespace app::ids

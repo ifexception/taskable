@@ -98,6 +98,7 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
     , pTotalHoursText(nullptr)
     , pListCtrl(nullptr)
     , pStatusBar(nullptr)
+    , pInfoBar(nullptr)
     , pTaskBarIcon(nullptr)
     , bHasPendingTaskToResume(false)
     , bHasInitialized(false)
@@ -239,6 +240,11 @@ void MainFrame::CreateControls()
     auto mainPanel = new wxPanel(this);
     mainPanel->SetSizer(mainSizer);
 
+    /* InfoBar Control */
+    pInfoBar = new wxInfoBar(mainPanel, wxID_ANY);
+    mainSizer->Add(pInfoBar, wxSizerFlags().Expand());
+
+
     /* Utilities Panel and Controls*/
     auto utilPanel = new wxPanel(mainPanel);
     mainSizer->Add(utilPanel);
@@ -348,61 +354,71 @@ void MainFrame::OnClose(wxCloseEvent& event)
 void MainFrame::OnNewEntryTask(wxCommandEvent& event)
 {
     dlg::TaskItemDialog entryTask(this, pLogger, pConfig, constants::TaskItemTypes::EntryTask);
-    entryTask.ShowModal();
+    int retCode = entryTask.ShowModal();
+    ShowInfoBarMessageForAdd(retCode, wxT("task"));
 }
 
 void MainFrame::OnNewTimedTask(wxCommandEvent& event)
 {
     dlg::TaskItemDialog timedTask(this, pLogger, pConfig, constants::TaskItemTypes::TimedTask);
-    timedTask.ShowModal();
+    int retCode = timedTask.ShowModal();
+    ShowInfoBarMessageForAdd(retCode, wxT("task"));
 }
 
 void MainFrame::OnNewEmployer(wxCommandEvent& event)
 {
     dlg::EmployerDialog newEmployer(this, pLogger);
-    newEmployer.ShowModal();
+    int retCode = newEmployer.ShowModal();
+    ShowInfoBarMessageForAdd(retCode, wxT("employer"));
 }
 
 void MainFrame::OnNewClient(wxCommandEvent& event)
 {
     dlg::ClientDialog newClient(this, pLogger);
-    newClient.ShowModal();
+    int retCode = newClient.ShowModal();
+    ShowInfoBarMessageForAdd(retCode, wxT("client"));
 }
 
 void MainFrame::OnNewProject(wxCommandEvent& event)
 {
     dlg::ProjectDialog newProject(this, pLogger);
-    newProject.ShowModal();
+    int retCode = newProject.ShowModal();
+    ShowInfoBarMessageForAdd(retCode, wxT("project"));
 }
 
 void MainFrame::OnNewCategory(wxCommandEvent& event)
 {
     dlg::CategoriesDialog categoriesDialog(this, pLogger);
-    categoriesDialog.ShowModal();
+    int retCode = categoriesDialog.ShowModal();
+    ShowInfoBarMessageForAdd(retCode, wxT("category(ies)"));
 }
 
 void MainFrame::OnEditEmployer(wxCommandEvent& event)
 {
     dlg::EditListDialog employerEdit(this, dlg::DialogType::Employer, pLogger);
-    employerEdit.ShowModal();
+    int retCode = employerEdit.ShowModal();
+    ShowInfoBarMessageForEdit(retCode, wxT("employer"));
 }
 
 void MainFrame::OnEditClient(wxCommandEvent& event)
 {
     dlg::EditListDialog clientEdit(this, dlg::DialogType::Client, pLogger);
-    clientEdit.ShowModal();
+    int retCode = clientEdit.ShowModal();
+    ShowInfoBarMessageForEdit(retCode, wxT("client"));
 }
 
 void MainFrame::OnEditProject(wxCommandEvent& event)
 {
     dlg::EditListDialog projectEdit(this, dlg::DialogType::Project, pLogger);
-    projectEdit.ShowModal();
+    int retCode = projectEdit.ShowModal();
+    ShowInfoBarMessageForEdit(retCode, wxT("project"));
 }
 
 void MainFrame::OnEditCategory(wxCommandEvent& event)
 {
     dlg::EditListDialog categoryEdit(this, dlg::DialogType::Category, pLogger);
-    categoryEdit.ShowModal();
+    int retCode = categoryEdit.ShowModal();
+    ShowInfoBarMessageForEdit(retCode, wxT("category(ies)"));
 }
 
 void MainFrame::OnTaskInserted(wxCommandEvent& event)
@@ -424,7 +440,8 @@ void MainFrame::OnItemDoubleClick(wxListEvent& event)
     wxDateTime dateContext = pDatePickerCtrl->GetValue();
 
     dlg::TaskItemDialog editTask(this, pLogger, pConfig, type, true, taskItemId, dateContext);
-    editTask.ShowModal();
+    int retCode = editTask.ShowModal();
+    ShowInfoBarMessageForEdit(retCode, wxT("task"));
 }
 
 void MainFrame::OnItemRightClick(wxListEvent& event)
@@ -631,5 +648,23 @@ bool MainFrame::RunDatabaseBackup()
     }
 
     return true;
+}
+
+void MainFrame::ShowInfoBarMessageForAdd(int modalRetCode, const wxString& item)
+{
+    if (modalRetCode == wxID_OK) {
+        pInfoBar->ShowMessage(constants::OnSuccessfulAdd(item), wxICON_INFORMATION);
+    } else {
+        pInfoBar->ShowMessage(constants::OnErrorAdd(item), wxICON_ERROR);
+    }
+}
+
+void MainFrame::ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item)
+{
+    if (modalRetCode == wxID_OK) {
+        pInfoBar->ShowMessage(constants::OnSuccessfulEdit(item), wxICON_INFORMATION);
+    } else {
+        pInfoBar->ShowMessage(constants::OnSuccessfulEdit(item), wxICON_ERROR);
+    }
 }
 } // namespace app::frm
