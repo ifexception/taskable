@@ -654,7 +654,7 @@ void MainFrame::ShowInfoBarMessageForAdd(int modalRetCode, const wxString& item)
 {
     if (modalRetCode == wxID_OK) {
         pInfoBar->ShowMessage(constants::OnSuccessfulAdd(item), wxICON_INFORMATION);
-    } else {
+    } else if (modalRetCode == ids::ID_ERROR_OCCURED) {
         pInfoBar->ShowMessage(constants::OnErrorAdd(item), wxICON_ERROR);
     }
 }
@@ -663,7 +663,7 @@ void MainFrame::ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item
 {
     if (modalRetCode == wxID_OK) {
         pInfoBar->ShowMessage(constants::OnSuccessfulEdit(item), wxICON_INFORMATION);
-    } else {
+    } else if (modalRetCode == ids::ID_ERROR_OCCURED) {
         pInfoBar->ShowMessage(constants::OnSuccessfulEdit(item), wxICON_ERROR);
     }
 }
