@@ -507,26 +507,28 @@ void TaskItemDialog::FillControls()
         pProjectChoiceCtrl->Append(project->GetDisplayName(), util::IntToVoidPointer(project->GetProjectId()));
     }
 
-    auto iterator = std::find_if(projects.begin(), projects.end(), [&](std::unique_ptr<model::ProjectModel>& project) {
-        return project->IsDefault() == true;
-    });
+    if (!bIsEdit) {
+        auto iterator = std::find_if(projects.begin(),
+            projects.end(),
+            [&](std::unique_ptr<model::ProjectModel>& project) { return project->IsDefault() == true; });
 
-    if (iterator != projects.end()) {
-        pProjectChoiceCtrl->SetStringSelection(iterator->get()->GetDisplayName());
-        FillCategoryControl(iterator->get()->GetProjectId());
+        if (iterator != projects.end()) {
+            pProjectChoiceCtrl->SetStringSelection(iterator->get()->GetDisplayName());
+            FillCategoryControl(iterator->get()->GetProjectId());
 
-        pProject = model::ProjectModel::GetById(iterator->get()->GetProjectId());
+            pProject = model::ProjectModel::GetById(iterator->get()->GetProjectId());
 
-        if (iterator->get()->HasClientLinked()) {
-            pTaskContextTextCtrl->SetLabel(wxString::Format(TaskContextWithClient,
-                wxString(iterator->get()->GetEmployer()->GetName()),
-                wxString(iterator->get()->GetClient()->GetName())));
-        } else {
-            pTaskContextTextCtrl->SetLabel(
-                wxString::Format(TaskContextWithoutClient, wxString(iterator->get()->GetEmployer()->GetName())));
+            if (iterator->get()->HasClientLinked()) {
+                pTaskContextTextCtrl->SetLabel(wxString::Format(TaskContextWithClient,
+                    wxString(iterator->get()->GetEmployer()->GetName()),
+                    wxString(iterator->get()->GetClient()->GetName())));
+            } else {
+                pTaskContextTextCtrl->SetLabel(
+                    wxString::Format(TaskContextWithoutClient, wxString(iterator->get()->GetEmployer()->GetName())));
+            }
+
+            SetRateLabel(iterator->get());
         }
-
-        SetRateLabel(iterator->get());
     }
 
     wxDateTime timeInitializedToZero = wxDateTime::Now();
