@@ -28,7 +28,7 @@ wxString app::constants::OnSuccessfulAdd(const wxString& item)
 
 wxString app::constants::OnSuccessfulEdit(const wxString& item)
 {
-    return wxString::Format(wxT("Successfully edit %s!"), item);
+    return wxString::Format(wxT("Successfully edited %s!"), item);
 }
 
 wxString app::constants::OnErrorAdd(const wxString& item)
