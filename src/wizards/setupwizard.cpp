@@ -23,7 +23,6 @@
 #include <wx/wx.h>
 #include <wx/file.h>
 #include <wx/statline.h>
-#include <wx/stdpaths.h>
 
 #include "../common/common.h"
 #include "../../res/setupwizard.xpm"
