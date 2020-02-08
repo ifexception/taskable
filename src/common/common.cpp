@@ -19,6 +19,7 @@
 
 #include "common.h"
 
+#include <wx/stdpaths.h>
 #include <wx/richtooltip.h>
 
 #include "constants.h"
@@ -105,9 +106,20 @@ wxString app::common::GetProgramName()
     return wxT("Taskable");
 }
 
+wxString app::common::GetDatabasePath()
+{
+    return wxString::Format(wxT("%s\\data"), wxStandardPaths::Get().GetUserDataDir());
+}
+
 wxString app::common::GetDatabaseFileName()
 {
     return wxT("taskable.db");
+}
+
+wxString app::common::GetDatabaseFilePath()
+{
+    return wxString::Format(
+        wxT("%s\\data\\%s"), wxStandardPaths::Get().GetUserDataDir(), common::GetDatabaseFileName());
 }
 
 wxString app::common::GetConfigFileName()

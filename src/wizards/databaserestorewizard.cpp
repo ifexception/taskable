@@ -324,10 +324,11 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
     auto fileToRestore = pParent->GetDatabaseFileVersionToRestore();
 
     const wxString& backupPath = pConfig->GetBackupPath();
-    auto execPath = wxPathOnly(wxStandardPaths::Get().GetExecutablePath());
+    auto dataPath =
+        wxString::Format(wxT("%s\\data\\%s"), wxStandardPaths::Get().GetUserDataDir(), common::GetDatabaseFileName());
 
     auto fullBackupDatabaseFilePath = wxString::Format(wxT("%s\\%s"), backupPath, fileToRestore);
-    auto toCopyDatabaseFilePath = wxString::Format(wxT("%s\\%s"), execPath, fileToRestore);
+    auto toCopyDatabaseFilePath = wxString::Format(wxT("%s\\%s"), dataPath, fileToRestore);
 
     /* Copy selected database file to executable path */
     bool copySuccessful = wxCopyFile(fullBackupDatabaseFilePath, toCopyDatabaseFilePath);
@@ -336,7 +337,7 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
         return;
     }
 
-    auto existingDatabaseFile = wxString::Format(wxT("%s\\%s"), execPath, common::GetDatabaseFileName());
+    auto existingDatabaseFile = wxString::Format(wxT("%s\\%s"), dataPath, common::GetDatabaseFileName());
 
     /* If there is a existing 'db' file */
     if (!pParent->IsRestoreWithNoPreviousFileExisting()) {
@@ -400,7 +401,7 @@ void DatabaseRestoredPage::FileOperationErrorFeedback()
 {
     pStatusInOperationLabel->SetLabel(wxT("Error."));
     auto statusError = wxT("The wizard has encountered an error.\n"
-                           "Any operations executed have been rolled\nback."
+                           "Any operations executed have been rolled back."
                            "\n\n\nClick 'Finish' to exit the wizard.");
     pStatusCompleteLabel->SetLabel(statusError);
     pGaugeCtrl->SetValue(100);

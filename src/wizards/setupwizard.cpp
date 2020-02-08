@@ -23,6 +23,7 @@
 #include <wx/wx.h>
 #include <wx/file.h>
 #include <wx/statline.h>
+#include <wx/stdpaths.h>
 
 #include "../common/common.h"
 #include "../../res/setupwizard.xpm"
@@ -37,6 +38,7 @@ SetupWizard::SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger)
     , mEmployer(wxGetEmptyString())
     , mClient(wxGetEmptyString())
     , mProject(wxGetEmptyString())
+    , pDatabase(nullptr)
 {
     pPage1 = new WelcomePage(this);
     auto page2 = new AddEmployerAndClientPage(this);
@@ -114,16 +116,21 @@ void SetupWizard::SetProjectDisplayName(const wxString& displayName)
 
 void SetupWizard::CreateDatabaseFile()
 {
-    const wxString& databaseFilename = common::GetDatabaseFileName();
-    wxFile file;
-    file.Create(databaseFilename);
-    file.Close();
+    if (!wxDirExists(common::GetDatabasePath())) {
+        if (wxMkdir(common::GetDatabasePath())) {
+            wxFile file;
+            file.Create(common::GetDatabaseFilePath());
+            file.Close();
+        }
+    } else {
+
+    }
 }
 
 void SetupWizard::InitializeSqliteConnection()
 {
     auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
-    pDatabase = new sqlite::database(common::GetDatabaseFileName().ToStdString(), config);
+    pDatabase = new sqlite::database(common::GetDatabaseFilePath().ToStdString(), config);
 
     svc::DatabaseConnection::Get().SetHandle(pDatabase);
 }
@@ -136,9 +143,8 @@ void SetupWizard::Cleanup()
 
 void SetupWizard::DeleteDatabaseFile()
 {
-    const wxString& databaseFilename = common::GetDatabaseFileName();
-    if (wxFileExists(databaseFilename)) {
-        wxRemoveFile(databaseFilename);
+    if (wxFileExists(common::GetDatabaseFilePath())) {
+        wxRemoveFile(common::GetDatabaseFilePath());
     }
 }
 

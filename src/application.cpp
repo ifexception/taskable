@@ -25,6 +25,7 @@
 
 #include <algorithm>
 
+#include <wx/stdpaths.h>
 #include <wx/msw/registry.h>
 
 #include "common/common.h"
@@ -38,7 +39,7 @@ namespace app
 {
 Application::Application()
     : pInstanceChecker(std::make_unique<wxSingleInstanceChecker>())
-    , pConfig(std::make_shared<cfg::Configuration>())
+    , pConfig(nullptr)
     , pDatabase(nullptr)
 {
 }
@@ -129,7 +130,9 @@ bool Application::InitializeLogging()
     spdlog::set_level(spdlog::level::warn);
 #endif
 
-    auto logDirectory = std::string(constants::LogsDirectory) + std::string("/") + std::string(constants::LogsFilename);
+    auto logDirectory =
+        wxString::Format(wxT("%s\\logs\\%s"), wxStandardPaths::Get().GetUserDataDir(), constants::LogsFilename)
+            .ToStdString();
 
     try {
         pLogger = spdlog::daily_logger_st(constants::LoggerName, logDirectory);
@@ -148,10 +151,10 @@ bool Application::InitializeLogging()
 
 bool Application::CreateLogsDirectory()
 {
-    wxString logDirectory(wxT("logs"));
-    bool logDirectoryExists = wxDirExists(logDirectory);
+    wxString logs = wxString::Format(wxT("%s\\logs"), wxStandardPaths::Get().GetUserDataDir());
+    bool logDirectoryExists = wxDirExists(logs);
     if (!logDirectoryExists) {
-        bool success = wxMkDir(logDirectory);
+        bool success = wxMkDir(logs);
         return !success;
     }
 
@@ -206,12 +209,22 @@ bool Application::ConfigureRegistry()
 
 bool Application::ConfigurationFileExists()
 {
-    bool configFileExists = wxFileExists(common::GetConfigFileName());
+    wxString configFile =
+        wxString::Format(wxT("%s\\%s"), wxStandardPaths::Get().GetUserDataDir(), common::GetConfigFileName());
+    bool configFileExists = wxFileExists(configFile);
     if (!configFileExists) {
-        wxMessageBox(wxT("Error: Missing configuration file!\nCannot proceed."),
+        int res = wxMessageBox(wxT("Error: Program cannot locate configuration file!\nRecreate configuration file?"),
             common::GetProgramName(),
-            wxOK_DEFAULT | wxICON_ERROR);
+            wxYES_NO | wxICON_ERROR);
+        if (res == wxYES) {
+            pConfig->RecreateIfNotExists();
+            return true;
+        } else {
+            return false;
+        }
     }
+
+    pConfig = std::make_shared<cfg::Configuration>();
     return configFileExists;
 }
 
@@ -221,7 +234,7 @@ bool Application::CreateBackupsDirectory()
     if (IsInstalled() && !pConfig->GetBackupPath().empty()) {
         backupsDirectory = pConfig->GetBackupPath();
     } else {
-        backupsDirectory = wxT("backups");
+        backupsDirectory = wxString::Format(wxT("%s/backups"), wxStandardPaths::Get().GetUserDataDir());
     }
 
     bool backupsDirectoryExists = wxDirExists(backupsDirectory);
@@ -235,9 +248,23 @@ bool Application::CreateBackupsDirectory()
 
 bool Application::DatabaseFileExists()
 {
-    bool databaseFileExists = wxFileExists(common::GetDatabaseFileName());
+    wxString dataDirectory = wxString::Format(wxT("%s\\data"), wxStandardPaths::Get().GetUserDataDir());
+    if (!wxDirExists(dataDirectory)) {
+        int ret = wxMessageBox(wxT("Error: Program cannot find database file!\nRestore database from backup?"),
+            common::GetProgramName(),
+            wxYES_NO | wxICON_ERROR);
+        if (ret == wxYES) {
+            return RunSetupWizard();
+        } else {
+            return false;
+        }
+    }
+
+    wxString databaseFilePath =
+        wxString::Format(wxT("%s\\data\\%s"), wxStandardPaths::Get().GetUserDataDir(), common::GetDatabaseFileName());
+    bool databaseFileExists = wxFileExists(databaseFilePath);
     if (!databaseFileExists && pConfig->IsBackupEnabled()) {
-        int ret = wxMessageBox(wxT("Error: Missing database file!\nRestore from backup?"),
+        int ret = wxMessageBox(wxT("Error: Program cannot find database file!\nRestore database from backup?"),
             common::GetProgramName(),
             wxYES_NO | wxICON_WARNING);
         if (ret == wxYES) {
@@ -264,7 +291,7 @@ bool Application::DatabaseFileExists()
 void Application::InitializeSqliteConnection()
 {
     auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
-    pDatabase = new sqlite::database(common::GetDatabaseFileName().ToStdString(), config);
+    pDatabase = new sqlite::database(common::GetDatabaseFilePath().ToStdString(), config);
 }
 } // namespace app
 

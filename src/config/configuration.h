@@ -33,6 +33,7 @@ public:
     ~Configuration();
 
     void Save();
+    void RecreateIfNotExists();
 
     bool IsConfirmOnExit() const;
     void SetConfirmOnExit(bool value);
@@ -83,8 +84,6 @@ public:
     void SetTimeToRoundTo(const int value);
 
 private:
-    static wxString CFG_FILE;
-
     template<class T>
     T Get(const wxString& group, const wxString& key) const;
 

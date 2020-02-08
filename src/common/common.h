@@ -62,7 +62,11 @@ wxString GetVersion();
 
 wxString GetProgramName();
 
+wxString GetDatabasePath();
+
 wxString GetDatabaseFileName();
+
+wxString GetDatabaseFilePath();
 
 wxString GetConfigFileName();
 } // namespace app::common

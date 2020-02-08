@@ -19,17 +19,19 @@
 
 #include "configuration.h"
 
+#include <wx/file.h>
+
 #include "../common/common.h"
 #include "../common/util.h"
 
 namespace app::cfg
 {
-wxString Configuration::CFG_FILE = "taskable.ini";
-
 Configuration::Configuration()
 {
-    wxString configPath = wxPathOnly(wxStandardPaths::Get().GetExecutablePath()) + "\\" + common::GetConfigFileName();
-    pConfig = new wxFileConfig(wxEmptyString, wxEmptyString, configPath);
+    wxString configFile =
+        wxString::Format(wxT("%s\\%s"), wxStandardPaths::Get().GetUserDataDir(), common::GetConfigFileName());
+
+    pConfig = new wxFileConfig(wxEmptyString, wxEmptyString, configFile);
     pConfig->SetPath("/");
 }
 
@@ -41,6 +43,27 @@ Configuration::~Configuration()
 void Configuration::Save()
 {
     pConfig->Flush();
+}
+
+void Configuration::RecreateIfNotExists()
+{
+    Set<bool>(wxT("settings"), wxT("confirmOnExit"), false);
+    Set<bool>(wxT("settings"), wxT("startOnBoot"), false);
+    Set<bool>(wxT("settings"), wxT("showInTray"), false);
+    Set<bool>(wxT("settings"), wxT("closeToTray"), false);
+    Set<bool>(wxT("settings"), wxT("backupEnabled"), false);
+    Set<wxString>(wxT("settings"), wxT("backupPath"), wxGetEmptyString());
+    Set<bool>(wxT("settings"), wxT("minimizeStopwatchWindow"), false);
+    Set<int>(wxT("settings"), wxT("hideWindowTimer"), 1);
+    Set<int>(wxT("settings"), wxT("notificationTimer"), 5);
+    Set<int>(wxT("settings"), wxT("pausedTaskReminder"), 1);
+    Set<bool>(wxT("settings"), wxT("startStopwatchOnLaunch"), false);
+    Set<bool>(wxT("settings"), wxT("startStopwatchOnResume"), false);
+    Set<wxString>(wxT("persistence"), wxT("dimensions"), wxT("600,500"));
+    Set<bool>(wxT("settings"), wxT("timeRounding"), false);
+    Set<int>(wxT("settings"), wxT("timeToRoundTo"), 5);
+
+    Save();
 }
 
 bool Configuration::IsConfirmOnExit() const
