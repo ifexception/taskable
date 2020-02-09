@@ -370,14 +370,14 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
             FileOperationErrorFeedback();
             return;
         }
+
+        /* Restore connection to database */
+        auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
+        pDatabase = new sqlite::database(common::GetDatabaseFileName().ToStdString(), config);
+
+        // Need to bubble up new'd up pointer to parent (MainFrame)
+        pParent->SetNewDatabaseHandle(pDatabase);
     }
-
-    /* Restore connection to database */
-    auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
-    pDatabase = new sqlite::database(common::GetDatabaseFileName().ToStdString(), config);
-
-    // Need to bubble up new'd up pointer to parent (MainFrame)
-    pParent->SetNewDatabaseHandle(pDatabase);
 
     /* Complete operation */
     pStatusInOperationLabel->SetLabel(wxT("Complete."));

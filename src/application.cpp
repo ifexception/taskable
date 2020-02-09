@@ -247,7 +247,7 @@ bool Application::DatabaseFileExists()
 {
     /* Check if the 'data' directory is missing */
     if (!wxDirExists(common::GetDatabasePath())) {
-        /* Backups are enabled so run the setup wizard to create the directory and to restore database */
+        /* Backups are enabled so create the directory and to restore database */
         if (pConfig->IsBackupEnabled()) {
             int ret = wxMessageBox(wxT("Error: Program cannot find database file!\nRestore database from backup?"),
                 common::GetProgramName(),
@@ -258,7 +258,7 @@ bool Application::DatabaseFileExists()
                 }
                 auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pLogger, pConfig, pDatabase, true);
                 restoreDatabase->CenterOnParent();
-                restoreDatabase->Run();
+                return restoreDatabase->Run();
             } else {
                 return false;
             }
@@ -289,11 +289,11 @@ bool Application::DatabaseFileExists()
             if (ret == wxYES) {
                 auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pLogger, pConfig, pDatabase, true);
                 restoreDatabase->CenterOnParent();
-                restoreDatabase->Run();
+                return restoreDatabase->Run();
             }
         }
 
-         /* Backups are disabled so run the setup wizard to setup the database again */
+        /* Backups are disabled so run the setup wizard to setup the database again */
         if (!pConfig->IsBackupEnabled()) {
             int ret = wxMessageBox(wxT("Error! Missing database file\n"
                                        "and database backups are turned off.\n"
