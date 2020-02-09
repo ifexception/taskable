@@ -336,7 +336,7 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
         return;
     }
 
-    auto existingDatabaseFile = wxString::Format(wxT("%s\\%s"), dataPath, common::GetDatabaseFileName());
+    auto existingDatabaseFile = common::GetDatabaseFilePath();
 
     /* If there is a existing 'db' file */
     if (!pParent->IsRestoreWithNoPreviousFileExisting()) {
