@@ -324,8 +324,7 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
     auto fileToRestore = pParent->GetDatabaseFileVersionToRestore();
 
     const wxString& backupPath = pConfig->GetBackupPath();
-    auto dataPath =
-        wxString::Format(wxT("%s\\data\\%s"), wxStandardPaths::Get().GetUserDataDir(), common::GetDatabaseFileName());
+    auto dataPath = common::GetDatabasePath();
 
     auto fullBackupDatabaseFilePath = wxString::Format(wxT("%s\\%s"), backupPath, fileToRestore);
     auto toCopyDatabaseFilePath = wxString::Format(wxT("%s\\%s"), dataPath, fileToRestore);
