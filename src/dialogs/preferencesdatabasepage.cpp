@@ -109,7 +109,7 @@ void DatabasePage::OnOpenDirectory(wxCommandEvent& event)
 {
     wxString pathDirectory;
     if (pConfig->GetBackupPath().length() == 0) {
-        pathDirectory = wxStandardPaths::Get().GetUserLocalDataDir();
+        pathDirectory = wxStandardPaths::Get().GetUserDataDir();
     } else {
         pathDirectory = pConfig->GetBackupPath();
     }

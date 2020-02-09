@@ -68,5 +68,7 @@ wxString GetDatabaseFileName();
 
 wxString GetDatabaseFilePath();
 
+wxString GetConfigFilePath();
+
 wxString GetConfigFileName();
 } // namespace app::common

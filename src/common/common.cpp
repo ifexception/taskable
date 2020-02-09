@@ -122,6 +122,11 @@ wxString app::common::GetDatabaseFilePath()
         wxT("%s\\data\\%s"), wxStandardPaths::Get().GetUserDataDir(), common::GetDatabaseFileName());
 }
 
+wxString app::common::GetConfigFilePath()
+{
+    return wxString::Format(wxT("%s\\%s"), wxStandardPaths::Get().GetUserDataDir(), common::GetConfigFileName());
+}
+
 wxString app::common::GetConfigFileName()
 {
     return wxT("taskable.ini");
