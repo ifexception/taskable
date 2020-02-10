@@ -50,7 +50,7 @@ bool DatabaseBackup::Execute()
 wxString DatabaseBackup::CreateBackupFileName()
 {
     auto dateTime = wxDateTime::Now();
-    auto dateTimeString = dateTime.FormatISOCombined();
+    auto dateTimeString = dateTime.FormatISODate();
     auto indexOfPeriod = common::GetDatabaseFileName().find(wxT("."), 0);
     wxString databaseFileName = "";
     if (indexOfPeriod != wxString::npos) {

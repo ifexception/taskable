@@ -166,18 +166,18 @@ void SelectDatabaseVersionPage::CreateControls()
     pListCtrl->EnableCheckBoxes();
     databaseVersionSizer->Add(pListCtrl, wxSizerFlags().Border(wxALL, 5).Expand());
 
-    pListCtrl->SetSize(350, 200);
+    pListCtrl->SetSize(250, 200);
 
     wxListItem databaseColumn;
     databaseColumn.SetId(0);
     databaseColumn.SetText(wxT("Database"));
-    databaseColumn.SetWidth(200);
+    databaseColumn.SetWidth(150);
     pListCtrl->InsertColumn(0, databaseColumn);
 
     wxListItem dateColumn;
     dateColumn.SetId(1);
     dateColumn.SetText(wxT("Date Modified"));
-    dateColumn.SetWidth(148);
+    dateColumn.SetWidth(98);
     pListCtrl->InsertColumn(1, dateColumn);
 
     SetSizerAndFit(mainSizer);
@@ -215,7 +215,7 @@ void SelectDatabaseVersionPage::FillControls()
     int listIndex = 0;
     int columnIndex = 0;
     for (const auto& file : files) {
-        wxRegEx dateRegex(wxT("([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}.[0-9]{2}.[0-9]{2})"));
+        wxRegEx dateRegex(wxT("([0-9]{4}-[0-9]{2}-[0-9]{2})"));
         if (dateRegex.IsValid()) {
             if (dateRegex.Matches(file)) {
                 wxFileName filename(file);
