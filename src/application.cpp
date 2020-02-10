@@ -253,7 +253,7 @@ bool Application::DatabaseFileExists()
                 common::GetProgramName(),
                 wxYES_NO | wxICON_WARNING);
             if (ret == wxYES) {
-                if (wxMkdir(common::GetDatabasePath())) {
+                if (!wxMkdir(common::GetDatabasePath())) {
                     return false;
                 }
                 auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pLogger, pConfig, pDatabase, true);

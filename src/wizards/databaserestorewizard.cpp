@@ -321,10 +321,10 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
 {
     pGaugeCtrl->Pulse();
 
-    auto fileToRestore = pParent->GetDatabaseFileVersionToRestore();
+    const wxString& fileToRestore = pParent->GetDatabaseFileVersionToRestore();
 
     const wxString& backupPath = pConfig->GetBackupPath();
-    auto dataPath = common::GetDatabasePath();
+    const wxString& dataPath = common::GetDatabasePath();
 
     auto fullBackupDatabaseFilePath = wxString::Format(wxT("%s\\%s"), backupPath, fileToRestore);
     auto toCopyDatabaseFilePath = wxString::Format(wxT("%s\\%s"), dataPath, fileToRestore);
