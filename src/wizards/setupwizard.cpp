@@ -116,13 +116,15 @@ void SetupWizard::SetProjectDisplayName(const wxString& displayName)
 void SetupWizard::CreateDatabaseFile()
 {
     if (!wxDirExists(common::GetDatabasePath())) {
-        if (wxMkdir(common::GetDatabasePath())) {
+        if (!wxMkdir(common::GetDatabasePath())) {
             wxFile file;
             file.Create(common::GetDatabaseFilePath());
             file.Close();
         }
     } else {
-
+        wxFile file;
+        file.Create(common::GetDatabaseFilePath());
+        file.Close();
     }
 }
 
