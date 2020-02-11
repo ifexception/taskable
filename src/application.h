@@ -48,7 +48,7 @@ private:
     bool InitializeLogging();
     bool CreateLogsDirectory();
 
-    bool IsInstalled();
+    bool IsSetup();
     bool RunSetupWizard();
     bool ConfigureRegistry();
 

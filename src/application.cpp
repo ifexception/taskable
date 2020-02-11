@@ -60,7 +60,7 @@ bool Application::OnInit()
         return false;
     }
 
-    if (IsInstalled()) {
+    if (IsSetup()) {
         if (!StartupInitialization()) {
             return false;
         }
@@ -109,12 +109,6 @@ bool Application::StartupInitialization()
 
     InitializeSqliteConnection();
 
-    if (pConfig->IsBackupEnabled()) {
-        if (!CreateBackupsDirectory()) {
-            return false;
-        }
-    }
-
     return true;
 }
 
@@ -161,17 +155,17 @@ bool Application::CreateLogsDirectory()
     return logDirectoryExists;
 }
 
-bool Application::IsInstalled()
+bool Application::IsSetup()
 {
 #if _DEBUG
-    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\Taskabled");
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled");
 #else
-    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\Taskable");
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskable");
 #endif // _DEBUG
 
     if (key.Exists()) {
-        long value = -1;
-        key.QueryValue(wxT("Installed"), &value);
+        long value = 0;
+        key.QueryValue(wxT("IsSetup"), &value);
 
         return !!value;
     }
@@ -190,19 +184,21 @@ bool Application::RunSetupWizard()
 bool Application::ConfigureRegistry()
 {
 #if _DEBUG
-    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\Taskabled");
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled");
 #else
-    wxRegKey key(wxRegKey::HKCU, "SOFTWARE\\Taskable");
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskable");
 #endif // _DEBUG
 
-    bool result = key.Create();
+
+    bool result = key.Exists();
     if (!result) {
-        pLogger->critical("Unable to create registry: \"Taskable\"");
+        pLogger->critical("Unable to locate registry: \"Taskable\"");
         return result;
     }
-    result = key.SetValue("Installed", 1);
+
+    result = key.SetValue("IsSetup", true);
     if (!result) {
-        pLogger->critical("Unable to set registry value: \"Installed\"");
+        pLogger->critical("Unable to set registry value: \"IsSetup\"");
     }
     return result;
 }
@@ -229,7 +225,7 @@ bool Application::ConfigurationFileExists()
 bool Application::CreateBackupsDirectory()
 {
     wxString backupsDirectory;
-    if (IsInstalled() && !pConfig->GetBackupPath().empty()) {
+    if (IsSetup() && !pConfig->GetBackupPath().empty()) {
         backupsDirectory = pConfig->GetBackupPath();
     } else {
         backupsDirectory = wxString::Format(wxT("%s\\backups"), wxStandardPaths::Get().GetUserDataDir());
