@@ -132,6 +132,11 @@ wxString app::common::GetConfigFileName()
     return wxT("taskable.ini");
 }
 
+wxString app::common::GetAppId()
+{
+    return wxT("6BE5E5E6-68BF-4AF7-A9E5-FF919709E86C");
+}
+
 void app::common::validations::ForRequiredChoiceSelection(wxWindow* window, wxString label)
 {
     const wxString errorHeader = wxT("Invalid selection");
