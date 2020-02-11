@@ -185,8 +185,7 @@ bool StopwatchTaskDialog::Create(wxWindow* parent,
         if (pConfig->IsShowInTray()) {
             wxNotificationMessage::UseTaskBarIcon(pTaskBarIcon);
         } else {
-            // Need to implement installing application with shortcut
-            // wxNotificationMessage::MSWUseToasts(wxGetEmptyString(), wxGetEmptyString());
+             //wxNotificationMessage::MSWUseToasts(wxGetEmptyString(), common::GetAppId());
         }
     }
 
