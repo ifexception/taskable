@@ -154,9 +154,9 @@ bool Application::CreateLogsDirectory()
 bool Application::IsSetup()
 {
 #if _DEBUG
-    wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled");
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled\\IsSetup");
 #else
-    wxRegKey key(wxRegKey::HKCU, "Software\\Taskable");
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskable\\IsSetup");
 #endif // _DEBUG
 
     if (key.Exists()) {
@@ -172,9 +172,9 @@ bool Application::RunSetupWizard()
 {
     auto wizard = new wizard::SetupWizard(nullptr, pLogger);
     wizard->CenterOnScreen();
-    bool wizardSetupSuccess = wizard->Run();
+    bool result = wizard->Run();
 
-    return wizardSetupSuccess;
+    return result;
 }
 
 bool Application::ConfigureRegistry()
