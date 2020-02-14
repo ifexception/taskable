@@ -154,12 +154,12 @@ bool Application::CreateLogsDirectory()
 bool Application::IsSetup()
 {
 #if _DEBUG
-    wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled\\IsSetup");
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled");
 #else
-    wxRegKey key(wxRegKey::HKCU, "Software\\Taskable\\IsSetup");
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskable");
 #endif // _DEBUG
 
-    if (key.Exists()) {
+    if (key.HasValue(wxT("IsSetup"))) {
         long value = 0;
         key.QueryValue(wxT("IsSetup"), &value);
 
