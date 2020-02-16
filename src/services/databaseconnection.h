@@ -30,6 +30,9 @@ class DatabaseConnection final
 public:
     static DatabaseConnection& Get();
 
+    DatabaseConnection(const DatabaseConnection&) = delete;
+    DatabaseConnection& operator=(const DatabaseConnection&) = delete;
+
     sqlite::database* GetHandle();
 
     void SetHandle(sqlite::database* database);
