@@ -120,6 +120,7 @@ MainFrame::~MainFrame()
 
     if (pDatabase) {
         delete pDatabase;
+        pDatabase = nullptr;
     }
 }
 
