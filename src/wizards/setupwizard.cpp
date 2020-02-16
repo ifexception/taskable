@@ -74,6 +74,7 @@ bool SetupWizard::Run()
         }
     }
 
+    Cleanup();
     Destroy();
     return wizardSuccess;
 }
@@ -132,14 +133,12 @@ void SetupWizard::InitializeSqliteConnection()
 {
     auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
     pDatabase = new sqlite::database(common::GetDatabaseFilePath().ToStdString(), config);
-
-    svc::DatabaseConnection::Get().SetHandle(pDatabase);
 }
 
 void SetupWizard::Cleanup()
 {
     delete pDatabase;
-    svc::DatabaseConnection::Get().UnsetHandle();
+    pDatabase = nullptr;
 }
 
 void SetupWizard::DeleteDatabaseFile()
@@ -151,13 +150,13 @@ void SetupWizard::DeleteDatabaseFile()
 
 bool SetupWizard::SetUpTables()
 {
-    SetupTables tables(pLogger);
+    SetupTables tables(pLogger, pDatabase);
     return tables.CreateTables();
 }
 
 bool SetupWizard::SetUpEntities()
 {
-    SetupEntities entities(pLogger);
+    SetupEntities entities(pLogger, pDatabase);
     return entities.CreateEntities(mEmployer, mClient, mProject, mDisplayName);
 }
 

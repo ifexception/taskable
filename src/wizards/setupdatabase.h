@@ -22,21 +22,21 @@
 #include <string>
 
 #include <spdlog/spdlog.h>
-
-#include "../services/databaseconnection.h"
+#include <sqlite_modern_cpp.h>
 
 namespace app::wizard
 {
 class SetupTables final
 {
 public:
-    SetupTables(std::shared_ptr<spdlog::logger> logger);
+    SetupTables(std::shared_ptr<spdlog::logger> logger, sqlite::database* database);
     ~SetupTables() = default;
 
     bool CreateTables();
 
 private:
     std::shared_ptr<spdlog::logger> pLogger;
+    sqlite::database* pDatabase;
 
     bool Create();
     bool Seed();
@@ -59,7 +59,7 @@ private:
 class SetupEntities final
 {
 public:
-    SetupEntities(std::shared_ptr<spdlog::logger> logger);
+    SetupEntities(std::shared_ptr<spdlog::logger> logger, sqlite::database* database);
     ~SetupEntities() = default;
 
     bool CreateEntities(std::string employerName,
@@ -69,6 +69,7 @@ public:
 
 private:
     std::shared_ptr<spdlog::logger> pLogger;
+    sqlite::database* pDatabase;
 
     int CreateEmployer(std::string employerName);
     int CreateClient(std::string clientName, int employerId);
