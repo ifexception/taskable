@@ -19,11 +19,43 @@
 
 #include "preferencesgeneralpage.h"
 
+#include <wx/stdpaths.h>
+#include <wx/msw/registry.h>
+
 #include "../common/common.h"
 #include "../config/configuration.h"
 
 namespace app::dlg
 {
+struct AutoRun {
+    AutoRun()
+        : mKey(wxRegKey::HKCU, wxT("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"))
+    {
+    }
+
+    void Create()
+    {
+        wxString execPath = wxStandardPaths::Get().GetExecutablePath();
+        if (!mKey.SetValue(common::GetProgramName(), execPath)) {
+            // log error
+        }
+    }
+
+    void Delete()
+    {
+        if (!mKey.DeleteValue(common::GetProgramName())) {
+            // log error
+        }
+    }
+
+    bool Exists()
+    {
+        return mKey.Exists();
+    }
+
+    wxRegKey mKey;
+};
+
 GeneralPage::GeneralPage(wxWindow* parent, std::shared_ptr<cfg::Configuration> config)
     : wxPanel(parent, wxID_ANY)
     , pConfig(config)
@@ -47,6 +79,17 @@ void GeneralPage::Apply()
     pConfig->SetShowInTray(pShowInTrayCtrl->GetValue());
     pConfig->SetMinimizeToTray(pMinimizeToTrayCtrl->GetValue());
     pConfig->SetCloseToTray(pCloseToTrayCtrl->GetValue());
+
+    {
+        AutoRun autoRun;
+        if (autoRun.Exists() && !pConfig->IsStartOnBoot()) {
+            autoRun.Delete();
+        }
+
+        if (!autoRun.Exists() && pConfig->IsStartOnBoot()) {
+            autoRun.Create();
+        }
+    }
 }
 
 void GeneralPage::CreateControls()
@@ -69,7 +112,7 @@ void GeneralPage::CreateControls()
 
     displayGridSizer->Add(0, 0);
 
-    displaySettingsSizer->Add(displayGridSizer, 1, wxALL , 5);
+    displaySettingsSizer->Add(displayGridSizer, 1, wxALL, 5);
 
     sizer->Add(displaySettingsSizer, 0, wxLEFT | wxRIGHT | wxEXPAND, 5);
 
@@ -104,7 +147,7 @@ void GeneralPage::CreateControls()
 
 void GeneralPage::ConfigureEventBindings()
 {
-     pShowInTrayCtrl->Bind(wxEVT_CHECKBOX, &GeneralPage::OnShowInTrayCheck, this);
+    pShowInTrayCtrl->Bind(wxEVT_CHECKBOX, &GeneralPage::OnShowInTrayCheck, this);
 }
 
 void GeneralPage::FillControls()
