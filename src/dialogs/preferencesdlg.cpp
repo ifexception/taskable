@@ -101,7 +101,7 @@ void PreferencesDialog::OnOk(wxCommandEvent& event)
     pDatabasePage->Apply();
     pStopwatchPage->Apply();
 
-    if (pConfig->GetBackupPath().length() == 0) {
+    if (pConfig->IsBackupEnabled() && pConfig->GetBackupPath().length() == 0) {
         wxMessageBox(wxT("A backup path must be selected."), common::GetProgramName(), wxOK_DEFAULT | wxICON_WARNING);
         return;
     }
