@@ -91,7 +91,7 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
     std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<services::TaskStateService> taskState,
-    frm::TaskBarIcon *taskBarIcon,
+    frm::TaskBarIcon* taskBarIcon,
     bool hasPendingPausedTask,
     const wxString& name)
     : pLogger(logger)
@@ -185,7 +185,7 @@ bool StopwatchTaskDialog::Create(wxWindow* parent,
         if (pConfig->IsShowInTray()) {
             wxNotificationMessage::UseTaskBarIcon(pTaskBarIcon);
         } else {
-             //wxNotificationMessage::MSWUseToasts(wxGetEmptyString(), common::GetAppId());
+            wxNotificationMessage::MSWUseToasts();
         }
     }
 
@@ -400,6 +400,7 @@ void StopwatchTaskDialog::OnTimer(wxTimerEvent& WXUNUSED(event))
     auto message = wxString::Format(TaskRunningForText, elapsed.Format());
 
     wxNotificationMessage taskElaspedMessage(common::GetProgramName(), message, this);
+    taskElaspedMessage.SetIcon(common::GetProgramIcon64());
     taskElaspedMessage.Show();
 }
 
@@ -412,6 +413,7 @@ void StopwatchTaskDialog::OnHideWindow(wxTimerEvent& WXUNUSED(event))
 void StopwatchTaskDialog::OnPausedTaskReminder(wxTimerEvent& event)
 {
     wxNotificationMessage pausedTaskMessage(common::GetProgramName(), PendingPausedTaskText, this);
+    pausedTaskMessage.SetIcon(common::GetProgramIcon64());
     pausedTaskMessage.Show();
 }
 
