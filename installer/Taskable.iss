@@ -1,7 +1,7 @@
 ; -- Taskable.iss --
 ; Installer file for Taskable application
 
-#define TaskableVersion "0.80.0"
+#define TaskableVersion "0.82.1"
 
 [Setup]
 AppName=Taskable
@@ -19,7 +19,7 @@ UninstallDisplayIcon={app}\Taskable.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=Installer
-OutputBaseFilename=Taskable-x86.0.80.0-Installer
+OutputBaseFilename=Taskable-x86.0.82.1-Installer
 LicenseFile=License.txt
 SetupIconFile=taskable.ico
 WindowResizable=no
@@ -50,11 +50,15 @@ Name: quicklaunchicon; Description: "Create a &Quick Launch icon"; GroupDescript
 Name: "{group}\Taskable"; Filename: "{app}\Taskable.exe"
 Name: "{autodesktop}\Taskable"; Filename: "{app}\Taskable.exe"
 
+[Messages]
+WelcomeLabel1=Welcome to the Taskable Installation Wizard
+
 [UninstallDelete]
 Type: filesandordirs; Name: "{userappdata}\Taskable\logs"
 Type: filesandordirs; Name: "{userappdata}\Taskable\backups"
+Type: files; Name: "{userappdata}\Taskable\data\taskable.db"
 Type: files; Name: "{userappdata}\Taskable\taskable.ini"
-Type: files; Name: "{userappdata}\Taskable\taskable.db"
+Type: filesandordirs; Name: "{userappdata}\Taskable"
 
 [Registry]
 Root: HKCU; Subkey: "Software\Taskable"; Flags: uninsdeletekey
