@@ -23,7 +23,7 @@
 
 #include <sqlite_modern_cpp.h>
 
-#include <wx/clrpicker.h>
+#include <wx/checkbox.h>
 #include <wx/textctrl.h>
 #include <wx/wizard.h>
 
@@ -40,7 +40,7 @@ class SetupWizard final : public wxWizard
 public:
     SetupWizard() = default;
     explicit SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger);
-    virtual ~SetupWizard();
+    virtual ~SetupWizard() = default;
 
     bool Run();
 
@@ -51,6 +51,7 @@ public:
     wxString GetProject() const;
     void SetProject(const wxString& project);
     void SetProjectDisplayName(const wxString& project);
+    void IsDefault(const bool value);
 
 private:
     void CreateDatabaseFile();
@@ -71,6 +72,7 @@ private:
     wxString mClient;
     wxString mProject;
     wxString mDisplayName;
+    bool bIsDefault;
 };
 
 class WelcomePage final : public wxWizardPageSimple
@@ -120,5 +122,6 @@ private:
     SetupWizard* pParent;
     wxTextCtrl* pNameCtrl;
     wxTextCtrl* pDisplayNameCtrl;
+    wxCheckBox* pIsDefaultCtrl;
 };
 } // namespace app::wizard
