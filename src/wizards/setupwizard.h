@@ -23,7 +23,6 @@
 
 #include <sqlite_modern_cpp.h>
 
-#include <wx/checkbox.h>
 #include <wx/textctrl.h>
 #include <wx/wizard.h>
 
@@ -51,7 +50,6 @@ public:
     wxString GetProject() const;
     void SetProject(const wxString& project);
     void SetProjectDisplayName(const wxString& project);
-    void IsDefault(const bool value);
 
 private:
     void CreateDatabaseFile();
@@ -64,7 +62,6 @@ private:
     bool SetUpEntities();
 
     std::shared_ptr<spdlog::logger> pLogger;
-    wxFrame* pFrame;
     sqlite::database* pDatabase;
     WelcomePage* pPage1;
 
@@ -72,7 +69,6 @@ private:
     wxString mClient;
     wxString mProject;
     wxString mDisplayName;
-    bool bIsDefault;
 };
 
 class WelcomePage final : public wxWizardPageSimple
@@ -122,6 +118,5 @@ private:
     SetupWizard* pParent;
     wxTextCtrl* pNameCtrl;
     wxTextCtrl* pDisplayNameCtrl;
-    wxCheckBox* pIsDefaultCtrl;
 };
 } // namespace app::wizard

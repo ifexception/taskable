@@ -32,12 +32,10 @@ namespace app::wizard
 SetupWizard::SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger)
     : wxWizard(frame, wxID_ANY, wxT("Setup Wizard"), wxBitmap(setupwizard), wxDefaultPosition, wxDEFAULT_DIALOG_STYLE)
     , pLogger(logger)
-    , pFrame(frame)
     , pPage1(nullptr)
     , mEmployer(wxGetEmptyString())
     , mClient(wxGetEmptyString())
     , mProject(wxGetEmptyString())
-    , bIsDefault(false)
     , pDatabase(nullptr)
 {
     SetBitmapPlacement(wxWIZARD_HALIGN_LEFT);
@@ -110,11 +108,6 @@ void SetupWizard::SetProject(const wxString& project)
 void SetupWizard::SetProjectDisplayName(const wxString& displayName)
 {
     mDisplayName = displayName;
-}
-
-void SetupWizard::IsDefault(const bool value)
-{
-    bIsDefault = value;
 }
 
 void SetupWizard::CreateDatabaseFile()
@@ -345,21 +338,6 @@ AddProjectPage::AddProjectPage(SetupWizard* parent)
     pDisplayNameCtrl->SetToolTip(wxT("Specify a shortened version of the project name"));
     displayNameHSizer->Add(pDisplayNameCtrl, wxSizerFlags().Border(wxALL, 5).CenterVertical());
 
-    wxString isDefaultDisplayInfo = wxT("Enabling this option will automatically\n"
-                                        "pre-select this project when adding tasks");
-    auto isDefaultDisplayInfoLabel = new wxStaticText(this, wxID_ANY, isDefaultDisplayInfo);
-    projectSizer->Add(isDefaultDisplayInfoLabel, wxSizerFlags().Border(wxALL, 5));
-
-    auto isDefaultHorizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(2, 2), wxLI_HORIZONTAL);
-    projectSizer->Add(isDefaultHorizontalLine, wxSizerFlags().Expand());
-
-    auto isDefaultHSizer = new wxBoxSizer(wxHORIZONTAL);
-    projectSizer->Add(isDefaultHSizer, 1);
-
-    pIsDefaultCtrl = new wxCheckBox(this, wxID_ANY, wxT("Default"));
-    pIsDefaultCtrl->SetToolTip(wxT("Set project to be default"));
-    isDefaultHSizer->Add(pIsDefaultCtrl, wxSizerFlags().Border(wxALL, 5));
-
     SetSizerAndFit(mainSizer);
 }
 
@@ -379,7 +357,6 @@ bool AddProjectPage::TransferDataFromWindow()
 
     pParent->SetProject(projectName);
     pParent->SetProjectDisplayName(displayName);
-    pParent->IsDefault(pIsDefaultCtrl->GetValue());
 
     return true;
 }
