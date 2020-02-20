@@ -178,12 +178,12 @@ std::unique_ptr<CategoryModel> CategoryModel::GetById(const int id)
 
     auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << CategoryModel::getCategoryById << id >> [&](int categoryId,
-                                                      std::string categoryName,
-                                                      unsigned int color,
-                                                      int dateCreated,
-                                                      int dateModified,
-                                                      int isActive,
-                                                      int projectId) {
+                                                       std::string categoryName,
+                                                       unsigned int color,
+                                                       int dateCreated,
+                                                       int dateModified,
+                                                       int isActive,
+                                                       int projectId) {
         category =
             std::make_unique<CategoryModel>(categoryId, categoryName, color, dateCreated, dateModified, isActive);
         auto project = std::make_unique<ProjectModel>(projectId, true);
@@ -199,7 +199,7 @@ void CategoryModel::Update(std::unique_ptr<CategoryModel> category)
 
     auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << CategoryModel::updateCategory << category->GetName().ToStdString() << color << category->GetProjectId()
-       << util::UnixTimestamp() << category->GetCategoryId();
+        << util::UnixTimestamp() << category->GetCategoryId();
 }
 
 void CategoryModel::Delete(std::unique_ptr<CategoryModel> category)
@@ -213,12 +213,12 @@ std::vector<std::unique_ptr<CategoryModel>> CategoryModel::GetByProjectId(const 
     std::vector<std::unique_ptr<CategoryModel>> categories;
     auto db = svc::DatabaseConnection::Get().GetHandle();
     *db << CategoryModel::getCategoriesByProjectId << projectId >> [&](int categoryId,
-                                                                      std::string categoryName,
-                                                                      unsigned int color,
-                                                                      int dateCreated,
-                                                                      int dateModified,
-                                                                      int isActive,
-                                                                      int projectId) {
+                                                                       std::string categoryName,
+                                                                       unsigned int color,
+                                                                       int dateCreated,
+                                                                       int dateModified,
+                                                                       int isActive,
+                                                                       int projectId) {
         auto category =
             std::make_unique<CategoryModel>(categoryId, categoryName, color, dateCreated, dateModified, isActive);
         auto project = std::make_unique<ProjectModel>(projectId, true);
@@ -234,13 +234,13 @@ std::vector<std::unique_ptr<CategoryModel>> CategoryModel::GetAll()
     std::vector<std::unique_ptr<CategoryModel>> categories;
 
     auto db = svc::DatabaseConnection::Get().GetHandle();
-    *db << CategoryModel::getCategoryById >> [&](int categoryId,
-                                                std::string categoryName,
-                                                unsigned int color,
-                                                int dateCreated,
-                                                int dateModified,
-                                                int isActive,
-                                                int projectId) {
+    *db << CategoryModel::getCategories >> [&](int categoryId,
+                                               std::string categoryName,
+                                               unsigned int color,
+                                               int dateCreated,
+                                               int dateModified,
+                                               int isActive,
+                                               int projectId) {
         auto category =
             std::make_unique<CategoryModel>(categoryId, categoryName, color, dateCreated, dateModified, isActive);
         auto project = std::make_unique<ProjectModel>(projectId, true);
@@ -284,6 +284,7 @@ const std::string CategoryModel::getCategoriesByProjectId = "SELECT categories.c
 
 const std::string CategoryModel::getCategories = "SELECT categories.category_id, "
                                                  "categories.name, "
+                                                 "categories.color, "
                                                  "categories.date_created, "
                                                  "categories.date_modified, "
                                                  "categories.is_active, "

@@ -144,11 +144,7 @@ void EditListDialog::OnItemDoubleClick(wxListEvent& event)
         break;
     }
 
-    if (retCode == wxID_OK) {
-        EndDialog(wxID_OK);
-    } else {
-        EndModal(ids::ID_ERROR_OCCURED);
-    }
+    EndDialog(retCode);
 }
 
 void EditListDialog::SetStrategy()
@@ -191,9 +187,7 @@ std::string EditListDialog::MapEnumToValue()
     }
 }
 
-Strategy::Strategy()
-{
-}
+Strategy::Strategy() {}
 
 EmployerStrategy::EmployerStrategy(std::shared_ptr<spdlog::logger> logger)
     : pLogger(logger)
