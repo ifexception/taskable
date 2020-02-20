@@ -32,6 +32,8 @@
 #include "../../res/database-restore.xpm"
 #include "../../res/database-backup.xpm"
 #include "../../res/taskable-64.xpm"
+#include "../../res/settings.xpm"
+#include "../../res/quit.xpm"
 
 const char** app::common::GetProgramIcon()
 {
@@ -76,6 +78,16 @@ const char** app::common::GetDatabaseBackupIcon()
 const char** app::common::GetProgramIcon64()
 {
     return taskable_64_xpm;
+}
+
+const char** app::common::GetSettingsIcon()
+{
+    return settings_xpm;
+}
+
+const char** app::common::GetQuitIcon()
+{
+    return quit_xpm;
 }
 
 std::string app::common::GetLicense()

@@ -57,12 +57,19 @@ wxMenu* TaskBarIcon::CreatePopupMenu()
 {
     auto menu = new wxMenu();
 
-    menu->Append(ID_ADD_ENTRY_TASK, wxT("Add Entry Task"));
-    menu->Append(ID_ADD_TIMED_TASK, wxT("Add Timed Task"));
+    auto entryMenu = menu->Append(ID_ADD_ENTRY_TASK, wxT("Add Entry Task"));
+    entryMenu->SetBitmap(common::GetEntryTaskIcon());
+
+    auto timedMenuItem = menu->Append(ID_ADD_TIMED_TASK, wxT("Add Timed Task"));
+    timedMenuItem->SetBitmap(common::GetTimedTaskIcon());
+
     menu->AppendSeparator();
-    menu->Append(ID_SETTINGS, wxT("Preferences"));
+    auto preferencesMenuItem = menu->Append(ID_SETTINGS, wxT("Preferences"));
+    preferencesMenuItem->SetBitmap(common::GetSettingsIcon());
+
     menu->AppendSeparator();
-    menu->Append(wxID_EXIT, wxT("Exit"));
+    auto exitMenuItem = menu->Append(wxID_EXIT, wxT("Exit"));
+    exitMenuItem->SetBitmap(common::GetQuitIcon());
 
     return menu;
 }

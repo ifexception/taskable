@@ -65,6 +65,7 @@ private:
     void DataToControls();
 
     void OnAbout(wxCommandEvent& event);
+    void OnExit(wxCommandEvent& event);
     void OnClose(wxCloseEvent& event);
     void OnNewEntryTask(wxCommandEvent& event);
     void OnNewTimedTask(wxCommandEvent& event);

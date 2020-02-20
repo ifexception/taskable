@@ -58,6 +58,7 @@ namespace app::frm
 // clang-format off
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 EVT_CLOSE(MainFrame::OnClose)
+EVT_MENU(wxID_EXIT, MainFrame::OnExit)
 EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
 EVT_MENU(ids::ID_NEW_ENTRY_TASK, MainFrame::OnNewEntryTask)
 EVT_MENU(ids::ID_NEW_TIMED_TASK, MainFrame::OnNewTimedTask)
@@ -185,7 +186,8 @@ void MainFrame::CreateControls()
     fileMenu->Append(ids::ID_NEW_PROJECT, wxT("New &Project"), wxT("Create new project"));
     fileMenu->Append(ids::ID_NEW_CATEGORY, wxT("New C&ategory"), wxT("Create new category"));
     fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_EXIT, wxT("Exit"), wxT("Exit the application"));
+    auto exitMenuItem = fileMenu->Append(wxID_EXIT, wxT("Exit"), wxT("Exit the application"));
+    exitMenuItem->SetBitmap(common::GetQuitIcon());
 
     /* Edit Menu Control */
     auto editMenu = new wxMenu();
@@ -194,7 +196,8 @@ void MainFrame::CreateControls()
     editMenu->Append(ids::ID_EDIT_PROJECT, wxT("Edit &Project"), wxT("Select a project to edit"));
     editMenu->Append(ids::ID_EDIT_CATEGORY, wxT("Edit C&ategory"), wxT("Select a category to edit"));
     editMenu->AppendSeparator();
-    editMenu->Append(ids::ID_PREFERENCES, wxT("&Preferences\tCtrl-P"), wxT("Edit application preferences"));
+    auto preferencesMenuItem = editMenu->Append(ids::ID_PREFERENCES, wxT("&Preferences\tCtrl-P"), wxT("Edit application preferences"));
+    preferencesMenuItem->SetBitmap(common::GetSettingsIcon());
 
     /* Export Menu Control */
     auto exportMenu = new wxMenu();
@@ -333,6 +336,11 @@ void MainFrame::OnAbout(wxCommandEvent& event)
     aboutInfo.AddDeveloper(wxT("Szymon Welgus"));
 
     wxAboutBox(aboutInfo);
+}
+
+void MainFrame::OnExit(wxCommandEvent& event)
+{
+    Close(true);
 }
 
 void MainFrame::OnClose(wxCloseEvent& event)

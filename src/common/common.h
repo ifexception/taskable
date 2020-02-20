@@ -55,6 +55,8 @@ extern const char** GetStopwatchIcon();
 extern const char** GetDatabaseRestoreIcon();
 extern const char** GetDatabaseBackupIcon();
 extern const char** GetProgramIcon64();
+extern const char** GetSettingsIcon();
+extern const char** GetQuitIcon();
 
 std::string GetLicense();
 
