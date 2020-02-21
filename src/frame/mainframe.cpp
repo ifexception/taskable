@@ -546,22 +546,21 @@ void MainFrame::OnCheckForUpdate(wxCommandEvent& event)
 void MainFrame::OnResize(wxSizeEvent& event)
 {
     auto frameSize = GetClientSize();
-
-    // if (bHasInitialized) {
-    //    int width = frameSize.GetWidth();
-
-    //    pListCtrl->SetColumnWidth(0, width * 0.10); // project
-    //    pListCtrl->SetColumnWidth(1, width * 0.11); // task date
-    //    pListCtrl->SetColumnWidth(2, width * 0.09); // start time
-    //    pListCtrl->SetColumnWidth(3, width * 0.09); // end time
-    //    pListCtrl->SetColumnWidth(4, width * 0.10); // duration
-    //    pListCtrl->SetColumnWidth(5, width * 0.12); // category
-    //    pListCtrl->SetColumnWidth(6, width * 0.37); // description
-    //}
-
-    // if (!bHasInitialized) {
-    //    bHasInitialized = true;
-    //}
+    int width = frameSize.GetWidth();
+    if (pListCtrl) {
+        pListCtrl->SetColumnWidth(0, width * 0.10); // project
+        pListCtrl->SetColumnWidth(1, width * 0.11); // task date
+        pListCtrl->SetColumnWidth(2, width * 0.09); // start time
+        pListCtrl->SetColumnWidth(3, width * 0.09); // end time
+        pListCtrl->SetColumnWidth(4, width * 0.10); // duration
+        pListCtrl->SetColumnWidth(5, width * 0.12); // category
+        pListCtrl->SetColumnWidth(6, width * 0.37); // description
+    }
+    if (pStatusBar) {
+        wxRect statusBarRect;
+        pStatusBar->GetFieldRect(2, statusBarRect);
+        pFeedbackButton->SetPosition(statusBarRect.GetPosition());
+    }
 
     event.Skip();
 }
