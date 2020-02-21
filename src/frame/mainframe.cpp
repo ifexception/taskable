@@ -103,7 +103,6 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
     , pInfoBar(nullptr)
     , pTaskBarIcon(nullptr)
     , bHasPendingTaskToResume(false)
-    , bHasInitialized(false)
     , pFeedbackButton(nullptr)
     , pFeedbackPopupWindow(nullptr)
 // clang-format on

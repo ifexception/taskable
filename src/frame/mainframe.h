@@ -116,7 +116,6 @@ private:
     sqlite::database* pDatabase;
 
     bool bHasPendingTaskToResume;
-    bool bHasInitialized;
 
     enum { IDC_GO_TO_DATE = wxID_HIGHEST + 1, IDC_HOURS_TEXT, IDC_LIST, IDC_FEEDBACK };
 };
