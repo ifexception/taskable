@@ -38,6 +38,7 @@ set (SRC
     "application.manifest"
     "frame/mainframe.cpp"
     "frame/taskbaricon.cpp"
+    "frame/feedbackpopup.cpp"
     "dialogs/editlistdlg.cpp"
     "dialogs/stopwatchtaskdlg.cpp"
     "dialogs/checkforupdatedlg.cpp"

@@ -34,6 +34,7 @@
 #include "../../res/taskable-64.xpm"
 #include "../../res/settings.xpm"
 #include "../../res/quit.xpm"
+#include "../../res/feedback.xpm"
 
 const char** app::common::GetProgramIcon()
 {
@@ -88,6 +89,11 @@ const char** app::common::GetSettingsIcon()
 const char** app::common::GetQuitIcon()
 {
     return quit_xpm;
+}
+
+const char** app::common::GetFeedbackIcon()
+{
+    return feedback_xpm;
 }
 
 std::string app::common::GetLicense()

@@ -82,6 +82,7 @@ EVT_COMMAND(wxID_ANY, START_NEW_STOPWATCH_TASK, MainFrame::OnNewStopwatchTaskFro
 EVT_ICONIZE(MainFrame::OnIconize)
 EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 EVT_SIZE(MainFrame::OnResize)
+EVT_BUTTON(MainFrame::IDC_FEEDBACK, MainFrame::OnFeedback)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
@@ -103,6 +104,8 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
     , pTaskBarIcon(nullptr)
     , bHasPendingTaskToResume(false)
     , bHasInitialized(false)
+    , pFeedbackButton(nullptr)
+    , pFeedbackPopupWindow(nullptr)
 // clang-format on
 {
     svc::DatabaseConnection::Get().SetHandle(pDatabase);
@@ -127,12 +130,12 @@ MainFrame::~MainFrame()
 
 bool MainFrame::CreateFrame()
 {
+    auto configSize = pConfig->GetFrameSize();
+    SetSize(configSize);
+
     bool success = Create();
     SetMinClientSize(wxSize(599, 499));
     SetIcon(common::GetProgramIcon());
-
-    auto configSize = pConfig->GetFrameSize();
-    SetSize(configSize);
 
     pTaskBarIcon = new TaskBarIcon(this, pConfig, pLogger, pDatabase);
     if (pConfig->IsShowInTray()) {
@@ -159,9 +162,24 @@ bool MainFrame::Create()
 void MainFrame::CreateControls()
 {
     /* Status Bar Control */
-    pStatusBar = CreateStatusBar(2);
-    SetStatusText(wxT("Ready"));
+    int statusBarWidths[] = { 128, -1, 36 };
+
+    pStatusBar = CreateStatusBar(3);
+    SetStatusWidths(3, statusBarWidths);
+
+    SetStatusText(wxT("Ready"), 0);
     SetStatusText(wxString::Format("%d.%d.%d", TASKABLE_MAJOR, TASKABLE_MINOR, TASKABLE_PATCH), 1);
+
+    wxRect statusBarRect;
+    pStatusBar->GetFieldRect(2, statusBarRect);
+
+    wxSize btnSize(32, 20);
+    pFeedbackButton = new wxBitmapButton(pStatusBar,
+        IDC_FEEDBACK,
+        common::GetFeedbackIcon(),
+        statusBarRect.GetPosition(),
+        btnSize,
+        wxBU_LEFT | wxBU_RIGHT);
 
     /* File Menu Control */
     auto fileMenu = new wxMenu();
@@ -196,7 +214,8 @@ void MainFrame::CreateControls()
     editMenu->Append(ids::ID_EDIT_PROJECT, wxT("Edit &Project"), wxT("Select a project to edit"));
     editMenu->Append(ids::ID_EDIT_CATEGORY, wxT("Edit C&ategory"), wxT("Select a category to edit"));
     editMenu->AppendSeparator();
-    auto preferencesMenuItem = editMenu->Append(ids::ID_PREFERENCES, wxT("&Preferences\tCtrl-P"), wxT("Edit application preferences"));
+    auto preferencesMenuItem =
+        editMenu->Append(ids::ID_PREFERENCES, wxT("&Preferences\tCtrl-P"), wxT("Edit application preferences"));
     preferencesMenuItem->SetBitmap(common::GetSettingsIcon());
 
     /* Export Menu Control */
@@ -247,7 +266,6 @@ void MainFrame::CreateControls()
     /* InfoBar Control */
     pInfoBar = new wxInfoBar(mainPanel, wxID_ANY);
     mainSizer->Add(pInfoBar, wxSizerFlags().Expand());
-
 
     /* Utilities Panel and Controls*/
     auto utilPanel = new wxPanel(mainPanel);
@@ -529,21 +547,21 @@ void MainFrame::OnResize(wxSizeEvent& event)
 {
     auto frameSize = GetClientSize();
 
-    if (bHasInitialized) {
-        int width = frameSize.GetWidth();
+    // if (bHasInitialized) {
+    //    int width = frameSize.GetWidth();
 
-        pListCtrl->SetColumnWidth(0, width * 0.10); // project
-        pListCtrl->SetColumnWidth(1, width * 0.11); // task date
-        pListCtrl->SetColumnWidth(2, width * 0.09); // start time
-        pListCtrl->SetColumnWidth(3, width * 0.09); // end time
-        pListCtrl->SetColumnWidth(4, width * 0.10); // duration
-        pListCtrl->SetColumnWidth(5, width * 0.12); // category
-        pListCtrl->SetColumnWidth(6, width * 0.37); // description
-    }
+    //    pListCtrl->SetColumnWidth(0, width * 0.10); // project
+    //    pListCtrl->SetColumnWidth(1, width * 0.11); // task date
+    //    pListCtrl->SetColumnWidth(2, width * 0.09); // start time
+    //    pListCtrl->SetColumnWidth(3, width * 0.09); // end time
+    //    pListCtrl->SetColumnWidth(4, width * 0.10); // duration
+    //    pListCtrl->SetColumnWidth(5, width * 0.12); // category
+    //    pListCtrl->SetColumnWidth(6, width * 0.37); // description
+    //}
 
-    if (!bHasInitialized) {
-        bHasInitialized = true;
-    }
+    // if (!bHasInitialized) {
+    //    bHasInitialized = true;
+    //}
 
     event.Skip();
 }
@@ -580,10 +598,21 @@ void MainFrame::OnBackupDatabase(wxCommandEvent& event)
                 wxOK_DEFAULT | wxICON_ERROR);
         }
     } else {
-        wxMessageBox(wxT("Error! Backup option is turned off"),
-            common::GetProgramName(),
-            wxICON_WARNING | wxOK_DEFAULT);
+        wxMessageBox(
+            wxT("Error! Backup option is turned off"), common::GetProgramName(), wxICON_WARNING | wxOK_DEFAULT);
     }
+}
+
+void MainFrame::OnFeedback(wxCommandEvent& event)
+{
+    delete pFeedbackPopupWindow;
+    pFeedbackPopupWindow = new FeedbackPopupWindow(this);
+
+    wxWindow* btn = (wxWindow*) event.GetEventObject();
+    wxPoint pos = btn->ClientToScreen(wxPoint(-186, -78));
+    wxSize sz = btn->GetSize();
+    pFeedbackPopupWindow->Position(pos, sz);
+    pFeedbackPopupWindow->Popup(nullptr);
 }
 
 void MainFrame::CalculateTotalTime(wxDateTime date)

@@ -28,13 +28,14 @@
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
 #include <wx/infobar.h>
-#include <wx/scrolwin.h>
+#include <wx/bmpbuttn.h>
 
 #include <spdlog/spdlog.h>
 
 #include "../config/configuration.h"
 #include "../services/taskstateservice.h"
 #include "../services/taskstorageservice.h"
+#include "feedbackpopup.h"
 
 namespace app::frm
 {
@@ -89,6 +90,7 @@ private:
     void OnResize(wxSizeEvent& event);
     void OnRestoreDatabase(wxCommandEvent& event);
     void OnBackupDatabase(wxCommandEvent& event);
+    void OnFeedback(wxCommandEvent& event);
 
     void CalculateTotalTime(wxDateTime date = wxDateTime::Now());
     void RefreshItems(wxDateTime date = wxDateTime::Now());
@@ -108,12 +110,13 @@ private:
     wxStatusBar* pStatusBar;
     wxInfoBar* pInfoBar;
     TaskBarIcon* pTaskBarIcon;
-
+    wxBitmapButton* pFeedbackButton;
+    FeedbackPopupWindow* pFeedbackPopupWindow;
     sqlite::database* pDatabase;
 
     bool bHasPendingTaskToResume;
     bool bHasInitialized;
 
-    enum { IDC_GO_TO_DATE = wxID_HIGHEST + 1, IDC_HOURS_TEXT, IDC_LIST };
+    enum { IDC_GO_TO_DATE = wxID_HIGHEST + 1, IDC_HOURS_TEXT, IDC_LIST, IDC_FEEDBACK };
 };
 } // namespace app::frm
