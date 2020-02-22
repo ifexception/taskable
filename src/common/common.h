@@ -32,6 +32,7 @@ const wxSizerFlags ControlCenter = wxSizerFlags(ControlDefault).Center();
 const wxSizerFlags ControlCenterHorizontal = wxSizerFlags(ControlDefault).CenterHorizontal();
 const wxSizerFlags ControlCenterVertical = wxSizerFlags(ControlDefault).CenterVertical();
 const wxSizerFlags ControlRight = wxSizerFlags(ControlDefault).Right();
+const wxSizerFlags ControlLeft = wxSizerFlags(ControlDefault).Left();
 const wxSizerFlags ControlExpand = wxSizerFlags(ControlDefault).Expand();
 const wxSizerFlags ControlExpandProp = wxSizerFlags(ControlDefault).Align(wxEXPAND).Proportion(1);
 } // namespace sizers

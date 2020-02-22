@@ -226,18 +226,18 @@ void StopwatchTaskDialog::CreateControls()
     sizer->AddSpacer(2);
 
     /* Task Description Sizer */
-    auto taskDescSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto taskDescSizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(taskDescSizer, common::sizers::ControlExpand);
 
     /* Stopwatch Task Description Text Control */
     auto taskDescriptionText = new wxStaticText(mainPanel, wxID_STATIC, wxT("Description"));
-    taskDescSizer->Add(taskDescriptionText, common::sizers::ControlCenter);
+    taskDescSizer->Add(taskDescriptionText, common::sizers::ControlLeft);
 
     pStopwatchDescription =
-        new wxTextCtrl(mainPanel, IDC_TASK_DESCRIPTION, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1));
+        new wxTextCtrl(mainPanel, IDC_TASK_DESCRIPTION, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_MULTILINE);
     pStopwatchDescription->SetToolTip(wxT("Enter a short description for the stopwatch task to track"));
     pStopwatchDescription->SetMaxLength(32);
-    taskDescSizer->Add(pStopwatchDescription, common::sizers::ControlDefault);
+    taskDescSizer->Add(pStopwatchDescription, common::sizers::ControlExpand);
 
     /* Horizontal Line*/
     auto separationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
