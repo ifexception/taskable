@@ -48,7 +48,7 @@ DatabaseRestoreWizard::DatabaseRestoreWizard(frm::MainFrame* frame,
 {
     pPage1 = new DatabaseRestoreWelcomePage(this);
     auto page2 = new SelectDatabaseVersionPage(this, pConfig);
-    auto page3 = new DatabaseRestoredPage(this, pConfig, pDatabase);
+    auto page3 = new DatabaseRestoredPage(this, pLogger, pConfig, pDatabase);
 
     wxWizardPageSimple::Chain(pPage1, page2);
     wxWizardPageSimple::Chain(page2, page3);
