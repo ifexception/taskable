@@ -112,6 +112,7 @@ class DatabaseRestoredPage final : public wxWizardPageSimple
 public:
     DatabaseRestoredPage() = delete;
     DatabaseRestoredPage(DatabaseRestoreWizard* parent,
+        std::shared_ptr<spdlog::logger> logger,
         std::shared_ptr<cfg::Configuration> config,
         sqlite::database* database);
     virtual ~DatabaseRestoredPage() = default;
@@ -128,6 +129,7 @@ private:
     void FileOperationErrorFeedback();
 
     DatabaseRestoreWizard* pParent;
+    std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
     sqlite::database* pDatabase;
     wxStaticText* pStatusInOperationLabel;

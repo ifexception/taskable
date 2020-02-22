@@ -218,7 +218,7 @@ void ClientDialog::FillControls()
     try {
         employers = model::EmployerModel::GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on GetAll() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on EmployerModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (const auto& employer : employers) {
@@ -232,7 +232,7 @@ void ClientDialog::DataToControls()
     try {
         client = model::ClientModel::GetById(mClientId);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on GetById() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on ClientModel::GetById() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     pNameTextCtrl->ChangeValue(client->GetName());

@@ -264,10 +264,12 @@ wxDirTraverseResult DirectoryTraverser::OnDir(const wxString& WXUNUSED(dir))
 }
 
 DatabaseRestoredPage::DatabaseRestoredPage(DatabaseRestoreWizard* parent,
+    std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<cfg::Configuration> config,
     sqlite::database* database)
     : wxWizardPageSimple(parent)
     , pParent(parent)
+    , pLogger(logger)
     , pConfig(config)
     , pDatabase(database)
     , pStatusInOperationLabel(nullptr)
@@ -333,6 +335,9 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
     bool copySuccessful = wxCopyFile(fullBackupDatabaseFilePath, toCopyDatabaseFilePath);
     if (!copySuccessful) {
         FileOperationErrorFeedback();
+        pLogger->error("Failed to copy {0} to destination {1}",
+            fullBackupDatabaseFilePath.ToStdString(),
+            toCopyDatabaseFilePath.ToStdString());
         return;
     }
 
@@ -351,6 +356,9 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
             wxRenameFile(existingDatabaseFile, wxString::Format(wxT("%s.tmp"), existingDatabaseFile));
         if (!tmpRenameOfCurrentDatabaseFileSuccessful) {
             FileOperationErrorFeedback();
+            pLogger->error("Failed to rename file {0} to {1}",
+                existingDatabaseFile.ToStdString(),
+                wxString::Format(wxT("%s.tmp"), existingDatabaseFile).ToStdString());
             return;
         }
     }
@@ -359,6 +367,9 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
     bool renameCopyToNewNameSuccessful = wxRenameFile(toCopyDatabaseFilePath, existingDatabaseFile);
     if (!renameCopyToNewNameSuccessful) {
         FileOperationErrorFeedback();
+        pLogger->error("Failed to rename file {0} to {1}",
+            toCopyDatabaseFilePath.ToStdString(),
+            existingDatabaseFile.ToStdString());
         return;
     }
 
@@ -368,6 +379,8 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
         bool removeTmpDatabaseFile = wxRemoveFile(wxString::Format(wxT("%s.tmp"), existingDatabaseFile));
         if (!removeTmpDatabaseFile) {
             FileOperationErrorFeedback();
+            pLogger->error(
+                "Failed to remove file {0}", wxString::Format(wxT("%s.tmp"), existingDatabaseFile).ToStdString());
             return;
         }
 

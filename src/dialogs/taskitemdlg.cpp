@@ -968,7 +968,7 @@ bool TaskItemDialog::TransferDataAndValidate()
     try {
         taskId = model::TaskModel::GetByDate(pDateContextCtrl->GetValue())->GetTaskId();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in TaskModel::GetByDat() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in TaskModel::GetByDate() - {0:d} : {1}", e.get_code(), e.what());
         wxLogDebug(wxString(e.get_sql()));
     }
     pTaskItem->SetTaskId(taskId);

@@ -52,10 +52,13 @@ bool SetupWizard::Run()
 {
     auto wizardSuccess = wxWizard::RunWizard(pPage1);
     if (wizardSuccess) {
-        CreateDatabaseFile();
+        bool success = CreateDatabaseFile();
+        if (!success) {
+            return false;
+        }
 
         InitializeSqliteConnection();
-        bool success = SetUpTables();
+        success = SetUpTables();
         if (!success) {
             Cleanup();
             DeleteDatabaseFile();
@@ -110,19 +113,31 @@ void SetupWizard::SetProjectDisplayName(const wxString& displayName)
     mDisplayName = displayName;
 }
 
-void SetupWizard::CreateDatabaseFile()
+bool SetupWizard::CreateDatabaseFile()
 {
+    bool succeeded = true;
     if (!wxDirExists(common::GetDatabasePath())) {
         if (wxMkdir(common::GetDatabasePath())) {
             wxFile file;
-            file.Create(common::GetDatabaseFilePath());
+            succeeded = file.Create(common::GetDatabaseFilePath());
+            if (!succeeded) {
+                pLogger->error("Unable to create database file at specified location!");
+            }
             file.Close();
+        } else {
+            succeeded = false;
+            pLogger->error("Unable to create database folder at specified location!");
         }
     } else {
         wxFile file;
-        file.Create(common::GetDatabaseFilePath());
+        succeeded = file.Create(common::GetDatabaseFilePath());
+        if (!succeeded) {
+            pLogger->error("Unable to create database file at specified location!");
+        }
         file.Close();
     }
+
+    return succeeded;
 }
 
 void SetupWizard::InitializeSqliteConnection()
@@ -140,7 +155,9 @@ void SetupWizard::Cleanup()
 void SetupWizard::DeleteDatabaseFile()
 {
     if (wxFileExists(common::GetDatabaseFilePath())) {
-        wxRemoveFile(common::GetDatabaseFilePath());
+        if (!wxRemoveFile(common::GetDatabaseFilePath())) {
+            pLogger->error("Unable to delete database file!");
+        }
     }
 }
 

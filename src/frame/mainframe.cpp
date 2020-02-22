@@ -172,12 +172,11 @@ void MainFrame::CreateControls()
     wxRect statusBarRect;
     pStatusBar->GetFieldRect(2, statusBarRect);
 
-    wxSize btnSize(32, 20);
     pFeedbackButton = new wxBitmapButton(pStatusBar,
         IDC_FEEDBACK,
         common::GetFeedbackIcon(),
         statusBarRect.GetPosition(),
-        btnSize,
+        wxSize(32, 20),
         wxBU_LEFT | wxBU_RIGHT);
 
     /* File Menu Control */
@@ -646,7 +645,7 @@ void MainFrame::RefreshItems(wxDateTime date)
     try {
         taskItems = model::TaskItemModel::GetByDate(dateString);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on get_all_task_items_by_date() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on TaskItemModel::GetByDate() - {0:d} : {1}", e.get_code(), e.what());
         return;
     }
 

@@ -52,7 +52,7 @@ public:
     void SetProjectDisplayName(const wxString& project);
 
 private:
-    void CreateDatabaseFile();
+    bool CreateDatabaseFile();
 
     void InitializeSqliteConnection();
     void Cleanup();

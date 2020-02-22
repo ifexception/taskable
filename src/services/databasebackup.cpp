@@ -56,7 +56,7 @@ wxString DatabaseBackup::CreateBackupFileName()
     if (indexOfPeriod != wxString::npos) {
         databaseFileName = common::GetDatabaseFileName().substr(0, indexOfPeriod);
     } else {
-        return wxT("");
+        return wxGetEmptyString();
     }
     auto backupFileName = wxString::Format(wxT("%s.%s.db"), databaseFileName, dateTimeString);
     std::replace(backupFileName.begin(), backupFileName.end(), ':', '.');
@@ -68,6 +68,9 @@ bool DatabaseBackup::CreateBackupFile(const wxString& fileName)
 {
     wxFile file;
     bool success = file.Create(fileName);
+    if (!success) {
+        pLogger->error("Failed to create file {0}", fileName.ToStdString());
+    }
     file.Close();
     return success;
 }
@@ -105,7 +108,12 @@ bool DatabaseBackup::MoveBackupFileToBackupDirectory(const wxString& fileName)
     if (wxCopyFile(fullFilePath, destinationFullFilePath, true)) {
         if (wxRemoveFile(fullFilePath)) {
             return true;
+        } else {
+            pLogger->error("Failed to remove file {0}", fullFilePath.ToStdString());
         }
+    } else {
+        pLogger->error(
+            "Failed to copy file {0} to {1}", fullFilePath.ToStdString(), destinationFullFilePath.ToStdString());
     }
 
     return false;

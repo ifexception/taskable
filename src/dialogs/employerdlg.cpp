@@ -167,7 +167,6 @@ void EmployerDialog::CreateControls()
 // clang-format off
 void EmployerDialog::ConfigureEventBindings()
 {
-
     pOkButton->Bind(
         wxEVT_BUTTON,
         &EmployerDialog::OnOk,
@@ -198,7 +197,7 @@ void EmployerDialog::DataToControls()
     try {
         employer = model::EmployerModel::GetById(mEmployerId);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in GetById() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in EmployerModel::GetById() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     pNameTextCtrl->ChangeValue(employer->GetName());
@@ -218,7 +217,7 @@ void EmployerDialog::OnOk(wxCommandEvent& event)
                 model::EmployerModel::Create(std::move(pEmployer));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error(
-                    "Error occured in category CategoryModel::Update | Delete - {0:d} : {1}", e.get_code(), e.what());
+                    "Error occured in category CategoryModel::Create() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
             }
         }
@@ -228,7 +227,7 @@ void EmployerDialog::OnOk(wxCommandEvent& event)
                 model::EmployerModel::Update(std::move(pEmployer));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error(
-                    "Error occured in category CategoryModel::Update | Delete - {0:d} : {1}", e.get_code(), e.what());
+                    "Error occured in category CategoryModel::Update() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
             }
         }
@@ -238,7 +237,7 @@ void EmployerDialog::OnOk(wxCommandEvent& event)
                 model::EmployerModel::Delete(std::move(pEmployer));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error(
-                    "Error occured in category CategoryModel::Update | Delete - {0:d} : {1}", e.get_code(), e.what());
+                    "Error occured in category CategoryModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
             }
         }
