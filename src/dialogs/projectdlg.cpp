@@ -149,9 +149,9 @@ void ProjectDialog::CreateControls()
 
     wxTextValidator nameValidator(wxFILTER_ALPHANUMERIC | wxFILTER_INCLUDE_CHAR_LIST);
     wxArrayString allowedChars;
-    allowedChars.Add(wxT(" "));
-    allowedChars.Add(wxT(":"));
-    allowedChars.Add(wxT("-"));
+    allowedChars.Add(wxT(" ")); // space
+    allowedChars.Add(wxT(":")); // colon
+    allowedChars.Add(wxT("-")); // dash
     nameValidator.SetIncludes(allowedChars);
 
     pNameTextCtrl = new wxTextCtrl(projectDetailsPanel,
@@ -517,14 +517,13 @@ void ProjectDialog::OnEmployerChoiceSelection(wxCommandEvent& event)
 {
     int employerId = util::VoidPointerToInt(pEmployerChoiceCtrl->GetClientData(pEmployerChoiceCtrl->GetSelection()));
 
+    pClientChoiceCtrl->Clear();
+    pClientChoiceCtrl->AppendString(wxT("Select a client"));
+    pClientChoiceCtrl->SetSelection(0);
+
     if (event.GetSelection() == 0) {
-        pClientChoiceCtrl->Clear();
         pClientChoiceCtrl->Disable();
     } else {
-        pClientChoiceCtrl->Clear();
-        pClientChoiceCtrl->AppendString(wxT("Select a client"));
-        pClientChoiceCtrl->SetSelection(0);
-
         std::vector<std::unique_ptr<model::ClientModel>> clients;
         try {
             clients = model::ClientModel::GetByEmployerId(employerId);
@@ -571,7 +570,7 @@ void ProjectDialog::OnBillableCheck(wxCommandEvent& event)
 void ProjectDialog::OnRateChoiceSelection(wxCommandEvent& event)
 {
     int selection = util::VoidPointerToInt(pRateChoiceCtrl->GetClientData(pRateChoiceCtrl->GetSelection()));
-    if (selection == static_cast<int>(constants::RateTypes::Unknown)) {
+    if (selection == static_cast<int>(constants::RateTypes::Unknown) || selection == 0) {
         pRateTextCtrl->Disable();
         pCurrencyComboBoxCtrl->Disable();
 

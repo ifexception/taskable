@@ -659,6 +659,11 @@ void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
     pCategoryChoiceCtrl->SetSelection(0);
     int projectId = util::VoidPointerToInt(event.GetClientData());
 
+    if (event.GetSelection() == 0) {
+        SetRateLabel(nullptr);
+        return;
+    }
+
     FillCategoryControl(projectId);
 
     try {
@@ -832,6 +837,12 @@ void TaskItemDialog::FillCategoryControl(int projectId)
 
 void TaskItemDialog::SetRateLabel(model::ProjectModel* project)
 {
+    if (project == nullptr) {
+        pBillableCtrl->Disable();
+        pCalculatedRateTextCtrl->SetLabel(wxT("Select a project..."));
+        return;
+    }
+
     auto font = pCalculatedRateTextCtrl->GetFont();
     if (font.GetWeight() == wxFONTWEIGHT_BOLD) {
         font.SetWeight(wxFONTWEIGHT_NORMAL);
