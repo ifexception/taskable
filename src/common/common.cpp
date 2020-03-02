@@ -121,7 +121,11 @@ wxString app::common::GetVersion()
 
 wxString app::common::GetProgramName()
 {
+#ifdef _DEBUG
+    return wxT("Taskable-Debug");
+#else
     return wxT("Taskable");
+#endif // _DEBUG
 }
 
 wxString app::common::GetDatabasePath()
@@ -131,7 +135,11 @@ wxString app::common::GetDatabasePath()
 
 wxString app::common::GetDatabaseFileName()
 {
+#ifdef _DEBUG
+    return wxT("taskable-d.db");
+#else
     return wxT("taskable.db");
+#endif // _DEBUG
 }
 
 wxString app::common::GetDatabaseFilePath()
@@ -196,10 +204,8 @@ void app::common::validations::ForRequiredLongText(wxWindow* window, wxString la
 void app::common::validations::ForRequiredNumber(wxWindow* window, wxString label)
 {
     const wxString errorHeader = wxT("Invalid amount");
-    const wxString errorMessage =
-        wxString::Format(wxT("%s is required \nand must be greater than %d"), label,
-            constants::MinLength,
-            constants::MaxLength);
+    const wxString errorMessage = wxString::Format(
+        wxT("%s is required \nand must be greater than %d"), label, constants::MinLength, constants::MaxLength);
 
     wxRichToolTip tooltip(errorHeader, errorMessage);
     tooltip.SetIcon(wxICON_WARNING);
