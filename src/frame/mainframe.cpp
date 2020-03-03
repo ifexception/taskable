@@ -378,14 +378,16 @@ void MainFrame::OnClose(wxCloseEvent& event)
 
 void MainFrame::OnNewEntryTask(wxCommandEvent& event)
 {
-    dlg::TaskItemDialog entryTask(this, pLogger, pConfig, constants::TaskItemTypes::EntryTask);
+    wxDateTime date = pDatePickerCtrl->GetValue();
+    dlg::TaskItemDialog entryTask(this, pLogger, pConfig, constants::TaskItemTypes::EntryTask, date);
     int retCode = entryTask.ShowModal();
     ShowInfoBarMessageForAdd(retCode, wxT("task"));
 }
 
 void MainFrame::OnNewTimedTask(wxCommandEvent& event)
 {
-    dlg::TaskItemDialog timedTask(this, pLogger, pConfig, constants::TaskItemTypes::TimedTask);
+    wxDateTime date = pDatePickerCtrl->GetValue();
+    dlg::TaskItemDialog timedTask(this, pLogger, pConfig, constants::TaskItemTypes::TimedTask, date);
     int retCode = timedTask.ShowModal();
     ShowInfoBarMessageForAdd(retCode, wxT("task"));
 }
