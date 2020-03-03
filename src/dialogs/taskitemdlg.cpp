@@ -36,8 +36,8 @@ wxDEFINE_EVENT(EVT_TASK_ITEM_INSERTED, wxCommandEvent);
 
 namespace app::dlg
 {
-static const wxString TaskContextWithoutClient = wxT("Capturing task for employer %s");
-static const wxString TaskContextWithClient = wxT("Capturing task for employer %s and client %s");
+static const wxString TaskContextWithoutClient = wxT("Employer %s");
+static const wxString TaskContextWithClient = wxT("Employer %s | Client %s");
 const wxString TaskItemDialog::DateCreatedLabel = wxT("Created: %s @ %s");
 const wxString TaskItemDialog::DateModifiedLabel = wxT("Updated: %s @ %s");
 const wxString TaskItemDialog::CalculatedRateLabelNonBillable = wxT("%s is not billable");
@@ -222,6 +222,7 @@ void TaskItemDialog::CreateControls()
         wxT("Additional information under which employer (and client) the task is being captured under"));
     auto taskContextTextFont = pTaskContextTextCtrl->GetFont();
     taskContextTextFont.SetPointSize(9);
+    taskContextTextFont.MakeItalic();
     pTaskContextTextCtrl->SetFont(taskContextTextFont);
     contextSizer->Add(pTaskContextTextCtrl, common::sizers::ControlDefault);
 
@@ -418,6 +419,8 @@ void TaskItemDialog::CreateControls()
 
     pCancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("Cancel"));
     buttonPanelSizer->Add(pCancelButton, wxSizerFlags().Border(wxALL, 5));
+
+    pProjectChoiceCtrl->SetFocus();
 }
 
 // clang-format off
