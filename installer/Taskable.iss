@@ -1,13 +1,13 @@
 ; -- Taskable.iss --
 ; Installer file for Taskable application
 
-#define TaskableVersion "0.91.1"
+#define TaskableVersion "0.94.4"
 
 [Setup]
 AppName=Taskable
 AppVersion={#TaskableVersion}
 AppContact=szymonwelgus at gmail dot com
-AppCopyright=Copyright (2019-2020) Szymon Welgus
+AppCopyright=Copyright (2018-2020) Szymon Welgus
 AppPublisher=Szymon Welgus
 AppId={{6BE5E5E6-68BF-4AF7-A9E5-FF919709E86C}}
 ; AppReadmeFile=https://github.com/ifexception/taskable
@@ -19,7 +19,7 @@ UninstallDisplayIcon={app}\Taskable.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=Installer
-OutputBaseFilename=Taskable-x86.0.91.1-Installer
+OutputBaseFilename=Taskable-x86.0.94.4-Installer
 LicenseFile=License.txt
 WindowResizable=no
 DisableWelcomePage=no
@@ -37,7 +37,7 @@ Source: "tiff.dll"; DestDir: "{app}"
 Source: "wxbase313u_vc_custom.dll"; DestDir: "{app}"
 Source: "wxmsw313u_core_vc_custom.dll"; DestDir: "{app}"
 Source: "zlib1.dll"; DestDir: "{app}"
-Source: "taskable.ini"; DestDir: "{userappdata}\Taskable"
+Source: "taskable.ini"; DestDir: "{userappdata}\Taskable"; Flags: onlyifdoesntexist
 
 [Components]
 Name: "main"; Description: "Core files"; Types: full; Flags: fixed
