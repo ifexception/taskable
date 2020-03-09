@@ -29,10 +29,13 @@ set (SRC
     "common/util.cpp"
     "common/constants.cpp"
     "config/configuration.cpp"
+
     "services/taskstateservice.cpp"
     "services/taskstorageservice.cpp"
     "services/databasebackup.cpp"
     "services/databaseconnection.cpp"
+    "services/connectionpool.cpp"
+
     "application.cpp"
     "resources.rc"
     "application.manifest"
