@@ -131,6 +131,7 @@ public:
     static void Delete(std::unique_ptr<TaskItemModel> taskItem);
     static std::vector<std::unique_ptr<TaskItemModel>> GetByDate(const wxString& date);
     static std::vector<wxString> GetHours(const wxString& date);
+    static int GetTaskItemTypeIdByTaskItemId(const int taskItemId);
 
 private:
     int mTaskItemId;
@@ -161,5 +162,6 @@ private:
     static const std::string updateTaskItem;
     static const std::string deleteTaskItem;
     static const std::string getTaskHoursByTaskId;
+    static const std::string getTaskItemTypeIdByTaskItemId;
 };
 } // namespace app::model

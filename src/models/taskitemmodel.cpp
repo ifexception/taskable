@@ -594,6 +594,16 @@ std::vector<wxString> TaskItemModel::GetHours(const wxString& date)
     return taskDurations;
 }
 
+int TaskItemModel::GetTaskItemTypeIdByTaskItemId(const int taskItemId)
+{
+    int taskItemTypeId = 0;
+    auto db = svc::DatabaseConnection::Get().GetHandle();
+
+    *db << TaskItemModel::getTaskItemTypeIdByTaskItemId << taskItemId >>
+        [&](int taskItemType) { taskItemTypeId = taskItemType; };
+    return taskItemTypeId;
+}
+
 const std::string TaskItemModel::createTaskItem = "INSERT INTO task_items "
                                                   "(start_time, end_time, duration, description, "
                                                   "billable, calculated_rate, is_active, "
@@ -655,5 +665,9 @@ const std::string TaskItemModel::getTaskHoursByTaskId = "SELECT task_items.durat
                                                         "FROM task_items "
                                                         "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
                                                         "WHERE task_date = ?";
+
+const std::string TaskItemModel::getTaskItemTypeIdByTaskItemId = "SELECT task_items.task_item_type_id "
+                                                                 "FROM task_items "
+                                                                 "WHERE task_item_id = ?";
 ;
 } // namespace app::model

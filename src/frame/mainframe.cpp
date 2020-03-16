@@ -460,9 +460,14 @@ void MainFrame::OnTaskInserted(wxCommandEvent& event)
 
 void MainFrame::OnItemDoubleClick(wxListEvent& event)
 {
-    unsigned int taskItemDataPtr = (unsigned int) event.GetData();
-    auto taskItemId = (taskItemDataPtr & 0x000000FF);
-    auto taskItemTypeId = (taskItemDataPtr & 0x0000FF00) >> 8;
+    auto taskItemId = event.GetData();
+    int taskItemTypeId = 0;
+    try {
+        taskItemTypeId = model::TaskItemModel::GetTaskItemTypeIdByTaskItemId(taskItemId);
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured on TaskItemModel::GetByDate() - {0:d} : {1}", e.get_code(), e.what());
+        return;
+    }
     constants::TaskItemTypes type = static_cast<constants::TaskItemTypes>(taskItemTypeId);
     wxDateTime dateContext = pDatePickerCtrl->GetValue();
 
@@ -667,10 +672,8 @@ void MainFrame::RefreshItems(wxDateTime date)
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDescription());
 
         pListCtrl->SetItemBackgroundColour(listIndex, taskItem->GetCategory()->GetColor());
-        unsigned int data = 0;
-        data |= taskItem->GetTaskItemId();
-        data |= (taskItem->GetTaskItemTypeId() << 8);
-        pListCtrl->SetItemPtrData(listIndex, (wxUIntPtr) data);
+
+        pListCtrl->SetItemPtrData(listIndex, (wxUIntPtr) taskItem->GetTaskItemId());
 
         columnIndex = 0;
     }
