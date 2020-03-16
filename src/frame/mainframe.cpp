@@ -465,7 +465,8 @@ void MainFrame::OnItemDoubleClick(wxListEvent& event)
     try {
         taskItemTypeId = model::TaskItemModel::GetTaskItemTypeIdByTaskItemId(taskItemId);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on TaskItemModel::GetByDate() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error(
+            "Error occured on TaskItemModel::GetTaskItemTypeIdByTaskItemId() - {0:d} : {1}", e.get_code(), e.what());
         return;
     }
     constants::TaskItemTypes type = static_cast<constants::TaskItemTypes>(taskItemTypeId);
