@@ -624,16 +624,20 @@ void MainFrame::OnFeedback(wxCommandEvent& event)
 void MainFrame::OnKeyDown(wxKeyEvent& event)
 {
     if (event.GetKeyCode() == WXK_RIGHT) {
+        pListCtrl->DeleteAllItems();
         auto currentDateTime = pDatePickerCtrl->GetValue();
         currentDateTime.Add(wxDateSpan::Days(1));
         pDatePickerCtrl->SetValue(currentDateTime);
         RefreshItems(currentDateTime);
+        CalculateTotalTime(currentDateTime);
     }
     if (event.GetKeyCode() == WXK_LEFT) {
+        pListCtrl->DeleteAllItems();
         auto currentDateTime = pDatePickerCtrl->GetValue();
         currentDateTime.Add(wxDateSpan::Days(-1));
         pDatePickerCtrl->SetValue(currentDateTime);
         RefreshItems(currentDateTime);
+        CalculateTotalTime(currentDateTime);
     }
 
     event.Skip();
