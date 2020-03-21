@@ -121,11 +121,11 @@ wxString app::common::GetVersion()
 
 wxString app::common::GetProgramName()
 {
-#ifdef _DEBUG
+#ifdef TASKABLE_DEBUG
     return wxT("Taskable-Debug");
 #else
     return wxT("Taskable");
-#endif // _DEBUG
+#endif // TASKABLE_DEBUG
 }
 
 wxString app::common::GetDatabasePath()
@@ -135,11 +135,11 @@ wxString app::common::GetDatabasePath()
 
 wxString app::common::GetDatabaseFileName()
 {
-#ifdef _DEBUG
+#ifdef TASKABLE_DEBUG
     return wxT("taskable-d.db");
 #else
     return wxT("taskable.db");
-#endif // _DEBUG
+#endif // TASKABLE_DEBUG
 }
 
 wxString app::common::GetDatabaseFilePath()

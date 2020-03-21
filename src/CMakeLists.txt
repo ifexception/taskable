@@ -88,7 +88,7 @@ target_compile_definitions (${PROJECT_NAME} PUBLIC
     wxUSE_GUI=1
     wxUSE_TIMEPICKCTRL=1
     __WXMSW__
-    $<$<CONFIG:Debug>:_DEBUG>)
+    $<$<CONFIG:Debug>:TASKABLE_DEBUG>)
 
 target_link_libraries (${PROJECT_NAME}
     ${wxWidgets_LIBRARIES}

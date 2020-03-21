@@ -42,7 +42,7 @@ Application::Application()
 
 bool Application::OnInit()
 {
-#ifndef _DEBUG
+#ifndef TASKABLE_DEBUG
     bool isInstanceAlreadyRunning = pInstanceChecker->IsAnotherRunning();
     if (isInstanceAlreadyRunning) {
         wxMessageBox(wxT("Another instance of the application is already running."),
@@ -50,7 +50,7 @@ bool Application::OnInit()
             wxOK_DEFAULT | wxICON_WARNING);
         return false;
     }
-#endif // _DEBUG
+#endif // TASKABLE_DEBUG
 
     if (!InitializeLogging()) {
         return false;
@@ -114,7 +114,7 @@ bool Application::InitializeLogging()
         return false;
     }
 
-#ifdef _DEBUG
+#ifdef TASKABLE_DEBUG
     spdlog::set_level(spdlog::level::info);
 #else
     spdlog::set_level(spdlog::level::warn);
@@ -153,11 +153,11 @@ bool Application::CreateLogsDirectory()
 
 bool Application::IsSetup()
 {
-#if _DEBUG
+#if TASKABLE_DEBUG
     wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled");
 #else
     wxRegKey key(wxRegKey::HKCU, "Software\\Taskable");
-#endif // _DEBUG
+#endif // TASKABLE_DEBUG
 
     if (key.HasValue(wxT("IsSetup"))) {
         long value = 0;
@@ -179,11 +179,11 @@ bool Application::RunSetupWizard()
 
 bool Application::ConfigureRegistry()
 {
-#if _DEBUG
+#if TASKABLE_DEBUG
     wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled");
 #else
     wxRegKey key(wxRegKey::HKCU, "Software\\Taskable");
-#endif // _DEBUG
+#endif // TASKABLE_DEBUG
 
 
     bool result = key.Exists();

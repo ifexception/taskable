@@ -136,16 +136,4 @@ private:
     wxGauge* pGaugeCtrl;
     wxStaticText* pStatusCompleteLabel;
 };
-
-class DirectoryTraverser final : public wxDirTraverser
-{
-public:
-    DirectoryTraverser(wxArrayString& files);
-
-    wxDirTraverseResult OnFile(const wxString& file) override;
-    wxDirTraverseResult OnDir(const wxString& dir) override;
-
-private:
-    wxArrayString mFiles;
-};
 } // namespace app::wizard

@@ -247,22 +247,6 @@ void SelectDatabaseVersionPage::OnWizardCancel(wxWizardEvent& event)
     }
 }
 
-DirectoryTraverser::DirectoryTraverser(wxArrayString& files)
-    : mFiles(files)
-{
-}
-
-wxDirTraverseResult DirectoryTraverser::OnFile(const wxString& file)
-{
-    mFiles.Add(file);
-    return wxDIR_CONTINUE;
-}
-
-wxDirTraverseResult DirectoryTraverser::OnDir(const wxString& WXUNUSED(dir))
-{
-    return wxDIR_CONTINUE;
-}
-
 DatabaseRestoredPage::DatabaseRestoredPage(DatabaseRestoreWizard* parent,
     std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<cfg::Configuration> config,
