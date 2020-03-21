@@ -83,6 +83,7 @@ EVT_ICONIZE(MainFrame::OnIconize)
 EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 EVT_SIZE(MainFrame::OnResize)
 EVT_BUTTON(MainFrame::IDC_FEEDBACK, MainFrame::OnFeedback)
+EVT_CHAR_HOOK(MainFrame::OnKeyDown)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
@@ -618,6 +619,24 @@ void MainFrame::OnFeedback(wxCommandEvent& event)
     wxSize sz = btn->GetSize();
     pFeedbackPopupWindow->Position(pos, sz);
     pFeedbackPopupWindow->Popup(nullptr);
+}
+
+void MainFrame::OnKeyDown(wxKeyEvent& event)
+{
+    if (event.GetKeyCode() == WXK_RIGHT) {
+        auto currentDateTime = pDatePickerCtrl->GetValue();
+        currentDateTime.Add(wxDateSpan::Days(1));
+        pDatePickerCtrl->SetValue(currentDateTime);
+        RefreshItems(currentDateTime);
+    }
+    if (event.GetKeyCode() == WXK_LEFT) {
+        auto currentDateTime = pDatePickerCtrl->GetValue();
+        currentDateTime.Add(wxDateSpan::Days(-1));
+        pDatePickerCtrl->SetValue(currentDateTime);
+        RefreshItems(currentDateTime);
+    }
+
+    event.Skip();
 }
 
 void MainFrame::CalculateTotalTime(wxDateTime date)

@@ -91,6 +91,7 @@ private:
     void OnRestoreDatabase(wxCommandEvent& event);
     void OnBackupDatabase(wxCommandEvent& event);
     void OnFeedback(wxCommandEvent& event);
+    void OnKeyDown(wxKeyEvent& event);
 
     void CalculateTotalTime(wxDateTime date = wxDateTime::Now());
     void RefreshItems(wxDateTime date = wxDateTime::Now());
