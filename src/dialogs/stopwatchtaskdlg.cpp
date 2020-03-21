@@ -133,6 +133,9 @@ void StopwatchTaskDialog::Launch()
 
     if (pConfig->IsStartStopwatchOnLaunch()) {
         ExecuteStartupProcedure();
+        pPauseButton->SetDefault();
+    } else {
+        pStartButton->SetDefault();
     }
 
     wxDialog::ShowModal();
@@ -143,9 +146,11 @@ void StopwatchTaskDialog::Relaunch()
     // if we can start stopwatch on resume, then execute startup procedure
     if (pConfig->IsStartStopwatchOnResume()) {
         ExecuteStartupProcedure();
+        pPauseButton->SetDefault();
     } else {
         // if we cannot, enable start button
         pStartButton->Enable();
+        pStartButton->SetDefault();
 
         // and disable pause button
         pPauseButton->Disable();
@@ -302,6 +307,7 @@ void StopwatchTaskDialog::ExecutePauseProcedure()
 
     /* enable start button */
     pStartButton->Enable();
+    pStartButton->SetDefault();
 
     /* disable pause button */
     pPauseButton->Disable();

@@ -415,6 +415,7 @@ void TaskItemDialog::CreateControls()
     bottomSizer->Add(buttonPanel, wxSizerFlags().Border(wxALL, 5).Center());
 
     pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("OK"));
+    pOkButton->SetDefault();
     buttonPanelSizer->Add(pOkButton, wxSizerFlags().Border(wxALL, 5));
 
     pCancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("Cancel"));

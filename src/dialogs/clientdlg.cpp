@@ -179,6 +179,7 @@ void ClientDialog::CreateControls()
     mainSizer->Add(buttonPanel, wxSizerFlags(wxSizerFlags().Border(wxALL, 5)).Center());
 
     pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("&OK"));
+    pOkButton->SetDefault();
     pCancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("&Cancel"));
 
     buttonPanelSizer->Add(pOkButton, wxSizerFlags().Border(wxALL, 5));
