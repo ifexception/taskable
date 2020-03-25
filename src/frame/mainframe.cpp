@@ -218,7 +218,7 @@ void MainFrame::CreateControls()
     preferencesMenuItem->SetBitmap(common::GetSettingsIcon());
 
     /* Export Menu Control */
-    auto exportMenu = new wxMenu();
+    //auto exportMenu = new wxMenu();
 
     /* Tools Menu Control */
     auto toolsMenu = new wxMenu();
@@ -241,7 +241,7 @@ void MainFrame::CreateControls()
     wxMenuBar* menuBar = new wxMenuBar();
     menuBar->Append(fileMenu, wxT("File"));
     menuBar->Append(editMenu, wxT("Edit"));
-    menuBar->Append(exportMenu, wxT("Export"));
+    //menuBar->Append(exportMenu, wxT("Export"));
     menuBar->Append(toolsMenu, wxT("Tools"));
     menuBar->Append(helpMenu, wxT("Help"));
 
