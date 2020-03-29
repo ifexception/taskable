@@ -315,14 +315,17 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
     auto fullBackupDatabaseFilePath = wxString::Format(wxT("%s\\%s"), backupPath, fileToRestore);
     auto toCopyDatabaseFilePath = wxString::Format(wxT("%s\\%s"), dataPath, fileToRestore);
 
-    /* Copy selected database file to executable path */
-    bool copySuccessful = wxCopyFile(fullBackupDatabaseFilePath, toCopyDatabaseFilePath);
-    if (!copySuccessful) {
-        FileOperationErrorFeedback();
-        pLogger->error("Failed to copy {0} to destination {1}",
-            fullBackupDatabaseFilePath.ToStdString(),
-            toCopyDatabaseFilePath.ToStdString());
-        return;
+    /* Check if the backups are in the same place as main database */
+    if (backupPath != dataPath) {
+        /* Copy selected database file to correct path */
+        bool copySuccessful = wxCopyFile(fullBackupDatabaseFilePath, toCopyDatabaseFilePath);
+        if (!copySuccessful) {
+            FileOperationErrorFeedback();
+            pLogger->error("Failed to copy {0} to destination {1}",
+                fullBackupDatabaseFilePath.ToStdString(),
+                toCopyDatabaseFilePath.ToStdString());
+            return;
+        }
     }
 
     auto existingDatabaseFile = common::GetDatabaseFilePath();
@@ -370,7 +373,7 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
 
         /* Restore connection to database */
         auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
-        pDatabase = new sqlite::database(common::GetDatabaseFileName().ToStdString(), config);
+        pDatabase = new sqlite::database(common::GetDatabaseFilePath().ToStdString(), config);
 
         // Need to bubble up new'd up pointer to parent (MainFrame)
         pParent->SetNewDatabaseHandle(pDatabase);
@@ -395,7 +398,7 @@ void DatabaseRestoredPage::OnWizardCancel(wxWizardEvent& event)
 
 void DatabaseRestoredPage::FileOperationErrorFeedback()
 {
-    pStatusInOperationLabel->SetLabel(wxT("Error."));
+    pStatusInOperationLabel->SetLabel(wxT("The operation encountered an error."));
     auto statusError = wxT("The wizard has encountered an error.\n"
                            "Any operations executed have been rolled back."
                            "\n\n\nClick 'Finish' to exit the wizard.");

@@ -130,7 +130,7 @@ wxString app::common::GetProgramName()
 
 wxString app::common::GetDatabasePath()
 {
-    return wxString::Format(wxT("%s\\data"), wxStandardPaths::Get().GetUserDataDir());
+    return wxStandardPaths::Get().GetAppDocumentsDir();
 }
 
 wxString app::common::GetDatabaseFileName()
@@ -144,8 +144,7 @@ wxString app::common::GetDatabaseFileName()
 
 wxString app::common::GetDatabaseFilePath()
 {
-    return wxString::Format(
-        wxT("%s\\data\\%s"), wxStandardPaths::Get().GetUserDataDir(), common::GetDatabaseFileName());
+    return wxString::Format(wxT("%s\\%s"), app::common::GetDatabasePath(), common::GetDatabaseFileName());
 }
 
 wxString app::common::GetConfigFilePath()

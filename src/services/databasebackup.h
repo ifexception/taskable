@@ -41,6 +41,7 @@ public:
 
 private:
     wxString CreateBackupFileName();
+    wxString CreateBackupPath(const wxString& fileName);
     bool CreateBackupFile(const wxString& fileName);
     bool ExecuteBackup(const wxString& fileName);
     bool MoveBackupFileToBackupDirectory(const wxString& fileName);
