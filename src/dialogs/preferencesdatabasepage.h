@@ -54,11 +54,13 @@ private:
     wxCheckBox* pBackupDatabaseCtrl;
     wxTextCtrl* pBackupPathTextCtrl;
     wxButton* pBrowseBackupPathButton;
+    wxTextCtrl* pDeleteBackupsAfterCtrl;
 
     enum {
         IDC_BACKUP_DATABASE = wxID_HIGHEST + 1,
         IDC_BACKUP_PATH,
         IDC_BACKUP_PATH_BUTTON,
+        IDC_DELETE_BACKUPS_AFTER
     };
 };
 } // namespace app::dlg

@@ -19,6 +19,8 @@
 
 #include "preferencesdatabasepage.h"
 
+#include <wx/valnum.h>
+
 #include "../common/common.h"
 #include "../config/configuration.h"
 
@@ -41,6 +43,7 @@ void DatabasePage::Apply()
 {
     pConfig->SetBackupEnabled(pBackupDatabaseCtrl->GetValue());
     pConfig->SetBackupPath(pBackupPathTextCtrl->GetValue());
+    pConfig->SetDeleteBackupsAfter(std::stoi(pDeleteBackupsAfterCtrl->GetValue().ToStdString()));
 }
 
 void DatabasePage::CreateControls()
@@ -73,6 +76,27 @@ void DatabasePage::CreateControls()
 
     sizer->Add(databaseSettingsSizer, 0, wxLEFT | wxRIGHT | wxEXPAND, 5);
 
+    /* Database Backups Options */
+    auto databaseBackupsBox = new wxStaticBox(this, wxID_ANY, wxT("Backup Options"));
+    auto databaseBackupsSizer = new wxStaticBoxSizer(databaseBackupsBox, wxHORIZONTAL);
+
+    auto backupOptionsSizer = new wxBoxSizer(wxHORIZONTAL);
+    databaseBackupsSizer->Add(backupOptionsSizer, 1, wxALL | wxEXPAND, 5);
+
+    auto deleteBackupsAfterLabel = new wxStaticText(databaseBackupsBox, wxID_ANY, wxT("Delete Backups After (days)"));
+    backupOptionsSizer->Add(deleteBackupsAfterLabel, common::sizers::ControlCenter);
+
+    wxIntegerValidator<int> integerValidator;
+    integerValidator.SetMin(1);
+    integerValidator.SetMax(30);
+
+    pDeleteBackupsAfterCtrl = new wxTextCtrl(
+        databaseBackupsBox, IDC_DELETE_BACKUPS_AFTER, wxT("30"), wxDefaultPosition, wxSize(42, -1), wxTE_CENTRE, integerValidator);
+    pDeleteBackupsAfterCtrl->SetToolTip(wxT("Number of days to keep a backup"));
+    backupOptionsSizer->Add(pDeleteBackupsAfterCtrl, common::sizers::ControlDefault);
+
+    sizer->Add(databaseBackupsSizer, 0, wxLEFT | wxRIGHT | wxEXPAND, 5);
+
     SetSizerAndFit(sizer);
 }
 
@@ -87,6 +111,7 @@ void DatabasePage::FillControls()
 {
     pBackupDatabaseCtrl->SetValue(pConfig->IsBackupEnabled());
     pBackupPathTextCtrl->SetValue(pConfig->GetBackupPath());
+    pDeleteBackupsAfterCtrl->SetValue(wxString(std::to_string(pConfig->GetDeleteBackupsAfter())));
 
     if (!pBackupDatabaseCtrl->GetValue()) {
         pBackupPathTextCtrl->Disable();

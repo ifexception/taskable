@@ -56,6 +56,9 @@ public:
     wxString GetBackupPath() const;
     void SetBackupPath(const wxString& value);
 
+    int GetDeleteBackupsAfter() const;
+    void SetDeleteBackupsAfter(int value);
+
     bool IsMinimizeStopwatchWindow() const;
     void SetMinimizeStopwatchWindow(bool value);
 

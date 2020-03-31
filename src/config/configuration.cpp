@@ -136,6 +136,16 @@ void Configuration::SetBackupPath(const wxString& value)
     Set<wxString>(wxT("settings"), wxT("backupPath"), value);
 }
 
+int Configuration::GetDeleteBackupsAfter() const
+{
+    return Get<int>(wxT("settings"), wxT("deleteBackupsAfter"));
+}
+
+void Configuration::SetDeleteBackupsAfter(int value)
+{
+    Set<int>(wxT("settings"), wxT("deleteBackupsAfter"), value);
+}
+
 bool Configuration::IsMinimizeStopwatchWindow() const
 {
     return Get<bool>(wxT("settings"), wxT("minimizeStopwatchWindow"));
