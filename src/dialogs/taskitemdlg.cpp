@@ -471,6 +471,12 @@ void TaskItemDialog::ConfigureEventBindings()
             &TaskItemDialog::OnDurationTimeChange,
             this
          );
+
+        pDurationTimeCtrl->Bind(
+            wxEVT_KILL_FOCUS,
+            &TaskItemDialog::OnDurationTimeFocusLost,
+            this
+        );
     }
 
     if (bIsEdit) {
@@ -626,10 +632,28 @@ void TaskItemDialog::CalculateTimeDiff(wxDateTime start, wxDateTime end)
 
 void TaskItemDialog::CalculateRate()
 {
-    auto start = pStartTimeCtrl->GetValue();
-    auto end = pEndTimeCtrl->GetValue();
+    if (mType == constants::TaskItemTypes::EntryTask) {
+        auto time = pDurationTimeCtrl->GetValue();
+        CalculateRate(time);
+    }
 
-    CalculateRate(start, end);
+    if (mType == constants::TaskItemTypes::TimedTask) {
+        auto start = pStartTimeCtrl->GetValue();
+        auto end = pEndTimeCtrl->GetValue();
+
+        CalculateRate(start, end);
+    }
+}
+
+void TaskItemDialog::CalculateRate(wxDateTime time)
+{
+    auto hours = time.GetHour();
+    auto minutes = time.GetMinute();
+    auto seconds = time.GetSecond();
+    auto milliseconds = time.GetMillisecond();
+
+    wxTimeSpan timeSpan(hours, minutes, seconds, milliseconds);
+    CalculateRate(timeSpan);
 }
 
 void TaskItemDialog::CalculateRate(wxDateTime start, wxDateTime end)
@@ -637,8 +661,16 @@ void TaskItemDialog::CalculateRate(wxDateTime start, wxDateTime end)
     if (pProject != nullptr) {
         if (pProject->GetRateType()->GetType() == constants::RateTypes::Hourly) {
             wxTimeSpan diff = end.Subtract(start);
-            // if (!diff.IsShorterThan(wxTimeSpan::Minutes(5))) {
-            int minutes = diff.GetMinutes();
+            CalculateRate(diff);
+        }
+    }
+}
+
+void TaskItemDialog::CalculateRate(wxTimeSpan time)
+{
+    if (pProject != nullptr) {
+        if (pProject->GetRateType()->GetType() == constants::RateTypes::Hourly) {
+            int minutes = time.GetMinutes();
             double time = ((double) minutes / 60.0);
             mCalculatedRate = time * *pProject->GetRate();
 
@@ -646,7 +678,6 @@ void TaskItemDialog::CalculateRate(wxDateTime start, wxDateTime end)
                 pProject->GetCurrency()->GetSymbol(),
                 mCalculatedRate);
             pCalculatedRateTextCtrl->SetLabel(rate);
-            //}
         }
     }
 }
@@ -766,6 +797,13 @@ void TaskItemDialog::OnEndTimeFocusLost(wxFocusEvent& event)
     CalculateRate(start, end);
 
     event.Skip();
+}
+
+void TaskItemDialog::OnDurationTimeFocusLost(wxFocusEvent& event)
+{
+    auto time = pDurationTimeCtrl->GetValue();
+
+    CalculateRate(time);
 }
 
 void TaskItemDialog::OnDurationTimeChange(wxDateEvent& event)
