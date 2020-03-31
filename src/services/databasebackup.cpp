@@ -52,9 +52,6 @@ bool DatabaseBackup::Execute()
     if (!ExecuteBackup(filePath)) {
         return false;
     }
-    if (!MoveBackupFileToBackupDirectory(filePath)) {
-        return false;
-    }
     return true;
 }
 
@@ -115,27 +112,5 @@ bool DatabaseBackup::ExecuteBackup(const wxString& fileName)
         return false;
     }
     return true;
-}
-
-bool DatabaseBackup::MoveBackupFileToBackupDirectory(const wxString& fileName)
-{
-    if (pConfig->GetBackupPath() == common::GetDatabasePath()) {
-        return true;
-    }
-
-    auto currentDatabaseDirectory = wxPathOnly(wxStandardPaths::Get().GetExecutablePath());
-    auto fullFilePath = wxString::Format(wxT("%s\\%s"), currentDatabaseDirectory, fileName);
-
-    if (wxCopyFile(fullFilePath, fileName, true)) {
-        if (wxRemoveFile(fullFilePath)) {
-            return true;
-        } else {
-            pLogger->error("Failed to remove file {0}", fullFilePath.ToStdString());
-        }
-    } else {
-        pLogger->error("Failed to copy file {0} to {1}", fullFilePath.ToStdString(), fileName.ToStdString());
-    }
-
-    return false;
 }
 } // namespace app::svc
