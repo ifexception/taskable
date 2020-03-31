@@ -52,6 +52,7 @@
 
 #include "../services/databaseconnection.h"
 #include "../services/databasebackup.h"
+#include "../services/databasebackupdeleter.h"
 
 namespace app::frm
 {
@@ -137,6 +138,11 @@ bool MainFrame::CreateFrame()
     SetMinClientSize(wxSize(599, 499));
     SetIcon(common::GetProgramIcon());
 
+    if (pConfig->IsBackupEnabled()) {
+        svc::DatabaseBackupDeleter dbBackupDeleter(pConfig);
+        dbBackupDeleter.Execute();
+    }
+
     pTaskBarIcon = new TaskBarIcon(this, pConfig, pLogger, pDatabase);
     if (pConfig->IsShowInTray()) {
         pTaskBarIcon->SetTaskBarIcon();
@@ -218,7 +224,7 @@ void MainFrame::CreateControls()
     preferencesMenuItem->SetBitmap(common::GetSettingsIcon());
 
     /* Export Menu Control */
-    //auto exportMenu = new wxMenu();
+    // auto exportMenu = new wxMenu();
 
     /* Tools Menu Control */
     auto toolsMenu = new wxMenu();
@@ -241,7 +247,7 @@ void MainFrame::CreateControls()
     wxMenuBar* menuBar = new wxMenuBar();
     menuBar->Append(fileMenu, wxT("File"));
     menuBar->Append(editMenu, wxT("Edit"));
-    //menuBar->Append(exportMenu, wxT("Export"));
+    // menuBar->Append(exportMenu, wxT("Export"));
     menuBar->Append(toolsMenu, wxT("Tools"));
     menuBar->Append(helpMenu, wxT("Help"));
 
