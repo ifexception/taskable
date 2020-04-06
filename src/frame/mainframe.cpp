@@ -85,6 +85,7 @@ EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 EVT_SIZE(MainFrame::OnResize)
 EVT_BUTTON(MainFrame::IDC_FEEDBACK, MainFrame::OnFeedback)
 EVT_CHAR_HOOK(MainFrame::OnKeyDown)
+EVT_TIMER(IDC_DISMISS_INFOBAR_TIMER, MainFrame::OnDismissInfoBar)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
@@ -98,6 +99,7 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
     , pDatabase(database)
     , pTaskState(std::make_shared<services::TaskStateService>())
     , pTaskStorage(std::make_unique<services::TaskStorage>())
+    , pDismissInfoBarTimer(std::make_unique<wxTimer>(this, IDC_DISMISS_INFOBAR_TIMER))
     , pDatePickerCtrl(nullptr)
     , pTotalHoursText(nullptr)
     , pListCtrl(nullptr)
@@ -649,6 +651,12 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
     event.Skip();
 }
 
+void MainFrame::OnDismissInfoBar(wxTimerEvent& event)
+{
+    pDismissInfoBarTimer->Stop();
+    pInfoBar->Dismiss();
+}
+
 void MainFrame::CalculateTotalTime(wxDateTime date)
 {
     std::vector<wxString> taskDurations;
@@ -727,6 +735,8 @@ void MainFrame::ShowInfoBarMessageForAdd(int modalRetCode, const wxString& item)
     } else if (modalRetCode == ids::ID_ERROR_OCCURED) {
         pInfoBar->ShowMessage(constants::OnErrorAdd(item), wxICON_ERROR);
     }
+
+    pDismissInfoBarTimer->Start(2000);
 }
 
 void MainFrame::ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item)
@@ -736,5 +746,7 @@ void MainFrame::ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item
     } else if (modalRetCode == ids::ID_ERROR_OCCURED) {
         pInfoBar->ShowMessage(constants::OnSuccessfulEdit(item), wxICON_ERROR);
     }
+
+    pDismissInfoBarTimer->Start(2000);
 }
 } // namespace app::frm

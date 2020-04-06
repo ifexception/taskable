@@ -29,6 +29,7 @@
 #include <wx/dateevt.h>
 #include <wx/infobar.h>
 #include <wx/bmpbuttn.h>
+#include <wx/timer.h>
 
 #include <spdlog/spdlog.h>
 
@@ -92,6 +93,7 @@ private:
     void OnBackupDatabase(wxCommandEvent& event);
     void OnFeedback(wxCommandEvent& event);
     void OnKeyDown(wxKeyEvent& event);
+    void OnDismissInfoBar(wxTimerEvent& event);
 
     void CalculateTotalTime(wxDateTime date = wxDateTime::Now());
     void RefreshItems(wxDateTime date = wxDateTime::Now());
@@ -105,6 +107,7 @@ private:
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<services::TaskStateService> pTaskState;
     std::unique_ptr<services::TaskStorage> pTaskStorage;
+    std::unique_ptr<wxTimer> pDismissInfoBarTimer;
     wxDatePickerCtrl* pDatePickerCtrl;
     wxStaticText* pTotalHoursText;
     wxListCtrl* pListCtrl;
@@ -117,6 +120,6 @@ private:
 
     bool bHasPendingTaskToResume;
 
-    enum { IDC_GO_TO_DATE = wxID_HIGHEST + 1, IDC_HOURS_TEXT, IDC_LIST, IDC_FEEDBACK };
+    enum { IDC_GO_TO_DATE = wxID_HIGHEST + 1, IDC_HOURS_TEXT, IDC_LIST, IDC_FEEDBACK, IDC_DISMISS_INFOBAR_TIMER };
 };
 } // namespace app::frm
