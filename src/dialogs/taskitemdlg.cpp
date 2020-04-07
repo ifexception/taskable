@@ -804,6 +804,8 @@ void TaskItemDialog::OnDurationTimeFocusLost(wxFocusEvent& event)
     auto time = pDurationTimeCtrl->GetValue();
 
     CalculateRate(time);
+
+    event.Skip();
 }
 
 void TaskItemDialog::OnDurationTimeChange(wxDateEvent& event)
