@@ -109,6 +109,8 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
     , bHasPendingTaskToResume(false)
     , pFeedbackButton(nullptr)
     , pFeedbackPopupWindow(nullptr)
+    , mItemIndexForClipboard(-1)
+    , mSelectedTaskItemId(-1)
 // clang-format on
 {
     svc::DatabaseConnection::Get().SetHandle(pDatabase);
@@ -202,7 +204,7 @@ void MainFrame::CreateControls()
     fileMenu->AppendSeparator();
 
     auto stopwatchMenuItem =
-        fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("Stop&watch Task\tCtrl-W"), wxT("Start task stopwatch"));
+        fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("Stop&watch\tCtrl-W"), wxT("Start task stopwatch"));
     stopwatchMenuItem->SetBitmap(common::GetStopwatchIcon());
 
     fileMenu->AppendSeparator();
@@ -488,19 +490,16 @@ void MainFrame::OnItemDoubleClick(wxListEvent& event)
 
 void MainFrame::OnItemRightClick(wxListEvent& event)
 {
-    auto canOpen = wxTheClipboard->Open();
-    if (canOpen) {
-        auto item = event.GetItem();
-        wxListItem listItem;
-        listItem.m_itemId = item;
-        listItem.m_col = 6;
-        listItem.m_mask = wxLIST_MASK_TEXT;
-        pListCtrl->GetItem(listItem);
+    mItemIndexForClipboard = event.GetIndex();
+    mSelectedTaskItemId = event.GetData();
 
-        auto textData = new wxTextDataObject(listItem.GetText());
-        wxTheClipboard->SetData(textData);
-        wxTheClipboard->Close();
-    }
+    wxMenu menu;
+
+    menu.Append(wxID_COPY, wxT("&Copy to Clipboard"));
+    menu.Append(wxID_EDIT, wxT("&Edit"));
+    menu.Append(wxID_DELETE, wxT("&Delete"));
+
+    PopupMenu(&menu);
 }
 
 void MainFrame::OnIconize(wxIconizeEvent& event)
@@ -657,6 +656,56 @@ void MainFrame::OnDismissInfoBar(wxTimerEvent& event)
     pInfoBar->Dismiss();
 }
 
+void MainFrame::OnPopupMenuCopyToClipboard(wxCommandEvent& event)
+{
+    auto canOpen = wxTheClipboard->Open();
+    if (canOpen) {
+        wxListItem listItem;
+        listItem.m_itemId = mItemIndexForClipboard;
+        listItem.m_col = 6;
+        listItem.m_mask = wxLIST_MASK_TEXT;
+        pListCtrl->GetItem(listItem);
+
+        auto textData = new wxTextDataObject(listItem.GetText());
+        wxTheClipboard->SetData(textData);
+        wxTheClipboard->Close();
+    }
+
+    mItemIndexForClipboard = -1;
+}
+
+void MainFrame::OnPopupMenuEdit(wxCommandEvent& event)
+{
+    int taskItemTypeId = 0;
+    try {
+        taskItemTypeId = model::TaskItemModel::GetTaskItemTypeIdByTaskItemId(mSelectedTaskItemId);
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error(
+            "Error occured on TaskItemModel::GetTaskItemTypeIdByTaskItemId() - {0:d} : {1}", e.get_code(), e.what());
+        return;
+    }
+    constants::TaskItemTypes type = static_cast<constants::TaskItemTypes>(taskItemTypeId);
+    wxDateTime dateContext = pDatePickerCtrl->GetValue();
+
+    dlg::TaskItemDialog editTask(this, pLogger, pConfig, type, true, mSelectedTaskItemId, dateContext);
+    int retCode = editTask.ShowModal();
+    ShowInfoBarMessageForEdit(retCode, wxT("task"));
+}
+
+void MainFrame::OnPopupMenuDelete(wxCommandEvent& event)
+{
+    try {
+        model::TaskItemModel::Delete(mSelectedTaskItemId);
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error(
+            "Error occured on TaskItemModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
+        ShowInfoBarMessageForDelete(false);
+        return;
+    }
+
+    ShowInfoBarMessageForDelete(true);
+}
+
 void MainFrame::CalculateTotalTime(wxDateTime date)
 {
     std::vector<wxString> taskDurations;
@@ -744,7 +793,18 @@ void MainFrame::ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item
     if (modalRetCode == wxID_OK) {
         pInfoBar->ShowMessage(constants::OnSuccessfulEdit(item), wxICON_INFORMATION);
     } else if (modalRetCode == ids::ID_ERROR_OCCURED) {
-        pInfoBar->ShowMessage(constants::OnSuccessfulEdit(item), wxICON_ERROR);
+        pInfoBar->ShowMessage(constants::OnErrorEdit(item), wxICON_ERROR);
+    }
+
+    pDismissInfoBarTimer->Start(2000);
+}
+
+void MainFrame::ShowInfoBarMessageForDelete(bool success)
+{
+    if (success) {
+        pInfoBar->ShowMessage(wxT("Successfully deleted"));
+    } else {
+        pInfoBar->ShowMessage(wxT("Error deleting task"));
     }
 
     pDismissInfoBarTimer->Start(2000);

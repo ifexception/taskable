@@ -94,6 +94,9 @@ private:
     void OnFeedback(wxCommandEvent& event);
     void OnKeyDown(wxKeyEvent& event);
     void OnDismissInfoBar(wxTimerEvent& event);
+    void OnPopupMenuCopyToClipboard(wxCommandEvent& event);
+    void OnPopupMenuEdit(wxCommandEvent& event);
+    void OnPopupMenuDelete(wxCommandEvent& event);
 
     void CalculateTotalTime(wxDateTime date = wxDateTime::Now());
     void RefreshItems(wxDateTime date = wxDateTime::Now());
@@ -102,6 +105,7 @@ private:
 
     void ShowInfoBarMessageForAdd(int modalRetCode, const wxString& item);
     void ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item);
+    void ShowInfoBarMessageForDelete(bool success);
 
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
@@ -119,6 +123,8 @@ private:
     sqlite::database* pDatabase;
 
     bool bHasPendingTaskToResume;
+    long mItemIndexForClipboard;
+    int mSelectedTaskItemId;
 
     enum { IDC_GO_TO_DATE = wxID_HIGHEST + 1, IDC_HOURS_TEXT, IDC_LIST, IDC_FEEDBACK, IDC_DISMISS_INFOBAR_TIMER };
 };
