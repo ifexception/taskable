@@ -18,7 +18,7 @@
 //    szymonwelgus at gmail dot com
 
 #define TASKABLE_MAJOR 0
-#define TASKABLE_MINOR 97
+#define TASKABLE_MINOR 98
 #define TASKABLE_PATCH 1
 
 #define TASKABLE_VERSION (TASKABLE_MAJOR * 1000 + TASKABLE_MINOR * 100 + TASKABLE_PATCH)
