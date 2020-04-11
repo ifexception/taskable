@@ -129,6 +129,7 @@ public:
     static std::unique_ptr<TaskItemModel> GetById(const int taskItemId);
     static void Update(std::unique_ptr<TaskItemModel> taskItem);
     static void Delete(std::unique_ptr<TaskItemModel> taskItem);
+    static void Delete(int taskItemId);
     static std::vector<std::unique_ptr<TaskItemModel>> GetByDate(const wxString& date);
     static std::vector<wxString> GetHours(const wxString& date);
     static int GetTaskItemTypeIdByTaskItemId(const int taskItemId);

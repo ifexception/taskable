@@ -525,6 +525,12 @@ void TaskItemModel::Delete(std::unique_ptr<TaskItemModel> taskItem)
     *db << TaskItemModel::deleteTaskItem << util::UnixTimestamp() << taskItem->GetTaskItemId();
 }
 
+void TaskItemModel::Delete(int taskItemId)
+{
+    auto db = svc::DatabaseConnection::Get().GetHandle();
+    *db << TaskItemModel::deleteTaskItem << util::UnixTimestamp() << taskItemId;
+}
+
 std::vector<std::unique_ptr<TaskItemModel>> TaskItemModel::GetByDate(const wxString& date)
 {
     std::vector<std::unique_ptr<TaskItemModel>> taskItems;
