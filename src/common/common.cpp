@@ -159,7 +159,7 @@ wxString app::common::GetConfigFileName()
 
 wxString app::common::GetAppId()
 {
-    return wxT("6BE5E5E6-68BF-4AF7-A9E5-FF919709E86C");
+    return wxT("ifexception.Taskable");
 }
 
 void app::common::validations::ForRequiredChoiceSelection(wxWindow* window, wxString label)
