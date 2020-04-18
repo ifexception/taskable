@@ -641,7 +641,7 @@ const std::string TaskItemModel::updateTaskItem = "UPDATE task_items "
                                                   "WHERE task_item_id = ?";
 
 const std::string TaskItemModel::deleteTaskItem = "UPDATE task_items "
-                                                  "SET is_active = 0, date_modified_utc = ? "
+                                                  "SET is_active = 0, date_modified = ? "
                                                   "WHERE task_item_id = ?";
 
 const std::string TaskItemModel::getTaskItemsByDate =
@@ -665,7 +665,8 @@ const std::string TaskItemModel::getTaskItemsByDate =
     "INNER JOIN categories ON task_items.category_id = categories.category_id "
     "INNER JOIN projects ON task_items.project_id = projects.project_id "
     "INNER JOIN task_item_types ON task_items.task_item_type_id = task_item_types.task_item_type_id "
-    "WHERE task_date = ?";
+    "WHERE task_date = ? "
+    "AND is_active = 1";
 
 const std::string TaskItemModel::getTaskHoursByTaskId = "SELECT task_items.duration "
                                                         "FROM task_items "
