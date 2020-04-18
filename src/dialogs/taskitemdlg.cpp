@@ -835,7 +835,7 @@ void TaskItemDialog::OnOk(wxCommandEvent& event)
             try {
                 model::TaskItemModel::Update(std::move(pTaskItem));
             } catch (const sqlite::sqlite_exception& e) {
-                pLogger->error("Error occured in TaskItemModel::Create() - {0:d} : {1}", e.get_code(), e.what());
+                pLogger->error("Error occured in TaskItemModel::Update() - {0:d} : {1}", e.get_code(), e.what());
                 wxLogDebug(wxString(e.get_sql()));
                 EndModal(ids::ID_ERROR_OCCURED);
             }
@@ -845,7 +845,7 @@ void TaskItemDialog::OnOk(wxCommandEvent& event)
             try {
                 model::TaskItemModel::Delete(std::move(pTaskItem));
             } catch (const sqlite::sqlite_exception& e) {
-                pLogger->error("Error occured in TaskItemModel::Create() - {0:d} : {1}", e.get_code(), e.what());
+                pLogger->error("Error occured in TaskItemModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
                 wxLogDebug(wxString(e.get_sql()));
                 EndModal(ids::ID_ERROR_OCCURED);
             }
