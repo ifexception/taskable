@@ -86,6 +86,9 @@ EVT_SIZE(MainFrame::OnResize)
 EVT_BUTTON(MainFrame::IDC_FEEDBACK, MainFrame::OnFeedback)
 EVT_CHAR_HOOK(MainFrame::OnKeyDown)
 EVT_TIMER(IDC_DISMISS_INFOBAR_TIMER, MainFrame::OnDismissInfoBar)
+EVT_MENU(wxID_COPY, MainFrame::OnPopupMenuCopyToClipboard)
+EVT_MENU(wxID_EDIT, MainFrame::OnPopupMenuEdit)
+EVT_MENU(wxID_DELETE, MainFrame::OnPopupMenuDelete)
 wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
@@ -802,9 +805,9 @@ void MainFrame::ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item
 void MainFrame::ShowInfoBarMessageForDelete(bool success)
 {
     if (success) {
-        pInfoBar->ShowMessage(wxT("Successfully deleted"));
+        pInfoBar->ShowMessage(wxT("Successfully deleted"), wxICON_INFORMATION);
     } else {
-        pInfoBar->ShowMessage(wxT("Error deleting task"));
+        pInfoBar->ShowMessage(wxT("Error deleting task"), wxICON_ERROR);
     }
 
     pDismissInfoBarTimer->Start(2000);
