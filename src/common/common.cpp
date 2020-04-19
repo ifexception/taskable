@@ -128,11 +128,6 @@ wxString app::common::GetProgramName()
 #endif // TASKABLE_DEBUG
 }
 
-wxString app::common::GetDatabasePath()
-{
-    return wxStandardPaths::Get().GetAppDocumentsDir();
-}
-
 wxString app::common::GetDatabaseFileName()
 {
 #ifdef TASKABLE_DEBUG
@@ -142,9 +137,9 @@ wxString app::common::GetDatabaseFileName()
 #endif // TASKABLE_DEBUG
 }
 
-wxString app::common::GetDatabaseFilePath()
+wxString app::common::GetDatabaseFilePath(const wxString& databasePath)
 {
-    return wxString::Format(wxT("%s\\%s"), app::common::GetDatabasePath(), common::GetDatabaseFileName());
+    return wxString::Format(wxT("%s\\%s"), databasePath, common::GetDatabaseFileName());
 }
 
 wxString app::common::GetConfigFilePath()

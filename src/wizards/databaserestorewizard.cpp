@@ -28,8 +28,8 @@
 namespace app::wizard
 {
 DatabaseRestoreWizard::DatabaseRestoreWizard(frm::MainFrame* frame,
-    std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<cfg::Configuration> config,
+    std::shared_ptr<spdlog::logger> logger,
     sqlite::database* database,
     bool restoreWithNoPreviousFileExisting)
     : wxWizard(frame,
@@ -39,8 +39,8 @@ DatabaseRestoreWizard::DatabaseRestoreWizard(frm::MainFrame* frame,
           wxDefaultPosition,
           wxDEFAULT_DIALOG_STYLE)
     , pFrame(frame)
-    , pLogger(logger)
     , pConfig(config)
+    , pLogger(logger)
     , pPage1(nullptr)
     , pDatabase(database)
     , mDatabaseFileToRestore(wxGetEmptyString())
@@ -48,7 +48,7 @@ DatabaseRestoreWizard::DatabaseRestoreWizard(frm::MainFrame* frame,
 {
     pPage1 = new DatabaseRestoreWelcomePage(this);
     auto page2 = new SelectDatabaseVersionPage(this, pConfig);
-    auto page3 = new DatabaseRestoredPage(this, pLogger, pConfig, pDatabase);
+    auto page3 = new DatabaseRestoredPage(this, pConfig, pLogger, pDatabase);
 
     wxWizardPageSimple::Chain(pPage1, page2);
     wxWizardPageSimple::Chain(page2, page3);
@@ -248,13 +248,13 @@ void SelectDatabaseVersionPage::OnWizardCancel(wxWizardEvent& event)
 }
 
 DatabaseRestoredPage::DatabaseRestoredPage(DatabaseRestoreWizard* parent,
-    std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<cfg::Configuration> config,
+    std::shared_ptr<spdlog::logger> logger,
     sqlite::database* database)
     : wxWizardPageSimple(parent)
     , pParent(parent)
-    , pLogger(logger)
     , pConfig(config)
+    , pLogger(logger)
     , pDatabase(database)
     , pStatusInOperationLabel(nullptr)
     , pGaugeCtrl(nullptr)
@@ -310,7 +310,7 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
     const wxString& fileToRestore = pParent->GetDatabaseFileVersionToRestore();
 
     const wxString& backupPath = pConfig->GetBackupPath();
-    const wxString& dataPath = common::GetDatabasePath();
+    const wxString& dataPath = pConfig->GetDatabasePath();
 
     auto fullBackupDatabaseFilePath = wxString::Format(wxT("%s\\%s"), backupPath, fileToRestore);
     auto toCopyDatabaseFilePath = wxString::Format(wxT("%s\\%s"), dataPath, fileToRestore);
@@ -328,7 +328,7 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
         }
     }
 
-    auto existingDatabaseFile = common::GetDatabaseFilePath();
+    auto existingDatabaseFile = common::GetDatabaseFilePath(pConfig->GetDatabasePath());
 
     /* If there is a existing 'db' file */
     if (!pParent->IsRestoreWithNoPreviousFileExisting()) {
@@ -373,7 +373,7 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
 
         /* Restore connection to database */
         auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
-        pDatabase = new sqlite::database(common::GetDatabaseFilePath().ToStdString(), config);
+        pDatabase = new sqlite::database(common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString(), config);
 
         // Need to bubble up new'd up pointer to parent (MainFrame)
         pParent->SetNewDatabaseHandle(pDatabase);

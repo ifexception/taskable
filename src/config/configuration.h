@@ -50,6 +50,9 @@ public:
     bool IsCloseToTray() const;
     void SetCloseToTray(bool value);
 
+    wxString GetDatabasePath() const;
+    void SetDatabasePath(const wxString& value);
+
     bool IsBackupEnabled() const;
     void SetBackupEnabled(bool value);
 

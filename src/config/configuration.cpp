@@ -116,6 +116,16 @@ void Configuration::SetCloseToTray(bool value)
     Set<bool>(wxT("settings"), wxT("closeToTray"), value);
 }
 
+wxString Configuration::GetDatabasePath() const
+{
+    return Get<wxString>(wxT("settings"), wxT("databasePath"));
+}
+
+void Configuration::SetDatabasePath(const wxString& value)
+{
+    Set<wxString>(wxT("settings"), wxT("databasePath"), value);
+}
+
 bool Configuration::IsBackupEnabled() const
 {
     return Get<bool>(wxT("settings"), wxT("backupEnabled"));

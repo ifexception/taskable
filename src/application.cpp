@@ -76,15 +76,15 @@ bool Application::OnInit()
 
 bool Application::FirstStartupInitialization()
 {
+    if (!ConfigurationFileExists()) {
+        return false;
+    }
+
     if (!RunSetupWizard()) {
         return false;
     }
 
     if (!ConfigureRegistry()) {
-        return false;
-    }
-
-    if (!ConfigurationFileExists()) {
         return false;
     }
 
@@ -153,7 +153,7 @@ bool Application::CreateLogsDirectory()
 
 bool Application::IsSetup()
 {
-#if TASKABLE_DEBUG
+#ifdef TASKABLE_DEBUG
     wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled");
 #else
     wxRegKey key(wxRegKey::HKCU, "Software\\Taskable");
@@ -170,7 +170,7 @@ bool Application::IsSetup()
 
 bool Application::RunSetupWizard()
 {
-    auto wizard = new wizard::SetupWizard(nullptr, pLogger);
+    auto wizard = new wizard::SetupWizard(nullptr, pConfig, pLogger);
     wizard->CenterOnScreen();
     bool result = wizard->Run();
 
@@ -179,12 +179,11 @@ bool Application::RunSetupWizard()
 
 bool Application::ConfigureRegistry()
 {
-#if TASKABLE_DEBUG
+#ifdef TASKABLE_DEBUG
     wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled");
 #else
     wxRegKey key(wxRegKey::HKCU, "Software\\Taskable");
 #endif // TASKABLE_DEBUG
-
 
     bool result = key.Exists();
     if (!result) {
@@ -215,6 +214,12 @@ bool Application::ConfigurationFileExists()
     }
 
     pConfig = std::make_shared<cfg::Configuration>();
+
+    if (pConfig->GetDatabasePath().empty()) {
+        pConfig->SetDatabasePath(wxStandardPaths::Get().GetAppDocumentsDir());
+        pConfig->Save();
+    }
+
     return configFileExists;
 }
 
@@ -238,17 +243,17 @@ bool Application::CreateBackupsDirectory()
 bool Application::DatabaseFileExists()
 {
     /* Check if the 'data' directory is missing */
-    if (!wxDirExists(common::GetDatabasePath())) {
+    if (!wxDirExists(pConfig->GetDatabasePath())) {
         /* Backups are enabled so create the directory and to restore database */
         if (pConfig->IsBackupEnabled()) {
             int ret = wxMessageBox(wxT("Error: Program cannot find database file!\nRestore database from backup?"),
                 common::GetProgramName(),
                 wxYES_NO | wxICON_WARNING);
             if (ret == wxYES) {
-                if (!wxMkdir(common::GetDatabasePath())) {
+                if (!wxMkdir(pConfig->GetDatabasePath())) {
                     return false;
                 }
-                auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pLogger, pConfig, pDatabase, true);
+                auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pConfig, pLogger, pDatabase, true);
                 restoreDatabase->CenterOnParent();
                 return restoreDatabase->Run();
             } else {
@@ -270,7 +275,7 @@ bool Application::DatabaseFileExists()
     }
 
     /* Check if the database file is missing */
-    bool databaseFileExists = wxFileExists(common::GetDatabaseFilePath());
+    bool databaseFileExists = wxFileExists(common::GetDatabaseFilePath(pConfig->GetDatabasePath()));
 
     if (!databaseFileExists) {
         /* Backups are enabled so run the database restore wizard to restore database */
@@ -279,7 +284,7 @@ bool Application::DatabaseFileExists()
                 common::GetProgramName(),
                 wxYES_NO | wxICON_WARNING);
             if (ret == wxYES) {
-                auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pLogger, pConfig, pDatabase, true);
+                auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pConfig, pLogger, pDatabase, true);
                 restoreDatabase->CenterOnParent();
                 return restoreDatabase->Run();
             }
@@ -305,7 +310,7 @@ bool Application::DatabaseFileExists()
 void Application::InitializeSqliteConnection()
 {
     auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
-    pDatabase = new sqlite::database(common::GetDatabaseFilePath().ToStdString(), config);
+    pDatabase = new sqlite::database(common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString(), config);
 }
 } // namespace app
 

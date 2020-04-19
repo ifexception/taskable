@@ -585,7 +585,7 @@ void MainFrame::OnResize(wxSizeEvent& event)
 void MainFrame::OnRestoreDatabase(wxCommandEvent& event)
 {
     if (pConfig->IsBackupEnabled()) {
-        auto wizard = new wizard::DatabaseRestoreWizard(this, pLogger, pConfig, pDatabase);
+        auto wizard = new wizard::DatabaseRestoreWizard(this, pConfig, pLogger, pDatabase);
         wizard->CenterOnParent();
         bool wizardSetupSuccess = wizard->Run();
         if (wizardSetupSuccess) {
@@ -700,8 +700,7 @@ void MainFrame::OnPopupMenuDelete(wxCommandEvent& event)
     try {
         model::TaskItemModel::Delete(mSelectedTaskItemId);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error(
-            "Error occured on TaskItemModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on TaskItemModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
         ShowInfoBarMessageForDelete(false);
         return;
     }
