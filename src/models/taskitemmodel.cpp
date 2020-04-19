@@ -666,7 +666,7 @@ const std::string TaskItemModel::getTaskItemsByDate =
     "INNER JOIN projects ON task_items.project_id = projects.project_id "
     "INNER JOIN task_item_types ON task_items.task_item_type_id = task_item_types.task_item_type_id "
     "WHERE task_date = ? "
-    "AND is_active = 1";
+    "AND task_items.is_active = 1";
 
 const std::string TaskItemModel::getTaskHoursByTaskId = "SELECT task_items.duration "
                                                         "FROM task_items "
