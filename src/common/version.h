@@ -17,8 +17,8 @@
 //  Contact:
 //    szymonwelgus at gmail dot com
 
-#define TASKABLE_MAJOR 0
-#define TASKABLE_MINOR 99
+#define TASKABLE_MAJOR 1
+#define TASKABLE_MINOR 0
 #define TASKABLE_PATCH 0
 
 #define TASKABLE_VERSION (TASKABLE_MAJOR * 1000 + TASKABLE_MINOR * 100 + TASKABLE_PATCH)
