@@ -82,7 +82,7 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
         wxID_ANY,
         wxT("Stopwatch"),
         wxDefaultPosition,
-        wxSize(320, 240),
+        wxSize(420, 380),
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
         name);
 }
@@ -120,7 +120,7 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
         wxID_ANY,
         wxT("Stopwatch"),
         wxDefaultPosition,
-        wxSize(320, 240),
+        wxSize(420, 320),
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
         name);
 }
@@ -133,6 +133,9 @@ void StopwatchTaskDialog::Launch()
 
     if (pConfig->IsStartStopwatchOnLaunch()) {
         ExecuteStartupProcedure();
+        pPauseButton->SetDefault();
+    } else {
+        pStartButton->SetDefault();
     }
 
     wxDialog::ShowModal();
@@ -143,9 +146,11 @@ void StopwatchTaskDialog::Relaunch()
     // if we can start stopwatch on resume, then execute startup procedure
     if (pConfig->IsStartStopwatchOnResume()) {
         ExecuteStartupProcedure();
+        pPauseButton->SetDefault();
     } else {
         // if we cannot, enable start button
         pStartButton->Enable();
+        pStartButton->SetDefault();
 
         // and disable pause button
         pPauseButton->Disable();
@@ -185,7 +190,14 @@ bool StopwatchTaskDialog::Create(wxWindow* parent,
         if (pConfig->IsShowInTray()) {
             wxNotificationMessage::UseTaskBarIcon(pTaskBarIcon);
         } else {
-            wxNotificationMessage::MSWUseToasts();
+#ifdef TASKABLE_DEBUG
+            // In DEBUG mode, we need to hardcode the application name as in common where
+            // we return a different name for the application, but we want Windows RT
+            // to work with the official installed application name
+            bool result = wxNotificationMessage::MSWUseToasts(wxT("Taskable"), common::GetAppId());
+#else
+            bool result = wxNotificationMessage::MSWUseToasts(common::GetProgramName(), common::GetAppId());
+#endif // TASKABLE_DEBUG
         }
     }
 
@@ -233,9 +245,9 @@ void StopwatchTaskDialog::CreateControls()
     auto taskDescriptionText = new wxStaticText(mainPanel, wxID_STATIC, wxT("Description"));
     taskDescSizer->Add(taskDescriptionText, common::sizers::ControlLeft);
 
-    pStopwatchDescription =
-        new wxTextCtrl(mainPanel, IDC_TASK_DESCRIPTION, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_MULTILINE);
-    pStopwatchDescription->SetToolTip(wxT("Enter a short description for the stopwatch task to track"));
+    pStopwatchDescription = new wxTextCtrl(
+        mainPanel, IDC_TASK_DESCRIPTION, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_MULTILINE);
+    pStopwatchDescription->SetToolTip(wxT("Enter a short description of the task to track"));
     pStopwatchDescription->SetMaxLength(32);
     taskDescSizer->Add(pStopwatchDescription, common::sizers::ControlExpand);
 
@@ -252,8 +264,6 @@ void StopwatchTaskDialog::CreateControls()
     pStartButton = new wxButton(buttonPanel, IDC_START, wxT("St&art"));
     pPauseButton = new wxButton(buttonPanel, IDC_PAUSE, wxT("&Pause"));
     pStopButton = new wxButton(buttonPanel, IDC_STOP, wxT("&Stop"));
-    pStopButton->SetFocus();
-    pStopButton->SetDefault();
     pCancelButton = new wxButton(buttonPanel, IDC_CANCEL, wxT("&Cancel"));
 
     buttonPanelSizer->Add(pStartButton, common::sizers::ControlDefault);
@@ -302,6 +312,7 @@ void StopwatchTaskDialog::ExecutePauseProcedure()
 
     /* enable start button */
     pStartButton->Enable();
+    pStartButton->SetDefault();
 
     /* disable pause button */
     pPauseButton->Disable();

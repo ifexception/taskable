@@ -121,31 +121,25 @@ wxString app::common::GetVersion()
 
 wxString app::common::GetProgramName()
 {
-#ifdef _DEBUG
+#ifdef TASKABLE_DEBUG
     return wxT("Taskable-Debug");
 #else
     return wxT("Taskable");
-#endif // _DEBUG
-}
-
-wxString app::common::GetDatabasePath()
-{
-    return wxString::Format(wxT("%s\\data"), wxStandardPaths::Get().GetUserDataDir());
+#endif // TASKABLE_DEBUG
 }
 
 wxString app::common::GetDatabaseFileName()
 {
-#ifdef _DEBUG
+#ifdef TASKABLE_DEBUG
     return wxT("taskable-d.db");
 #else
     return wxT("taskable.db");
-#endif // _DEBUG
+#endif // TASKABLE_DEBUG
 }
 
-wxString app::common::GetDatabaseFilePath()
+wxString app::common::GetDatabaseFilePath(const wxString& databasePath)
 {
-    return wxString::Format(
-        wxT("%s\\data\\%s"), wxStandardPaths::Get().GetUserDataDir(), common::GetDatabaseFileName());
+    return wxString::Format(wxT("%s\\%s"), databasePath, common::GetDatabaseFileName());
 }
 
 wxString app::common::GetConfigFilePath()
@@ -160,7 +154,7 @@ wxString app::common::GetConfigFileName()
 
 wxString app::common::GetAppId()
 {
-    return wxT("6BE5E5E6-68BF-4AF7-A9E5-FF919709E86C");
+    return wxT("ifexception.Taskable");
 }
 
 void app::common::validations::ForRequiredChoiceSelection(wxWindow* window, wxString label)

@@ -66,11 +66,9 @@ wxString GetVersion();
 
 wxString GetProgramName();
 
-wxString GetDatabasePath();
-
 wxString GetDatabaseFileName();
 
-wxString GetDatabaseFilePath();
+wxString GetDatabaseFilePath(const wxString& databasePath);
 
 wxString GetConfigFilePath();
 

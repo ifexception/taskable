@@ -19,7 +19,7 @@
 
 #include "databasebackup.h"
 
-#include <algorithm>
+#include <string>
 
 #include <wx/datetime.h>
 #include <wx/file.h>
@@ -41,10 +41,18 @@ DatabaseBackup::DatabaseBackup(std::shared_ptr<cfg::Configuration> config,
 bool DatabaseBackup::Execute()
 {
     wxString fileName = CreateBackupFileName();
-    bool result = CreateBackupFile(fileName);
-    result = ExecuteBackup(fileName);
-    result = MoveBackupFileToBackupDirectory(fileName);
-    return result;
+    wxString filePath = CreateBackupPath(fileName);
+    if (fileName.empty() || filePath.empty()) {
+        return false;
+    }
+
+    if (!CreateBackupFile(filePath)) {
+        return false;
+    }
+    if (!ExecuteBackup(filePath)) {
+        return false;
+    }
+    return true;
 }
 
 wxString DatabaseBackup::CreateBackupFileName()
@@ -58,16 +66,23 @@ wxString DatabaseBackup::CreateBackupFileName()
     } else {
         return wxGetEmptyString();
     }
+
     auto backupFileName = wxString::Format(wxT("%s.%s.db"), databaseFileName, dateTimeString);
-    std::replace(backupFileName.begin(), backupFileName.end(), ':', '.');
 
     return backupFileName;
+}
+
+wxString DatabaseBackup::CreateBackupPath(const wxString& filename)
+{
+    auto backupDirectory = pConfig->GetBackupPath();
+    auto backupFilePath = wxString::Format(wxT("%s\\%s"), backupDirectory, filename);
+    return backupFilePath;
 }
 
 bool DatabaseBackup::CreateBackupFile(const wxString& fileName)
 {
     wxFile file;
-    bool success = file.Create(fileName);
+    bool success = file.Create(fileName, true);
     if (!success) {
         pLogger->error("Failed to create file {0}", fileName.ToStdString());
     }
@@ -97,25 +112,5 @@ bool DatabaseBackup::ExecuteBackup(const wxString& fileName)
         return false;
     }
     return true;
-}
-
-bool DatabaseBackup::MoveBackupFileToBackupDirectory(const wxString& fileName)
-{
-    auto currentDatabaseDirectory = wxPathOnly(wxStandardPaths::Get().GetExecutablePath());
-    auto fullFilePath = wxString::Format(wxT("%s\\%s"), currentDatabaseDirectory, fileName);
-    auto destinationFullFilePath = wxString::Format(wxT("%s\\%s"), pConfig->GetBackupPath(), fileName);
-
-    if (wxCopyFile(fullFilePath, destinationFullFilePath, true)) {
-        if (wxRemoveFile(fullFilePath)) {
-            return true;
-        } else {
-            pLogger->error("Failed to remove file {0}", fullFilePath.ToStdString());
-        }
-    } else {
-        pLogger->error(
-            "Failed to copy file {0} to {1}", fullFilePath.ToStdString(), destinationFullFilePath.ToStdString());
-    }
-
-    return false;
 }
 } // namespace app::svc

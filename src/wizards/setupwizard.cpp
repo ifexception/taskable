@@ -24,13 +24,17 @@
 #include <wx/file.h>
 #include <wx/statline.h>
 
+#include "../config/configuration.h"
 #include "../common/common.h"
 #include "../../res/setupwizard.xpm"
 
 namespace app::wizard
 {
-SetupWizard::SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger)
+SetupWizard::SetupWizard(wxFrame* frame,
+    std::shared_ptr<cfg::Configuration> config,
+    std::shared_ptr<spdlog::logger> logger)
     : wxWizard(frame, wxID_ANY, wxT("Setup Wizard"), wxBitmap(setupwizard), wxDefaultPosition, wxDEFAULT_DIALOG_STYLE)
+    , pConfig(config)
     , pLogger(logger)
     , pPage1(nullptr)
     , mEmployer(wxGetEmptyString())
@@ -116,10 +120,10 @@ void SetupWizard::SetProjectDisplayName(const wxString& displayName)
 bool SetupWizard::CreateDatabaseFile()
 {
     bool succeeded = true;
-    if (!wxDirExists(common::GetDatabasePath())) {
-        if (wxMkdir(common::GetDatabasePath())) {
+    if (!wxDirExists(pConfig->GetDatabasePath())) {
+        if (wxMkdir(pConfig->GetDatabasePath())) {
             wxFile file;
-            succeeded = file.Create(common::GetDatabaseFilePath());
+            succeeded = file.Create(common::GetDatabaseFilePath(pConfig->GetDatabasePath()));
             if (!succeeded) {
                 pLogger->error("Unable to create database file at specified location!");
             }
@@ -130,7 +134,7 @@ bool SetupWizard::CreateDatabaseFile()
         }
     } else {
         wxFile file;
-        succeeded = file.Create(common::GetDatabaseFilePath());
+        succeeded = file.Create(common::GetDatabaseFilePath(pConfig->GetDatabasePath()));
         if (!succeeded) {
             pLogger->error("Unable to create database file at specified location!");
         }
@@ -143,7 +147,7 @@ bool SetupWizard::CreateDatabaseFile()
 void SetupWizard::InitializeSqliteConnection()
 {
     auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
-    pDatabase = new sqlite::database(common::GetDatabaseFilePath().ToStdString(), config);
+    pDatabase = new sqlite::database(common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString(), config);
 }
 
 void SetupWizard::Cleanup()
@@ -154,8 +158,8 @@ void SetupWizard::Cleanup()
 
 void SetupWizard::DeleteDatabaseFile()
 {
-    if (wxFileExists(common::GetDatabaseFilePath())) {
-        if (!wxRemoveFile(common::GetDatabaseFilePath())) {
+    if (wxFileExists(common::GetDatabaseFilePath(pConfig->GetDatabasePath()))) {
+        if (!wxRemoveFile(common::GetDatabaseFilePath(pConfig->GetDatabasePath()))) {
             pLogger->error("Unable to delete database file!");
         }
     }

@@ -44,8 +44,8 @@ class DatabaseRestoreWizard final : public wxWizard
 public:
     DatabaseRestoreWizard() = default;
     DatabaseRestoreWizard(frm::MainFrame* frame,
-        std::shared_ptr<spdlog::logger> logger,
         std::shared_ptr<cfg::Configuration> config,
+        std::shared_ptr<spdlog::logger> logger,
         sqlite::database* database,
         bool restoreWithNoPreviousFileExisting = false);
     virtual ~DatabaseRestoreWizard() = default;
@@ -60,8 +60,8 @@ public:
 
 private:
     frm::MainFrame* pFrame;
-    std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
+    std::shared_ptr<spdlog::logger> pLogger;
 
     DatabaseRestoreWelcomePage* pPage1;
 
@@ -112,12 +112,12 @@ class DatabaseRestoredPage final : public wxWizardPageSimple
 public:
     DatabaseRestoredPage() = delete;
     DatabaseRestoredPage(DatabaseRestoreWizard* parent,
-        std::shared_ptr<spdlog::logger> logger,
         std::shared_ptr<cfg::Configuration> config,
+        std::shared_ptr<spdlog::logger> logger,
         sqlite::database* database);
     virtual ~DatabaseRestoredPage() = default;
 
-    //bool TransferDataFromWindow() override;
+    // bool TransferDataFromWindow() override;
 
 private:
     void CreateControls();
@@ -129,23 +129,11 @@ private:
     void FileOperationErrorFeedback();
 
     DatabaseRestoreWizard* pParent;
-    std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
+    std::shared_ptr<spdlog::logger> pLogger;
     sqlite::database* pDatabase;
     wxStaticText* pStatusInOperationLabel;
     wxGauge* pGaugeCtrl;
     wxStaticText* pStatusCompleteLabel;
-};
-
-class DirectoryTraverser final : public wxDirTraverser
-{
-public:
-    DirectoryTraverser(wxArrayString& files);
-
-    wxDirTraverseResult OnFile(const wxString& file) override;
-    wxDirTraverseResult OnDir(const wxString& dir) override;
-
-private:
-    wxArrayString mFiles;
 };
 } // namespace app::wizard

@@ -29,6 +29,7 @@
 #include <wx/dateevt.h>
 #include <wx/infobar.h>
 #include <wx/bmpbuttn.h>
+#include <wx/timer.h>
 
 #include <spdlog/spdlog.h>
 
@@ -91,6 +92,11 @@ private:
     void OnRestoreDatabase(wxCommandEvent& event);
     void OnBackupDatabase(wxCommandEvent& event);
     void OnFeedback(wxCommandEvent& event);
+    void OnKeyDown(wxKeyEvent& event);
+    void OnDismissInfoBar(wxTimerEvent& event);
+    void OnPopupMenuCopyToClipboard(wxCommandEvent& event);
+    void OnPopupMenuEdit(wxCommandEvent& event);
+    void OnPopupMenuDelete(wxCommandEvent& event);
 
     void CalculateTotalTime(wxDateTime date = wxDateTime::Now());
     void RefreshItems(wxDateTime date = wxDateTime::Now());
@@ -99,11 +105,13 @@ private:
 
     void ShowInfoBarMessageForAdd(int modalRetCode, const wxString& item);
     void ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item);
+    void ShowInfoBarMessageForDelete(bool success);
 
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<services::TaskStateService> pTaskState;
     std::unique_ptr<services::TaskStorage> pTaskStorage;
+    std::unique_ptr<wxTimer> pDismissInfoBarTimer;
     wxDatePickerCtrl* pDatePickerCtrl;
     wxStaticText* pTotalHoursText;
     wxListCtrl* pListCtrl;
@@ -115,7 +123,9 @@ private:
     sqlite::database* pDatabase;
 
     bool bHasPendingTaskToResume;
+    long mItemIndexForClipboard;
+    int mSelectedTaskItemId;
 
-    enum { IDC_GO_TO_DATE = wxID_HIGHEST + 1, IDC_HOURS_TEXT, IDC_LIST, IDC_FEEDBACK };
+    enum { IDC_GO_TO_DATE = wxID_HIGHEST + 1, IDC_HOURS_TEXT, IDC_LIST, IDC_FEEDBACK, IDC_DISMISS_INFOBAR_TIMER };
 };
 } // namespace app::frm

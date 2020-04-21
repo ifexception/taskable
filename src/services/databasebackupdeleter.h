@@ -21,33 +21,25 @@
 
 #include <memory>
 
-#include <spdlog/spdlog.h>
-#include <sqlite_modern_cpp.h>
+#include <wx/arrstr.h>
 #include <wx/string.h>
 
 #include "../config/configuration.h"
 
 namespace app::svc
 {
-class DatabaseBackup final
+class DatabaseBackupDeleter final
 {
 public:
-    DatabaseBackup() = delete;
-    DatabaseBackup(std::shared_ptr<cfg::Configuration> config,
-        std::shared_ptr<spdlog::logger> logger,
-        sqlite::database* database);
+    DatabaseBackupDeleter(std::shared_ptr<cfg::Configuration> config);
+    ~DatabaseBackupDeleter() = default;
 
     bool Execute();
 
 private:
-    wxString CreateBackupFileName();
-    wxString CreateBackupPath(const wxString& fileName);
-    bool CreateBackupFile(const wxString& fileName);
-    bool ExecuteBackup(const wxString& fileName);
-    bool MoveBackupFileToBackupDirectory(const wxString& fileName);
+    wxArrayString GetFilesForDeletion();
+    bool DeleteFilesAfterSpecifiedDate(const wxArrayString& filesToDelete);
 
     std::shared_ptr<cfg::Configuration> pConfig;
-    std::shared_ptr<spdlog::logger> pLogger;
-    sqlite::database* pDatabase;
 };
 } // namespace app::svc

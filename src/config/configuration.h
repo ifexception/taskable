@@ -50,11 +50,17 @@ public:
     bool IsCloseToTray() const;
     void SetCloseToTray(bool value);
 
+    wxString GetDatabasePath() const;
+    void SetDatabasePath(const wxString& value);
+
     bool IsBackupEnabled() const;
     void SetBackupEnabled(bool value);
 
     wxString GetBackupPath() const;
     void SetBackupPath(const wxString& value);
+
+    int GetDeleteBackupsAfter() const;
+    void SetDeleteBackupsAfter(int value);
 
     bool IsMinimizeStopwatchWindow() const;
     void SetMinimizeStopwatchWindow(bool value);

@@ -35,6 +35,7 @@ set (SRC
     "services/databasebackup.cpp"
     "services/databaseconnection.cpp"
     "services/connectionpool.cpp"
+    "services/databasebackupdeleter.cpp"
 
     "application.cpp"
     "resources.rc"
@@ -91,7 +92,8 @@ target_compile_definitions (${PROJECT_NAME} PUBLIC
     wxUSE_GUI=1
     wxUSE_TIMEPICKCTRL=1
     __WXMSW__
-    $<$<CONFIG:Debug>:_DEBUG>)
+    $<$<CONFIG:Debug>:TASKABLE_DEBUG>
+    $<$<CONFIG:Debug>:NDEBUG>)
 
 target_link_libraries (${PROJECT_NAME}
     ${wxWidgets_LIBRARIES}

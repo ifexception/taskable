@@ -39,6 +39,22 @@
       "clangTidyChecks": "-*,cppcoreguidelines-*",
       "enableMicrosoftCodeAnalysis": true,
       "intelliSenseMode": "windows-msvc-x86"
+    },
+    {
+      "name": "x86-RelWithDebInfo",
+      "generator": "Visual Studio 16 2019",
+      "configurationType": "RelWithDebInfo",
+      "buildRoot": "${projectDir}\\build\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-m -v:minimal",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "C:\\Microsoft\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
+          "type": "STRING"
+        }
+      ],
+      "inheritEnvironments": [ "msvc_x86" ]
     }
   ]
 }

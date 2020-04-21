@@ -358,6 +358,7 @@ void TaskItemDialog::CreateControls()
     allowedChars.Add(wxT("("));
     allowedChars.Add(wxT(")"));
     allowedChars.Add(wxT("-"));
+    allowedChars.Add(wxT("&"));
     descriptionValidator.SetIncludes(allowedChars);
 
     pDescriptionCtrl = new wxTextCtrl(taskDescriptionPanel,
@@ -415,6 +416,7 @@ void TaskItemDialog::CreateControls()
     bottomSizer->Add(buttonPanel, wxSizerFlags().Border(wxALL, 5).Center());
 
     pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("OK"));
+    pOkButton->SetDefault();
     buttonPanelSizer->Add(pOkButton, wxSizerFlags().Border(wxALL, 5));
 
     pCancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("Cancel"));
@@ -470,6 +472,12 @@ void TaskItemDialog::ConfigureEventBindings()
             &TaskItemDialog::OnDurationTimeChange,
             this
          );
+
+        pDurationTimeCtrl->Bind(
+            wxEVT_KILL_FOCUS,
+            &TaskItemDialog::OnDurationTimeFocusLost,
+            this
+        );
     }
 
     if (bIsEdit) {
@@ -625,10 +633,28 @@ void TaskItemDialog::CalculateTimeDiff(wxDateTime start, wxDateTime end)
 
 void TaskItemDialog::CalculateRate()
 {
-    auto start = pStartTimeCtrl->GetValue();
-    auto end = pEndTimeCtrl->GetValue();
+    if (mType == constants::TaskItemTypes::EntryTask) {
+        auto time = pDurationTimeCtrl->GetValue();
+        CalculateRate(time);
+    }
 
-    CalculateRate(start, end);
+    if (mType == constants::TaskItemTypes::TimedTask) {
+        auto start = pStartTimeCtrl->GetValue();
+        auto end = pEndTimeCtrl->GetValue();
+
+        CalculateRate(start, end);
+    }
+}
+
+void TaskItemDialog::CalculateRate(wxDateTime time)
+{
+    auto hours = time.GetHour();
+    auto minutes = time.GetMinute();
+    auto seconds = time.GetSecond();
+    auto milliseconds = time.GetMillisecond();
+
+    wxTimeSpan timeSpan(hours, minutes, seconds, milliseconds);
+    CalculateRate(timeSpan);
 }
 
 void TaskItemDialog::CalculateRate(wxDateTime start, wxDateTime end)
@@ -636,8 +662,16 @@ void TaskItemDialog::CalculateRate(wxDateTime start, wxDateTime end)
     if (pProject != nullptr) {
         if (pProject->GetRateType()->GetType() == constants::RateTypes::Hourly) {
             wxTimeSpan diff = end.Subtract(start);
-            // if (!diff.IsShorterThan(wxTimeSpan::Minutes(5))) {
-            int minutes = diff.GetMinutes();
+            CalculateRate(diff);
+        }
+    }
+}
+
+void TaskItemDialog::CalculateRate(wxTimeSpan time)
+{
+    if (pProject != nullptr) {
+        if (pProject->GetRateType()->GetType() == constants::RateTypes::Hourly) {
+            int minutes = time.GetMinutes();
             double time = ((double) minutes / 60.0);
             mCalculatedRate = time * *pProject->GetRate();
 
@@ -645,7 +679,6 @@ void TaskItemDialog::CalculateRate(wxDateTime start, wxDateTime end)
                 pProject->GetCurrency()->GetSymbol(),
                 mCalculatedRate);
             pCalculatedRateTextCtrl->SetLabel(rate);
-            //}
         }
     }
 }
@@ -767,6 +800,15 @@ void TaskItemDialog::OnEndTimeFocusLost(wxFocusEvent& event)
     event.Skip();
 }
 
+void TaskItemDialog::OnDurationTimeFocusLost(wxFocusEvent& event)
+{
+    auto time = pDurationTimeCtrl->GetValue();
+
+    CalculateRate(time);
+
+    event.Skip();
+}
+
 void TaskItemDialog::OnDurationTimeChange(wxDateEvent& event)
 {
     if (pConfig->IsTimeRoundingEnabled()) {
@@ -793,7 +835,7 @@ void TaskItemDialog::OnOk(wxCommandEvent& event)
             try {
                 model::TaskItemModel::Update(std::move(pTaskItem));
             } catch (const sqlite::sqlite_exception& e) {
-                pLogger->error("Error occured in TaskItemModel::Create() - {0:d} : {1}", e.get_code(), e.what());
+                pLogger->error("Error occured in TaskItemModel::Update() - {0:d} : {1}", e.get_code(), e.what());
                 wxLogDebug(wxString(e.get_sql()));
                 EndModal(ids::ID_ERROR_OCCURED);
             }
@@ -803,7 +845,7 @@ void TaskItemDialog::OnOk(wxCommandEvent& event)
             try {
                 model::TaskItemModel::Delete(std::move(pTaskItem));
             } catch (const sqlite::sqlite_exception& e) {
-                pLogger->error("Error occured in TaskItemModel::Create() - {0:d} : {1}", e.get_code(), e.what());
+                pLogger->error("Error occured in TaskItemModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
                 wxLogDebug(wxString(e.get_sql()));
                 EndModal(ids::ID_ERROR_OCCURED);
             }

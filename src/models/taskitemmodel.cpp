@@ -525,6 +525,12 @@ void TaskItemModel::Delete(std::unique_ptr<TaskItemModel> taskItem)
     *db << TaskItemModel::deleteTaskItem << util::UnixTimestamp() << taskItem->GetTaskItemId();
 }
 
+void TaskItemModel::Delete(int taskItemId)
+{
+    auto db = svc::DatabaseConnection::Get().GetHandle();
+    *db << TaskItemModel::deleteTaskItem << util::UnixTimestamp() << taskItemId;
+}
+
 std::vector<std::unique_ptr<TaskItemModel>> TaskItemModel::GetByDate(const wxString& date)
 {
     std::vector<std::unique_ptr<TaskItemModel>> taskItems;
@@ -594,6 +600,16 @@ std::vector<wxString> TaskItemModel::GetHours(const wxString& date)
     return taskDurations;
 }
 
+int TaskItemModel::GetTaskItemTypeIdByTaskItemId(const int taskItemId)
+{
+    int taskItemTypeId = 0;
+    auto db = svc::DatabaseConnection::Get().GetHandle();
+
+    *db << TaskItemModel::getTaskItemTypeIdByTaskItemId << taskItemId >>
+        [&](int taskItemType) { taskItemTypeId = taskItemType; };
+    return taskItemTypeId;
+}
+
 const std::string TaskItemModel::createTaskItem = "INSERT INTO task_items "
                                                   "(start_time, end_time, duration, description, "
                                                   "billable, calculated_rate, is_active, "
@@ -625,7 +641,7 @@ const std::string TaskItemModel::updateTaskItem = "UPDATE task_items "
                                                   "WHERE task_item_id = ?";
 
 const std::string TaskItemModel::deleteTaskItem = "UPDATE task_items "
-                                                  "SET is_active = 0, date_modified_utc = ? "
+                                                  "SET is_active = 0, date_modified = ? "
                                                   "WHERE task_item_id = ?";
 
 const std::string TaskItemModel::getTaskItemsByDate =
@@ -649,11 +665,16 @@ const std::string TaskItemModel::getTaskItemsByDate =
     "INNER JOIN categories ON task_items.category_id = categories.category_id "
     "INNER JOIN projects ON task_items.project_id = projects.project_id "
     "INNER JOIN task_item_types ON task_items.task_item_type_id = task_item_types.task_item_type_id "
-    "WHERE task_date = ?";
+    "WHERE task_date = ? "
+    "AND task_items.is_active = 1";
 
 const std::string TaskItemModel::getTaskHoursByTaskId = "SELECT task_items.duration "
                                                         "FROM task_items "
                                                         "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
                                                         "WHERE task_date = ?";
+
+const std::string TaskItemModel::getTaskItemTypeIdByTaskItemId = "SELECT task_items.task_item_type_id "
+                                                                 "FROM task_items "
+                                                                 "WHERE task_item_id = ?";
 ;
 } // namespace app::model

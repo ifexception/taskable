@@ -44,21 +44,28 @@ private:
     void ConfigureEventBindings();
     void FillControls();
 
+    void OnOpenDirectoryForDatabaseLocation(wxCommandEvent& event);
     void OnBackupDatabaseCheck(wxCommandEvent& event);
-    void OnOpenDirectory(wxCommandEvent& event);
+    void OnOpenDirectoryForBackupLocation(wxCommandEvent& event);
 
     std::shared_ptr<cfg::Configuration> pConfig;
 
     wxWindow* pParent;
 
+    wxTextCtrl* pDatabasePathTextCtrl;
+    wxButton* pBrowseDatabasePathButton;
     wxCheckBox* pBackupDatabaseCtrl;
     wxTextCtrl* pBackupPathTextCtrl;
     wxButton* pBrowseBackupPathButton;
+    wxTextCtrl* pDeleteBackupsAfterCtrl;
 
     enum {
-        IDC_BACKUP_DATABASE = wxID_HIGHEST + 1,
+        IDC_DATABASE_PATH = wxID_HIGHEST + 1,
+        IDC_DATABASE_PATH_BUTTON,
+        IDC_BACKUP_DATABASE,
         IDC_BACKUP_PATH,
         IDC_BACKUP_PATH_BUTTON,
+        IDC_DELETE_BACKUPS_AFTER
     };
 };
 } // namespace app::dlg

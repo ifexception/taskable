@@ -311,6 +311,7 @@ void ProjectDialog::CreateControls()
     mainSizer->Add(buttonPanel, common::sizers::ControlCenter);
 
     pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("OK"));
+    pOkButton->SetDefault();
     pCancelButton = new wxButton(buttonPanel, wxID_CANCEL, wxT("Cancel"));
 
     buttonPanelSizer->Add(pOkButton, common::sizers::ControlDefault);

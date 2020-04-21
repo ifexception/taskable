@@ -87,6 +87,7 @@ private:
     void OnIsActiveCheck(wxCommandEvent& event);
     void OnStartTimeFocusLost(wxFocusEvent& event);
     void OnEndTimeFocusLost(wxFocusEvent& event);
+    void OnDurationTimeFocusLost(wxFocusEvent& event);
     void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
 
@@ -95,7 +96,9 @@ private:
 
     void CalculateTimeDiff(wxDateTime start, wxDateTime end);
     void CalculateRate();
+    void CalculateRate(wxDateTime time);
     void CalculateRate(wxDateTime start, wxDateTime end);
+    void CalculateRate(wxTimeSpan timeSpan);
 
     void GenerateTaskSavedEvent();
 

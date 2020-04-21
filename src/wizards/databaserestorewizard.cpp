@@ -28,8 +28,8 @@
 namespace app::wizard
 {
 DatabaseRestoreWizard::DatabaseRestoreWizard(frm::MainFrame* frame,
-    std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<cfg::Configuration> config,
+    std::shared_ptr<spdlog::logger> logger,
     sqlite::database* database,
     bool restoreWithNoPreviousFileExisting)
     : wxWizard(frame,
@@ -39,8 +39,8 @@ DatabaseRestoreWizard::DatabaseRestoreWizard(frm::MainFrame* frame,
           wxDefaultPosition,
           wxDEFAULT_DIALOG_STYLE)
     , pFrame(frame)
-    , pLogger(logger)
     , pConfig(config)
+    , pLogger(logger)
     , pPage1(nullptr)
     , pDatabase(database)
     , mDatabaseFileToRestore(wxGetEmptyString())
@@ -48,7 +48,7 @@ DatabaseRestoreWizard::DatabaseRestoreWizard(frm::MainFrame* frame,
 {
     pPage1 = new DatabaseRestoreWelcomePage(this);
     auto page2 = new SelectDatabaseVersionPage(this, pConfig);
-    auto page3 = new DatabaseRestoredPage(this, pLogger, pConfig, pDatabase);
+    auto page3 = new DatabaseRestoredPage(this, pConfig, pLogger, pDatabase);
 
     wxWizardPageSimple::Chain(pPage1, page2);
     wxWizardPageSimple::Chain(page2, page3);
@@ -247,30 +247,14 @@ void SelectDatabaseVersionPage::OnWizardCancel(wxWizardEvent& event)
     }
 }
 
-DirectoryTraverser::DirectoryTraverser(wxArrayString& files)
-    : mFiles(files)
-{
-}
-
-wxDirTraverseResult DirectoryTraverser::OnFile(const wxString& file)
-{
-    mFiles.Add(file);
-    return wxDIR_CONTINUE;
-}
-
-wxDirTraverseResult DirectoryTraverser::OnDir(const wxString& WXUNUSED(dir))
-{
-    return wxDIR_CONTINUE;
-}
-
 DatabaseRestoredPage::DatabaseRestoredPage(DatabaseRestoreWizard* parent,
-    std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<cfg::Configuration> config,
+    std::shared_ptr<spdlog::logger> logger,
     sqlite::database* database)
     : wxWizardPageSimple(parent)
     , pParent(parent)
-    , pLogger(logger)
     , pConfig(config)
+    , pLogger(logger)
     , pDatabase(database)
     , pStatusInOperationLabel(nullptr)
     , pGaugeCtrl(nullptr)
@@ -326,22 +310,25 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
     const wxString& fileToRestore = pParent->GetDatabaseFileVersionToRestore();
 
     const wxString& backupPath = pConfig->GetBackupPath();
-    const wxString& dataPath = common::GetDatabasePath();
+    const wxString& dataPath = pConfig->GetDatabasePath();
 
     auto fullBackupDatabaseFilePath = wxString::Format(wxT("%s\\%s"), backupPath, fileToRestore);
     auto toCopyDatabaseFilePath = wxString::Format(wxT("%s\\%s"), dataPath, fileToRestore);
 
-    /* Copy selected database file to executable path */
-    bool copySuccessful = wxCopyFile(fullBackupDatabaseFilePath, toCopyDatabaseFilePath);
-    if (!copySuccessful) {
-        FileOperationErrorFeedback();
-        pLogger->error("Failed to copy {0} to destination {1}",
-            fullBackupDatabaseFilePath.ToStdString(),
-            toCopyDatabaseFilePath.ToStdString());
-        return;
+    /* Check if the backups are in the same place as main database */
+    if (backupPath != dataPath) {
+        /* Copy selected database file to correct path */
+        bool copySuccessful = wxCopyFile(fullBackupDatabaseFilePath, toCopyDatabaseFilePath);
+        if (!copySuccessful) {
+            FileOperationErrorFeedback();
+            pLogger->error("Failed to copy {0} to destination {1}",
+                fullBackupDatabaseFilePath.ToStdString(),
+                toCopyDatabaseFilePath.ToStdString());
+            return;
+        }
     }
 
-    auto existingDatabaseFile = common::GetDatabaseFilePath();
+    auto existingDatabaseFile = common::GetDatabaseFilePath(pConfig->GetDatabasePath());
 
     /* If there is a existing 'db' file */
     if (!pParent->IsRestoreWithNoPreviousFileExisting()) {
@@ -386,7 +373,7 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
 
         /* Restore connection to database */
         auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
-        pDatabase = new sqlite::database(common::GetDatabaseFileName().ToStdString(), config);
+        pDatabase = new sqlite::database(common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString(), config);
 
         // Need to bubble up new'd up pointer to parent (MainFrame)
         pParent->SetNewDatabaseHandle(pDatabase);
@@ -411,7 +398,7 @@ void DatabaseRestoredPage::OnWizardCancel(wxWizardEvent& event)
 
 void DatabaseRestoredPage::FileOperationErrorFeedback()
 {
-    pStatusInOperationLabel->SetLabel(wxT("Error."));
+    pStatusInOperationLabel->SetLabel(wxT("The operation encountered an error."));
     auto statusError = wxT("The wizard has encountered an error.\n"
                            "Any operations executed have been rolled back."
                            "\n\n\nClick 'Finish' to exit the wizard.");

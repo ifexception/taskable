@@ -30,6 +30,11 @@
 
 #include "setupdatabase.h"
 
+namespace app::cfg
+{
+class Configuration;
+}
+
 namespace app::wizard
 {
 class WelcomePage;
@@ -38,7 +43,9 @@ class SetupWizard final : public wxWizard
 {
 public:
     SetupWizard() = default;
-    explicit SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger);
+    explicit SetupWizard(wxFrame* frame,
+        std::shared_ptr<cfg::Configuration> config,
+        std::shared_ptr<spdlog::logger> logger);
     virtual ~SetupWizard() = default;
 
     bool Run();
@@ -61,6 +68,7 @@ private:
     bool SetUpTables();
     bool SetUpEntities();
 
+    std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
     sqlite::database* pDatabase;
     WelcomePage* pPage1;

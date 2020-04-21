@@ -1,7 +1,7 @@
 ; -- Taskable.iss --
 ; Installer file for Taskable application
 
-#define TaskableVersion "1.0.0"
+#define TaskableVersion "0.99.0"
 
 [Setup]
 AppName=Taskable
@@ -18,7 +18,7 @@ UninstallDisplayIcon={app}\Taskable.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=Installer
-OutputBaseFilename=Taskable-x86.1.0.0-Installer
+OutputBaseFilename=Taskable-x86.0.99.0-Installer
 LicenseFile=License.txt
 WindowResizable=no
 DisableWelcomePage=no
@@ -26,6 +26,8 @@ SetupIconFile=taskable-installer.ico
 
 [Files]
 Source: "Taskable.exe"; DestDir: "{app}"
+Source: "Taskable.ilk"; DestDir: "{app}"
+Source: "Taskable.pdb"; DestDir: "{app}"
 Source: "fmt.dll"; DestDir: "{app}"
 Source: "jpeg62.dll"; DestDir: "{app}"
 Source: "libcurl.dll"; DestDir: "{app}"
@@ -59,11 +61,9 @@ WelcomeLabel1=Welcome to the Taskable Installation Wizard
 Type: filesandordirs; Name: "{userappdata}\Taskable\logs"
 Type: files; Name: "{userappdata}\Taskable\taskable.ini"
 Type: filesandordirs; Name: "{userappdata}\Taskable"
-Type: filesandordirs; Name: "{userdocs}\Taskable"
 
 [Registry]
 Root: HKCU; Subkey: "Software\Taskable"; Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Taskable"; ValueType: dword; ValueName: "Installed"; ValueData: 1;  Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Taskable"; ValueType: string; ValueName: "Version"; ValueData: {#TaskableVersion};  Flags: preservestringtype uninsdeletekey
 Root: HKCR; Subkey: "Applications\Taskable.exe"; ValueType: none; ValueName: "IsHostApp"
-
