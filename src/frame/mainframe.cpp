@@ -522,6 +522,8 @@ void MainFrame::OnTaskStopwatch(wxCommandEvent& event)
 {
     dlg::StopwatchTaskDialog stopwatchTask(this, pConfig, pLogger, pTaskState, pTaskBarIcon);
     stopwatchTask.Launch();
+
+    pListCtrl->SetFocus();
 }
 
 void MainFrame::OnDateChanged(wxDateEvent& event)
@@ -552,6 +554,8 @@ void MainFrame::OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event)
     stopwatchPausedTask.Relaunch();
 
     pTaskStorage->mTimes.clear();
+
+    pListCtrl->SetFocus();
 }
 
 void MainFrame::OnCheckForUpdate(wxCommandEvent& event)
@@ -573,6 +577,7 @@ void MainFrame::OnResize(wxSizeEvent& event)
         pListCtrl->SetColumnWidth(5, width * 0.12); // category
         pListCtrl->SetColumnWidth(6, width * 0.37); // description
     }
+
     if (pStatusBar) {
         wxRect statusBarRect;
         pStatusBar->GetFieldRect(2, statusBarRect);
@@ -633,22 +638,19 @@ void MainFrame::OnFeedback(wxCommandEvent& event)
 
 void MainFrame::OnKeyDown(wxKeyEvent& event)
 {
+    pListCtrl->DeleteAllItems();
+    auto currentDateTime = pDatePickerCtrl->GetValue();
+
     if (event.GetKeyCode() == WXK_RIGHT) {
-        pListCtrl->DeleteAllItems();
-        auto currentDateTime = pDatePickerCtrl->GetValue();
         currentDateTime.Add(wxDateSpan::Days(1));
-        pDatePickerCtrl->SetValue(currentDateTime);
-        RefreshItems(currentDateTime);
-        CalculateTotalTime(currentDateTime);
     }
     if (event.GetKeyCode() == WXK_LEFT) {
-        pListCtrl->DeleteAllItems();
-        auto currentDateTime = pDatePickerCtrl->GetValue();
         currentDateTime.Add(wxDateSpan::Days(-1));
-        pDatePickerCtrl->SetValue(currentDateTime);
-        RefreshItems(currentDateTime);
-        CalculateTotalTime(currentDateTime);
     }
+
+    pDatePickerCtrl->SetValue(currentDateTime);
+    RefreshItems(currentDateTime);
+    CalculateTotalTime(currentDateTime);
 
     event.Skip();
 }
@@ -787,7 +789,7 @@ void MainFrame::ShowInfoBarMessageForAdd(int modalRetCode, const wxString& item)
         pInfoBar->ShowMessage(constants::OnErrorAdd(item), wxICON_ERROR);
     }
 
-    pDismissInfoBarTimer->Start(2000);
+    pDismissInfoBarTimer->Start(1500);
 }
 
 void MainFrame::ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item)
@@ -798,7 +800,7 @@ void MainFrame::ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item
         pInfoBar->ShowMessage(constants::OnErrorEdit(item), wxICON_ERROR);
     }
 
-    pDismissInfoBarTimer->Start(2000);
+    pDismissInfoBarTimer->Start(1500);
 }
 
 void MainFrame::ShowInfoBarMessageForDelete(bool success)
@@ -809,6 +811,6 @@ void MainFrame::ShowInfoBarMessageForDelete(bool success)
         pInfoBar->ShowMessage(wxT("Error deleting task"), wxICON_ERROR);
     }
 
-    pDismissInfoBarTimer->Start(2000);
+    pDismissInfoBarTimer->Start(1500);
 }
 } // namespace app::frm
