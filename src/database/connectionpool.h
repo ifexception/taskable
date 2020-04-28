@@ -21,10 +21,11 @@
 
 #include <memory>
 #include <list>
+#include <string>
 
 #include <sqlite_modern_cpp.h>
 
-namespace app::svc
+namespace app::db
 {
 class ConnectionPool final
 {
@@ -34,7 +35,7 @@ public:
     ConnectionPool(const ConnectionPool&) = delete;
     ConnectionPool& operator=(const ConnectionPool&) = delete;
 
-    sqlite::database* Acquire();
+    sqlite::database* Acquire(std::string databasePath);
     void Release(sqlite::database* connection);
 
 private:

@@ -18,11 +18,10 @@
 //    szymonwelgus at gmail dot com
 
 #include "connectionpool.h"
-#include "../common/common.h"
 
-namespace app::svc
+namespace app::db
 {
-const int ConnectionPool::PoolSize = 3;
+const int ConnectionPool::PoolSize = 4;
 
 ConnectionPool& ConnectionPool::Get()
 {
@@ -30,12 +29,15 @@ ConnectionPool& ConnectionPool::Get()
     return instance;
 }
 
-sqlite::database* ConnectionPool::Acquire()
+sqlite::database* ConnectionPool::Acquire(std::string databasePath)
 {
     if (mConnectionPool.empty()) {
         auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
-        return new sqlite::database(common::GetDatabaseFilePath().ToStdString(), config);
+        return new sqlite::database(databasePath, config);
     } else {
+        if (mAquiredConnections > 4) {
+            return nullptr; // max pool size reached
+        }
         auto connection = mConnectionPool.front();
         mConnectionPool.pop_front();
         return connection;
@@ -53,5 +55,4 @@ ConnectionPool::ConnectionPool()
     : mAquiredConnections(0)
 {
 }
-} // namespace app::svc
 } // namespace app::svc
