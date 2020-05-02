@@ -30,11 +30,17 @@ set (SRC
     "common/constants.cpp"
     "config/configuration.cpp"
 
+    "database/connection.cpp"
+    "database/connectionfactory.cpp"
+    "database/connectionpool.cpp"
+    "database/sqliteconnection.cpp"
+    "database/sqliteconnectionfactory.cpp"
+    "database/connectionprovider.cpp"
+
     "services/taskstateservice.cpp"
     "services/taskstorageservice.cpp"
     "services/databasebackup.cpp"
     "services/databaseconnection.cpp"
-    "services/connectionpool.cpp"
     "services/databasebackupdeleter.cpp"
 
     "application.cpp"
