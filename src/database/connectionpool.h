@@ -19,31 +19,61 @@
 
 #pragma once
 
+#include <deque>
 #include <memory>
-#include <list>
 #include <string>
 
 #include <sqlite_modern_cpp.h>
 
+#include "connectionfactory.h"
+
 namespace app::db
 {
+template<class T>
 class ConnectionPool final
 {
 public:
-    static ConnectionPool& Get();
+    ConnectionPool() = delete;
+    ConnectionPool(std::shared_ptr<IConnectionFactory> factory, std::size_t poolSize);
+    ~ConnectionPool() = default;
 
-    ConnectionPool(const ConnectionPool&) = delete;
-    ConnectionPool& operator=(const ConnectionPool&) = delete;
-
-    sqlite::database* Acquire(std::string databasePath);
-    void Release(sqlite::database* connection);
+    std::shared_ptr<T> Acquire();
+    void Release(std::shared_ptr<T> connection);
 
 private:
-    ConnectionPool();
-
-    std::list<sqlite::database*> mConnectionPool;
-    int mAquiredConnections;
-
-    static const int PoolSize;
+    std::size_t mPoolSize;
+    std::shared_ptr<IConnectionFactory> pFactory;
+    std::deque<std::shared_ptr<IConnection>> mPool;
 };
-} // namespace app::svc
+
+template<class T>
+inline ConnectionPool<T>::ConnectionPool(std::shared_ptr<IConnectionFactory> factory, std::size_t poolSize)
+    : pFactory(factory)
+    , mPoolSize(poolSize)
+    , mPool()
+{
+    while (mPool.size() < mPoolSize) {
+        mPool.push_back(pFactory->Create());
+    }
+}
+
+template<class T>
+inline std::shared_ptr<T> ConnectionPool<T>::Acquire()
+{
+    if (mPool.size() == 0) {
+        auto connection = pFactory->Create();
+        return std::dynamic_pointer_cast<T>(connection);
+    }
+
+    auto connection = mPool.front();
+    mPool.pop_front();
+
+    return std::dynamic_pointer_cast<T>(connection);
+}
+
+template<class T>
+inline void ConnectionPool<T>::Release(std::shared_ptr<T> connection)
+{
+    mPool.push_back(std::dynamic_pointer_cast<Connection>(connection));
+}
+} // namespace app::db

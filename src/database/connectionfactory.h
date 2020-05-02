@@ -17,8 +17,17 @@
 //  Contact:
 //    szymonwelgus at gmail dot com
 
-#include "connectionpool.h"
+#pragma once
+
+#include <memory>
+
+#include "connection.h"
 
 namespace app::db
 {
-}
+class IConnectionFactory
+{
+public:
+    virtual std::shared_ptr<IConnection> Create() = 0;
+};
+} // namespace app::db

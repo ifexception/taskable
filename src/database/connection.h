@@ -17,8 +17,14 @@
 //  Contact:
 //    szymonwelgus at gmail dot com
 
-#include "connectionpool.h"
+#pragma once
 
 namespace app::db
 {
-}
+class IConnection
+{
+public:
+    IConnection() = default;
+    virtual ~IConnection() = default;
+};
+} // namespace app::db

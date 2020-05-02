@@ -17,7 +17,7 @@
 //  Contact:
 //    szymonwelgus at gmail dot com
 
-#include "connectionpool.h"
+#include "connectionfactory.h"
 
 namespace app::db
 {
