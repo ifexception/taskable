@@ -26,6 +26,9 @@
 
 #include "common/common.h"
 #include "common/constants.h"
+#include "database/sqliteconnectionfactory.h"
+#include "database/sqliteconnection.h"
+#include "database/connectionprovider.h"
 #include "frame/mainframe.h"
 #include "services/databasebackup.h"
 #include "wizards/setupwizard.h"
@@ -56,6 +59,10 @@ bool Application::OnInit()
         return false;
     }
 
+    if (!ConfigurationFileExists()) {
+        return false;
+    }
+
     if (IsSetup()) {
         if (!StartupInitialization()) {
             return false;
@@ -76,10 +83,6 @@ bool Application::OnInit()
 
 bool Application::FirstStartupInitialization()
 {
-    if (!ConfigurationFileExists()) {
-        return false;
-    }
-
     if (!RunSetupWizard()) {
         return false;
     }
@@ -88,22 +91,14 @@ bool Application::FirstStartupInitialization()
         return false;
     }
 
-    InitializeSqliteConnection();
-
     return true;
 }
 
 bool Application::StartupInitialization()
 {
-    if (!ConfigurationFileExists()) {
-        return false;
-    }
-
     if (!DatabaseFileExists()) {
         return false;
     }
-
-    InitializeSqliteConnection();
 
     return true;
 }
@@ -149,6 +144,21 @@ bool Application::CreateLogsDirectory()
     }
 
     return logDirectoryExists;
+}
+
+bool Application::InitializeDatabaseConnectionProvider()
+{
+    auto sqliteConnectionFactory =
+        std::make_shared<db::SqliteConnectionFactory>(pConfig->GetDatabasePath().ToStdString());
+    auto connectionPool = std::make_unique<db::ConnectionPool<db::SqliteConnection>>(2, sqliteConnectionFactory);
+    db::ConnectionProvider::Get().InitializeConnectionPool(std::move(connectionPool));
+
+    // auto pool = db::ConnectionProvider::Get().Handle();
+    // auto conn = pool->Acquire();
+    // auto db = conn->DatabaseExecutableHandle();
+    // *db << "SELECT";
+
+    return true;
 }
 
 bool Application::IsSetup()
@@ -305,12 +315,6 @@ bool Application::DatabaseFileExists()
         }
     }
     return databaseFileExists;
-}
-
-void Application::InitializeSqliteConnection()
-{
-    auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
-    pDatabase = new sqlite::database(common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString(), config);
 }
 } // namespace app
 

@@ -47,6 +47,7 @@ private:
 
     bool InitializeLogging();
     bool CreateLogsDirectory();
+    bool InitializeDatabaseConnectionProvider();
 
     bool IsSetup();
     bool RunSetupWizard();
