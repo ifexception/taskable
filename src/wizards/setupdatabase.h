@@ -20,40 +20,33 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include <spdlog/spdlog.h>
 #include <sqlite_modern_cpp.h>
+#include <wx/string.h>
 
 namespace app::wizard
 {
 class SetupTables final
 {
 public:
-    SetupTables(std::shared_ptr<spdlog::logger> logger, sqlite::database* database);
+    SetupTables(std::shared_ptr<spdlog::logger> logger);
     ~SetupTables() = default;
 
     bool CreateTables();
 
 private:
     std::shared_ptr<spdlog::logger> pLogger;
-    sqlite::database* pDatabase;
+
+    std::vector<std::string> ReadFile(wxString fileToRead);
+    bool ExecuteDatabaseAction(std::vector<std::string> sqlTokens);
 
     bool Create();
     bool Seed();
 
-    void CreateEmployersTable();
-    void CreateClientsTable();
-    void CreateRateTypesTable();
-    void CreateCurrenciesTable();
-    void CreateProjectsTable();
-    void CreateCategoriesTable();
-    void CreateTasksTable();
-    void CreateTaskItemTypesTable();
-    void CreateTaskItemsTable();
-
-    void SeedRateTypesTable();
-    void SeedCurrenciesTable();
-    void SeedTaskItemTypesTable();
+    static const wxString CreateTaskableDatabaseFile;
+    static const wxString SeedTaskableDatabaseFile;
 };
 
 class SetupEntities final
