@@ -23,8 +23,7 @@
 
 namespace app::data
 {
-EmployerData::EmployerData(std::shared_ptr<spdlog::logger> logger)
-    : pLogger(logger)
+EmployerData::EmployerData()
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }

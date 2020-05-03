@@ -37,7 +37,7 @@ EmployerDialog::EmployerDialog(wxWindow* parent, std::shared_ptr<spdlog::logger>
     , bIsEdit(false)
     , mEmployerId(-1)
     , pEmployer(std::make_unique<model::EmployerModel>())
-    , mData(pLogger)
+    , mData()
 {
     Create(parent,
         wxID_ANY,
@@ -57,7 +57,7 @@ EmployerDialog::EmployerDialog(wxWindow* parent,
     : pLogger(logger)
     , bIsEdit(isEdit)
     , mEmployerId(employerId)
-    , mData(pLogger)
+    , mData()
 {
     Create(parent,
         wxID_ANY,

@@ -32,7 +32,7 @@ namespace app::data
 class EmployerData final
 {
 public:
-    EmployerData(std::shared_ptr<spdlog::logger> logger);
+    EmployerData();
     ~EmployerData();
 
     void Create(std::unique_ptr<model::EmployerModel> employer);
@@ -44,7 +44,6 @@ public:
     int GetLastInsertId() const;
 
 private:
-    std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<db::SqliteConnection> pConnection;
 
     int mLastInsertId;
