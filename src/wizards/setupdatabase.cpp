@@ -98,7 +98,7 @@ bool SetupTables::Seed()
 
 SetupEntities::SetupEntities(std::shared_ptr<spdlog::logger> logger)
     : pLogger(logger)
-    , mEmployerData(pLogger)
+    , mEmployerData()
 {
 }
 
@@ -129,8 +129,8 @@ int SetupEntities::CreateClient(std::string clientName, int employerId)
     if (clientName.empty()) {
         return 0;
     } else {
-        *pDatabase << "INSERT INTO clients (name, is_active, employer_id) VALUES (?, 1, ?)" << clientName << employerId;
-        return (int) pDatabase->last_insert_rowid();
+        mClientData.Create(std::make_unique<model::ClientModel>(wxString(clientName), employerId));
+        return mClientData.GetLastInsertId();
     }
 }
 

@@ -190,7 +190,7 @@ Strategy::Strategy() {}
 
 EmployerStrategy::EmployerStrategy(std::shared_ptr<spdlog::logger> logger)
     : pLogger(logger)
-    , mData(pLogger)
+    , mData()
 {
 }
 
@@ -237,6 +237,7 @@ wxSize EmployerStrategy::GetSize()
 
 ClientStrategy::ClientStrategy(std::shared_ptr<spdlog::logger> logger)
     : pLogger(logger)
+    , mData()
 {
 }
 
@@ -267,9 +268,9 @@ void ClientStrategy::DataToControl(wxListCtrl* control)
 {
     std::vector<std::unique_ptr<model::ClientModel>> clients;
     try {
-        clients = model::ClientModel::GetAll();
+        clients = mData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in ClientModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in ClientData::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     int listIndex = 0;

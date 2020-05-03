@@ -27,6 +27,7 @@
 
 #include "../models/clientmodel.h"
 #include "../data/employerdata.h"
+#include "../data/clientdata.h"
 
 namespace app::dlg
 {
@@ -77,6 +78,7 @@ private:
     int mClientId;
     bool bIsEdit;
     data::EmployerData mEmployerData;
+    data::ClientData mClientData;
 
     enum { IDC_NAME = wxID_HIGHEST + 1, IDC_EMPLOYERCHOICE, IDC_ISACTIVE };
 

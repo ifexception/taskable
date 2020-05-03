@@ -35,7 +35,7 @@ class ClientModel final
 public:
     ClientModel();
     ClientModel(const int clientId);
-    ClientModel(const int clientId, bool initializeFromDatabase);
+    ClientModel(wxString name, int employerId);
     ClientModel(int clientId, wxString name, int dateCreated, int dateModified, bool isActive);
     ~ClientModel() = default;
 
@@ -57,13 +57,6 @@ public:
 
     void SetEmployer(std::unique_ptr<EmployerModel> employer);
 
-    static void Create(std::unique_ptr<model::ClientModel> client);
-    static std::unique_ptr<ClientModel> GetById(const int clientId);
-    static void Update(std::unique_ptr<model::ClientModel> client);
-    static void Delete(std::unique_ptr<model::ClientModel> client);
-    static std::vector<std::unique_ptr<ClientModel>> GetByEmployerId(const int employerId);
-    static std::vector<std::unique_ptr<ClientModel>> GetAll();
-
 private:
     int mClientId;
     wxString mName;
@@ -73,12 +66,5 @@ private:
     int mEmployerId;
 
     std::unique_ptr<EmployerModel> pEmployer;
-
-    static const std::string createClient;
-    static const std::string getClientsByEmployerId;
-    static const std::string getClients;
-    static const std::string getClientById;
-    static const std::string updateClient;
-    static const std::string deleteClient;
 };
 } // namespace app::model

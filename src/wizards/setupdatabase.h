@@ -27,6 +27,7 @@
 #include <wx/string.h>
 
 #include "../data/employerdata.h"
+#include "../data/clientdata.h"
 
 namespace app::wizard
 {
@@ -65,6 +66,7 @@ public:
 private:
     std::shared_ptr<spdlog::logger> pLogger;
     data::EmployerData mEmployerData;
+    data::ClientData mClientData;
 
     int CreateEmployer(std::string employerName);
     int CreateClient(std::string clientName, int employerId);

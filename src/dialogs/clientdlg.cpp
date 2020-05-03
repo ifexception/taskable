@@ -44,7 +44,8 @@ ClientDialog::ClientDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> log
     , pClient(std::make_unique<model::ClientModel>())
     , mClientId(-1)
     , bIsEdit(false)
-    , mEmployerData(pLogger)
+    , mEmployerData()
+    , mClientData()
 {
     Create(parent,
         wxID_ANY,
@@ -71,7 +72,8 @@ ClientDialog::ClientDialog(wxWindow* parent,
     , pClient(std::make_unique<model::ClientModel>(clientId))
     , mClientId(clientId)
     , bIsEdit(isEdit)
-    , mEmployerData(pLogger)
+    , mEmployerData()
+    , mClientData()
 {
     Create(parent,
         wxID_ANY,
@@ -221,7 +223,7 @@ void ClientDialog::FillControls()
     try {
         employers = mEmployerData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on EmployerModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on EmployerData::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (const auto& employer : employers) {
@@ -233,9 +235,9 @@ void ClientDialog::DataToControls()
 {
     std::unique_ptr<model::ClientModel> client = nullptr;
     try {
-        client = model::ClientModel::GetById(mClientId);
+        client = mClientData.GetById(mClientId);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on ClientModel::GetById() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on ClientData::GetById() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     pNameTextCtrl->ChangeValue(client->GetName());
@@ -274,27 +276,27 @@ void ClientDialog::OnOk(wxCommandEvent& event)
     if (TransferDataAndValidate()) {
         if (!bIsEdit) {
             try {
-                model::ClientModel::Create(std::move(pClient));
+                mClientData.Create(std::move(pClient));
             } catch (const sqlite::sqlite_exception& e) {
-                pLogger->error("Error occured in category CategoryModel::Create - {0:d} : {1}", e.get_code(), e.what());
+                pLogger->error("Error occured in category ClientData::Create - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
             }
         }
 
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
             try {
-                model::ClientModel::Update(std::move(pClient));
+                mClientData.Update(std::move(pClient));
             } catch (const sqlite::sqlite_exception& e) {
-                pLogger->error("Error occured in category CategoryModel::Update - {0:d} : {1}", e.get_code(), e.what());
+                pLogger->error("Error occured in category ClientData::Update - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
             }
         }
 
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
             try {
-                model::ClientModel::Delete(std::move(pClient));
+                mClientData.Delete(mClientId);
             } catch (const sqlite::sqlite_exception& e) {
-                pLogger->error("Error occured in category CategoryModel::Delete - {0:d} : {1}", e.get_code(), e.what());
+                pLogger->error("Error occured in category ClientData::Delete - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
             }
         }
