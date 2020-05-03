@@ -45,6 +45,11 @@ void ConnectionProvider::ReInitializeConnectionPool(std::unique_ptr<ConnectionPo
     pConnectionPool = std::move(newConnectionPool);
 }
 
+void ConnectionProvider::PurgeConnectionPool()
+{
+    pConnectionPool.reset();
+}
+
 ConnectionPool<SqliteConnection>* ConnectionProvider::Handle()
 {
     return pConnectionPool.get();

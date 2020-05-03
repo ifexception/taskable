@@ -36,6 +36,7 @@ public:
 
     void InitializeConnectionPool(std::unique_ptr<ConnectionPool<SqliteConnection>> connectionPool);
     void ReInitializeConnectionPool(std::unique_ptr<ConnectionPool<SqliteConnection>> newConnectionPool);
+    void PurgeConnectionPool();
 
     ConnectionPool<SqliteConnection>* Handle();
 
