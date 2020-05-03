@@ -25,6 +25,7 @@
 
 #include <sqlite_modern_cpp.h>
 
+#include "connection.h"
 #include "connectionfactory.h"
 
 namespace app::db
@@ -74,6 +75,6 @@ inline std::shared_ptr<T> ConnectionPool<T>::Acquire()
 template<class T>
 inline void ConnectionPool<T>::Release(std::shared_ptr<T> connection)
 {
-    mPool.push_back(std::dynamic_pointer_cast<Connection>(connection));
+    mPool.push_back(std::dynamic_pointer_cast<IConnection>(connection));
 }
 } // namespace app::db

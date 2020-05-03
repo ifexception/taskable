@@ -32,6 +32,7 @@ void SqliteConnection::Connect()
     auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
     pDatabase = new sqlite::database(mConnectionString, config);
 }
+
 sqlite::database* SqliteConnection::DatabaseExecutableHandle()
 {
     return pDatabase;
