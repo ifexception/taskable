@@ -27,8 +27,8 @@
 
 namespace app::wizard
 {
-const wxString SetupTables::CreateTaskableDatabaseFile = wxT("create-taskable.sql");
-const wxString SetupTables::SeedTaskableDatabaseFile = wxT("seed-taskable.sql");
+const wxString SetupTables::CreateDatabaseFile = wxT("create-taskable.sql");
+const wxString SetupTables::SeedDatabaseFile = wxT("seed-taskable.sql");
 
 SetupTables::SetupTables(std::shared_ptr<spdlog::logger> logger)
     : pLogger(logger)
@@ -80,7 +80,7 @@ bool SetupTables::ExecuteDatabaseAction(std::vector<std::string> sqlTokens)
 
 bool SetupTables::Create()
 {
-    auto sqlTokens = ReadFile(SetupTables::CreateTaskableDatabaseFile);
+    auto sqlTokens = ReadFile(SetupTables::CreateDatabaseFile);
     if (sqlTokens.empty()) {
         return false;
     }
@@ -89,16 +89,16 @@ bool SetupTables::Create()
 
 bool SetupTables::Seed()
 {
-    auto sqlTokens = ReadFile(SetupTables::SeedTaskableDatabaseFile);
+    auto sqlTokens = ReadFile(SetupTables::SeedDatabaseFile);
     if (sqlTokens.empty()) {
         return false;
     }
     return ExecuteDatabaseAction(sqlTokens);
 }
 
-SetupEntities::SetupEntities(std::shared_ptr<spdlog::logger> logger, sqlite::database* database)
+SetupEntities::SetupEntities(std::shared_ptr<spdlog::logger> logger)
     : pLogger(logger)
-    , pDatabase(database)
+    , mEmployerData(pLogger)
 {
 }
 
@@ -120,8 +120,8 @@ bool SetupEntities::CreateEntities(std::string employerName,
 
 int SetupEntities::CreateEmployer(std::string employerName)
 {
-    *pDatabase << "INSERT INTO employers (name, is_active) VALUES (?, 1)" << employerName;
-    return (int) pDatabase->last_insert_rowid();
+    mEmployerData.Create(std::make_unique<model::EmployerModel>(wxString(employerName)));
+    return mEmployerData.GetLastInsertId();
 }
 
 int SetupEntities::CreateClient(std::string clientName, int employerId)

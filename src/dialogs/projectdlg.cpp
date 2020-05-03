@@ -53,6 +53,7 @@ ProjectDialog::ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> l
     , pProject(std::make_unique<model::ProjectModel>())
     , mProjectId(0)
     , bIsEdit(false)
+    , mEmployerData(pLogger)
 {
     Create(parent,
         wxID_ANY,
@@ -86,6 +87,7 @@ ProjectDialog::ProjectDialog(wxWindow* parent,
     , pProject(std::make_unique<model::ProjectModel>(projectId))
     , mProjectId(projectId)
     , bIsEdit(isEdit)
+    , mEmployerData(pLogger)
 {
     Create(parent,
         wxID_ANY,
@@ -374,9 +376,9 @@ void ProjectDialog::FillControls()
     /* Load Employers */
     std::vector<std::unique_ptr<model::EmployerModel>> employers;
     try {
-        employers = model::EmployerModel::GetAll();
+        employers = mEmployerData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in EmployerModel::GetAll()() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in EmployerData::GetAll()() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (const auto& employer : employers) {

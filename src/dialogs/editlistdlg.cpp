@@ -29,7 +29,6 @@
 #include "projectdlg.h"
 #include "categorydlg.h"
 
-#include "../models/employermodel.h"
 #include "../models/clientmodel.h"
 #include "../models/projectmodel.h"
 #include "../models/categorymodel.h"
@@ -191,6 +190,7 @@ Strategy::Strategy() {}
 
 EmployerStrategy::EmployerStrategy(std::shared_ptr<spdlog::logger> logger)
     : pLogger(logger)
+    , mData(pLogger)
 {
 }
 
@@ -215,9 +215,9 @@ void EmployerStrategy::DataToControl(wxListCtrl* control)
 {
     std::vector<std::unique_ptr<model::EmployerModel>> employers;
     try {
-        employers = model::EmployerModel::GetAll();
+        employers = mData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in EmployerModel::GetAll(); - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in EmployerData::GetAll(); - {0:d} : {1}", e.get_code(), e.what());
     }
 
     int listIndex = 0;

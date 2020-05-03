@@ -28,6 +28,7 @@
 #include <spdlog/spdlog.h>
 
 #include "../models/projectmodel.h"
+#include "../data/employerdata.h"
 
 namespace app::dlg
 {
@@ -91,6 +92,8 @@ private:
     std::unique_ptr<model::ProjectModel> pProject;
     int mProjectId;
     bool bIsEdit;
+
+    data::EmployerData mEmployerData;
 
     enum {
         IDC_NAME = wxID_HIGHEST + 1,

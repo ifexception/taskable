@@ -65,6 +65,7 @@ set (SRC
 
     "dialogs/employerdlg.cpp"
     "models/employermodel.cpp"
+    "data/employerdata.cpp"
 
     "dialogs/clientdlg.cpp"
     "models/clientmodel.cpp"
@@ -79,7 +80,7 @@ set (SRC
     "models/taskmodel.cpp"
     "models/taskitemmodel.cpp"
     "dialogs/taskitemdlg.cpp"
-    )
+     )
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
 

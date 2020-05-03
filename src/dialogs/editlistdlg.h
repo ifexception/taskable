@@ -24,6 +24,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include "../data/employerdata.h"
+
 namespace app::dlg
 {
 enum class DialogType { Employer, Client, Project, Category };
@@ -51,6 +53,7 @@ public:
 
 private:
     std::shared_ptr<spdlog::logger> pLogger;
+    data::EmployerData mData;
 };
 
 struct ClientStrategy final : public Strategy

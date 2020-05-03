@@ -44,6 +44,7 @@ ClientDialog::ClientDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> log
     , pClient(std::make_unique<model::ClientModel>())
     , mClientId(-1)
     , bIsEdit(false)
+    , mEmployerData(pLogger)
 {
     Create(parent,
         wxID_ANY,
@@ -70,6 +71,7 @@ ClientDialog::ClientDialog(wxWindow* parent,
     , pClient(std::make_unique<model::ClientModel>(clientId))
     , mClientId(clientId)
     , bIsEdit(isEdit)
+    , mEmployerData(pLogger)
 {
     Create(parent,
         wxID_ANY,
@@ -217,7 +219,7 @@ void ClientDialog::FillControls()
 {
     std::vector<std::unique_ptr<model::EmployerModel>> employers;
     try {
-        employers = model::EmployerModel::GetAll();
+        employers = mEmployerData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured on EmployerModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }

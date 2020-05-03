@@ -26,6 +26,7 @@
 #include <spdlog/spdlog.h>
 
 #include "../models/clientmodel.h"
+#include "../data/employerdata.h"
 
 namespace app::dlg
 {
@@ -75,6 +76,7 @@ private:
     std::unique_ptr<model::ClientModel> pClient;
     int mClientId;
     bool bIsEdit;
+    data::EmployerData mEmployerData;
 
     enum { IDC_NAME = wxID_HIGHEST + 1, IDC_EMPLOYERCHOICE, IDC_ISACTIVE };
 

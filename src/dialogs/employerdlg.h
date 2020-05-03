@@ -26,6 +26,7 @@
 #include <spdlog/spdlog.h>
 
 #include "../models/employermodel.h"
+#include "../data/employerdata.h"
 
 namespace app::dlg
 {
@@ -74,6 +75,7 @@ private:
     bool bIsEdit;
     int mEmployerId;
     std::unique_ptr<model::EmployerModel> pEmployer;
+    data::EmployerData mData;
 
     enum {
         IDC_EMPLOYERTEXT = wxID_HIGHEST + 1,

@@ -37,6 +37,7 @@ EmployerDialog::EmployerDialog(wxWindow* parent, std::shared_ptr<spdlog::logger>
     , bIsEdit(false)
     , mEmployerId(-1)
     , pEmployer(std::make_unique<model::EmployerModel>())
+    , mData(pLogger)
 {
     Create(parent,
         wxID_ANY,
@@ -56,7 +57,7 @@ EmployerDialog::EmployerDialog(wxWindow* parent,
     : pLogger(logger)
     , bIsEdit(isEdit)
     , mEmployerId(employerId)
-    , pEmployer(std::make_unique<model::EmployerModel>(mEmployerId))
+    , mData(pLogger)
 {
     Create(parent,
         wxID_ANY,
@@ -196,9 +197,10 @@ void EmployerDialog::DataToControls()
 {
     std::unique_ptr<model::EmployerModel> employer;
     try {
-        employer = model::EmployerModel::GetById(mEmployerId);
+        employer = mData.GetById(mEmployerId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in EmployerModel::GetById() - {0:d} : {1}", e.get_code(), e.what());
+        return;
     }
 
     pNameTextCtrl->ChangeValue(employer->GetName());
@@ -215,30 +217,28 @@ void EmployerDialog::OnOk(wxCommandEvent& event)
     if (TransferDataAndValidate()) {
         if (!bIsEdit) {
             try {
-                model::EmployerModel::Create(std::move(pEmployer));
+                mData.Create(std::move(pEmployer));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error(
-                    "Error occured in category CategoryModel::Create() - {0:d} : {1}", e.get_code(), e.what());
+                    "Error occured in category EmployerData::Create() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
             }
         }
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
             try {
-                pEmployer->SetDateModified(wxDateTime::Now());
-                model::EmployerModel::Update(std::move(pEmployer));
+                mData.Update(std::move(pEmployer));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error(
-                    "Error occured in category CategoryModel::Update() - {0:d} : {1}", e.get_code(), e.what());
+                    "Error occured in category EmployerData::Update() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
             }
         }
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
             try {
-                pEmployer->SetDateModified(wxDateTime::Now());
-                model::EmployerModel::Delete(std::move(pEmployer));
+                mData.Delete(mEmployerId);
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error(
-                    "Error occured in category CategoryModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
+                    "Error occured in category EmployerData::Delete() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
             }
         }

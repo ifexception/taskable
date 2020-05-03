@@ -26,6 +26,8 @@
 #include <sqlite_modern_cpp.h>
 #include <wx/string.h>
 
+#include "../data/employerdata.h"
+
 namespace app::wizard
 {
 class SetupTables final
@@ -45,14 +47,14 @@ private:
     bool Create();
     bool Seed();
 
-    static const wxString CreateTaskableDatabaseFile;
-    static const wxString SeedTaskableDatabaseFile;
+    static const wxString CreateDatabaseFile;
+    static const wxString SeedDatabaseFile;
 };
 
 class SetupEntities final
 {
 public:
-    SetupEntities(std::shared_ptr<spdlog::logger> logger, sqlite::database* database);
+    SetupEntities(std::shared_ptr<spdlog::logger> logger);
     ~SetupEntities() = default;
 
     bool CreateEntities(std::string employerName,
@@ -62,7 +64,7 @@ public:
 
 private:
     std::shared_ptr<spdlog::logger> pLogger;
-    sqlite::database* pDatabase;
+    data::EmployerData mEmployerData;
 
     int CreateEmployer(std::string employerName);
     int CreateClient(std::string clientName, int employerId);
