@@ -150,13 +150,8 @@ bool Application::InitializeDatabaseConnectionProvider()
 {
     auto sqliteConnectionFactory =
         std::make_shared<db::SqliteConnectionFactory>(pConfig->GetDatabasePath().ToStdString());
-    auto connectionPool = std::make_unique<db::ConnectionPool<db::SqliteConnection>>(2, sqliteConnectionFactory);
+    auto connectionPool = std::make_unique<db::ConnectionPool<db::SqliteConnection>>(sqliteConnectionFactory, 2);
     db::ConnectionProvider::Get().InitializeConnectionPool(std::move(connectionPool));
-
-    // auto pool = db::ConnectionProvider::Get().Handle();
-    // auto conn = pool->Acquire();
-    // auto db = conn->DatabaseExecutableHandle();
-    // *db << "SELECT";
 
     return true;
 }
