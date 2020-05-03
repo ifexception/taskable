@@ -1,6 +1,3 @@
--- taskable database setup scripts --
-
--- employers table
 CREATE TABLE employers
 (
     employer_id INTEGER PRIMARY KEY NOT NULL,
@@ -10,7 +7,6 @@ CREATE TABLE employers
     is_active INTEGER NOT NULL
 );
 
--- clients table
 CREATE TABLE clients
 (
     client_id INTEGER PRIMARY KEY NOT NULL,
@@ -24,14 +20,12 @@ CREATE TABLE clients
     FOREIGN KEY (employer_id) REFERENCES employers(employer_id)
 );
 
--- rate_types table
 CREATE TABLE rate_types
 (
     rate_type_id INTEGER PRIMARY KEY NOT NULL,
     name TEXT NOT NULL
 );
 
--- create currencies table
 CREATE TABLE currencies
 (
     currency_id INTEGER PRIMARY KEY NOT NULL,
@@ -40,7 +34,6 @@ CREATE TABLE currencies
     symbol TEXT NOT NULL
 );
 
--- projects table
 CREATE TABLE projects
 (
     project_id INTEGER PRIMARY KEY NOT NULL,
@@ -65,7 +58,6 @@ CREATE TABLE projects
     FOREIGN KEY (currency_id) REFERENCES currencies(currency_id)
 );
 
--- categories table
 CREATE TABLE categories
 (
     category_id INTEGER PRIMARY KEY NOT NULL,
@@ -80,7 +72,6 @@ CREATE TABLE categories
     FOREIGN KEY (project_id) REFERENCES projects(project_id)
 );
 
--- tasks table
 CREATE TABLE tasks
 (
     task_id INTEGER PRIMARY KEY NOT NULL,
@@ -90,15 +81,12 @@ CREATE TABLE tasks
     is_active INTEGER NOT NULL
 );
 
--- task item types table
 CREATE TABLE task_item_types
 (
     task_item_type_id INTEGER PRIMARY KEY NOT NULL,
     name TEXT NOT NULL
 );
 
-
--- task items table
 CREATE TABLE task_items
 (
     task_item_id INTEGER PRIMARY KEY NOT NULL,
