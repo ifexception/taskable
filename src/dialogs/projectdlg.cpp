@@ -53,7 +53,7 @@ ProjectDialog::ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> l
     , pProject(std::make_unique<model::ProjectModel>())
     , mProjectId(0)
     , bIsEdit(false)
-    , mEmployerData(pLogger)
+    , mEmployerData()
 {
     Create(parent,
         wxID_ANY,
@@ -87,7 +87,7 @@ ProjectDialog::ProjectDialog(wxWindow* parent,
     , pProject(std::make_unique<model::ProjectModel>(projectId))
     , mProjectId(projectId)
     , bIsEdit(isEdit)
-    , mEmployerData(pLogger)
+    , mEmployerData()
 {
     Create(parent,
         wxID_ANY,
