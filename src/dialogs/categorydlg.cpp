@@ -30,6 +30,8 @@
 #include "../common/ids.h"
 #include "../common/util.h"
 
+#include "../data/projectdata.h"
+
 namespace app::dlg
 {
 const wxString& CategoryDialog::DateLabel = wxT("Created %s | Updated %s");
@@ -190,9 +192,10 @@ void CategoryDialog::CreateControls()
 void CategoryDialog::FillControls()
 {
     std::vector<std::unique_ptr<model::ProjectModel>> projects;
+    data::ProjectData mData;
 
     try {
-        projects = model::ProjectModel::GetAll();
+        projects = mData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in ProjectModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
@@ -205,6 +208,7 @@ void CategoryDialog::FillControls()
 void CategoryDialog::DataToControls()
 {
     std::unique_ptr<model::CategoryModel> category = nullptr;
+
     try {
         category = model::CategoryModel::GetById(mCategoryId);
     } catch (const sqlite::sqlite_exception& e) {

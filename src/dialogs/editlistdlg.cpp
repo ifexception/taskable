@@ -56,7 +56,7 @@ wxEND_EVENT_TABLE()
     SetStrategy();
     std::string title = MapEnumToValue();
     long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
-    bool success = Create(parent, wxID_ANY, wxString(title), wxDefaultPosition, mStrategy->GetSize(), style, name);
+    Create(parent, wxID_ANY, wxString(title), wxDefaultPosition, mStrategy->GetSize(), style, name);
 }
 
 EditListDialog::~EditListDialog()
@@ -327,7 +327,7 @@ void ProjectStrategy::DataToControl(wxListCtrl* control)
 {
     std::vector<std::unique_ptr<model::ProjectModel>> projects;
     try {
-        projects = model::ProjectModel::GetAll();
+        projects = mData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in ProjectModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }

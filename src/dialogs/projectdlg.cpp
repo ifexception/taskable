@@ -27,6 +27,10 @@
 #include "../common/common.h"
 #include "../common/ids.h"
 #include "../common/util.h"
+
+#include "../data/ratetypedata.h"
+#include "../data/currencydata.h"
+
 #include "../models/employermodel.h"
 #include "../models/clientmodel.h"
 
@@ -54,6 +58,8 @@ ProjectDialog::ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> l
     , mProjectId(0)
     , bIsEdit(false)
     , mEmployerData()
+    , mClientData()
+    , mProjectData()
 {
     Create(parent,
         wxID_ANY,
@@ -88,6 +94,8 @@ ProjectDialog::ProjectDialog(wxWindow* parent,
     , mProjectId(projectId)
     , bIsEdit(isEdit)
     , mEmployerData()
+    , mClientData()
+    , mProjectData()
 {
     Create(parent,
         wxID_ANY,
@@ -386,9 +394,11 @@ void ProjectDialog::FillControls()
     }
 
     /* Load Rate Types */
+
     std::vector<std::unique_ptr<model::RateTypeModel>> rateTypes;
     try {
-        rateTypes = model::RateTypeModel::GetAll();
+        data::RateTypeData rateTypeData;
+        rateTypes = rateTypeData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in RateTypeModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
@@ -400,7 +410,8 @@ void ProjectDialog::FillControls()
     /* Load Currencies */
     std::vector<std::unique_ptr<model::CurrencyModel>> curriencies;
     try {
-        curriencies = model::CurrencyModel::GetAll();
+        data::CurrencyData currencyData;
+        curriencies = currencyData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in CurrencyModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
@@ -416,7 +427,7 @@ void ProjectDialog::DataToControls()
     std::unique_ptr<model::ProjectModel> project;
 
     try {
-        project = model::ProjectModel::GetById(mProjectId);
+        project = mProjectData.GetById(mProjectId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in ProjectModel::GetById() - {0:d} : {1}", e.get_code(), e.what());
     }
@@ -434,7 +445,7 @@ void ProjectDialog::DataToControls()
         pClientChoiceCtrl->AppendString(wxT("Select a client"));
         std::vector<std::unique_ptr<model::ClientModel>> clients;
         try {
-            clients = model::ClientModel::GetByEmployerId(project->GetEmployer()->GetEmployerId());
+            clients = mClientData.GetByEmployerId(project->GetEmployer()->GetEmployerId());
         } catch (const sqlite::sqlite_exception& e) {
             pLogger->error("Error occured in ClientModel::GetByEmployerId() - {0:d} : {1}", e.get_code(), e.what());
         }
@@ -529,7 +540,7 @@ void ProjectDialog::OnEmployerChoiceSelection(wxCommandEvent& event)
     } else {
         std::vector<std::unique_ptr<model::ClientModel>> clients;
         try {
-            clients = model::ClientModel::GetByEmployerId(employerId);
+            clients = mClientData.GetByEmployerId(employerId);
         } catch (const sqlite::sqlite_exception& e) {
             pLogger->error("Error occured in ClientModel::GetByEmployerId() - {0:d} : {1}", e.get_code(), e.what());
         }
@@ -596,7 +607,7 @@ void ProjectDialog::OnRateChoiceSelection(wxCommandEvent& event)
 void ProjectDialog::OnIsDefaultCheck(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
-        model::ProjectModel::UnmarkDefaultProjects();
+        mProjectData.UnmarkDefaultProjects();
     }
 }
 
@@ -605,7 +616,7 @@ void ProjectDialog::OnOk(wxCommandEvent& WXUNUSED(event))
     if (TryTransferValuesFromControls()) {
         if (!bIsEdit) {
             try {
-                model::ProjectModel::Create(std::move(pProject));
+                mProjectData.Create(std::move(pProject));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in ProjectModel::Create() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
@@ -614,7 +625,7 @@ void ProjectDialog::OnOk(wxCommandEvent& WXUNUSED(event))
 
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
             try {
-                model::ProjectModel::Update(std::move(pProject));
+                mProjectData.Update(std::move(pProject));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in ProjectModel::Update() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
@@ -623,7 +634,7 @@ void ProjectDialog::OnOk(wxCommandEvent& WXUNUSED(event))
 
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
             try {
-                model::ProjectModel::Delete(std::move(pProject));
+                mProjectData.Delete(mProjectId);
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in ProjectModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);

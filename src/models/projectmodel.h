@@ -28,76 +28,28 @@
 #include "../common/constants.h"
 #include "employermodel.h"
 #include "clientmodel.h"
+#include "ratetypemodel.h"
+#include "currencymodel.h"
 
 namespace app::model
 {
-class RateTypeModel final
-{
-public:
-    RateTypeModel();
-    RateTypeModel(const int rateTypeId);
-    RateTypeModel(const int rateTypeId, bool initializeFromDatabase);
-    RateTypeModel(const int rateTypeId, wxString name);
-    ~RateTypeModel() = default;
-
-    const int GetRateTypeId() const;
-    const wxString GetName() const;
-    const constants::RateTypes GetType() const;
-
-    void SetRateTypeId(const int rateTypeId);
-    void SetName(const wxString& name);
-
-    static std::unique_ptr<RateTypeModel> GetById(const int rateTypeId);
-    static std::vector<std::unique_ptr<RateTypeModel>> GetAll();
-
-private:
-    int mRateTypeId;
-    wxString mName;
-    constants::RateTypes mRateType;
-
-    static const std::string getRateTypeById;
-    static const std::string getRateTypes;
-};
-
-class CurrencyModel final
-{
-public:
-    CurrencyModel();
-    CurrencyModel(const int currencyId);
-    CurrencyModel(const int currencyId, bool initialize);
-    CurrencyModel(int currencyId, wxString name, wxString code, wxString symbol);
-    ~CurrencyModel() = default;
-
-    const int GetCurrencyId() const;
-    const wxString GetName() const;
-    const wxString GetCode() const;
-    const wxString GetSymbol() const;
-
-    void SetCurrencyId(const int currencyId);
-    void SetName(const wxString& name);
-    void SetCode(const wxString& code);
-    void SetSymbol(const wxString& symbol);
-
-    static std::unique_ptr<CurrencyModel> GetById(const int id);
-    static std::vector<std::unique_ptr<CurrencyModel>> GetAll();
-
-private:
-    int mCurrencyId;
-    wxString mName;
-    wxString mCode;
-    wxString mSymbol;
-
-    static const std::string getCurrencies;
-    static const std::string getCurrencyById;
-};
-
 class ProjectModel final
 {
 public:
     ProjectModel();
     ProjectModel(int projectId);
-    ProjectModel(int projectId, bool initializeFromDatabase);
     ProjectModel(int projectId, wxString name, wxString displayName);
+    ProjectModel(int projectId,
+        wxString name,
+        wxString displayName,
+        bool billable,
+        bool isDefault,
+        double* rate,
+        int* hours,
+        int employerId,
+        int* clientId,
+        int* rateTypeId,
+        int* currencyId);
     ProjectModel(int projectId,
         wxString name,
         wxString displayName,
@@ -157,13 +109,6 @@ public:
     void SetRateType(std::unique_ptr<RateTypeModel> rateType);
     void SetCurrency(std::unique_ptr<CurrencyModel> currency);
 
-    static void Create(std::unique_ptr<ProjectModel> project);
-    static std::unique_ptr<ProjectModel> GetById(const int projectId);
-    static void Update(std::unique_ptr<ProjectModel> project);
-    static void Delete(std::unique_ptr<ProjectModel> project);
-    static std::vector<std::unique_ptr<ProjectModel>> GetAll();
-    static void UnmarkDefaultProjects();
-
 private:
     int mProjectId;
     wxString mName;
@@ -184,12 +129,5 @@ private:
     std::unique_ptr<ClientModel> pClient;
     std::unique_ptr<RateTypeModel> pRateType;
     std::unique_ptr<CurrencyModel> pCurrency;
-
-    static const std::string createProject;
-    static const std::string getProject;
-    static const std::string updateProject;
-    static const std::string deleteProject;
-    static const std::string getProjects;
-    static const std::string unmarkDefaultProjects;
 };
 } // namespace app::model

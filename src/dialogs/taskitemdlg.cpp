@@ -76,6 +76,7 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
     , mCalculatedRate(0.0)
     , pTaskItem(std::make_unique<model::TaskItemModel>())
     , pProject(nullptr)
+    , mProjectData()
 {
     Create(parent,
         wxID_ANY,
@@ -119,6 +120,7 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
     , mCalculatedRate(0.0)
     , pTaskItem(std::make_unique<model::TaskItemModel>(mTaskItemId))
     , pProject(nullptr)
+    , mProjectData()
 {
     Create(parent,
         wxID_ANY,
@@ -509,7 +511,7 @@ void TaskItemDialog::FillControls()
     std::vector<std::unique_ptr<model::ProjectModel>> projects;
 
     try {
-        projects = model::ProjectModel::GetAll();
+        projects = mProjectData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in ProjectModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
         wxLogDebug(wxString(e.get_sql()));
@@ -528,7 +530,7 @@ void TaskItemDialog::FillControls()
             pProjectChoiceCtrl->SetStringSelection(iterator->get()->GetDisplayName());
             FillCategoryControl(iterator->get()->GetProjectId());
 
-            pProject = model::ProjectModel::GetById(iterator->get()->GetProjectId());
+            pProject = mProjectData.GetById(iterator->get()->GetProjectId());
 
             if (iterator->get()->HasClientLinked()) {
                 pTaskContextTextCtrl->SetLabel(wxString::Format(TaskContextWithClient,
@@ -621,7 +623,7 @@ void TaskItemDialog::DataToControls()
 
     pIsActiveCtrl->SetValue(taskItem->IsActive());
 
-    pProject = model::ProjectModel::GetById(taskItem->GetProjectId());
+    pProject = mProjectData.GetById(taskItem->GetProjectId());
 }
 
 void TaskItemDialog::CalculateTimeDiff(wxDateTime start, wxDateTime end)
@@ -703,7 +705,7 @@ void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
     FillCategoryControl(projectId);
 
     try {
-        pProject = model::ProjectModel::GetById(projectId);
+        pProject = mProjectData.GetById(projectId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in ProjectModel::GetById() - {0:d} : {1}", e.get_code(), e.what());
         wxLogDebug(wxString(e.get_sql()));
@@ -954,7 +956,7 @@ bool TaskItemDialog::TransferDataAndValidate()
     pTaskItem->SetProjectId(projectId);
 
     if (bIsEdit) {
-        pTaskItem->SetProject(std::move(model::ProjectModel::GetById(projectId)));
+        pTaskItem->SetProject(std::move(mProjectData.GetById(projectId)));
     }
 
     if (mType == constants::TaskItemTypes::TimedTask) {

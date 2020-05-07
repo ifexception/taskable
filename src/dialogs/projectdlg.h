@@ -29,6 +29,8 @@
 
 #include "../models/projectmodel.h"
 #include "../data/employerdata.h"
+#include "../data/clientdata.h"
+#include "../data/projectdata.h"
 
 namespace app::dlg
 {
@@ -94,6 +96,8 @@ private:
     bool bIsEdit;
 
     data::EmployerData mEmployerData;
+    data::ClientData mClientData;
+    data::ProjectData mProjectData;
 
     enum {
         IDC_NAME = wxID_HIGHEST + 1,

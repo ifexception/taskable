@@ -23,7 +23,6 @@
 #include <wx/stdpaths.h>
 
 #include "../common/util.h"
-#include "../database/connectionprovider.h"
 
 namespace app::wizard
 {

@@ -71,8 +71,15 @@ set (SRC
     "models/clientmodel.cpp"
     "data/clientdata.cpp"
 
+    "data/ratetypedata.cpp"
+    "models/ratetypemodel.cpp"
+
+    "data/currencydata.cpp"
+    "models/currencymodel.cpp"
+
     "dialogs/projectdlg.cpp"
     "models/projectmodel.cpp"
+    "data/projectdata.cpp"
 
     "dialogs/categorydlg.cpp"
     "dialogs/categoriesdlg.cpp"
@@ -80,7 +87,9 @@ set (SRC
 
     "models/taskmodel.cpp"
     "models/taskitemmodel.cpp"
-    "dialogs/taskitemdlg.cpp")
+    "dialogs/taskitemdlg.cpp"
+
+    )
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
 

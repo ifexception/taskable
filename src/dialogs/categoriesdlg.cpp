@@ -28,6 +28,8 @@
 #include "../common/ids.h"
 #include "../common/util.h"
 
+#include "../data/projectdata.h"
+
 namespace app::dlg
 {
 CategoriesDialog::CategoriesDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, const wxString& name)
@@ -314,11 +316,12 @@ void CategoriesDialog::CreateControls()
 void CategoriesDialog::FillControls()
 {
     std::vector<std::unique_ptr<model::ProjectModel>> projects;
+    data::ProjectData mData;
 
     try {
-        projects = model::ProjectModel::GetAll();
+        projects = mData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in ProjectModel::GetAll()() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in ProjectModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (const auto& project : projects) {

@@ -26,6 +26,7 @@
 
 #include "../data/employerdata.h"
 #include "../data/clientdata.h"
+#include "../data/projectdata.h"
 
 namespace app::dlg
 {
@@ -84,6 +85,7 @@ public:
 
 private:
     std::shared_ptr<spdlog::logger> pLogger;
+    data::ProjectData mData;
 };
 
 struct CategoryStrategy final : public Strategy

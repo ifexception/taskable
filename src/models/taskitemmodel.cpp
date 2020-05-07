@@ -22,6 +22,8 @@
 #include "../common/util.h"
 #include "../services/databaseconnection.h"
 
+//#include "../data/projectdata.h"
+
 namespace app::model
 {
 TaskItemTypeModel::TaskItemTypeModel()

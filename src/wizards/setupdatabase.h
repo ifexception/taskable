@@ -28,6 +28,7 @@
 
 #include "../data/employerdata.h"
 #include "../data/clientdata.h"
+#include "../data/projectdata.h"
 
 namespace app::wizard
 {
@@ -67,6 +68,7 @@ private:
     std::shared_ptr<spdlog::logger> pLogger;
     data::EmployerData mEmployerData;
     data::ClientData mClientData;
+    data::ProjectData mProjectData;
 
     int CreateEmployer(std::string employerName);
     int CreateClient(std::string clientName, int employerId);

@@ -31,6 +31,8 @@
 #include "../models/taskmodel.h"
 #include "../models/taskitemmodel.h"
 
+#include "../data/projectdata.h"
+
 class wxDateEvent;
 class wxDatePickerCtrl;
 class wxTimePickerCtrl;
@@ -133,6 +135,8 @@ private:
 
     std::unique_ptr<model::TaskItemModel> pTaskItem;
     std::unique_ptr<model::ProjectModel> pProject;
+
+    data::ProjectData mProjectData;
 
     enum {
         IDC_TASKCONTEXTINFO = wxID_HIGHEST + 1,
