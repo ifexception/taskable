@@ -60,17 +60,13 @@ public:
 
 private:
     bool CreateDatabaseFile();
-
-    void InitializeSqliteConnection();
-    void Cleanup();
-
     void DeleteDatabaseFile();
+
     bool SetUpTables();
     bool SetUpEntities();
 
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
-    sqlite::database* pDatabase;
     WelcomePage* pPage1;
 
     wxString mEmployer;

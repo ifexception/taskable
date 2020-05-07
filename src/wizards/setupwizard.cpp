@@ -40,7 +40,6 @@ SetupWizard::SetupWizard(wxFrame* frame,
     , mEmployer(wxGetEmptyString())
     , mClient(wxGetEmptyString())
     , mProject(wxGetEmptyString())
-    , pDatabase(nullptr)
 {
     SetBitmapPlacement(wxWIZARD_HALIGN_LEFT);
 
@@ -61,23 +60,19 @@ bool SetupWizard::Run()
             return false;
         }
 
-        InitializeSqliteConnection();
         success = SetUpTables();
         if (!success) {
-            Cleanup();
             DeleteDatabaseFile();
             return false;
         }
 
         success = SetUpEntities();
         if (!success) {
-            Cleanup();
             DeleteDatabaseFile();
             return false;
         }
     }
 
-    Cleanup();
     Destroy();
     return wizardSuccess;
 }
@@ -119,41 +114,20 @@ void SetupWizard::SetProjectDisplayName(const wxString& displayName)
 
 bool SetupWizard::CreateDatabaseFile()
 {
-    bool succeeded = true;
     if (!wxDirExists(pConfig->GetDatabasePath())) {
-        if (wxMkdir(pConfig->GetDatabasePath())) {
-            wxFile file;
-            succeeded = file.Create(common::GetDatabaseFilePath(pConfig->GetDatabasePath()));
-            if (!succeeded) {
-                pLogger->error("Unable to create database file at specified location!");
-            }
-            file.Close();
-        } else {
-            succeeded = false;
+        if (!wxMkdir(pConfig->GetDatabasePath())) {
             pLogger->error("Unable to create database folder at specified location!");
         }
-    } else {
-        wxFile file;
-        succeeded = file.Create(common::GetDatabaseFilePath(pConfig->GetDatabasePath()));
-        if (!succeeded) {
-            pLogger->error("Unable to create database file at specified location!");
-        }
-        file.Close();
     }
 
+    wxFile file;
+    auto succeeded = file.Create(common::GetDatabaseFilePath(pConfig->GetDatabasePath()));
+    if (!succeeded) {
+        pLogger->error("Unable to create database file at specified location!");
+    }
+    file.Close();
+
     return succeeded;
-}
-
-void SetupWizard::InitializeSqliteConnection()
-{
-    auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
-    pDatabase = new sqlite::database(common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString(), config);
-}
-
-void SetupWizard::Cleanup()
-{
-    delete pDatabase;
-    pDatabase = nullptr;
 }
 
 void SetupWizard::DeleteDatabaseFile()
@@ -167,13 +141,13 @@ void SetupWizard::DeleteDatabaseFile()
 
 bool SetupWizard::SetUpTables()
 {
-    SetupTables tables(pLogger, pDatabase);
+    SetupTables tables(pLogger);
     return tables.CreateTables();
 }
 
 bool SetupWizard::SetUpEntities()
 {
-    SetupEntities entities(pLogger, pDatabase);
+    SetupEntities entities(pLogger);
     return entities.CreateEntities(mEmployer, mClient, mProject, mDisplayName);
 }
 
