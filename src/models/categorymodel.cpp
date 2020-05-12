@@ -23,6 +23,8 @@
 #include "../common/util.h"
 #include "../services/databaseconnection.h"
 
+#include "../data/projectdata.h"
+
 namespace app::model
 {
 CategoryModel::CategoryModel()
@@ -186,8 +188,9 @@ std::unique_ptr<CategoryModel> CategoryModel::GetById(const int id)
                                                        int projectId) {
         category =
             std::make_unique<CategoryModel>(categoryId, categoryName, color, dateCreated, dateModified, isActive);
-        auto project = std::make_unique<ProjectModel>(projectId, true);
-        category->SetProject(std::move(project));
+
+        data::ProjectData mProjectData;
+        category->SetProject(std::move(mProjectData.GetById(projectId)));
     };
 
     return category;
@@ -221,8 +224,9 @@ std::vector<std::unique_ptr<CategoryModel>> CategoryModel::GetByProjectId(const 
                                                                        int projectId) {
         auto category =
             std::make_unique<CategoryModel>(categoryId, categoryName, color, dateCreated, dateModified, isActive);
-        auto project = std::make_unique<ProjectModel>(projectId, true);
-        category->SetProject(std::move(project));
+
+        data::ProjectData mProjectData;
+        category->SetProject(std::move(mProjectData.GetById(projectId)));
         categories.push_back(std::move(category));
     };
 
@@ -243,8 +247,9 @@ std::vector<std::unique_ptr<CategoryModel>> CategoryModel::GetAll()
                                                int projectId) {
         auto category =
             std::make_unique<CategoryModel>(categoryId, categoryName, color, dateCreated, dateModified, isActive);
-        auto project = std::make_unique<ProjectModel>(projectId, true);
-        category->SetProject(std::move(project));
+
+        data::ProjectData mProjectData;
+        category->SetProject(std::move(mProjectData.GetById(projectId)));
         categories.push_back(std::move(category));
     };
 

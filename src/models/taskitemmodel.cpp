@@ -22,7 +22,7 @@
 #include "../common/util.h"
 #include "../services/databaseconnection.h"
 
-//#include "../data/projectdata.h"
+#include "../data/projectdata.h"
 
 namespace app::model
 {
@@ -404,7 +404,8 @@ void TaskItemModel::Create(std::unique_ptr<TaskItemModel> taskItem)
 
     ps << taskItem->GetDuration().ToStdString() << taskItem->GetDescription().ToStdString();
 
-    taskItem->SetProject(std::move(ProjectModel::GetById(taskItem->GetProjectId())));
+    data::ProjectData mProjectData;
+    taskItem->SetProject(std::move(mProjectData.GetById(taskItem->GetProjectId())));
     if (taskItem->GetProject()->IsNonBillableScenario()) {
         ps << taskItem->IsBillable() << nullptr;
     }
@@ -466,7 +467,8 @@ std::unique_ptr<TaskItemModel> TaskItemModel::GetById(const int taskItemId)
         taskItem->SetTaskItemType(std::move(taskItemType));
 
         taskItem->SetProjectId(projectId);
-        auto project = ProjectModel::GetById(projectId);
+        data::ProjectData mProjectData;
+        auto project = mProjectData.GetById(projectId);
         taskItem->SetProject(std::move(project));
 
         taskItem->SetCategoryId(categoryId);
@@ -574,7 +576,8 @@ std::vector<std::unique_ptr<TaskItemModel>> TaskItemModel::GetByDate(const wxStr
         taskItem->SetTaskItemType(std::move(taskItemType));
 
         taskItem->SetProjectId(projectId);
-        auto project = ProjectModel::GetById(projectId);
+        data::ProjectData mProjectData;
+        auto project = mProjectData.GetById(projectId);
         taskItem->SetProject(std::move(project));
 
         taskItem->SetCategoryId(categoryId);
