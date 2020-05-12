@@ -27,6 +27,11 @@ SqliteConnection::SqliteConnection(std::string connectionString)
 {
 }
 
+SqliteConnection::~SqliteConnection()
+{
+    delete pDatabase;
+}
+
 void SqliteConnection::Connect()
 {
     auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };

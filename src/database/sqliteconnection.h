@@ -31,7 +31,7 @@ class SqliteConnection final : public IConnection
 {
 public:
     SqliteConnection(std::string connectionString);
-    virtual ~SqliteConnection() = default;
+    virtual ~SqliteConnection();
 
     void Connect();
 
