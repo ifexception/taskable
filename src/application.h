@@ -61,6 +61,8 @@ private:
     void DeleteDatabaseFile();
     bool DatabaseFileExists();
 
+    bool InitializeDatabaseTables();
+
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
     std::unique_ptr<wxSingleInstanceChecker> pInstanceChecker;

@@ -30,6 +30,7 @@
 #include "database/sqliteconnection.h"
 #include "database/connectionprovider.h"
 #include "frame/mainframe.h"
+#include "services/setupdatabase.h"
 #include "services/databasebackup.h"
 #include "wizards/setupwizard.h"
 #include "wizards/databaserestorewizard.h"
@@ -83,8 +84,15 @@ bool Application::OnInit()
 
 bool Application::FirstStartupInitialization()
 {
-    CreateDatabaseFile();
+    if (!CreateDatabaseFile()) {
+        return false;
+    }
+
     InitializeDatabaseConnectionProvider();
+
+    if (!InitializeDatabaseTables()) {
+        return false;
+    }
 
     if (!RunSetupWizard()) {
         db::ConnectionProvider::Get().PurgeConnectionPool();
@@ -302,7 +310,14 @@ bool Application::DatabaseFileExists()
                 common::GetProgramName(),
                 wxYES_NO | wxICON_ERROR);
             if (ret == wxYES) {
-                CreateDatabaseFile();
+                if (!CreateDatabaseFile()) {
+                    return false;
+                }
+
+                if (!InitializeDatabaseTables()) {
+                    return false;
+                }
+
                 if (!RunSetupWizard()) {
                     db::ConnectionProvider::Get().PurgeConnectionPool();
                     DeleteDatabaseFile();
@@ -314,6 +329,12 @@ bool Application::DatabaseFileExists()
     }
 
     return true;
+}
+
+bool Application::InitializeDatabaseTables()
+{
+    svc::SetupTables tables(pLogger);
+    return tables.CreateTables();
 }
 } // namespace app
 
