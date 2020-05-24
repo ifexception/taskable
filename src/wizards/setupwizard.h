@@ -28,7 +28,7 @@
 
 #include <spdlog/spdlog.h>
 
-#include "setupdatabase.h"
+#include "entitycompositor.h"
 
 namespace app::cfg
 {
@@ -50,48 +50,31 @@ public:
 
     bool Run();
 
-    wxString GetEmployer() const;
-    void SetEmployer(const wxString& employer);
-    wxString GetClient() const;
-    void SetClient(const wxString& client);
-    wxString GetProject() const;
-    void SetProject(const wxString& project);
-    void SetProjectDisplayName(const wxString& project);
-
 private:
-    bool CreateDatabaseFile();
-    void DeleteDatabaseFile();
-
-    bool SetUpTables();
-    bool SetUpEntities();
-
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
-    WelcomePage* pPage1;
+    std::shared_ptr<EntityCompositor> pCompositor;
 
-    wxString mEmployer;
-    wxString mClient;
-    wxString mProject;
-    wxString mDisplayName;
+    WelcomePage* pPage1;
 };
 
 class WelcomePage final : public wxWizardPageSimple
 {
 public:
     WelcomePage() = delete;
-    WelcomePage(SetupWizard* parent);
+    WelcomePage(wxWizard* parent);
     virtual ~WelcomePage() = default;
 
 private:
     void CreateControls();
 };
 
-class AddEmployerAndClientPage final : public wxWizardPageSimple
+class AddEmployerPage final : public wxWizardPageSimple
 {
 public:
-    AddEmployerAndClientPage() = default;
-    explicit AddEmployerAndClientPage(SetupWizard* parent);
-    virtual ~AddEmployerAndClientPage() = default;
+    AddEmployerPage() = default;
+    explicit AddEmployerPage(wxWizard* parent, std::shared_ptr<EntityCompositor> compositor);
+    virtual ~AddEmployerPage() = default;
 
     bool TransferDataFromWindow() override;
 
@@ -100,16 +83,41 @@ private:
 
     void OnWizardCancel(wxWizardEvent& event);
 
-    SetupWizard* pParent;
-    wxTextCtrl* pEmployerCtrl;
-    wxTextCtrl* pClientCtrl;
+    void CreateControls();
+
+    std::shared_ptr<EntityCompositor> pCompositor;
+
+    wxWizard* pParent;
+    wxTextCtrl* pEmployerTextCtrl;
+};
+
+class AddClientPage final : public wxWizardPageSimple
+{
+public:
+    AddClientPage(wxWizard* parent, std::shared_ptr<EntityCompositor> compositor);
+    virtual ~AddClientPage() = default;
+
+    bool TransferDataFromWindow() override;
+
+private:
+    wxDECLARE_EVENT_TABLE();
+
+    void OnWizardCancel(wxWizardEvent& event);
+
+    void CreateControls();
+
+    std::shared_ptr<EntityCompositor> pCompositor;
+
+    wxWizard* pParent;
+    wxTextCtrl* pClientTextCtrl;
 };
 
 class AddProjectPage final : public wxWizardPageSimple
 {
 public:
     AddProjectPage() = default;
-    explicit AddProjectPage(SetupWizard* parent);
+    explicit AddProjectPage(SetupWizard* parent, std::shared_ptr<spdlog::logger> logger,
+                            std::shared_ptr<EntityCompositor> compositor );
     virtual ~AddProjectPage() = default;
 
     bool TransferDataFromWindow() override;
@@ -118,9 +126,29 @@ private:
     wxDECLARE_EVENT_TABLE();
 
     void OnWizardCancel(wxWizardEvent& event);
+    void OnNameChange(wxCommandEvent& event);
+    void OnBillableCheck(wxCommandEvent& event);
+    void OnRateChoiceSelection(wxCommandEvent& event);
+
+    void CreateControls();
+    void FillControls();
+
+    std::shared_ptr<spdlog::logger> pLogger;
+    std::shared_ptr<EntityCompositor> pCompositor;
 
     SetupWizard* pParent;
-    wxTextCtrl* pNameCtrl;
-    wxTextCtrl* pDisplayNameCtrl;
+
+    wxTextCtrl* pNameTextCtrl;
+    wxTextCtrl* pDisplayNameTextCtrl;
+    wxCheckBox* pBillableCheckBoxCtrl;
+    wxChoice* pRateChoiceCtrl;
+    wxTextCtrl* pRateTextCtrl;
+    wxComboBox* pCurrencyComboBoxCtrl;
+
+    enum {
+        IDC_NAME = wxID_HIGHEST + 1,
+        IDC_BILLABLE,
+        IDC_RATECHOICE,
+    };
 };
 } // namespace app::wizard

@@ -21,11 +21,20 @@
 
 #include <sqlite_modern_cpp/errors.h>
 #include <wx/wx.h>
+#include <wx/colour.h>
 #include <wx/file.h>
 #include <wx/statline.h>
+#include <wx/valnum.h>
 
 #include "../config/configuration.h"
 #include "../common/common.h"
+#include "../common/util.h"
+#include "../data/ratetypedata.h"
+#include "../data/currencydata.h"
+#include "../models/employermodel.h"
+#include "../models/clientmodel.h"
+#include "../models/projectmodel.h"
+
 #include "../../res/setupwizard.xpm"
 
 namespace app::wizard
@@ -36,122 +45,33 @@ SetupWizard::SetupWizard(wxFrame* frame,
     : wxWizard(frame, wxID_ANY, wxT("Setup Wizard"), wxBitmap(setupwizard), wxDefaultPosition, wxDEFAULT_DIALOG_STYLE)
     , pConfig(config)
     , pLogger(logger)
+    , pCompositor(std::make_shared<EntityCompositor>(logger))
     , pPage1(nullptr)
-    , mEmployer(wxGetEmptyString())
-    , mClient(wxGetEmptyString())
-    , mProject(wxGetEmptyString())
 {
-    SetBitmapPlacement(wxWIZARD_HALIGN_LEFT);
+    SetBitmapPlacement(wxWIZARD_VALIGN_CENTRE);
 
     pPage1 = new WelcomePage(this);
-    auto page2 = new AddEmployerAndClientPage(this);
-    auto page3 = new AddProjectPage(this);
+    auto page2 = new AddEmployerPage(this, pCompositor);
+    auto page3 = new AddClientPage(this, pCompositor);
+    auto page4 = new AddProjectPage(this, pLogger, pCompositor);
 
     wxWizardPageSimple::Chain(pPage1, page2);
     wxWizardPageSimple::Chain(page2, page3);
+    wxWizardPageSimple::Chain(page3, page4);
+
+    // Allow the wizard to size itself around the pages
+    GetPageAreaSizer()->Add(pPage1);
 }
 
 bool SetupWizard::Run()
 {
-    auto wizardSuccess = wxWizard::RunWizard(pPage1);
-    if (wizardSuccess) {
-        bool success = CreateDatabaseFile();
-        if (!success) {
-            return false;
-        }
-
-        success = SetUpTables();
-        if (!success) {
-            DeleteDatabaseFile();
-            return false;
-        }
-
-        success = SetUpEntities();
-        if (!success) {
-            DeleteDatabaseFile();
-            return false;
-        }
-    }
+    bool wizardSuccess = wxWizard::RunWizard(pPage1);
 
     Destroy();
     return wizardSuccess;
 }
 
-wxString SetupWizard::GetEmployer() const
-{
-    return mEmployer;
-}
-
-void SetupWizard::SetEmployer(const wxString& employer)
-{
-    mEmployer = employer;
-}
-
-wxString SetupWizard::GetClient() const
-{
-    return mClient;
-}
-
-void SetupWizard::SetClient(const wxString& client)
-{
-    mClient = client;
-}
-
-wxString SetupWizard::GetProject() const
-{
-    return mProject;
-}
-
-void SetupWizard::SetProject(const wxString& project)
-{
-    mProject = project;
-}
-
-void SetupWizard::SetProjectDisplayName(const wxString& displayName)
-{
-    mDisplayName = displayName;
-}
-
-bool SetupWizard::CreateDatabaseFile()
-{
-    if (!wxDirExists(pConfig->GetDatabasePath())) {
-        if (!wxMkdir(pConfig->GetDatabasePath())) {
-            pLogger->error("Unable to create database folder at specified location!");
-        }
-    }
-
-    wxFile file;
-    auto succeeded = file.Create(common::GetDatabaseFilePath(pConfig->GetDatabasePath()));
-    if (!succeeded) {
-        pLogger->error("Unable to create database file at specified location!");
-    }
-    file.Close();
-
-    return succeeded;
-}
-
-void SetupWizard::DeleteDatabaseFile()
-{
-    if (wxFileExists(common::GetDatabaseFilePath(pConfig->GetDatabasePath()))) {
-        if (!wxRemoveFile(common::GetDatabaseFilePath(pConfig->GetDatabasePath()))) {
-            pLogger->error("Unable to delete database file!");
-        }
-    }
-}
-
-bool SetupWizard::SetUpTables()
-{
-    SetupTables tables(pLogger);
-    return tables.CreateTables();
-}
-
-bool SetupWizard::SetUpEntities()
-{
-    SetupEntities entities(pLogger);
-    return entities.CreateEntities(mEmployer, mClient, mProject, mDisplayName);
-}
-
-WelcomePage::WelcomePage(SetupWizard* parent)
+WelcomePage::WelcomePage(wxWizard* parent)
     : wxWizardPageSimple(parent)
 {
     CreateControls();
@@ -186,182 +106,532 @@ void WelcomePage::CreateControls()
 }
 
 // clang-format off
-wxBEGIN_EVENT_TABLE(AddEmployerAndClientPage, wxWizardPageSimple)
-    EVT_WIZARD_CANCEL(wxID_ANY, AddEmployerAndClientPage::OnWizardCancel)
+wxBEGIN_EVENT_TABLE(AddEmployerPage, wxWizardPageSimple)
+    EVT_WIZARD_CANCEL(wxID_ANY, AddEmployerPage::OnWizardCancel)
 wxEND_EVENT_TABLE()
 
-AddEmployerAndClientPage::AddEmployerAndClientPage(SetupWizard* parent)
+AddEmployerPage::AddEmployerPage(wxWizard* parent, std::shared_ptr<EntityCompositor> compositor)
     : wxWizardPageSimple(parent)
     , pParent(parent)
+    , pCompositor(compositor)
+    , pEmployerTextCtrl(nullptr)
 // clang-format on
 {
-    auto mainSizer = new wxBoxSizer(wxVERTICAL);
-
-    auto employerSizer = new wxBoxSizer(wxVERTICAL);
-    mainSizer->Add(employerSizer, wxSizerFlags().Border(wxALL, 5).Expand());
-
-    wxString employerDescriptiveText = wxT("An employer is the company that employs you\n"
-                                           "(this can be a company or self-employment)");
-    auto employerTextCtrl = new wxStaticText(this, wxID_ANY, employerDescriptiveText);
-    employerSizer->Add(employerTextCtrl, wxSizerFlags().Border(wxALL, 5));
-
-    auto employerHorizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(1, 1), wxLI_HORIZONTAL);
-    employerSizer->Add(employerHorizontalLine, wxSizerFlags().Expand());
-
-    auto employerHSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto employerText = new wxStaticText(this, wxID_ANY, wxT("Employer:"));
-    employerHSizer->Add(employerText, wxSizerFlags().Border(wxALL, 5).CenterVertical());
-
-    pEmployerCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
-    pEmployerCtrl->SetHint(wxT("Employer name"));
-    pEmployerCtrl->SetToolTip(wxT("Specify a descriptive name for an employer"));
-    employerHSizer->Add(pEmployerCtrl, wxSizerFlags().Border(wxALL, 5));
-    employerSizer->Add(employerHSizer, 0);
-
-    mainSizer->AddSpacer(16);
-
-    auto horizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(3, 3), wxLI_HORIZONTAL);
-    mainSizer->Add(horizontalLine, wxSizerFlags().Expand());
-
-    mainSizer->AddSpacer(16);
-
-    auto clientSizer = new wxBoxSizer(wxVERTICAL);
-    mainSizer->Add(clientSizer, wxSizerFlags().Border(wxALL, 5).Expand());
-
-    wxString clientDescriptiveText = wxT("A client is a beneficiary of an employer\n"
-                                         "(utilizes a person's/companys services)");
-    auto clientTextCtrl = new wxStaticText(this, wxID_ANY, clientDescriptiveText);
-    clientSizer->Add(clientTextCtrl, wxSizerFlags().Border(wxALL, 5));
-
-    auto clientHorizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(1, 1), wxLI_HORIZONTAL);
-    clientSizer->Add(clientHorizontalLine, wxSizerFlags().Expand());
-
-    auto clientHSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto clientText = new wxStaticText(this, wxID_ANY, wxT("Client:*"));
-    clientHSizer->Add(clientText, wxSizerFlags().Border(wxALL, 5).CenterVertical());
-
-    pClientCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
-    pClientCtrl->SetHint(wxT("Client name (optional)"));
-    pClientCtrl->SetToolTip(wxT("Specify a client name to associate to the employer above"));
-    clientHSizer->Add(pClientCtrl, wxSizerFlags().Border(wxALL, 5));
-
-    clientSizer->Add(clientHSizer, 0);
-
-    SetSizerAndFit(mainSizer);
+    CreateControls();
 }
 
-bool AddEmployerAndClientPage::TransferDataFromWindow()
+bool AddEmployerPage::TransferDataFromWindow()
 {
-    const wxString employer = pEmployerCtrl->GetValue().Trim();
+    const wxString employer = pEmployerTextCtrl->GetValue().Trim();
     if (employer.empty()) {
         wxMessageBox(wxT("An employer is required"), common::GetProgramName(), wxOK | wxICON_ERROR, this);
         return false;
     }
 
-    const wxString client = pClientCtrl->GetValue().Trim();
-
-    pParent->SetEmployer(employer);
-    pParent->SetClient(client);
+    if (!pCompositor->ComposeEmployerEntity(std::make_unique<model::EmployerModel>(employer))) {
+        wxMessageBox(wxT("An error occured during the Employer save operation."),
+            common::GetProgramName(),
+            wxOK_DEFAULT | wxICON_ERROR);
+        return false;
+    }
 
     return true;
 }
 
-void AddEmployerAndClientPage::OnWizardCancel(wxWizardEvent& event)
+void AddEmployerPage::OnWizardCancel(wxWizardEvent& event)
 {
-    auto userResponse = wxMessageBox(
-        wxT("Are you sure want to cancel the setup and exit?"), common::GetProgramName(), wxICON_QUESTION | wxYES_NO);
+    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup wizard and exit?"),
+        common::GetProgramName(),
+        wxICON_QUESTION | wxYES_NO);
     if (userResponse == wxNO) {
         event.Veto();
     }
+}
+
+void AddEmployerPage::CreateControls()
+{
+    auto mainSizer = new wxBoxSizer(wxVERTICAL);
+
+    /* Wizard page heading */
+    wxString addEmployerString = wxT("Employer Setup");
+    auto addEmployerLabel = new wxStaticText(this, wxID_ANY, addEmployerString);
+    auto addEmployerLabelFont = addEmployerLabel->GetFont();
+    addEmployerLabelFont.MakeBold();
+    addEmployerLabelFont.SetPointSize(13);
+    addEmployerLabel->SetFont(addEmployerLabelFont);
+    mainSizer->Add(addEmployerLabel, wxSizerFlags().Border(wxALL, 5));
+
+    mainSizer->AddSpacer(2);
+
+    /* Wizard page subtitle */
+    wxString employerOptionalString = wxT("required");
+    auto employerOptionalLabel = new wxStaticText(this, wxID_ANY, employerOptionalString);
+    auto employerOptionalLabelFont = employerOptionalLabel->GetFont();
+    employerOptionalLabelFont.MakeBold();
+    employerOptionalLabelFont.SetPointSize(8);
+    employerOptionalLabel->SetFont(employerOptionalLabelFont);
+    mainSizer->Add(employerOptionalLabel, wxSizerFlags().Border(wxALL, 5));
+
+    mainSizer->AddSpacer(2);
+
+    auto employerHorizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(3, 3), wxLI_HORIZONTAL);
+    mainSizer->Add(employerHorizontalLine, wxSizerFlags().Expand());
+
+    mainSizer->AddSpacer(2);
+
+    /* Information Box */
+    auto informationBox = new wxStaticBox(this, wxID_ANY, wxT("Information"));
+    auto informationBoxSizer = new wxStaticBoxSizer(informationBox, wxVERTICAL);
+
+    /* Employer description text */
+    wxString employerDescriptiveText = wxT("A person or organization or business entity\n"
+                                           "that employs you.\n"
+                                           "This includes self-employment.");
+    auto employerTextCtrl = new wxStaticText(informationBox, wxID_ANY, employerDescriptiveText);
+    informationBoxSizer->Add(employerTextCtrl, wxSizerFlags().Border(wxALL, 5));
+    mainSizer->Add(informationBoxSizer, wxSizerFlags().Border(wxALL, 5).Expand());
+
+    auto employerSizer = new wxBoxSizer(wxVERTICAL);
+    mainSizer->Add(employerSizer, wxSizerFlags().Border(wxALL, 5).Expand());
+
+    employerSizer->AddSpacer(8);
+
+    auto employerHSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto employerText = new wxStaticText(this, wxID_ANY, wxT("Employer:"));
+    employerHSizer->Add(employerText, wxSizerFlags().Border(wxALL, 5).CenterVertical());
+
+    wxTextValidator employerInputValidator(wxFILTER_ALPHANUMERIC | wxFILTER_INCLUDE_CHAR_LIST);
+    wxArrayString allowedChars;
+    allowedChars.Add(wxT(" "));
+    allowedChars.Add(wxT("."));
+    allowedChars.Add(wxT("'"));
+    allowedChars.Add(wxT("("));
+    allowedChars.Add(wxT(")"));
+    allowedChars.Add(wxT("-"));
+    employerInputValidator.SetIncludes(allowedChars);
+
+    pEmployerTextCtrl = new wxTextCtrl(
+        this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT, employerInputValidator);
+    pEmployerTextCtrl->SetHint(wxT("Employer name"));
+    pEmployerTextCtrl->SetToolTip(wxT("Specify a descriptive name for an employer"));
+    employerHSizer->Add(pEmployerTextCtrl, wxSizerFlags().Border(wxALL, 5));
+    employerSizer->Add(employerHSizer, 0);
+
+    mainSizer->AddSpacer(16);
+
+    SetSizerAndFit(mainSizer);
+}
+
+// clang-format off
+wxBEGIN_EVENT_TABLE(AddClientPage, wxWizardPageSimple)
+    EVT_WIZARD_CANCEL(wxID_ANY, AddClientPage::OnWizardCancel)
+wxEND_EVENT_TABLE()
+
+AddClientPage::AddClientPage(wxWizard* parent, std::shared_ptr<EntityCompositor> compositor)
+    : wxWizardPageSimple(parent)
+    , pParent(parent)
+    , pCompositor(compositor)
+    , pClientTextCtrl(nullptr)
+// clang-format on
+{
+    CreateControls();
+}
+
+bool AddClientPage::TransferDataFromWindow()
+{
+    const wxString clientName = pClientTextCtrl->GetValue().Trim();
+    if (clientName.empty()) {
+        return true;
+    }
+
+    if (!clientName.empty() && !clientName.length() > 2) {
+        wxMessageBox(wxT("An client name is required to be at least 2 characters long"),
+            common::GetProgramName(),
+            wxOK | wxICON_ERROR,
+            this);
+        return false;
+    }
+
+    std::unique_ptr<model::ClientModel> clientModel = std::make_unique<model::ClientModel>();
+    clientModel->SetName(clientName);
+    if (!pCompositor->ComposeClientEntity(std::move(clientModel))) {
+        wxMessageBox(wxT("An error occured during the Client save operation."),
+            common::GetProgramName(),
+            wxOK_DEFAULT | wxICON_ERROR);
+        return false;
+    }
+
+    return true;
+}
+
+void AddClientPage::OnWizardCancel(wxWizardEvent& event)
+{
+    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup wizard and exit?"),
+        common::GetProgramName(),
+        wxICON_QUESTION | wxYES_NO);
+    if (userResponse == wxNO) {
+        event.Veto();
+    }
+}
+
+void AddClientPage::CreateControls()
+{
+    auto mainSizer = new wxBoxSizer(wxVERTICAL);
+
+    /* Wizard page heading */
+    wxString addClientString = wxT("Client Setup");
+    auto addClientLabel = new wxStaticText(this, wxID_ANY, addClientString);
+    auto addClientLabelFont = addClientLabel->GetFont();
+    addClientLabelFont.MakeBold();
+    addClientLabelFont.SetPointSize(13);
+    addClientLabel->SetFont(addClientLabelFont);
+    mainSizer->Add(addClientLabel, wxSizerFlags().Border(wxALL, 5));
+
+    mainSizer->AddSpacer(2);
+
+    /* Wizard page subtitle */
+    wxColourDatabase colorDatabase;
+    wxString clientOptionalString = wxT("optional");
+    auto clientOptionalLabel = new wxStaticText(this, wxID_ANY, clientOptionalString);
+    auto clientOptionalLabelFont = clientOptionalLabel->GetFont();
+    clientOptionalLabelFont.MakeItalic();
+    clientOptionalLabelFont.SetPointSize(8);
+    clientOptionalLabel->SetFont(clientOptionalLabelFont);
+    clientOptionalLabel->SetForegroundColour(colorDatabase.Find(wxT("DARK GREY")));
+    mainSizer->Add(clientOptionalLabel, wxSizerFlags().Border(wxALL, 5));
+
+    mainSizer->AddSpacer(2);
+
+    auto clientHorizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(3, 3), wxLI_HORIZONTAL);
+    mainSizer->Add(clientHorizontalLine, wxSizerFlags().Expand());
+
+    mainSizer->AddSpacer(2);
+
+    /* Information Box */
+    auto informationBox = new wxStaticBox(this, wxID_ANY, wxT("Information"));
+    auto informationBoxSizer = new wxStaticBoxSizer(informationBox, wxVERTICAL);
+
+    /* Client description text */
+    wxString clientDescriptiveText = wxT("A client is a beneficiary of an employer that\n"
+                                         "utilizes (buys or pays) the services/goods\n"
+                                         "provided by a person or a company.");
+    auto clientTextCtrl = new wxStaticText(informationBox, wxID_ANY, clientDescriptiveText);
+    informationBoxSizer->Add(clientTextCtrl, wxSizerFlags().Border(wxALL, 5));
+    mainSizer->Add(informationBoxSizer, wxSizerFlags().Border(wxALL, 5).Expand());
+
+    auto clientSizer = new wxBoxSizer(wxVERTICAL);
+    mainSizer->Add(clientSizer, wxSizerFlags().Border(wxALL, 5).Expand());
+
+    clientSizer->AddSpacer(8);
+
+    auto clientHSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto clientText = new wxStaticText(this, wxID_ANY, wxT("Client:"));
+    clientHSizer->Add(clientText, wxSizerFlags().Border(wxALL, 5).CenterVertical());
+
+    wxTextValidator clientInputValidator(wxFILTER_ALPHANUMERIC | wxFILTER_INCLUDE_CHAR_LIST);
+    wxArrayString allowedChars;
+    allowedChars.Add(wxT(" "));
+    allowedChars.Add(wxT("."));
+    allowedChars.Add(wxT("'"));
+    allowedChars.Add(wxT("("));
+    allowedChars.Add(wxT(")"));
+    allowedChars.Add(wxT("-"));
+    clientInputValidator.SetIncludes(allowedChars);
+
+    pClientTextCtrl = new wxTextCtrl(
+        this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT, clientInputValidator);
+    pClientTextCtrl->SetHint(wxT("Client name"));
+    pClientTextCtrl->SetToolTip(wxT("Specify a descriptive name for a client"));
+    clientHSizer->Add(pClientTextCtrl, wxSizerFlags().Border(wxALL, 5));
+    clientSizer->Add(clientHSizer, 0);
+
+    mainSizer->AddSpacer(16);
+
+    SetSizerAndFit(mainSizer);
 }
 
 // clang-format off
 wxBEGIN_EVENT_TABLE(AddProjectPage, wxWizardPageSimple)
     EVT_WIZARD_CANCEL(wxID_ANY, AddProjectPage::OnWizardCancel)
+    EVT_TEXT(IDC_NAME, AddProjectPage::OnNameChange)
+    EVT_CHECKBOX(IDC_BILLABLE, AddProjectPage::OnBillableCheck)
+    EVT_CHOICE(IDC_RATECHOICE, AddProjectPage::OnRateChoiceSelection)
 wxEND_EVENT_TABLE()
 
-AddProjectPage::AddProjectPage(SetupWizard* parent)
+AddProjectPage::AddProjectPage(SetupWizard* parent,
+    std::shared_ptr<spdlog::logger> logger,
+    std::shared_ptr<EntityCompositor> compositor)
     : wxWizardPageSimple(parent)
+    , pLogger(logger)
+    , pCompositor(compositor)
     , pParent(parent)
+    , pNameTextCtrl(nullptr)
+    , pDisplayNameTextCtrl(nullptr)
+    , pBillableCheckBoxCtrl(nullptr)
+    , pRateChoiceCtrl(nullptr)
+    , pRateTextCtrl(nullptr)
+    , pCurrencyComboBoxCtrl(nullptr)
 // clang-format on
 {
-    auto mainSizer = new wxBoxSizer(wxVERTICAL);
-
-    auto projectSizer = new wxBoxSizer(wxVERTICAL);
-    mainSizer->Add(projectSizer, wxSizerFlags().Border(wxALL, 5).Expand());
-
-    auto projectInfoText = wxT("A business undertaking as a individual or\n"
-                               "team to achieve a business goal");
-    auto projectInfoTextCtrl = new wxStaticText(this, wxID_ANY, projectInfoText);
-    projectSizer->Add(projectInfoTextCtrl, wxSizerFlags().Border(wxALL, 5));
-
-    auto projectHorizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(2, 2), wxLI_HORIZONTAL);
-    projectSizer->Add(projectHorizontalLine, wxSizerFlags().Expand());
-
-    auto projectNameHSizer = new wxBoxSizer(wxHORIZONTAL);
-    projectSizer->Add(projectNameHSizer, 1);
-
-    auto projectLabel = new wxStaticText(this, wxID_ANY, wxT("Project:"));
-    projectNameHSizer->Add(projectLabel, wxSizerFlags().Border(wxALL, 5).CenterVertical());
-
-    projectNameHSizer->AddStretchSpacer(1);
-
-    pNameCtrl = new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
-    pNameCtrl->SetHint(wxT("Project name"));
-    pNameCtrl->SetToolTip(wxT("Specify a project name to associate with said employer and/or client"));
-    projectNameHSizer->Add(pNameCtrl, wxSizerFlags().Border(wxALL, 5));
-
-    projectSizer->AddSpacer(8);
-
-    wxString displayNameInfo = wxT("A shortened version of a project name to\n"
-                                   "aid with legibility and display.");
-    auto displayNameInfoTextCtrl = new wxStaticText(this, wxID_ANY, displayNameInfo);
-    projectSizer->Add(displayNameInfoTextCtrl, wxSizerFlags().Border(wxALL, 5));
-
-    auto displayNameHorizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(2, 2), wxLI_HORIZONTAL);
-    projectSizer->Add(displayNameHorizontalLine, wxSizerFlags().Expand());
-
-    auto displayNameHSizer = new wxBoxSizer(wxHORIZONTAL);
-    projectSizer->Add(displayNameHSizer, 1);
-
-    auto displayNameLabel = new wxStaticText(this, wxID_ANY, wxT("Display Name:"));
-    displayNameHSizer->Add(displayNameLabel, wxSizerFlags().Border(wxALL, 5));
-
-    pDisplayNameCtrl =
-        new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
-    pDisplayNameCtrl->SetHint(wxT("Display name"));
-    pDisplayNameCtrl->SetToolTip(wxT("Specify a shortened version of the project name"));
-    displayNameHSizer->Add(pDisplayNameCtrl, wxSizerFlags().Border(wxALL, 5).CenterVertical());
-
-    SetSizerAndFit(mainSizer);
+    CreateControls();
+    FillControls();
 }
 
 bool AddProjectPage::TransferDataFromWindow()
 {
-    const wxString projectName = pNameCtrl->GetValue().Trim();
+    std::unique_ptr<model::ProjectModel> project = nullptr;
+
+    const wxString projectName = pNameTextCtrl->GetValue().Trim();
     if (projectName.empty()) {
         wxMessageBox(wxT("A project name is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
         return false;
     }
 
-    const wxString displayName = pDisplayNameCtrl->GetValue().Trim();
+    const wxString displayName = pDisplayNameTextCtrl->GetValue().Trim();
     if (displayName.empty()) {
         wxMessageBox(wxT("A display name is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
         return false;
     }
 
-    pParent->SetProject(projectName);
-    pParent->SetProjectDisplayName(displayName);
+    bool isBillable = pBillableCheckBoxCtrl->GetValue();
+    if (!isBillable) {
+        project = std::make_unique<model::ProjectModel>(projectName, displayName, isBillable, nullptr, -1, -1);
+    } else {
+        int rateChoice = util::VoidPointerToInt(pRateChoiceCtrl->GetClientData(pRateChoiceCtrl->GetSelection()));
+        if (rateChoice == 0) {
+            wxMessageBox(wxT("A rate selection is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
+            return false;
+        }
 
-    return true;
+        if (rateChoice == static_cast<int>(constants::RateTypes::Unknown)) {
+            project =
+                std::make_unique<model::ProjectModel>(projectName, displayName, isBillable, nullptr, rateChoice, -1);
+        }
+
+        if (rateChoice == static_cast<int>(constants::RateTypes::Hourly)) {
+            wxString value = pRateTextCtrl->GetValue();
+            if (value.empty()) {
+                wxMessageBox(wxT("A rate value is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
+                return false;
+            }
+            std::unique_ptr<double> rate =
+                std::move(std::make_unique<double>(std::stod(pRateTextCtrl->GetValue().ToStdString())));
+
+            if (pCurrencyComboBoxCtrl->GetSelection() == 0) {
+                wxMessageBox(wxT("A currency selection is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
+                return false;
+            }
+
+            int currencyId =
+                util::VoidPointerToInt(pCurrencyComboBoxCtrl->GetClientData(pCurrencyComboBoxCtrl->GetSelection()));
+            project = std::make_unique<model::ProjectModel>(
+                projectName, displayName, isBillable, std::move(rate), rateChoice, currencyId);
+        }
+    }
+
+    if (!pCompositor->ComposeProjectEntity(std::move(project))) {
+        wxMessageBox(wxT("An error occured during the Project save operation."),
+            common::GetProgramName(),
+            wxOK_DEFAULT | wxICON_ERROR);
+        return false;
+    }
+
+    return false;
 }
 
 void AddProjectPage::OnWizardCancel(wxWizardEvent& event)
 {
-    auto userResponse = wxMessageBox(
-        wxT("Are you sure want to cancel the setup and exit?"), wxT("Taskable Wizard"), wxICON_QUESTION | wxYES_NO);
+    auto userResponse = wxMessageBox(wxT("Are you sure want to cancel the setup wizard and exit?"),
+        wxT("Taskable Wizard"),
+        wxICON_QUESTION | wxYES_NO);
     if (userResponse == wxNO) {
         event.Veto();
+    }
+}
+
+void AddProjectPage::OnNameChange(wxCommandEvent& event)
+{
+    wxString name = pNameTextCtrl->GetValue();
+    pDisplayNameTextCtrl->ChangeValue(name);
+}
+
+void AddProjectPage::OnBillableCheck(wxCommandEvent& event)
+{
+    if (event.IsChecked()) {
+        pRateChoiceCtrl->Enable();
+    } else {
+        pRateChoiceCtrl->Disable();
+        pRateTextCtrl->Disable();
+        pCurrencyComboBoxCtrl->Disable();
+
+        pRateChoiceCtrl->SetSelection(0);
+        pRateTextCtrl->ChangeValue(wxGetEmptyString());
+        pCurrencyComboBoxCtrl->SetSelection(0);
+    }
+}
+
+void AddProjectPage::OnRateChoiceSelection(wxCommandEvent& event)
+{
+    int selection = util::VoidPointerToInt(pRateChoiceCtrl->GetClientData(pRateChoiceCtrl->GetSelection()));
+    if (selection == static_cast<int>(constants::RateTypes::Unknown) || selection == 0) {
+        pRateTextCtrl->Disable();
+        pCurrencyComboBoxCtrl->Disable();
+
+        pRateTextCtrl->ChangeValue(wxGetEmptyString());
+        pCurrencyComboBoxCtrl->SetSelection(0);
+    }
+    if (selection == static_cast<int>(constants::RateTypes::Hourly)) {
+        pRateTextCtrl->Enable();
+        pCurrencyComboBoxCtrl->Enable();
+    }
+}
+
+void AddProjectPage::CreateControls()
+{
+    auto mainSizer = new wxBoxSizer(wxVERTICAL);
+
+    /* Wizard page heading */
+    wxString addProjectString = wxT("Project Setup");
+    auto addProjectLabel = new wxStaticText(this, wxID_ANY, addProjectString);
+    auto addProjectLabelFont = addProjectLabel->GetFont();
+    addProjectLabelFont.MakeBold();
+    addProjectLabelFont.SetPointSize(13);
+    addProjectLabel->SetFont(addProjectLabelFont);
+    mainSizer->Add(addProjectLabel, wxSizerFlags().Border(wxALL, 5));
+
+    mainSizer->AddSpacer(2);
+
+    /* Wizard page subtitle */
+    wxString projectRequiredString = wxT("required");
+    auto projectRequiredLabel = new wxStaticText(this, wxID_ANY, projectRequiredString);
+    auto projectRequiredLabelFont = projectRequiredLabel->GetFont();
+    projectRequiredLabelFont.MakeBold();
+    projectRequiredLabelFont.SetPointSize(8);
+    projectRequiredLabel->SetFont(projectRequiredLabelFont);
+    mainSizer->Add(projectRequiredLabel, wxSizerFlags().Border(wxALL, 5));
+
+    mainSizer->AddSpacer(2);
+
+    auto projectHorizontalLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(3, 3), wxLI_HORIZONTAL);
+    mainSizer->Add(projectHorizontalLine, wxSizerFlags().Expand());
+
+    mainSizer->AddSpacer(2);
+
+    /* Information Box */
+    auto informationBox = new wxStaticBox(this, wxID_ANY, wxT("Information"));
+    auto informationBoxSizer = new wxStaticBoxSizer(informationBox, wxVERTICAL);
+
+    /* Project description text */
+    wxString projectDescriptiveText = wxT("A project is a piece of work that is planned\n"
+                                          "within a business environment to achieve\n"
+                                          "business objectives that align to a\n"
+                                          "company's business strategy.");
+    auto projectTextCtrl = new wxStaticText(informationBox, wxID_ANY, projectDescriptiveText);
+    informationBoxSizer->Add(projectTextCtrl, wxSizerFlags().Border(wxALL, 5));
+    mainSizer->Add(informationBoxSizer, wxSizerFlags().Border(wxALL, 5).Expand());
+
+    auto projectSizer = new wxBoxSizer(wxVERTICAL);
+    mainSizer->Add(projectSizer, wxSizerFlags().Border(wxALL, 5).Expand());
+
+    auto projectFlexGridSizer = new wxFlexGridSizer(2, 1, 1);
+    projectSizer->Add(projectFlexGridSizer, 1);
+
+    /* Project Name Text Control */
+    auto projectLabel = new wxStaticText(this, wxID_ANY, wxT("Project:"));
+    projectFlexGridSizer->Add(projectLabel, wxSizerFlags().Border(wxALL, 5).CenterVertical());
+
+    pNameTextCtrl = new wxTextCtrl(this, IDC_NAME, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
+    pNameTextCtrl->SetHint(wxT("Project name"));
+    pNameTextCtrl->SetToolTip(wxT("Specify a project name to associate with said employer and/or client"));
+    projectFlexGridSizer->Add(pNameTextCtrl, wxSizerFlags().Border(wxALL, 5));
+
+    /* Project Display Name Text Control */
+    auto displayNameLabel = new wxStaticText(this, wxID_ANY, wxT("Display Name:"));
+    projectFlexGridSizer->Add(displayNameLabel, wxSizerFlags().Border(wxALL, 5));
+
+    pDisplayNameTextCtrl =
+        new wxTextCtrl(this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
+    pDisplayNameTextCtrl->SetHint(wxT("Display name"));
+    pDisplayNameTextCtrl->SetToolTip(wxT("Specify a shortened version of the project name"));
+    projectFlexGridSizer->Add(pDisplayNameTextCtrl, wxSizerFlags().Border(wxALL, 5).CenterVertical());
+
+    /* Billable Checkbox Control */
+    projectFlexGridSizer->Add(0, 0);
+
+    pBillableCheckBoxCtrl = new wxCheckBox(this, IDC_BILLABLE, wxT("Billable"));
+    pBillableCheckBoxCtrl->SetToolTip(wxT("Indicates that work on this project is billable"));
+    projectFlexGridSizer->Add(pBillableCheckBoxCtrl, wxSizerFlags().Border(wxALL, 5));
+
+    /* Rate Choice Control */
+    auto rateText = new wxStaticText(this, wxID_STATIC, wxT("Rate"));
+    projectFlexGridSizer->Add(rateText, wxSizerFlags().Border(wxALL, 5).CenterVertical());
+
+    pRateChoiceCtrl = new wxChoice(this, IDC_RATECHOICE, wxDefaultPosition, wxDefaultSize);
+    pRateChoiceCtrl->SetToolTip(wxT("Select a rate at which to charge work at"));
+    pRateChoiceCtrl->AppendString(wxT("Select a rate"));
+    pRateChoiceCtrl->SetSelection(0);
+    pRateChoiceCtrl->Disable();
+    projectFlexGridSizer->Add(pRateChoiceCtrl, wxSizerFlags().Border(wxALL, 5).Expand());
+
+    /* Rate Text Control */
+    auto rateValueText = new wxStaticText(this, wxID_STATIC, wxT("Rate Value"));
+    projectFlexGridSizer->Add(rateValueText, wxSizerFlags().Border(wxALL, 5).CenterVertical());
+
+    wxFloatingPointValidator<double> rateValueValidator(2, nullptr, wxNUM_VAL_ZERO_AS_BLANK);
+    rateValueValidator.SetRange(0.0, 1000000.0);
+
+    pRateTextCtrl = new wxTextCtrl(
+        this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT, rateValueValidator);
+    pRateTextCtrl->SetHint(wxT("Rate value"));
+    pRateTextCtrl->SetToolTip(wxT("Enter the rate at which to charge work at"));
+    pRateTextCtrl->Disable();
+    projectFlexGridSizer->Add(pRateTextCtrl, wxSizerFlags().Border(wxALL, 5));
+
+    /* Currency ComboBox Control */
+    auto currencyText = new wxStaticText(this, wxID_STATIC, wxT("Currency"));
+    projectFlexGridSizer->Add(currencyText, wxSizerFlags().Border(wxALL, 5));
+
+    wxArrayString choices;
+    choices.Add(wxT("Select a currency"));
+    pCurrencyComboBoxCtrl =
+        new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, choices, wxCB_DROPDOWN);
+    pCurrencyComboBoxCtrl->SetToolTip(wxT("Select a currency to associate the rate value with"));
+    pCurrencyComboBoxCtrl->SetSelection(0);
+    pCurrencyComboBoxCtrl->Disable();
+    projectFlexGridSizer->Add(pCurrencyComboBoxCtrl, wxSizerFlags().Border(wxALL, 5).Expand());
+
+    SetSizerAndFit(mainSizer);
+}
+
+void AddProjectPage::FillControls()
+{
+    /* Load Rate Types */
+    data::RateTypeData rateTypeData;
+    std::vector<std::unique_ptr<model::RateTypeModel>> rateTypes;
+
+    try {
+        rateTypes = rateTypeData.GetAll();
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in RateTypeModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
+    }
+
+    for (const auto& rateType : rateTypes) {
+        pRateChoiceCtrl->Append(rateType->GetName(), util::IntToVoidPointer(rateType->GetRateTypeId()));
+    }
+
+    /* Load Currencies */
+    data::CurrencyData currencyData;
+    std::vector<std::unique_ptr<model::CurrencyModel>> curriencies;
+
+    try {
+        curriencies = currencyData.GetAll();
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured in CurrencyModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
+    }
+
+    for (const auto& currency : curriencies) {
+        pCurrencyComboBoxCtrl->Append(wxString::Format(wxT("%s (%s)"), currency->GetName(), currency->GetCode()),
+            util::IntToVoidPointer(currency->GetCurrencyId()));
     }
 }
 } // namespace app::wizard
