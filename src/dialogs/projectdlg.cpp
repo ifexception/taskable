@@ -386,7 +386,7 @@ void ProjectDialog::FillControls()
         data::RateTypeData rateTypeData;
         rateTypes = rateTypeData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in RateTypeModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in RateTypeData::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (const auto& rateType : rateTypes) {
@@ -399,7 +399,7 @@ void ProjectDialog::FillControls()
         data::CurrencyData currencyData;
         curriencies = currencyData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in CurrencyModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in CurrencyData::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (const auto& currency : curriencies) {
