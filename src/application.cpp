@@ -63,7 +63,7 @@ bool Application::OnInit()
         return false;
     }
 
-    if (IsSetup()) {
+    if (!IsSetup()) {
         if (!StartupInitialization()) {
             return false;
         }
@@ -83,7 +83,12 @@ bool Application::OnInit()
 
 bool Application::FirstStartupInitialization()
 {
+    CreateDatabaseFile();
+    InitializeDatabaseConnectionProvider();
+
     if (!RunSetupWizard()) {
+        db::ConnectionProvider::Get().PurgeConnectionPool();
+        DeleteDatabaseFile();
         return false;
     }
 
@@ -148,8 +153,8 @@ bool Application::CreateLogsDirectory()
 
 bool Application::InitializeDatabaseConnectionProvider()
 {
-    auto sqliteConnectionFactory =
-        std::make_shared<db::SqliteConnectionFactory>(pConfig->GetDatabasePath().ToStdString());
+    auto sqliteConnectionFactory = std::make_shared<db::SqliteConnectionFactory>(
+        common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString());
     auto connectionPool = std::make_unique<db::ConnectionPool<db::SqliteConnection>>(sqliteConnectionFactory, 2);
     db::ConnectionProvider::Get().InitializeConnectionPool(std::move(connectionPool));
 
@@ -207,15 +212,11 @@ bool Application::ConfigurationFileExists()
 {
     bool configFileExists = wxFileExists(common::GetConfigFilePath());
     if (!configFileExists) {
-        int res = wxMessageBox(wxT("Error: Program cannot locate configuration file!\nRecreate configuration file?"),
+        wxMessageBox(wxT("Error: Program cannot locate configuration file!"),
             common::GetProgramName(),
-            wxYES_NO | wxICON_ERROR);
-        if (res == wxYES) {
-            pConfig->RecreateIfNotExists();
-            return true;
-        } else {
-            return false;
-        }
+            wxOK_DEFAULT | wxICON_ERROR);
+        pLogger->error("Unable to locate configuration file at specified location.");
+        return false;
     }
 
     pConfig = std::make_shared<cfg::Configuration>();
@@ -245,71 +246,74 @@ bool Application::CreateBackupsDirectory()
     return true;
 }
 
+bool Application::CreateDatabaseFile()
+{
+    if (!wxDirExists(pConfig->GetDatabasePath())) {
+        if (!wxMkdir(pConfig->GetDatabasePath())) {
+            pLogger->error("Unable to create database directory at specified location.");
+        }
+    }
+
+    wxFile file;
+    auto succeeded = file.Create(common::GetDatabaseFilePath(pConfig->GetDatabasePath()));
+    if (!succeeded) {
+        pLogger->error("Unable to create database file at specified location.");
+    }
+    file.Close();
+
+    return succeeded;
+}
+
+void Application::DeleteDatabaseFile()
+{
+    if (wxFileExists(common::GetDatabaseFilePath(pConfig->GetDatabasePath()))) {
+        if (!wxRemoveFile(common::GetDatabaseFilePath(pConfig->GetDatabasePath()))) {
+            pLogger->error("Unable to delete database file.");
+        }
+    }
+}
+
 bool Application::DatabaseFileExists()
 {
-    /* Check if the 'data' directory is missing */
+    /* Check if the database directory is missing */
     if (!wxDirExists(pConfig->GetDatabasePath())) {
-        /* Backups are enabled so create the directory and to restore database */
-        if (pConfig->IsBackupEnabled()) {
-            int ret = wxMessageBox(wxT("Error: Program cannot find database file!\nRestore database from backup?"),
-                common::GetProgramName(),
-                wxYES_NO | wxICON_WARNING);
-            if (ret == wxYES) {
-                if (!wxMkdir(pConfig->GetDatabasePath())) {
-                    return false;
-                }
-                auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pConfig, pLogger, pDatabase, true);
-                restoreDatabase->CenterOnParent();
-                return restoreDatabase->Run();
-            } else {
-                return false;
-            }
-        } else {
-            /* Backups are disabled so run the setup wizard to create the directory and setup the database again */
-            int ret = wxMessageBox(wxT("Error! Program cannot find database file\n"
-                                       "and database backups are turned off.\n"
-                                       "Run setup wizard?"),
-                common::GetProgramName(),
-                wxYES_NO | wxICON_ERROR);
-            if (ret == wxYES) {
-                return RunSetupWizard();
-            } else {
-                return false;
-            }
+        /* Create the database directory */
+        if (!wxMkdir(pConfig->GetDatabasePath())) {
+            return false;
         }
     }
 
     /* Check if the database file is missing */
-    bool databaseFileExists = wxFileExists(common::GetDatabaseFilePath(pConfig->GetDatabasePath()));
-
-    if (!databaseFileExists) {
+    if (!wxFileExists(common::GetDatabaseFilePath(pConfig->GetDatabasePath()))) {
         /* Backups are enabled so run the database restore wizard to restore database */
         if (pConfig->IsBackupEnabled()) {
-            int ret = wxMessageBox(wxT("Error: Program cannot find database file!\nRestore database from backup?"),
+            int ret = wxMessageBox(wxT("Error: Program cannot find database file\nRestore database from backup?"),
                 common::GetProgramName(),
-                wxYES_NO | wxICON_WARNING);
+                wxYES_NO | wxICON_ERROR);
             if (ret == wxYES) {
                 auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pConfig, pLogger, pDatabase, true);
                 restoreDatabase->CenterOnParent();
                 return restoreDatabase->Run();
             }
-        }
-
-        /* Backups are disabled so run the setup wizard to setup the database again */
-        if (!pConfig->IsBackupEnabled()) {
-            int ret = wxMessageBox(wxT("Error! Missing database file\n"
+        } else { /* Backups are disabled so run the setup wizard to setup the database again */
+            int ret = wxMessageBox(wxT("Error: Program cannot find database file\n"
                                        "and database backups are turned off.\n"
                                        "Run setup wizard?"),
                 common::GetProgramName(),
                 wxYES_NO | wxICON_ERROR);
             if (ret == wxYES) {
-                return RunSetupWizard();
+                CreateDatabaseFile();
+                if (!RunSetupWizard()) {
+                    db::ConnectionProvider::Get().PurgeConnectionPool();
+                    DeleteDatabaseFile();
+                }
             } else {
                 return false;
             }
         }
     }
-    return databaseFileExists;
+
+    return true;
 }
 } // namespace app
 

@@ -57,9 +57,9 @@ private:
 
     bool CreateBackupsDirectory();
 
+    bool CreateDatabaseFile();
+    void DeleteDatabaseFile();
     bool DatabaseFileExists();
-
-    void InitializeSqliteConnection();
 
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
