@@ -24,7 +24,6 @@
 #include <string>
 
 #include <sqlite_modern_cpp.h>
-
 #include "connection.h"
 #include "connectionfactory.h"
 
@@ -36,7 +35,7 @@ class ConnectionPool final
 public:
     ConnectionPool() = delete;
     ConnectionPool(std::shared_ptr<IConnectionFactory> factory, std::size_t poolSize);
-    ~ConnectionPool() = default;
+    ~ConnectionPool();
 
     std::shared_ptr<T> Acquire();
     void Release(std::shared_ptr<T> connection);
@@ -59,6 +58,12 @@ inline ConnectionPool<T>::ConnectionPool(std::shared_ptr<IConnectionFactory> fac
 }
 
 template<class T>
+inline ConnectionPool<T>::~ConnectionPool()
+{
+    mPool.clear();
+}
+
+template<class T>
 inline std::shared_ptr<T> ConnectionPool<T>::Acquire()
 {
     if (mPool.size() == 0) {
@@ -68,6 +73,7 @@ inline std::shared_ptr<T> ConnectionPool<T>::Acquire()
 
     auto connection = mPool.front();
     mPool.pop_front();
+    wxLogDebug(wxT("Acquire()"));
 
     return std::dynamic_pointer_cast<T>(connection);
 }
@@ -76,5 +82,6 @@ template<class T>
 inline void ConnectionPool<T>::Release(std::shared_ptr<T> connection)
 {
     mPool.push_back(std::dynamic_pointer_cast<IConnection>(connection));
+    wxLogDebug(wxT("Release(std::shared_ptr<T> connection)"));
 }
 } // namespace app::db
