@@ -30,7 +30,7 @@
 #include "../data/clientdata.h"
 #include "../data/projectdata.h"
 
-namespace app::wizard
+namespace app::svc
 {
 class SetupTables final
 {
@@ -52,4 +52,4 @@ private:
     static const wxString CreateDatabaseFile;
     static const wxString SeedDatabaseFile;
 };
-} // namespace app::wizard
+} // namespace app::svc

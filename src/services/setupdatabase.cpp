@@ -24,7 +24,7 @@
 
 #include "../common/util.h"
 
-namespace app::wizard
+namespace app::svc
 {
 const wxString SetupTables::CreateDatabaseFile = wxT("create-taskable.sql");
 const wxString SetupTables::SeedDatabaseFile = wxT("seed-taskable.sql");
@@ -106,4 +106,4 @@ bool SetupTables::Seed()
 
     return ExecuteDatabaseAction(sqlTokens);
 }
-} // namespace app::wizard
+} // namespace app::svc
