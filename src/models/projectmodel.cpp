@@ -30,7 +30,7 @@ ProjectModel::ProjectModel()
     , mDisplayName(wxGetEmptyString())
     , bIsBillable(false)
     , pRate(nullptr)
-    , bIsDefault(nullptr)
+    , bIsDefault(false)
     , mDateCreated(wxDefaultDateTime)
     , mDateModified(wxDefaultDateTime)
     , bIsActive(false)
@@ -59,18 +59,20 @@ ProjectModel::ProjectModel(int projectId, wxString name, wxString displayName)
     mDisplayName = displayName;
 }
 
-ProjectModel::ProjectModel(int projectId,
-    wxString name,
+ProjectModel::ProjectModel(wxString name,
     wxString displayName,
     bool billable,
-    bool isDefault,
-    double* rate,
-    int employerId,
-    int* clientId,
-    int* rateTypeId,
-    int* currencyId)
+    std::unique_ptr<double> rate,
+    int rateTypeId,
+    int currencyId)
     : ProjectModel()
 {
+    mName = name;
+    mDisplayName = displayName;
+    bIsBillable = billable;
+    pRate = std::move(rate);
+    mRateTypeId = rateTypeId;
+    mCurrencyId = currencyId;
 }
 
 ProjectModel::ProjectModel(int projectId,
@@ -100,7 +102,8 @@ bool ProjectModel::IsNonBillableScenario()
 
 bool ProjectModel::IsBillableWithUnknownRateScenario()
 {
-    return bIsBillable == true && mRateTypeId == 1 && pRate == nullptr && mCurrencyId == -1;
+    return bIsBillable == true && mRateTypeId == static_cast<int>(constants::RateTypes::Unknown) && pRate == nullptr &&
+           mCurrencyId == -1;
 }
 
 bool ProjectModel::IsBillableScenarioWithHourlyRate()

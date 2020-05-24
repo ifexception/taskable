@@ -39,16 +39,12 @@ public:
     ProjectModel();
     ProjectModel(int projectId);
     ProjectModel(int projectId, wxString name, wxString displayName);
-    ProjectModel(int projectId,
-        wxString name,
+    ProjectModel(wxString name,
         wxString displayName,
         bool billable,
-        bool isDefault,
-        double* rate,
-        int employerId,
-        int* clientId,
-        int* rateTypeId,
-        int* currencyId);
+        std::unique_ptr<double> rate,
+        int rateTypeId,
+        int currencyId);
     ProjectModel(int projectId,
         wxString name,
         wxString displayName,
