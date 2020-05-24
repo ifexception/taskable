@@ -41,11 +41,11 @@ bool SetupTables::CreateTables()
 
 std::vector<std::string> SetupTables::ReadFile(wxString fileToRead)
 {
-    auto createScriptPath = wxString::Format(
-        wxT("%s\\%s"), wxStandardPaths::Get().GetExecutablePath(), fileToRead);
+    auto scriptPath =
+        wxString::Format(wxT("%s\\%s"), wxPathOnly(wxStandardPaths::Get().GetExecutablePath()), fileToRead);
     wxTextFile file;
-    if (!file.Open(createScriptPath)) {
-        // log error and abort
+    if (!file.Open(scriptPath)) {
+        pLogger->error("Error occured: Unable to open file: {0}", scriptPath.ToStdString());
         return std::vector<std::string>();
     }
 
@@ -55,26 +55,36 @@ std::vector<std::string> SetupTables::ReadFile(wxString fileToRead)
         fileData += file.GetNextLine();
     }
 
-    auto fileDataString = fileData.ToStdString();
-    return util::lib::split(fileDataString, ';');
+    /* Since some currencies symbols are UTF8 specific characters
+       we cannot use ToStdString() as that (tries) to convert to regular
+       ASCII and the conversion results in an error.
+       The solution is to first convert to UTF8 explicitly and then
+       initialize a std::string from that. This way std::string will handle
+       the symbol character encodings correctly
+    */
+    /* TODO: Internationalization of Taskable might require using this approach everywhere */
+    // Note that in the debugger, the encodings do not look correct
+    auto fileDataString = fileData.ToUTF8();
+    return util::lib::split(std::string(fileDataString), ';');
 }
 
 bool SetupTables::ExecuteDatabaseAction(std::vector<std::string> sqlTokens)
 {
+    auto connectionHandle = db::ConnectionProvider::Get().Handle()->Acquire();
+
     try {
-        auto connectionHandle = db::ConnectionProvider::Get().Handle()->Acquire();
         auto databaseHandle = connectionHandle->DatabaseExecutableHandle();
         for (const auto& token : sqlTokens) {
             *databaseHandle << token;
         }
 
-        db::ConnectionProvider::Get().Handle()->Release(connectionHandle);
-        return true;
-
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured: Database Create Table Procedure - {0:d} : {1}", e.get_code(), e.what());
         return false;
     }
+
+    db::ConnectionProvider::Get().Handle()->Release(connectionHandle);
+    return true;
 }
 
 bool SetupTables::Create()
@@ -83,6 +93,7 @@ bool SetupTables::Create()
     if (sqlTokens.empty()) {
         return false;
     }
+
     return ExecuteDatabaseAction(sqlTokens);
 }
 
@@ -92,60 +103,7 @@ bool SetupTables::Seed()
     if (sqlTokens.empty()) {
         return false;
     }
+
     return ExecuteDatabaseAction(sqlTokens);
-}
-
-SetupEntities::SetupEntities(std::shared_ptr<spdlog::logger> logger)
-    : pLogger(logger)
-    , mEmployerData()
-{
-}
-
-bool SetupEntities::CreateEntities(std::string employerName,
-    std::string clientName,
-    std::string projectName,
-    std::string projectDisplayName)
-{
-    try {
-        int employerId = CreateEmployer(employerName);
-        int clientId = CreateClient(clientName, employerId);
-        CreateProject(projectName, projectDisplayName, employerId, clientId);
-        return true;
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured: Database Entity Setup Procedure - {0:d} : {1}", e.get_code(), e.what());
-        return false;
-    }
-}
-
-int SetupEntities::CreateEmployer(std::string employerName)
-{
-    mEmployerData.Create(std::make_unique<model::EmployerModel>(wxString(employerName)));
-    return mEmployerData.GetLastInsertId();
-}
-
-int SetupEntities::CreateClient(std::string clientName, int employerId)
-{
-    if (clientName.empty()) {
-        return 0;
-    } else {
-        mClientData.Create(std::make_unique<model::ClientModel>(wxString(clientName), employerId));
-        return mClientData.GetLastInsertId();
-    }
-}
-
-void SetupEntities::CreateProject(std::string projectName, std::string projectDisplayName, int employerId, int clientId)
-{
-    bool isAssociatedWithClient = clientId != 0;
-    if (isAssociatedWithClient) {
-        *pDatabase
-            << "INSERT INTO projects(name, display_name, billable, is_active, employer_id, client_id) VALUES(?, ?, ?, "
-               "1, ?, ?)"
-            << projectName << projectDisplayName << false << employerId << clientId;
-    } else {
-        *pDatabase
-            << "INSERT INTO projects(name, display_name, billable, is_active, employer_id, client_id) VALUES(?, ?, ?, "
-               "1, ?, ?)"
-            << projectName << projectDisplayName << false << employerId << nullptr;
-    }
 }
 } // namespace app::wizard

@@ -52,26 +52,4 @@ private:
     static const wxString CreateDatabaseFile;
     static const wxString SeedDatabaseFile;
 };
-
-class SetupEntities final
-{
-public:
-    SetupEntities(std::shared_ptr<spdlog::logger> logger);
-    ~SetupEntities() = default;
-
-    bool CreateEntities(std::string employerName,
-        std::string clientName,
-        std::string projectName,
-        std::string projectDisplayName);
-
-private:
-    std::shared_ptr<spdlog::logger> pLogger;
-    data::EmployerData mEmployerData;
-    data::ClientData mClientData;
-    data::ProjectData mProjectData;
-
-    int CreateEmployer(std::string employerName);
-    int CreateClient(std::string clientName, int employerId);
-    void CreateProject(std::string projectName, std::string projectDisplayName, int employerId, int clientId);
-};
 } // namespace app::wizard
