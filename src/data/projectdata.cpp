@@ -57,9 +57,6 @@ void ProjectData::Create(std::unique_ptr<model::ProjectModel> project)
     if (project->IsBillableScenarioWithHourlyRate())
         ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId() << nullptr;
 
-    if (project->IsBillableScenarioWithDailyRate())
-        ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId() << *project->GetHours();
-
     ps.execute();
 }
 
@@ -78,7 +75,6 @@ std::unique_ptr<model::ProjectModel> ProjectData::GetById(const int projectId)
             int billable,
             int isDefault,
             std::unique_ptr<double> rate,
-            std::unique_ptr<int> hours,
             int dateCreated,
             int dateModified,
             int isActive,
@@ -99,13 +95,10 @@ std::unique_ptr<model::ProjectModel> ProjectData::GetById(const int projectId)
                 project->SetRate(std::move(rate));
             }
 
-            if (hours != nullptr) {
-                project->SetHours(std::move(hours));
-            }
-
             project->SetEmployerId(employerId);
             auto employer = employerData.GetById(employerId);
             project->SetEmployer(std::move(employer));
+
             if (clientId != nullptr) {
                 project->SetClientId(*clientId);
                 auto client = clientData.GetById(*clientId);
@@ -148,9 +141,6 @@ void ProjectData::Update(std::unique_ptr<model::ProjectModel> project)
     if (project->IsBillableScenarioWithHourlyRate())
         ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId() << nullptr;
 
-    if (project->IsBillableScenarioWithDailyRate())
-        ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId() << *project->GetHours();
-
     ps << project->GetProjectId();
 
     ps.execute();
@@ -175,7 +165,6 @@ std::vector<std::unique_ptr<model::ProjectModel>> ProjectData::GetAll()
                                                                                 int billable,
                                                                                 int isDefault,
                                                                                 std::unique_ptr<double> rate,
-                                                                                std::unique_ptr<int> hours,
                                                                                 int dateCreated,
                                                                                 int dateModified,
                                                                                 int isActive,
@@ -188,10 +177,6 @@ std::vector<std::unique_ptr<model::ProjectModel>> ProjectData::GetAll()
 
         if (rate != nullptr) {
             project->SetRate(std::move(rate));
-        }
-
-        if (hours != nullptr) {
-            project->SetHours(std::move(hours));
         }
 
         project->SetEmployerId(employerId);
@@ -242,7 +227,6 @@ const std::string ProjectData::getProject = "SELECT projects.project_id, "
                                             "projects.billable, "
                                             "projects.is_default,"
                                             "projects.rate, "
-                                            "projects.hours,"
                                             "projects.date_created, "
                                             "projects.date_modified, "
                                             "projects.is_active, "
@@ -260,8 +244,7 @@ const std::string ProjectData::getProject = "SELECT projects.project_id, "
 const std::string ProjectData::updateProject =
     "UPDATE projects "
     "SET name = ?, display_name = ?, billable = ?, is_default = ?, date_modified = ?, "
-    "employer_id = ?, client_id = ?, rate = ?, rate_type_id = ?, currency_id = ?, "
-    "hours = ? "
+    "employer_id = ?, client_id = ?, rate = ?, rate_type_id = ?, currency_id = ? "
     "WHERE project_id = ?";
 
 const std::string ProjectData::deleteProject = "UPDATE projects"
@@ -274,7 +257,6 @@ const std::string ProjectData::getProjects = "SELECT projects.project_id, "
                                              "projects.billable, "
                                              "projects.is_default,"
                                              "projects.rate, "
-                                             "projects.hours,"
                                              "projects.date_created, "
                                              "projects.date_modified, "
                                              "projects.is_active, "

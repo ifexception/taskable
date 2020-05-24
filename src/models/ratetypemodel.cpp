@@ -24,7 +24,7 @@ namespace app::model
 RateTypeModel::RateTypeModel()
     : mRateTypeId(-1)
     , mName(wxGetEmptyString())
-    , mRateType(constants::RateTypes::None)
+    , mRateType()
 {
 }
 

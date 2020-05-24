@@ -45,7 +45,6 @@ public:
         bool billable,
         bool isDefault,
         double* rate,
-        int* hours,
         int employerId,
         int* clientId,
         int* rateTypeId,
@@ -62,19 +61,16 @@ public:
     bool IsNonBillableScenario();
     bool IsBillableWithUnknownRateScenario();
     bool IsBillableScenarioWithHourlyRate();
-    bool IsBillableScenarioWithDailyRate();
     bool HasClientLinked();
 
     void SwitchOutOfBillableScenario();
     void SwitchInToUnknownRateBillableScenario();
-    void SwitchInToHourlyRateBillableScenario();
 
     const int GetProjectId() const;
     const wxString GetName() const;
     const wxString GetDisplayName() const;
     const bool IsBillable() const;
     const double* GetRate() const;
-    const int* GetHours() const;
     const bool IsDefault() const;
     const wxDateTime GetDateCreated();
     const wxDateTime GetDateModified();
@@ -94,7 +90,6 @@ public:
     void SetDisplayName(const wxString& displayName);
     void IsBillable(const bool billable);
     void SetRate(std::unique_ptr<double> rate);
-    void SetHours(std::unique_ptr<int> hours);
     void IsDefault(const bool isDefault);
     void SetDateCreated(const wxDateTime& dateCreated);
     void SetDateUpdated(const wxDateTime& dateUpdated);
@@ -115,7 +110,6 @@ private:
     wxString mDisplayName;
     bool bIsBillable;
     std::unique_ptr<double> pRate;
-    std::unique_ptr<int> pHours;
     bool bIsDefault;
     wxDateTime mDateCreated;
     wxDateTime mDateModified;

@@ -48,7 +48,6 @@ ProjectDialog::ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> l
     , pRateChoiceCtrl(nullptr)
     , pRateTextCtrl(nullptr)
     , pCurrencyComboBoxCtrl(nullptr)
-    , pHoursTextCtrl(nullptr)
     , pIsActiveCtrl(nullptr)
     , pIsDefaultCtrl(nullptr)
     , pDateTextCtrl(nullptr)
@@ -84,7 +83,6 @@ ProjectDialog::ProjectDialog(wxWindow* parent,
     , pRateChoiceCtrl(nullptr)
     , pRateTextCtrl(nullptr)
     , pCurrencyComboBoxCtrl(nullptr)
-    , pHoursTextCtrl(nullptr)
     , pIsActiveCtrl(nullptr)
     , pIsDefaultCtrl(nullptr)
     , pDateTextCtrl(nullptr)
@@ -289,18 +287,6 @@ void ProjectDialog::CreateControls()
     pCurrencyComboBoxCtrl->Disable();
     billableFlexGridSizer->Add(pCurrencyComboBoxCtrl, common::sizers::ControlExpand);
 
-    /* Hours Text Control */
-    auto hoursLabel = new wxStaticText(billablePanel, wxID_STATIC, wxT("Hours"));
-    billableFlexGridSizer->Add(hoursLabel, common::sizers::ControlDefault);
-
-    wxTextValidator hoursValidator(wxFILTER_DIGITS);
-    pHoursTextCtrl = new wxTextCtrl(
-        billablePanel, IDC_HOURS, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT, hoursValidator);
-    pHoursTextCtrl->SetHint(wxT("Enter hours"));
-    pHoursTextCtrl->SetToolTip(wxT("Enter number of hours to charge against a daily rate for a project"));
-    pHoursTextCtrl->Disable();
-    billableFlexGridSizer->Add(pHoursTextCtrl, common::sizers::ControlDefault);
-
     if (bIsEdit) {
         /* Date Text Control */
         pDateTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
@@ -487,29 +473,6 @@ void ProjectDialog::DataToControls()
         /* Set the currency for project */
         pCurrencyComboBoxCtrl->SetStringSelection(
             wxString::Format(wxT("%s (%s)"), project->GetCurrency()->GetName(), project->GetCurrency()->GetCode()));
-
-        pHoursTextCtrl->Disable();
-    }
-
-    if (project->IsBillableScenarioWithDailyRate()) {
-        /* Project is billable, set the billable attributes */
-
-        /* Set the rate choice */
-        pRateChoiceCtrl->Enable();
-        pRateChoiceCtrl->SetStringSelection(project->GetRateType()->GetName());
-
-        /* Set the rate value */
-        pRateTextCtrl->Enable();
-        pRateTextCtrl->SetValue(wxString::Format(wxT("%.2f"), wxString(std::to_string(*project->GetRate()))));
-
-        /* Set the currency */
-        pCurrencyComboBoxCtrl->Enable();
-        pCurrencyComboBoxCtrl->SetStringSelection(
-            wxString::Format(wxT("%s (%s)"), project->GetCurrency()->GetName(), project->GetCurrency()->GetCode()));
-
-        /* Set the hours */
-        pHoursTextCtrl->ChangeValue(wxString(std::to_string(*project->GetHours())));
-        pHoursTextCtrl->Enable();
     }
 
     /* Is the project active (i.e. not deleted) */
@@ -568,7 +531,6 @@ void ProjectDialog::OnBillableCheck(wxCommandEvent& event)
         pRateChoiceCtrl->Disable();
         pRateTextCtrl->Disable();
         pCurrencyComboBoxCtrl->Disable();
-        pHoursTextCtrl->Disable();
 
         {
             pProject->SwitchOutOfBillableScenario();
@@ -576,7 +538,6 @@ void ProjectDialog::OnBillableCheck(wxCommandEvent& event)
             pRateChoiceCtrl->SetSelection(0);
             pRateTextCtrl->ChangeValue(wxGetEmptyString());
             pCurrencyComboBoxCtrl->SetSelection(0);
-            pHoursTextCtrl->ChangeValue(wxGetEmptyString());
         }
     }
 }
@@ -590,17 +551,10 @@ void ProjectDialog::OnRateChoiceSelection(wxCommandEvent& event)
 
         pRateTextCtrl->ChangeValue(wxGetEmptyString());
         pCurrencyComboBoxCtrl->SetSelection(0);
-        pHoursTextCtrl->Disable();
     }
     if (selection == static_cast<int>(constants::RateTypes::Hourly)) {
         pRateTextCtrl->Enable();
         pCurrencyComboBoxCtrl->Enable();
-        pHoursTextCtrl->Disable();
-    }
-    if (selection == static_cast<int>(constants::RateTypes::Daily)) {
-        pRateTextCtrl->Enable();
-        pCurrencyComboBoxCtrl->Enable();
-        pHoursTextCtrl->Enable();
     }
 }
 
@@ -674,13 +628,6 @@ void ProjectDialog::OnIsActiveCheck(wxCommandEvent& event)
             pCurrencyComboBoxCtrl->Enable();
         }
 
-        if (pProject->IsBillableScenarioWithDailyRate()) {
-            pRateChoiceCtrl->Enable();
-            pRateTextCtrl->Enable();
-            pCurrencyComboBoxCtrl->Enable();
-            pHoursTextCtrl->Enable();
-        }
-
     } else {
         pNameTextCtrl->Disable();
         pDisplayNameCtrl->Disable();
@@ -691,7 +638,6 @@ void ProjectDialog::OnIsActiveCheck(wxCommandEvent& event)
         pRateChoiceCtrl->Disable();
         pRateTextCtrl->Disable();
         pCurrencyComboBoxCtrl->Disable();
-        pHoursTextCtrl->Disable();
     }
 }
 
@@ -752,26 +698,6 @@ bool ProjectDialog::TryTransferValuesFromControls()
             }
             pProject->SetCurrencyId(
                 util::VoidPointerToInt(pCurrencyComboBoxCtrl->GetClientData(pCurrencyComboBoxCtrl->GetSelection())));
-        }
-        if (selection == static_cast<int>(constants::RateTypes::Daily)) {
-            wxString value = pRateTextCtrl->GetValue();
-            if (value.empty()) {
-                common::validations::ForRequiredNumber(pRateTextCtrl, wxT("Rate amount"));
-                return false;
-            }
-            pProject->SetRate(std::move(std::make_unique<double>(std::stod(value.ToStdString()))));
-            if (pCurrencyComboBoxCtrl->GetSelection() == 0) {
-                common::validations::ForRequiredChoiceSelection(pCurrencyComboBoxCtrl, wxT("currency"));
-                return false;
-            }
-            pProject->SetCurrencyId(
-                util::VoidPointerToInt(pCurrencyComboBoxCtrl->GetClientData(pCurrencyComboBoxCtrl->GetSelection())));
-            wxString hourValue = pHoursTextCtrl->GetValue();
-            if (hourValue.empty()) {
-                common::validations::ForRequiredNumber(pRateTextCtrl, wxT("Hours value"));
-                return false;
-            }
-            pProject->SetHours(std::move(std::make_unique<int>(std::stoi(hourValue.ToStdString()))));
         }
     }
 

@@ -39,8 +39,6 @@ static const int MaxLength2 = 1024;
 enum class RateTypes : int {
     Unknown = 1,
     Hourly = 2,
-    Daily = 3,
-    None = 9,
 };
 
 enum class TaskItemTypes : int {

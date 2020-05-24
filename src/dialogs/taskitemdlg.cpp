@@ -922,14 +922,6 @@ void TaskItemDialog::SetRateLabel(model::ProjectModel* project)
         CalculateRate();
     }
 
-    if (project->IsBillableScenarioWithDailyRate()) {
-        pBillableCtrl->Enable();
-        pBillableCtrl->SetValue(true);
-        wxString label =
-            wxString::Format(TaskItemDialog::CalculatedRateLabelBillableDailyRate, project->GetDisplayName());
-        pCalculatedRateTextCtrl->SetLabel(label);
-    }
-
     pCalculatedRateTextCtrl->SetFont(font);
 }
 

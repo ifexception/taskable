@@ -1,6 +1,5 @@
 INSERT INTO rate_types (name) VALUES ('Unknown');
 INSERT INTO rate_types (name) VALUES ('Hourly');
-INSERT INTO rate_types (name) VALUES ('Daily');
 
 INSERT INTO task_item_types (name) VALUES ('Timed');
 INSERT INTO task_item_types (name) VALUES ('Entry');

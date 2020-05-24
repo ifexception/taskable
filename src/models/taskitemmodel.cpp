@@ -418,10 +418,6 @@ void TaskItemModel::Create(std::unique_ptr<TaskItemModel> taskItem)
         ps << taskItem->IsBillable() << *taskItem->GetCalculatedRate();
     }
 
-    if (taskItem->GetProject()->IsBillableScenarioWithDailyRate()) {
-        ps << taskItem->IsBillable() << nullptr;
-    }
-
     ps << taskItem->GetTaskItemTypeId() << taskItem->GetProjectId() << taskItem->GetCategoryId()
        << taskItem->GetTaskId();
 
@@ -508,10 +504,6 @@ void TaskItemModel::Update(std::unique_ptr<TaskItemModel> taskItem)
 
     if (taskItem->GetProject()->IsBillableScenarioWithHourlyRate()) {
         ps << taskItem->IsBillable() << *taskItem->GetCalculatedRate();
-    }
-
-    if (taskItem->GetProject()->IsBillableScenarioWithDailyRate()) {
-        ps << taskItem->IsBillable() << nullptr;
     }
 
     ps << util::UnixTimestamp();

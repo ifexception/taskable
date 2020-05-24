@@ -30,7 +30,6 @@ ProjectModel::ProjectModel()
     , mDisplayName(wxGetEmptyString())
     , bIsBillable(false)
     , pRate(nullptr)
-    , pHours(nullptr)
     , bIsDefault(nullptr)
     , mDateCreated(wxDefaultDateTime)
     , mDateModified(wxDefaultDateTime)
@@ -66,7 +65,6 @@ ProjectModel::ProjectModel(int projectId,
     bool billable,
     bool isDefault,
     double* rate,
-    int* hours,
     int employerId,
     int* clientId,
     int* rateTypeId,
@@ -111,12 +109,6 @@ bool ProjectModel::IsBillableScenarioWithHourlyRate()
            mCurrencyId > 0;
 }
 
-bool ProjectModel::IsBillableScenarioWithDailyRate()
-{
-    return bIsBillable == true && mRateTypeId == static_cast<int>(constants::RateTypes::Daily) && pRate != nullptr &&
-           mCurrencyId > 0;
-}
-
 bool ProjectModel::HasClientLinked()
 {
     return pClient != nullptr || mClientId > 0;
@@ -127,19 +119,12 @@ void ProjectModel::SwitchOutOfBillableScenario()
     pRate.reset();
     mRateTypeId = -1;
     mCurrencyId = -1;
-    pHours.reset();
 }
 
 void ProjectModel::SwitchInToUnknownRateBillableScenario()
 {
     pRate.reset();
     mCurrencyId = -1;
-    pHours.reset();
-}
-
-void ProjectModel::SwitchInToHourlyRateBillableScenario()
-{
-    pHours.reset();
 }
 
 const int ProjectModel::GetProjectId() const
@@ -165,11 +150,6 @@ const bool ProjectModel::IsBillable() const
 const double* ProjectModel::GetRate() const
 {
     return pRate.get();
-}
-
-const int* ProjectModel::GetHours() const
-{
-    return pHours.get();
 }
 
 const bool ProjectModel::IsDefault() const
@@ -255,11 +235,6 @@ void ProjectModel::IsBillable(const bool billable)
 void ProjectModel::SetRate(std::unique_ptr<double> rate)
 {
     pRate = std::move(rate);
-}
-
-void ProjectModel::SetHours(std::unique_ptr<int> hours)
-{
-    pHours = std::move(hours);
 }
 
 void ProjectModel::IsDefault(const bool isDefault)
