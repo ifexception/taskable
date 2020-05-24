@@ -49,13 +49,13 @@ void ProjectData::Create(std::unique_ptr<model::ProjectModel> project)
         ps << nullptr;
 
     if (project->IsNonBillableScenario())
-        ps << nullptr << nullptr << nullptr << nullptr;
+        ps << nullptr << nullptr << nullptr;
 
     if (project->IsBillableWithUnknownRateScenario())
-        ps << nullptr << project->GetRateTypeId() << nullptr << nullptr;
+        ps << nullptr << project->GetRateTypeId() << nullptr;
 
     if (project->IsBillableScenarioWithHourlyRate())
-        ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId() << nullptr;
+        ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId();
 
     ps.execute();
 }
@@ -133,13 +133,13 @@ void ProjectData::Update(std::unique_ptr<model::ProjectModel> project)
         ps << nullptr;
 
     if (project->IsNonBillableScenario())
-        ps << nullptr << nullptr << nullptr << nullptr;
+        ps << nullptr << nullptr << nullptr;
 
     if (project->IsBillableWithUnknownRateScenario())
-        ps << nullptr << project->GetRateTypeId() << nullptr << nullptr;
+        ps << nullptr << project->GetRateTypeId() << nullptr;
 
     if (project->IsBillableScenarioWithHourlyRate())
-        ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId() << nullptr;
+        ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId();
 
     ps << project->GetProjectId();
 
@@ -218,8 +218,8 @@ int ProjectData::GetLastInsertId() const
 
 const std::string ProjectData::createProject = "INSERT INTO "
                                                "projects(name, display_name, billable, is_default, is_active, "
-                                               "employer_id, client_id, rate, rate_type_id, currency_id, hours) "
-                                               "VALUES(?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)";
+                                               "employer_id, client_id, rate, rate_type_id, currency_id) "
+                                               "VALUES(?, ?, ?, ?, 1, ?, ?, ?, ?, ?)";
 
 const std::string ProjectData::getProject = "SELECT projects.project_id, "
                                             "projects.name AS project_name, "
