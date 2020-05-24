@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 
 #include <spdlog/spdlog.h>
@@ -35,13 +36,13 @@ public:
     EmployerData();
     ~EmployerData();
 
-    void Create(std::unique_ptr<model::EmployerModel> employer);
+    int64_t Create(std::unique_ptr<model::EmployerModel> employer);
     std::unique_ptr<model::EmployerModel> GetById(const int employerId);
     std::vector<std::unique_ptr<model::EmployerModel>> GetAll();
     void Update(std::unique_ptr<model::EmployerModel> employer);
     void Delete(const int employerId);
 
-    int GetLastInsertId() const;
+    int64_t GetLastInsertId() const;
 
 private:
     std::shared_ptr<db::SqliteConnection> pConnection;

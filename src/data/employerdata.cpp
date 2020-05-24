@@ -33,9 +33,10 @@ EmployerData::~EmployerData()
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 
-void EmployerData::Create(std::unique_ptr<model::EmployerModel> employer)
+int64_t EmployerData::Create(std::unique_ptr<model::EmployerModel> employer)
 {
     *pConnection->DatabaseExecutableHandle() << EmployerData::createEmployer << employer->GetName().ToStdString();
+    return pConnection->DatabaseExecutableHandle()->last_insert_rowid();
 }
 
 std::unique_ptr<model::EmployerModel> EmployerData::GetById(const int employerId)
@@ -76,9 +77,9 @@ void EmployerData::Delete(const int employerId)
     *pConnection->DatabaseExecutableHandle() << EmployerData::deleteEmployer << util::UnixTimestamp() << employerId;
 }
 
-int EmployerData::GetLastInsertId() const
+int64_t EmployerData::GetLastInsertId() const
 {
-    return (int) pConnection->DatabaseExecutableHandle()->last_insert_rowid();
+    return pConnection->DatabaseExecutableHandle()->last_insert_rowid();
 }
 
 const std::string EmployerData::createEmployer = "INSERT INTO employers (name, is_active) VALUES (?, 1);";
