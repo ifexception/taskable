@@ -34,10 +34,12 @@ ClientData::~ClientData()
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 
-void ClientData::Create(std::unique_ptr<model::ClientModel> client)
+int64_t ClientData::Create(std::unique_ptr<model::ClientModel> client)
 {
     *pConnection->DatabaseExecutableHandle()
         << ClientData::createClient << std::string(client->GetName().ToUTF8()) << client->GetEmployerId();
+
+    return pConnection->DatabaseExecutableHandle()->last_insert_rowid();
 }
 
 std::unique_ptr<model::ClientModel> ClientData::GetById(const int clientId)
@@ -97,7 +99,7 @@ std::vector<std::unique_ptr<model::ClientModel>> ClientData::GetAll()
     return clients;
 }
 
-int ClientData::GetLastInsertId() const
+int64_t ClientData::GetLastInsertId() const
 {
     return pConnection->DatabaseExecutableHandle()->last_insert_rowid();
 }

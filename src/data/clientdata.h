@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -34,14 +35,14 @@ public:
     ClientData();
     ~ClientData();
 
-    void Create(std::unique_ptr<model::ClientModel> client);
+    int64_t Create(std::unique_ptr<model::ClientModel> client);
     std::unique_ptr<model::ClientModel> GetById(const int clientId);
     void Update(std::unique_ptr<model::ClientModel> client);
     void Delete(const int clientId);
     std::vector<std::unique_ptr<model::ClientModel>> GetByEmployerId(const int employerId);
     std::vector<std::unique_ptr<model::ClientModel>> GetAll();
 
-    int GetLastInsertId() const;
+    int64_t GetLastInsertId() const;
 
 private:
     std::shared_ptr<db::SqliteConnection> pConnection;
