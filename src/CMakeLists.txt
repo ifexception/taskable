@@ -60,7 +60,8 @@ set (SRC
     "dialogs/preferencesdlg.cpp"
 
     "wizards/setupwizard.cpp"
-    "wizards/setupdatabase.cpp"
+    "services/setupdatabase.cpp"
+    "wizards/entitycompositor.cpp"
     "wizards/databaserestorewizard.cpp"
 
     "dialogs/employerdlg.cpp"
@@ -88,8 +89,7 @@ set (SRC
     "models/taskmodel.cpp"
     "models/taskitemmodel.cpp"
     "dialogs/taskitemdlg.cpp"
-
-    )
+   )
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
 
@@ -109,7 +109,8 @@ target_compile_definitions (${PROJECT_NAME} PUBLIC
     wxUSE_TIMEPICKCTRL=1
     __WXMSW__
     $<$<CONFIG:Debug>:TASKABLE_DEBUG>
-    $<$<CONFIG:Debug>:NDEBUG>)
+    $<$<CONFIG:Release>:NDEBUG>
+    $<$<CONFIG:Debug>:WXDEBUG>)
 
 target_link_libraries (${PROJECT_NAME}
     ${wxWidgets_LIBRARIES}
