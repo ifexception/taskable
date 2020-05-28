@@ -73,7 +73,6 @@ inline std::shared_ptr<T> ConnectionPool<T>::Acquire()
 
     auto connection = mPool.front();
     mPool.pop_front();
-    wxLogDebug(wxT("Acquire()"));
 
     return std::dynamic_pointer_cast<T>(connection);
 }
@@ -82,6 +81,5 @@ template<class T>
 inline void ConnectionPool<T>::Release(std::shared_ptr<T> connection)
 {
     mPool.push_back(std::dynamic_pointer_cast<IConnection>(connection));
-    wxLogDebug(wxT("Release(std::shared_ptr<T> connection)"));
 }
 } // namespace app::db
