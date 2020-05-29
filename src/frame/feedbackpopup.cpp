@@ -70,7 +70,7 @@ void FeedbackPopupWindow::CreateControls()
     wxString submitABugLink =
         wxT("https://github.com/ifexception/taskable/issues/new?title=BUG%3A&template=ISSUE_TEMPLATE.md");
     pSubmitABugLink = new wxHyperlinkCtrl(panel, IDC_SUBMITABUG, wxT("Submit a Bug"), submitABugLink);
-    pSubmitABugLink->SetToolTip(wxT("Click the link to submit a bug in the program"));
+    pSubmitABugLink->SetToolTip(wxT("Click the link to submit a bug in the application"));
     hyperlinkSizer->Add(pSubmitABugLink, wxSizerFlags().Border(wxALL, 5));
 
     wxString requestAFeatureLink = wxT("https://github.com/ifexception/taskable/issues/"

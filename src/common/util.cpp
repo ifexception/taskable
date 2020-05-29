@@ -44,8 +44,8 @@ wxDateTime ToDateTime(int timestamp)
 
 wxDateTime RoundToNearestInterval(wxDateTime value, int interval)
 {
-    auto seconds = value.GetTicks();
-    auto timeRoundToInterval = std::round((double)seconds / (interval * 60.0)) * (interval * 60.0);
+    time_t seconds = value.GetTicks();
+    double timeRoundToInterval = std::round((double)seconds / (interval * 60.0)) * (interval * 60.0);
     std::time_t time = timeRoundToInterval;
     wxDateTime roundedTime(time);
     roundedTime.SetSecond(0);
