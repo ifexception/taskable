@@ -23,6 +23,8 @@
 
 #include <sqlite_modern_cpp.h>
 
+#include <wx/wx.h>
+#include <wx/arrstr.h>
 #include <wx/textctrl.h>
 #include <wx/wizard.h>
 
@@ -144,6 +146,8 @@ private:
     wxChoice* pRateChoiceCtrl;
     wxTextCtrl* pRateTextCtrl;
     wxComboBox* pCurrencyComboBoxCtrl;
+
+    wxArrayString mCurrencyChoices;
 
     enum {
         IDC_NAME = wxID_HIGHEST + 1,
