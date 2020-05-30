@@ -51,7 +51,6 @@
 #include "../wizards/databaserestorewizard.h"
 #include "taskbaricon.h"
 
-#include "../services/databaseconnection.h"
 #include "../services/databasebackup.h"
 #include "../services/databasebackupdeleter.h"
 
@@ -117,7 +116,6 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
     , mSelectedTaskItemId(-1)
 // clang-format on
 {
-    svc::DatabaseConnection::Get().SetHandle(pDatabase);
 }
 
 MainFrame::~MainFrame()
@@ -157,12 +155,6 @@ bool MainFrame::CreateFrame()
     }
 
     return success;
-}
-
-void MainFrame::ResetDatabaseHandleOnDatabaseRestore(sqlite::database* database)
-{
-    pDatabase = database;
-    svc::DatabaseConnection::Get().ResetHandle(database);
 }
 
 bool MainFrame::Create()

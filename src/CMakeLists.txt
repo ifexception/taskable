@@ -40,7 +40,6 @@ set (SRC
     "services/taskstateservice.cpp"
     "services/taskstorageservice.cpp"
     "services/databasebackup.cpp"
-    "services/databaseconnection.cpp"
     "services/databasebackupdeleter.cpp"
     "services/setupdatabase.cpp"
 

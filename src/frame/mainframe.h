@@ -56,8 +56,6 @@ public:
 
     bool CreateFrame();
 
-    void ResetDatabaseHandleOnDatabaseRestore(sqlite::database* database);
-
 private:
     wxDECLARE_EVENT_TABLE();
 
