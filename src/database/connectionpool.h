@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <cassert>
 #include <deque>
 #include <memory>
 #include <string>
@@ -42,6 +43,7 @@ public:
 
 private:
     std::size_t mPoolSize;
+    std::size_t mConnectionsInUse;
     std::shared_ptr<IConnectionFactory> pFactory;
     std::deque<std::shared_ptr<IConnection>> mPool;
 };
@@ -51,6 +53,7 @@ inline ConnectionPool<T>::ConnectionPool(std::shared_ptr<IConnectionFactory> fac
     : pFactory(factory)
     , mPoolSize(poolSize)
     , mPool()
+    , mConnectionsInUse(0)
 {
     while (mPool.size() < mPoolSize) {
         mPool.push_back(pFactory->Create());
@@ -66,6 +69,8 @@ inline ConnectionPool<T>::~ConnectionPool()
 template<class T>
 inline std::shared_ptr<T> ConnectionPool<T>::Acquire()
 {
+    assert(mConnectionsInUse != mPoolSize);
+
     if (mPool.size() == 0) {
         auto connection = pFactory->Create();
         return std::dynamic_pointer_cast<T>(connection);
@@ -74,6 +79,8 @@ inline std::shared_ptr<T> ConnectionPool<T>::Acquire()
     auto connection = mPool.front();
     mPool.pop_front();
 
+    mConnectionsInUse++;
+
     return std::dynamic_pointer_cast<T>(connection);
 }
 
@@ -81,5 +88,6 @@ template<class T>
 inline void ConnectionPool<T>::Release(std::shared_ptr<T> connection)
 {
     mPool.push_back(std::dynamic_pointer_cast<IConnection>(connection));
+    mConnectionsInUse--;
 }
 } // namespace app::db
