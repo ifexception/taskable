@@ -25,6 +25,10 @@
 #include <wx/regex.h>
 #include <wx/stdpaths.h>
 
+#include "../database/sqliteconnectionfactory.h"
+#include "../database/sqliteconnection.h"
+#include "../database/connectionprovider.h"
+
 namespace app::wizard
 {
 DatabaseRestoreWizard::DatabaseRestoreWizard(frm::MainFrame* frame,
@@ -42,13 +46,12 @@ DatabaseRestoreWizard::DatabaseRestoreWizard(frm::MainFrame* frame,
     , pConfig(config)
     , pLogger(logger)
     , pPage1(nullptr)
-    , pDatabase(database)
     , mDatabaseFileToRestore(wxGetEmptyString())
     , bRestoreWithNoPreviousFileExisting(restoreWithNoPreviousFileExisting)
 {
     pPage1 = new DatabaseRestoreWelcomePage(this);
     auto page2 = new SelectDatabaseVersionPage(this, pConfig);
-    auto page3 = new DatabaseRestoredPage(this, pConfig, pLogger, pDatabase);
+    auto page3 = new DatabaseRestoredPage(this, pConfig, pLogger);
 
     wxWizardPageSimple::Chain(pPage1, page2);
     wxWizardPageSimple::Chain(page2, page3);
@@ -75,12 +78,6 @@ const bool DatabaseRestoreWizard::IsRestoreWithNoPreviousFileExisting() const
 void DatabaseRestoreWizard::SetDatabaseVersionToRestore(const wxString& value)
 {
     mDatabaseFileToRestore = value;
-}
-
-void DatabaseRestoreWizard::SetNewDatabaseHandle(sqlite::database* database)
-{
-    pDatabase = database;
-    pFrame->ResetDatabaseHandleOnDatabaseRestore(pDatabase);
 }
 
 DatabaseRestoreWelcomePage::DatabaseRestoreWelcomePage(DatabaseRestoreWizard* parent)
@@ -133,7 +130,7 @@ SelectDatabaseVersionPage::SelectDatabaseVersionPage(DatabaseRestoreWizard* pare
 bool SelectDatabaseVersionPage::TransferDataFromWindow()
 {
     if (mSelectedIndex < 0) {
-        wxMessageBox(wxT("A selection is required"), common::GetProgramName(), wxOK | wxICON_ERROR, this);
+        wxMessageBox(wxT("A selection is required"), common::GetProgramName(), wxOK_DEFAULT | wxICON_ERROR, this);
         return false;
     }
 
@@ -143,7 +140,7 @@ bool SelectDatabaseVersionPage::TransferDataFromWindow()
     item.m_mask = wxLIST_MASK_TEXT;
     pListCtrl->GetItem(item);
 
-    auto databaseSelection = item.GetText();
+    wxString databaseSelection = item.GetText();
     pParent->SetDatabaseVersionToRestore(databaseSelection);
 
     return true;
@@ -241,7 +238,7 @@ void SelectDatabaseVersionPage::OnItemUnchecked(wxListEvent& event)
 void SelectDatabaseVersionPage::OnWizardCancel(wxWizardEvent& event)
 {
     auto userResponse = wxMessageBox(
-        wxT("Are you sure want to cancel and exit?"), common::GetProgramName(), wxICON_QUESTION | wxYES_NO);
+        wxT("Are you sure want to cancel the wizard and exit?"), common::GetProgramName(), wxICON_QUESTION | wxYES_NO);
     if (userResponse == wxNO) {
         event.Veto();
     }
@@ -249,13 +246,11 @@ void SelectDatabaseVersionPage::OnWizardCancel(wxWizardEvent& event)
 
 DatabaseRestoredPage::DatabaseRestoredPage(DatabaseRestoreWizard* parent,
     std::shared_ptr<cfg::Configuration> config,
-    std::shared_ptr<spdlog::logger> logger,
-    sqlite::database* database)
+    std::shared_ptr<spdlog::logger> logger)
     : wxWizardPageSimple(parent)
     , pParent(parent)
     , pConfig(config)
     , pLogger(logger)
-    , pDatabase(database)
     , pStatusInOperationLabel(nullptr)
     , pGaugeCtrl(nullptr)
     , pStatusCompleteLabel(nullptr)
@@ -280,7 +275,7 @@ void DatabaseRestoredPage::CreateControls()
 
     sizer->AddSpacer(8);
 
-    pStatusCompleteLabel = new wxStaticText(this, wxID_ANY, wxT(""));
+    pStatusCompleteLabel = new wxStaticText(this, wxID_ANY, wxGetEmptyString());
     sizer->Add(pStatusCompleteLabel, wxSizerFlags().Border(wxALL, 5).Left());
 
     SetSizerAndFit(mainSizer);
@@ -307,10 +302,10 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
 {
     pGaugeCtrl->Pulse();
 
-    const wxString& fileToRestore = pParent->GetDatabaseFileVersionToRestore();
+    const wxString fileToRestore = pParent->GetDatabaseFileVersionToRestore();
 
-    const wxString& backupPath = pConfig->GetBackupPath();
-    const wxString& dataPath = pConfig->GetDatabasePath();
+    const wxString backupPath = pConfig->GetBackupPath();
+    const wxString dataPath = pConfig->GetDatabasePath();
 
     auto fullBackupDatabaseFilePath = wxString::Format(wxT("%s\\%s"), backupPath, fileToRestore);
     auto toCopyDatabaseFilePath = wxString::Format(wxT("%s\\%s"), dataPath, fileToRestore);
@@ -333,10 +328,7 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
     /* If there is a existing 'db' file */
     if (!pParent->IsRestoreWithNoPreviousFileExisting()) {
         /* Terminate connection to database */
-        if (pDatabase) {
-            delete pDatabase;
-            pDatabase = nullptr;
-        }
+        db::ConnectionProvider::Get().PurgeConnectionPool();
 
         /* Rename existing file temporarily (in case any of the next steps fail) */
         bool tmpRenameOfCurrentDatabaseFileSuccessful =
@@ -351,8 +343,8 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
     }
 
     /* Rename the selected database file to the plain name */
-    bool renameCopyToNewNameSuccessful = wxRenameFile(toCopyDatabaseFilePath, existingDatabaseFile);
-    if (!renameCopyToNewNameSuccessful) {
+    bool renameToNewNameSuccessful = wxRenameFile(toCopyDatabaseFilePath, existingDatabaseFile);
+    if (!renameToNewNameSuccessful) {
         FileOperationErrorFeedback();
         pLogger->error("Failed to rename file {0} to {1}",
             toCopyDatabaseFilePath.ToStdString(),
@@ -372,11 +364,11 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
         }
 
         /* Restore connection to database */
-        auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
-        pDatabase = new sqlite::database(common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString(), config);
-
-        // Need to bubble up new'd up pointer to parent (MainFrame)
-        pParent->SetNewDatabaseHandle(pDatabase);
+        if (!InitializeDatabaseConnectionProvider()) {
+            FileOperationErrorFeedback();
+            pLogger->error("Failed to re-initialize database connection provider");
+            return;
+        }
     }
 
     /* Complete operation */
@@ -404,5 +396,15 @@ void DatabaseRestoredPage::FileOperationErrorFeedback()
                            "\n\n\nClick 'Finish' to exit the wizard.");
     pStatusCompleteLabel->SetLabel(statusError);
     pGaugeCtrl->SetValue(100);
+}
+
+bool DatabaseRestoredPage::InitializeDatabaseConnectionProvider()
+{
+    auto sqliteConnectionFactory = std::make_shared<db::SqliteConnectionFactory>(
+        common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString());
+    auto connectionPool = std::make_unique<db::ConnectionPool<db::SqliteConnection>>(sqliteConnectionFactory, 2);
+    db::ConnectionProvider::Get().InitializeConnectionPool(std::move(connectionPool));
+
+    return true;
 }
 } // namespace app::wizard
