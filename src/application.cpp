@@ -314,6 +314,8 @@ bool Application::DatabaseFileExists()
                     return false;
                 }
 
+                InitializeDatabaseConnectionProvider();
+
                 if (!InitializeDatabaseTables()) {
                     return false;
                 }
