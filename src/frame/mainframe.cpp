@@ -33,6 +33,7 @@
 #include "../common/util.h"
 #include "../common/version.h"
 
+#include "../data/taskitemdata.h"
 #include "../models/taskitemmodel.h"
 
 #include "../dialogs/taskitemdlg.h"
@@ -294,7 +295,7 @@ void MainFrame::CreateControls()
     utilSizer->Add(pDatePickerCtrl, common::sizers::ControlDefault);
 
     pTotalHoursText = new wxStaticText(utilPanel, IDC_HOURS_TEXT, wxT("Total Hours: %d"));
-    pTotalHoursText->SetToolTip(wxT("Indicates the total hours spent on a given task for selected day"));
+    pTotalHoursText->SetToolTip(wxT("Indicates the total hours spent on tasks for the selected day"));
     utilSizer->AddStretchSpacer();
     utilSizer->Add(pTotalHoursText, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
@@ -431,7 +432,7 @@ void MainFrame::OnNewCategory(wxCommandEvent& event)
 {
     dlg::CategoriesDialog categoriesDialog(this, pLogger);
     int retCode = categoriesDialog.ShowModal();
-    ShowInfoBarMessageForAdd(retCode, wxT("category(ies)"));
+    ShowInfoBarMessageForAdd(retCode, wxT("categories"));
 }
 
 void MainFrame::OnEditEmployer(wxCommandEvent& event)
@@ -459,7 +460,7 @@ void MainFrame::OnEditCategory(wxCommandEvent& event)
 {
     dlg::EditListDialog categoryEdit(this, dlg::DialogType::Category, pLogger);
     int retCode = categoryEdit.ShowModal();
-    ShowInfoBarMessageForEdit(retCode, wxT("category(ies)"));
+    ShowInfoBarMessageForEdit(retCode, wxT("category"));
 }
 
 void MainFrame::OnTaskInserted(wxCommandEvent& event)
@@ -475,12 +476,14 @@ void MainFrame::OnTaskInserted(wxCommandEvent& event)
 void MainFrame::OnItemDoubleClick(wxListEvent& event)
 {
     auto taskItemId = event.GetData();
+
+    data::TaskItemData taskItemData;
     int taskItemTypeId = 0;
     try {
-        taskItemTypeId = model::TaskItemModel::GetTaskItemTypeIdByTaskItemId(taskItemId);
+        taskItemTypeId = taskItemData.GetTaskItemTypeIdByTaskItemId(taskItemId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error(
-            "Error occured on TaskItemModel::GetTaskItemTypeIdByTaskItemId() - {0:d} : {1}", e.get_code(), e.what());
+            "Error occured on TaskItemData::GetTaskItemTypeIdByTaskItemId() - {0:d} : {1}", e.get_code(), e.what());
         return;
     }
     constants::TaskItemTypes type = static_cast<constants::TaskItemTypes>(taskItemTypeId);
@@ -681,12 +684,14 @@ void MainFrame::OnPopupMenuCopyToClipboard(wxCommandEvent& event)
 
 void MainFrame::OnPopupMenuEdit(wxCommandEvent& event)
 {
+    data::TaskItemData taskItemData;
+
     int taskItemTypeId = 0;
     try {
-        taskItemTypeId = model::TaskItemModel::GetTaskItemTypeIdByTaskItemId(mSelectedTaskItemId);
+        taskItemTypeId = taskItemData.GetTaskItemTypeIdByTaskItemId(mSelectedTaskItemId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error(
-            "Error occured on TaskItemModel::GetTaskItemTypeIdByTaskItemId() - {0:d} : {1}", e.get_code(), e.what());
+            "Error occured on TaskItemData::GetTaskItemTypeIdByTaskItemId() - {0:d} : {1}", e.get_code(), e.what());
         return;
     }
     constants::TaskItemTypes type = static_cast<constants::TaskItemTypes>(taskItemTypeId);
@@ -699,10 +704,12 @@ void MainFrame::OnPopupMenuEdit(wxCommandEvent& event)
 
 void MainFrame::OnPopupMenuDelete(wxCommandEvent& event)
 {
+    data::TaskItemData taskItemData;
+
     try {
-        model::TaskItemModel::Delete(mSelectedTaskItemId);
+        taskItemData.Delete(mSelectedTaskItemId);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on TaskItemModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on TaskItemData::Delete() - {0:d} : {1}", e.get_code(), e.what());
         ShowInfoBarMessageForDelete(false);
         return;
     }
@@ -712,14 +719,14 @@ void MainFrame::OnPopupMenuDelete(wxCommandEvent& event)
 
 void MainFrame::CalculateTotalTime(wxDateTime date)
 {
-    std::vector<wxString> taskDurations;
-
     auto dateString = date.FormatISODate();
 
+    data::TaskItemData taskItemData;
+    std::vector<wxString> taskDurations;
     try {
-        taskDurations = model::TaskItemModel::GetHours(dateString);
+        taskDurations = taskItemData.GetHours(dateString);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on TaskItemModel::GetHours() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on TaskItemData::GetHours() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     wxTimeSpan totalDuration;
@@ -739,11 +746,13 @@ void MainFrame::CalculateTotalTime(wxDateTime date)
 void MainFrame::RefreshItems(wxDateTime date)
 {
     wxString dateString = date.FormatISODate();
+
+    data::TaskItemData taskItemData;
     std::vector<std::unique_ptr<model::TaskItemModel>> taskItems;
     try {
-        taskItems = model::TaskItemModel::GetByDate(dateString);
+        taskItems = taskItemData.GetByDate(dateString);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on TaskItemModel::GetByDate() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on TaskItemData::GetByDate() - {0:d} : {1}", e.get_code(), e.what());
         return;
     }
 

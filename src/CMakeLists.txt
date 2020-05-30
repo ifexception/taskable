@@ -42,6 +42,7 @@ set (SRC
     "services/databasebackup.cpp"
     "services/databaseconnection.cpp"
     "services/databasebackupdeleter.cpp"
+    "services/setupdatabase.cpp"
 
     "application.cpp"
     "resources.rc"
@@ -60,7 +61,6 @@ set (SRC
     "dialogs/preferencesdlg.cpp"
 
     "wizards/setupwizard.cpp"
-    "services/setupdatabase.cpp"
     "wizards/entitycompositor.cpp"
     "wizards/databaserestorewizard.cpp"
 
@@ -87,9 +87,12 @@ set (SRC
     "models/categorymodel.cpp"
 
     "models/taskmodel.cpp"
+    "models/taskitemtypemodel.cpp"
     "models/taskitemmodel.cpp"
     "dialogs/taskitemdlg.cpp"
-   )
+    "data/taskdata.cpp"
+    "data/taskitemtypedata.cpp"
+    "data/taskitemdata.cpp")
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
 

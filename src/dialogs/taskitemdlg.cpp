@@ -77,6 +77,8 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
     , pTaskItem(std::make_unique<model::TaskItemModel>())
     , pProject(nullptr)
     , mProjectData()
+    , mTaskItemData()
+    , mTaskData()
 {
     Create(parent,
         wxID_ANY,
@@ -121,6 +123,8 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
     , pTaskItem(std::make_unique<model::TaskItemModel>(mTaskItemId))
     , pProject(nullptr)
     , mProjectData()
+    , mTaskItemData()
+    , mTaskData()
 {
     Create(parent,
         wxID_ANY,
@@ -572,7 +576,7 @@ void TaskItemDialog::DataToControls()
     std::unique_ptr<model::TaskItemModel> taskItem = nullptr;
 
     try {
-        taskItem = model::TaskItemModel::GetById(mTaskItemId);
+        taskItem = mTaskItemData.GetById(mTaskItemId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in TaskItemModel::GetById() - {0:d} : {1}", e.get_code(), e.what());
         wxLogDebug(wxString(e.get_sql()));
@@ -825,7 +829,7 @@ void TaskItemDialog::OnOk(wxCommandEvent& event)
     if (TransferDataAndValidate()) {
         if (!bIsEdit) {
             try {
-                model::TaskItemModel::Create(std::move(pTaskItem));
+                mTaskItemData.Create(std::move(pTaskItem));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in TaskItemModel::Create() - {0:d} : {1}", e.get_code(), e.what());
                 wxLogDebug(wxString(e.get_sql()));
@@ -835,7 +839,7 @@ void TaskItemDialog::OnOk(wxCommandEvent& event)
 
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
             try {
-                model::TaskItemModel::Update(std::move(pTaskItem));
+                mTaskItemData.Update(std::move(pTaskItem));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in TaskItemModel::Update() - {0:d} : {1}", e.get_code(), e.what());
                 wxLogDebug(wxString(e.get_sql()));
@@ -845,7 +849,7 @@ void TaskItemDialog::OnOk(wxCommandEvent& event)
 
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
             try {
-                model::TaskItemModel::Delete(std::move(pTaskItem));
+                mTaskItemData.Delete(mTaskItemId);
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in TaskItemModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
                 wxLogDebug(wxString(e.get_sql()));
@@ -1016,7 +1020,7 @@ bool TaskItemDialog::TransferDataAndValidate()
 
     int taskId = -1;
     try {
-        taskId = model::TaskModel::GetByDate(pDateContextCtrl->GetValue())->GetTaskId();
+        taskId = mTaskData.GetByDate(pDateContextCtrl->GetValue())->GetTaskId();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in TaskModel::GetByDate() - {0:d} : {1}", e.get_code(), e.what());
         wxLogDebug(wxString(e.get_sql()));

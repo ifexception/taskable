@@ -20,35 +20,28 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <vector>
 
-#include <wx/datetime.h>
+#include "../database/connectionprovider.h"
+#include "../database/sqliteconnection.h"
+#include "../models/taskitemtypemodel.h"
 
-namespace app::model
+namespace app::data
 {
-class TaskModel final
+class TaskItemTypeData final
 {
 public:
-    TaskModel();
-    TaskModel(int taskId, wxString date, int dateCreated, int dateModified, bool isActive);
-    ~TaskModel() = default;
+    TaskItemTypeData();
+    ~TaskItemTypeData();
 
-    const int GetTaskId() const;
-    const wxDateTime GetTaskDate() const;
-    const wxDateTime GetDateCreated();
-    const wxDateTime GetDateModified();
-    const bool IsActive() const;
-
-    void SetTaskId(const int taskId);
-    void SetTaskDate(const wxDateTime& date);
-    void SetDateCreated(const wxDateTime& dateCreated);
-    void SetDateUpdated(const wxDateTime& dateModified);
-    void IsActive(const bool isActive);
+    std::unique_ptr<model::TaskItemTypeModel> GetById(const int taskItemTypeId);
+    std::vector<std::unique_ptr<model::TaskItemTypeModel>> GetAll();
 
 private:
-    int mTaskId;
-    wxDateTime mTaskDate;
-    wxDateTime mDateCreated;
-    wxDateTime mDateModified;
-    bool bIsActive;
+    std::shared_ptr<db::SqliteConnection> pConnection;
+
+    static const std::string getTaskItemTypeById;
+    static const std::string getTaskItemTypes;
 };
-} // namespace app::model
+} // namespace app::data

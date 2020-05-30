@@ -22,33 +22,30 @@
 #include <memory>
 
 #include <wx/datetime.h>
+#include <wx/string.h>
+
+#include "../common/constants.h"
 
 namespace app::model
 {
-class TaskModel final
+class TaskItemTypeModel final
 {
 public:
-    TaskModel();
-    TaskModel(int taskId, wxString date, int dateCreated, int dateModified, bool isActive);
-    ~TaskModel() = default;
+    TaskItemTypeModel();
+    TaskItemTypeModel(const int taskItemTypeId);
+    TaskItemTypeModel(int taskItemTypeId, wxString name);
+    ~TaskItemTypeModel() = default;
 
-    const int GetTaskId() const;
-    const wxDateTime GetTaskDate() const;
-    const wxDateTime GetDateCreated();
-    const wxDateTime GetDateModified();
-    const bool IsActive() const;
+    const int GetTaskItemTypeId() const;
+    const wxString GetName() const;
+    const constants::TaskItemTypes GetType() const;
 
-    void SetTaskId(const int taskId);
-    void SetTaskDate(const wxDateTime& date);
-    void SetDateCreated(const wxDateTime& dateCreated);
-    void SetDateUpdated(const wxDateTime& dateModified);
-    void IsActive(const bool isActive);
+    void SetTaskItemTypeId(const int taskItemTypeId);
+    void SetName(const wxString& name);
 
 private:
-    int mTaskId;
-    wxDateTime mTaskDate;
-    wxDateTime mDateCreated;
-    wxDateTime mDateModified;
-    bool bIsActive;
+    int mTaskItemTypeId;
+    wxString mName;
+    constants::TaskItemTypes mType;
 };
 } // namespace app::model

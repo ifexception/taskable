@@ -33,14 +33,6 @@ TaskModel::TaskModel()
 {
 }
 
-TaskModel::TaskModel(int taskId, bool initializeFromDatabase)
-    : TaskModel()
-{
-    assert(initializeFromDatabase == true);
-
-    auto task = TaskModel::GetById(taskId);
-}
-
 TaskModel::TaskModel(int taskId, wxString date, int dateCreated, int dateModified, bool isActive)
     : TaskModel()
 {
@@ -100,80 +92,4 @@ void TaskModel::IsActive(const bool isActive)
 {
     bIsActive = isActive;
 }
-
-int TaskModel::GetId(const wxDateTime date)
-{
-    int rTaskId = 0;
-    bool taskDoesNotExistYet = true;
-    auto db = svc::DatabaseConnection::Get().GetHandle();
-
-    *db << TaskModel::getTaskId << date.FormatISODate().ToStdString() >> [&](std::unique_ptr<int> taskId) {
-        if (taskId != nullptr) {
-            taskDoesNotExistYet = false;
-            rTaskId = *taskId;
-        }
-    };
-
-    if (taskDoesNotExistYet) {
-        TaskModel::Create(date);
-        rTaskId = db->last_insert_rowid();
-    }
-    return rTaskId;
-}
-
-std::unique_ptr<TaskModel> TaskModel::GetByDate(const wxDateTime date)
-{
-    std::unique_ptr<TaskModel> taskModel = nullptr;
-    auto db = svc::DatabaseConnection::Get().GetHandle();
-    int taskId = GetId(date);
-
-    *db << TaskModel::getTaskByDate << date.FormatISODate().ToStdString() >>
-        [&](int taskId, std::string date, int dateCreated, int dateModified, bool isActive) {
-            taskModel = std::make_unique<TaskModel>(taskId, wxString(date), dateCreated, dateModified, isActive);
-        };
-
-    return std::move(taskModel);
-}
-
-std::unique_ptr<TaskModel> TaskModel::GetById(const int taskId)
-{
-    std::unique_ptr<TaskModel> taskModel = nullptr;
-    auto db = svc::DatabaseConnection::Get().GetHandle();
-    *db << TaskModel::getTaskById << taskId >>
-        [&](int taskId, std::string date, int dateCreated, int dateModified, bool isActive) {
-            taskModel = std::make_unique<TaskModel>(taskId, wxString(date), dateCreated, dateModified, isActive);
-        };
-
-    return std::move(taskModel);
-}
-
-void TaskModel::Create(const wxDateTime date)
-{
-    auto db = svc::DatabaseConnection::Get().GetHandle();
-    *db << TaskModel::createTask << date.FormatISODate().ToStdString();
-}
-
-const std::string TaskModel::getTaskId = "SELECT task_id "
-                                         "FROM tasks "
-                                         "WHERE task_date = ?";
-
-const std::string TaskModel::getTaskByDate = "SELECT task_id, "
-                                             "task_date, "
-                                             "date_created, "
-                                             "date_modified, "
-                                             "is_active "
-                                             "FROM tasks "
-                                             "WHERE task_date = ?";
-
-const std::string TaskModel::getTaskById = "SELECT task_id, "
-                                           "task_date, "
-                                           "date_created, "
-                                           "date_modified, "
-                                           "is_active "
-                                           "FROM tasks "
-                                           "WHERE task_id = ?";
-
-const std::string TaskModel::createTask = "INSERT INTO "
-                                          "tasks (task_date, is_active) "
-                                          "VALUES (?, 1)";
 } // namespace app::model

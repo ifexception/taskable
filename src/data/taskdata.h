@@ -19,36 +19,32 @@
 
 #pragma once
 
-#include <memory>
+#include <cstdint>
 
-#include <wx/datetime.h>
+#include "../database/connectionprovider.h"
+#include "../database/sqliteconnection.h"
+#include "../models/taskmodel.h"
 
-namespace app::model
+namespace app::data
 {
-class TaskModel final
+class TaskData final
 {
 public:
-    TaskModel();
-    TaskModel(int taskId, wxString date, int dateCreated, int dateModified, bool isActive);
-    ~TaskModel() = default;
+    TaskData();
+    ~TaskData();
 
-    const int GetTaskId() const;
-    const wxDateTime GetTaskDate() const;
-    const wxDateTime GetDateCreated();
-    const wxDateTime GetDateModified();
-    const bool IsActive() const;
-
-    void SetTaskId(const int taskId);
-    void SetTaskDate(const wxDateTime& date);
-    void SetDateCreated(const wxDateTime& dateCreated);
-    void SetDateUpdated(const wxDateTime& dateModified);
-    void IsActive(const bool isActive);
+    std::unique_ptr<model::TaskModel> GetByDate(const wxDateTime date);
+    std::unique_ptr<model::TaskModel> GetById(const int taskId);
+    int64_t Create(const wxDateTime date);
 
 private:
-    int mTaskId;
-    wxDateTime mTaskDate;
-    wxDateTime mDateCreated;
-    wxDateTime mDateModified;
-    bool bIsActive;
+    std::shared_ptr<db::SqliteConnection> pConnection;
+
+    int GetId(const wxDateTime date);
+
+    static const std::string getTaskId;
+    static const std::string getTaskByDate;
+    static const std::string getTaskById;
+    static const std::string createTask;
 };
-} // namespace app::model
+} // namespace app::data
