@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <memory>
-
 #include <wx/datetime.h>
 
 namespace app::model

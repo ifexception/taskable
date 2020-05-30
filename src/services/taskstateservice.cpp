@@ -19,8 +19,6 @@
 
 #include "taskstateservice.h"
 
-#include <cassert>
-
 namespace app::services
 {
 TaskStateService::TaskStateService()

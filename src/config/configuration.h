@@ -33,7 +33,6 @@ public:
     ~Configuration();
 
     void Save();
-    void RecreateIfNotExists();
 
     bool IsConfirmOnExit() const;
     void SetConfirmOnExit(bool value);

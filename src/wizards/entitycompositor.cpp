@@ -34,7 +34,7 @@ bool EntityCompositor::ComposeEmployerEntity(std::unique_ptr<model::EmployerMode
     try {
         mEmployerId = employerData.Create(std::move(employer));
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in category EmployerData::Create() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in EmployerData::Create() - {0:d} : {1}", e.get_code(), e.what());
         return false;
     }
 
@@ -47,7 +47,7 @@ bool EntityCompositor::ComposeClientEntity(std::unique_ptr<model::ClientModel> c
     try {
         mClientId = clientData.Create(std::move(client));
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in category ClientData::Create() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in ClientData::Create() - {0:d} : {1}", e.get_code(), e.what());
         return false;
     }
 
@@ -60,7 +60,7 @@ bool EntityCompositor::ComposeProjectEntity(std::unique_ptr<model::ProjectModel>
     try {
         projectData.Create(std::move(project));
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in category ProjectData::Create() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in ProjectData::Create() - {0:d} : {1}", e.get_code(), e.what());
         return false;
     }
 

@@ -20,7 +20,6 @@
 #include "taskmodel.h"
 
 #include "../common/util.h"
-#include "../services/databaseconnection.h"
 
 namespace app::model
 {

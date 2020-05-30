@@ -20,7 +20,6 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
 #include <memory>
 
 #include <spdlog/spdlog.h>

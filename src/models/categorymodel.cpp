@@ -19,11 +19,7 @@
 
 #include "categorymodel.h"
 
-#include "../common/constants.h"
 #include "../common/util.h"
-#include "../services/databaseconnection.h"
-
-#include "../data/projectdata.h"
 
 namespace app::model
 {

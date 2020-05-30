@@ -151,7 +151,7 @@ bool MainFrame::CreateFrame()
         dbBackupDeleter.Execute();
     }
 
-    pTaskBarIcon = new TaskBarIcon(this, pConfig, pLogger, pDatabase);
+    pTaskBarIcon = new TaskBarIcon(this, pConfig, pLogger);
     if (pConfig->IsShowInTray()) {
         pTaskBarIcon->SetTaskBarIcon();
     }

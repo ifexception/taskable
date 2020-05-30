@@ -36,8 +36,7 @@ class TaskBarIcon : public wxTaskBarIcon
 public:
     TaskBarIcon(wxFrame* parent,
         std::shared_ptr<cfg::Configuration> config,
-        std::shared_ptr<spdlog::logger> logger,
-        sqlite::database* database);
+        std::shared_ptr<spdlog::logger> logger);
     virtual ~TaskBarIcon() = default;
 
     void SetTaskBarIcon();
@@ -54,7 +53,6 @@ private:
     void OnLeftButtonDown(wxTaskBarIconEvent& event);
 
     wxFrame* pParent;
-    sqlite::database* pDatabase;
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
 

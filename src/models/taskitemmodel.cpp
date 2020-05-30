@@ -20,7 +20,6 @@
 #include "taskitemmodel.h"
 
 #include "../common/util.h"
-#include "../services/databaseconnection.h"
 
 #include "../data/projectdata.h"
 #include "../data/taskdata.h"

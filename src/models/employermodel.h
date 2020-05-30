@@ -19,10 +19,6 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
-#include <vector>
-
 #include <wx/string.h>
 #include <wx/datetime.h>
 

@@ -19,9 +19,7 @@
 
 #include "clientmodel.h"
 
-#include "../common/constants.h"
 #include "../common/util.h"
-#include "../services/databaseconnection.h"
 
 namespace app::model
 {

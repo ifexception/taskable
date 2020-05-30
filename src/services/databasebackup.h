@@ -44,7 +44,6 @@ private:
     wxString CreateBackupPath(const wxString& fileName);
     bool CreateBackupFile(const wxString& fileName);
     bool ExecuteBackup(const wxString& fileName);
-    bool MoveBackupFileToBackupDirectory(const wxString& fileName);
 
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;

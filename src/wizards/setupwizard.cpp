@@ -29,8 +29,10 @@
 #include "../config/configuration.h"
 #include "../common/common.h"
 #include "../common/util.h"
+
 #include "../data/ratetypedata.h"
 #include "../data/currencydata.h"
+
 #include "../models/employermodel.h"
 #include "../models/clientmodel.h"
 #include "../models/projectmodel.h"
