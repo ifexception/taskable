@@ -161,9 +161,12 @@ bool Application::CreateLogsDirectory()
 
 bool Application::InitializeDatabaseConnectionProvider()
 {
+    static int ConnectionPoolSize = 4;
+
     auto sqliteConnectionFactory = std::make_shared<db::SqliteConnectionFactory>(
         common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString());
-    auto connectionPool = std::make_unique<db::ConnectionPool<db::SqliteConnection>>(sqliteConnectionFactory, 2);
+    auto connectionPool =
+        std::make_unique<db::ConnectionPool<db::SqliteConnection>>(sqliteConnectionFactory, ConnectionPoolSize);
     db::ConnectionProvider::Get().InitializeConnectionPool(std::move(connectionPool));
 
     return true;
