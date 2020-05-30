@@ -53,6 +53,7 @@ CategoriesDialog::CategoriesDialog(wxWindow* parent, std::shared_ptr<spdlog::log
     , pCategory(std::make_unique<model::CategoryModel>())
     , mCategories()
     , bEditFromListCtrl(false)
+    , mCategoryData()
 {
     Create(pParent,
         wxID_ANY,
@@ -428,7 +429,7 @@ void CategoriesDialog::OnOK(wxCommandEvent& event)
 {
     for (auto& category : mCategories) {
         try {
-            model::CategoryModel::Create(std::move(category));
+            mCategoryData.Create(std::move(category));
         } catch (const sqlite::sqlite_exception& e) {
             pLogger->error("Error occured in category CategoryModel::Create() - {0:d} : {1}", e.get_code(), e.what());
             EndModal(ids::ID_ERROR_OCCURED);

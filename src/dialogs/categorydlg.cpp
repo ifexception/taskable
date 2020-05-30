@@ -51,6 +51,7 @@ CategoryDialog::CategoryDialog(wxWindow* parent,
     , mCategoryId(categoryId)
     , pCategory(std::make_unique<model::CategoryModel>(categoryId))
     , pLogger(logger)
+    , mCategoryData()
 {
     Create(parent,
         wxID_ANY,
@@ -210,7 +211,7 @@ void CategoryDialog::DataToControls()
     std::unique_ptr<model::CategoryModel> category = nullptr;
 
     try {
-        category = model::CategoryModel::GetById(mCategoryId);
+        category =mCategoryData.GetById(mCategoryId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in get_category_by_id() - {0:d} : {1}", e.get_code(), e.what());
     }
@@ -260,14 +261,14 @@ void CategoryDialog::OnOk(wxCommandEvent& event)
     if (TransferDataAndValidate()) {
         if (pIsActiveCtrl->IsChecked()) {
             try {
-                model::CategoryModel::Update(std::move(pCategory));
+                mCategoryData.Update(std::move(pCategory));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in category CategoryModel::Update - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
             }
         } else {
             try {
-                model::CategoryModel::Delete(std::move(pCategory));
+                mCategoryData.Delete(mCategoryId);
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in category CategoryModel::Delete - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);

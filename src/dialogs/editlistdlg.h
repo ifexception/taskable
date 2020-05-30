@@ -27,6 +27,7 @@
 #include "../data/employerdata.h"
 #include "../data/clientdata.h"
 #include "../data/projectdata.h"
+#include "../data/categorydata.h"
 
 namespace app::dlg
 {
@@ -100,6 +101,7 @@ public:
 
 private:
     std::shared_ptr<spdlog::logger> pLogger;
+    data::CategoryData mData;
 };
 
 class EditListDialog final : public wxDialog

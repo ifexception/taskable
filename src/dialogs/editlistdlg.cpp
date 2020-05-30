@@ -382,7 +382,7 @@ void CategoryStrategy::DataToControl(wxListCtrl* control)
 {
     std::vector<std::unique_ptr<model::CategoryModel>> categories;
     try {
-        categories = model::CategoryModel::GetAll();
+        categories = mData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in get_categories() - {0:d} : {1}", e.get_code(), e.what());
     }

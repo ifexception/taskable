@@ -79,6 +79,7 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
     , mProjectData()
     , mTaskItemData()
     , mTaskData()
+    , mCategoryData()
 {
     Create(parent,
         wxID_ANY,
@@ -125,6 +126,7 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
     , mProjectData()
     , mTaskItemData()
     , mTaskData()
+    , mCategoryData()
 {
     Create(parent,
         wxID_ANY,
@@ -871,7 +873,7 @@ void TaskItemDialog::FillCategoryControl(int projectId)
 {
     std::vector<std::unique_ptr<model::CategoryModel>> categories;
     try {
-        categories = model::CategoryModel::GetByProjectId(projectId);
+        categories = mCategoryData.GetByProjectId(projectId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in CategoryModel::GetByProjectId() - {0:d} : {1}", e.get_code(), e.what());
         wxLogDebug(wxString(e.get_sql()));

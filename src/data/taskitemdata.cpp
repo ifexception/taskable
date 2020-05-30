@@ -24,8 +24,7 @@
 #include "projectdata.h"
 #include "taskitemtypedata.h"
 #include "taskdata.h"
-
-#include "../models/categorymodel.h"
+#include "categorydata.h"
 
 namespace app::data
 {
@@ -116,12 +115,13 @@ std::unique_ptr<model::TaskItemModel> TaskItemData::GetById(const int taskItemId
             taskItem->SetTaskItemType(std::move(taskItemType));
 
             taskItem->SetProjectId(projectId);
-            data::ProjectData mProjectData;
-            auto project = mProjectData.GetById(projectId);
+            data::ProjectData projectData;
+            auto project = projectData.GetById(projectId);
             taskItem->SetProject(std::move(project));
 
             taskItem->SetCategoryId(categoryId);
-            auto category = model::CategoryModel::GetById(categoryId);
+            data::CategoryData categoryData;
+            auto category = categoryData.GetById(categoryId);
             taskItem->SetCategory(std::move(category));
 
             taskItem->SetTaskId(taskId);
@@ -227,7 +227,8 @@ std::vector<std::unique_ptr<model::TaskItemModel>> TaskItemData::GetByDate(const
             taskItem->SetProject(std::move(project));
 
             taskItem->SetCategoryId(categoryId);
-            auto category = model::CategoryModel::GetById(categoryId);
+            data::CategoryData categoryData;
+            auto category = categoryData.GetById(categoryId);
             taskItem->SetCategory(std::move(category));
 
             taskItem->SetTaskId(taskId);

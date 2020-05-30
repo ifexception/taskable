@@ -34,6 +34,7 @@
 #include "../data/projectdata.h"
 #include "../data/taskitemdata.h"
 #include "../data/taskdata.h"
+#include "../data/categorydata.h"
 
 class wxDateEvent;
 class wxDatePickerCtrl;
@@ -141,6 +142,7 @@ private:
     data::ProjectData mProjectData;
     data::TaskItemData mTaskItemData;
     data::TaskData mTaskData;
+    data::CategoryData mCategoryData;
 
     enum {
         IDC_TASKCONTEXTINFO = wxID_HIGHEST + 1,

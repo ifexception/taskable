@@ -85,6 +85,7 @@ set (SRC
     "dialogs/categorydlg.cpp"
     "dialogs/categoriesdlg.cpp"
     "models/categorymodel.cpp"
+    "data/categorydata.cpp"
 
     "models/taskmodel.cpp"
     "models/taskitemtypemodel.cpp"
