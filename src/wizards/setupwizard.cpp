@@ -439,7 +439,7 @@ bool AddProjectPage::TransferDataFromWindow()
         return false;
     }
 
-    return false;
+    return true;
 }
 
 void AddProjectPage::OnWizardCancel(wxWizardEvent& event)

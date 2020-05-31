@@ -43,6 +43,8 @@ bool EntityCompositor::ComposeEmployerEntity(std::unique_ptr<model::EmployerMode
 
 bool EntityCompositor::ComposeClientEntity(std::unique_ptr<model::ClientModel> client)
 {
+    client->SetEmployerId(mEmployerId);
+
     data::ClientData clientData;
     try {
         mClientId = clientData.Create(std::move(client));
@@ -56,6 +58,11 @@ bool EntityCompositor::ComposeClientEntity(std::unique_ptr<model::ClientModel> c
 
 bool EntityCompositor::ComposeProjectEntity(std::unique_ptr<model::ProjectModel> project)
 {
+    project->SetEmployerId(mEmployerId);
+    if (mClientId != -1) {
+        project->SetClientId(mClientId);
+    }
+
     data::ProjectData projectData;
     try {
         projectData.Create(std::move(project));
