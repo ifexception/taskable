@@ -69,7 +69,8 @@ inline ConnectionPool<T>::~ConnectionPool()
 template<class T>
 inline std::shared_ptr<T> ConnectionPool<T>::Acquire()
 {
-    assert(mConnectionsInUse != mPoolSize);
+    mConnectionsInUse++;
+    assert(mConnectionsInUse <= mPoolSize);
 
     if (mPool.size() == 0) {
         auto connection = pFactory->Create();
@@ -79,7 +80,6 @@ inline std::shared_ptr<T> ConnectionPool<T>::Acquire()
     auto connection = mPool.front();
     mPool.pop_front();
 
-    mConnectionsInUse++;
 
     return std::dynamic_pointer_cast<T>(connection);
 }

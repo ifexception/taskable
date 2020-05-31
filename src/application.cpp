@@ -110,6 +110,8 @@ bool Application::StartupInitialization()
 {
     if (!DatabaseFileExists()) {
         return false;
+    } else {
+        InitializeDatabaseConnectionProvider();
     }
 
     return true;
