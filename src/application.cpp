@@ -40,7 +40,6 @@ namespace app
 Application::Application()
     : pInstanceChecker(std::make_unique<wxSingleInstanceChecker>())
     , pConfig(nullptr)
-    , pDatabase(nullptr)
 {
 }
 
@@ -64,7 +63,7 @@ bool Application::OnInit()
         return false;
     }
 
-    if (!IsSetup()) {
+    if (IsSetup()) {
         if (!StartupInitialization()) {
             return false;
         }
@@ -74,7 +73,7 @@ bool Application::OnInit()
         }
     }
 
-    auto frame = new frm::MainFrame(pConfig, pLogger, pDatabase);
+    auto frame = new frm::MainFrame(pConfig, pLogger);
     frame->CreateFrame();
     frame->Show(true);
     SetTopWindow(frame);
@@ -302,7 +301,7 @@ bool Application::DatabaseFileExists()
                 common::GetProgramName(),
                 wxYES_NO | wxICON_ERROR);
             if (ret == wxYES) {
-                auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pConfig, pLogger, pDatabase, true);
+                auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pConfig, pLogger, true);
                 restoreDatabase->CenterOnParent();
                 return restoreDatabase->Run();
             }

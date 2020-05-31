@@ -34,7 +34,6 @@ namespace app::wizard
 DatabaseRestoreWizard::DatabaseRestoreWizard(frm::MainFrame* frame,
     std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
-    sqlite::database* database,
     bool restoreWithNoPreviousFileExisting)
     : wxWizard(frame,
           wxID_ANY,

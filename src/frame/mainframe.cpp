@@ -93,13 +93,11 @@ wxEND_EVENT_TABLE()
 
 MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
-    sqlite::database* database,
     const wxString& name)
     :wxFrame(
         nullptr, wxID_ANY, common::GetProgramName(), wxDefaultPosition, wxSize(600, 500), wxDEFAULT_FRAME_STYLE, name)
     , pConfig(config)
     , pLogger(logger)
-    , pDatabase(database)
     , pTaskState(std::make_shared<services::TaskStateService>())
     , pTaskStorage(std::make_unique<services::TaskStorage>())
     , pDismissInfoBarTimer(std::make_unique<wxTimer>(this, IDC_DISMISS_INFOBAR_TIMER))
@@ -128,11 +126,6 @@ MainFrame::~MainFrame()
     }
 
     RunDatabaseBackup();
-
-    if (pDatabase) {
-        delete pDatabase;
-        pDatabase = nullptr;
-    }
 }
 
 bool MainFrame::CreateFrame()
@@ -585,7 +578,7 @@ void MainFrame::OnResize(wxSizeEvent& event)
 void MainFrame::OnRestoreDatabase(wxCommandEvent& event)
 {
     if (pConfig->IsBackupEnabled()) {
-        auto wizard = new wizard::DatabaseRestoreWizard(this, pConfig, pLogger, pDatabase);
+        auto wizard = new wizard::DatabaseRestoreWizard(this, pConfig, pLogger);
         wizard->CenterOnParent();
         bool wizardSetupSuccess = wizard->Run();
         if (wizardSetupSuccess) {
@@ -603,7 +596,7 @@ void MainFrame::OnRestoreDatabase(wxCommandEvent& event)
 void MainFrame::OnBackupDatabase(wxCommandEvent& event)
 {
     if (pConfig->IsBackupEnabled()) {
-        svc::DatabaseBackup databaseBackup(pConfig, pLogger, pDatabase);
+        svc::DatabaseBackup databaseBackup(pConfig, pLogger);
         bool result = databaseBackup.Execute();
         if (result) {
             wxMessageBox(
@@ -774,7 +767,7 @@ void MainFrame::RefreshItems(wxDateTime date)
 bool MainFrame::RunDatabaseBackup()
 {
     if (pConfig->IsBackupEnabled()) {
-        svc::DatabaseBackup dbBackup(pConfig, pLogger, pDatabase);
+        svc::DatabaseBackup dbBackup(pConfig, pLogger);
         bool result = dbBackup.Execute();
         return result;
     }

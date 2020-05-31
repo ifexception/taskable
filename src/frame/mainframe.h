@@ -47,7 +47,6 @@ class MainFrame : public wxFrame
 public:
     MainFrame(std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
-        sqlite::database* database,
         const wxString& name = wxT("mainfrm"));
     MainFrame(const MainFrame&) = delete;
     virtual ~MainFrame();
@@ -118,7 +117,6 @@ private:
     TaskBarIcon* pTaskBarIcon;
     wxBitmapButton* pFeedbackButton;
     FeedbackPopupWindow* pFeedbackPopupWindow;
-    sqlite::database* pDatabase;
 
     bool bHasPendingTaskToResume;
     long mItemIndexForClipboard;

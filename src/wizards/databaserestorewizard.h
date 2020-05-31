@@ -45,7 +45,6 @@ public:
     DatabaseRestoreWizard(frm::MainFrame* frame,
         std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
-        sqlite::database* database,
         bool restoreWithNoPreviousFileExisting = false);
     virtual ~DatabaseRestoreWizard() = default;
 
