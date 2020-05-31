@@ -29,13 +29,16 @@
 
 namespace app::svc
 {
-DatabaseBackup::DatabaseBackup(std::shared_ptr<cfg::Configuration> config,
-    std::shared_ptr<spdlog::logger> logger,
-    sqlite::database* database)
+DatabaseBackup::DatabaseBackup(std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger)
     : pConfig(config)
     , pLogger(logger)
-    , pDatabase(database)
 {
+    pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
+}
+
+DatabaseBackup::~DatabaseBackup()
+{
+    db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 
 bool DatabaseBackup::Execute()
@@ -95,7 +98,7 @@ bool DatabaseBackup::ExecuteBackup(const wxString& fileName)
     try {
         auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
         sqlite::database backupConnection(fileName.ToStdString(), config);
-        auto existingConnection = pDatabase->connection();
+        auto existingConnection = pConnection->DatabaseExecutableHandle()->connection();
 
         auto state = std::unique_ptr<sqlite3_backup, decltype(&sqlite3_backup_finish)>(
             sqlite3_backup_init(backupConnection.connection().get(), "main", existingConnection.get(), "main"),
