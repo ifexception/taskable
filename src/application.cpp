@@ -134,7 +134,19 @@ bool Application::InitializeLogging()
             .ToStdString();
 
     try {
-        pLogger = spdlog::daily_logger_st(constants::LoggerName, logDirectory);
+        auto msvcSink = std::make_shared<spdlog::sinks::msvc_sink_st>();
+
+        auto msvcLogger = std::make_shared<spdlog::logger>("msvc", msvcSink);
+        msvcLogger->set_level(spdlog::level::debug);
+        spdlog::register_logger(msvcLogger);
+
+        auto dialySink = std::make_shared<spdlog::sinks::daily_file_sink_st>(logDirectory, 23, 59);
+        dialySink->set_level(spdlog::level::err);
+
+        auto dist_sink = std::make_shared<spdlog::sinks::dist_sink_st>();
+        dist_sink->add_sink(msvcSink);
+        dist_sink->add_sink(dialySink);
+        pLogger = std::make_shared<spdlog::logger>(constants::LoggerName, dist_sink);
     } catch (const spdlog::spdlog_ex& e) {
         wxMessageBox(wxString::Format(wxT("Error initializing logger: %s"), e.what()),
             common::GetProgramName(),
@@ -162,7 +174,7 @@ bool Application::CreateLogsDirectory()
 
 bool Application::InitializeDatabaseConnectionProvider()
 {
-    static int ConnectionPoolSize = 4;
+    static int ConnectionPoolSize = 10;
 
     auto sqliteConnectionFactory = std::make_shared<db::SqliteConnectionFactory>(
         common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString());
