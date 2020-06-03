@@ -467,7 +467,7 @@ void ProjectDialog::DataToControls()
         pRateChoiceCtrl->SetStringSelection(project->GetRateType()->GetName());
         pRateTextCtrl->Enable();
         /* Set the rate value */
-        pRateTextCtrl->SetValue(wxString::Format(wxT("%.2f"), wxString(std::to_string(*project->GetRate()))));
+        pRateTextCtrl->SetValue(wxString::Format(wxT("%.2f"), *project->GetRate()));
 
         pCurrencyComboBoxCtrl->Enable();
         /* Set the currency for project */

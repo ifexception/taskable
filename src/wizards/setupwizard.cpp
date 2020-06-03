@@ -246,7 +246,7 @@ bool AddClientPage::TransferDataFromWindow()
         return true;
     }
 
-    if (!clientName.empty() && !clientName.length() > 2) {
+    if (!clientName.empty() && clientName.length() < 2) {
         wxMessageBox(wxT("An client name is required to be at least 2 characters long"),
             common::GetProgramName(),
             wxOK | wxICON_ERROR,
