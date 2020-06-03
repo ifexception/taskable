@@ -231,7 +231,6 @@ ProjectModel::ProjectModel()
     , mDisplayName(wxGetEmptyString())
     , bIsBillable(false)
     , pRate(nullptr)
-    , pHours(nullptr)
     , bIsDefault(nullptr)
     , mDateCreated(wxDefaultDateTime)
     , mDateModified(wxDefaultDateTime)
@@ -310,12 +309,6 @@ bool ProjectModel::IsBillableScenarioWithHourlyRate()
            mCurrencyId > 0;
 }
 
-bool ProjectModel::IsBillableScenarioWithDailyRate()
-{
-    return bIsBillable == true && mRateTypeId == static_cast<int>(constants::RateTypes::Daily) && pRate != nullptr &&
-           mCurrencyId > 0;
-}
-
 bool ProjectModel::HasClientLinked()
 {
     return pClient != nullptr || mClientId > 0;
@@ -326,19 +319,12 @@ void ProjectModel::SwitchOutOfBillableScenario()
     pRate.reset();
     mRateTypeId = -1;
     mCurrencyId = -1;
-    pHours.reset();
 }
 
 void ProjectModel::SwitchInToUnknownRateBillableScenario()
 {
     pRate.reset();
     mCurrencyId = -1;
-    pHours.reset();
-}
-
-void ProjectModel::SwitchInToHourlyRateBillableScenario()
-{
-    pHours.reset();
 }
 
 const int ProjectModel::GetProjectId() const
@@ -364,11 +350,6 @@ const bool ProjectModel::IsBillable() const
 const double* ProjectModel::GetRate() const
 {
     return pRate.get();
-}
-
-const int* ProjectModel::GetHours() const
-{
-    return pHours.get();
 }
 
 const bool ProjectModel::IsDefault() const
@@ -456,11 +437,6 @@ void ProjectModel::SetRate(std::unique_ptr<double> rate)
     pRate = std::move(rate);
 }
 
-void ProjectModel::SetHours(std::unique_ptr<int> hours)
-{
-    pHours = std::move(hours);
-}
-
 void ProjectModel::IsDefault(const bool isDefault)
 {
     bIsDefault = isDefault;
@@ -534,16 +510,13 @@ void ProjectModel::Create(std::unique_ptr<ProjectModel> project)
         ps << nullptr;
 
     if (project->IsNonBillableScenario())
-        ps << nullptr << nullptr << nullptr << nullptr;
+        ps << nullptr << nullptr << nullptr;
 
     if (project->IsBillableWithUnknownRateScenario())
-        ps << nullptr << project->GetRateTypeId() << nullptr << nullptr;
+        ps << nullptr << project->GetRateTypeId() << nullptr;
 
     if (project->IsBillableScenarioWithHourlyRate())
-        ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId() << nullptr;
-
-    if (project->IsBillableScenarioWithDailyRate())
-        ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId() << *project->GetHours();
+        ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId();
 
     ps.execute();
 }
@@ -558,7 +531,6 @@ std::unique_ptr<ProjectModel> ProjectModel::GetById(const int projectId)
                                                        int billable,
                                                        int isDefault,
                                                        std::unique_ptr<double> rate,
-                                                       std::unique_ptr<int> hours,
                                                        int dateCreated,
                                                        int dateModified,
                                                        int isActive,
@@ -571,10 +543,6 @@ std::unique_ptr<ProjectModel> ProjectModel::GetById(const int projectId)
 
         if (rate != nullptr) {
             project->SetRate(std::move(rate));
-        }
-
-        if (hours != nullptr) {
-            project->SetHours(std::move(hours));
         }
 
         project->SetEmployerId(employerId);
@@ -618,13 +586,10 @@ void ProjectModel::Update(std::unique_ptr<ProjectModel> project)
         ps << nullptr << nullptr << nullptr << nullptr;
 
     if (project->IsBillableWithUnknownRateScenario())
-        ps << nullptr << project->GetRateTypeId() << nullptr << nullptr;
+        ps << nullptr << project->GetRateTypeId() << nullptr;
 
     if (project->IsBillableScenarioWithHourlyRate())
-        ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId() << nullptr;
-
-    if (project->IsBillableScenarioWithDailyRate())
-        ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId() << *project->GetHours();
+        ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId();
 
     ps << project->GetProjectId();
 
@@ -647,7 +612,6 @@ std::vector<std::unique_ptr<ProjectModel>> ProjectModel::GetAll()
                                            int billable,
                                            int isDefault,
                                            std::unique_ptr<double> rate,
-                                           std::unique_ptr<int> hours,
                                            int dateCreated,
                                            int dateModified,
                                            int isActive,
@@ -660,10 +624,6 @@ std::vector<std::unique_ptr<ProjectModel>> ProjectModel::GetAll()
 
         if (rate != nullptr) {
             project->SetRate(std::move(rate));
-        }
-
-        if (hours != nullptr) {
-            project->SetHours(std::move(hours));
         }
 
         project->SetEmployerId(employerId);
@@ -702,7 +662,7 @@ void ProjectModel::UnmarkDefaultProjects()
 const std::string ProjectModel::createProject = "INSERT INTO "
                                                 "projects(name, display_name, billable, is_default, is_active, "
                                                 "employer_id, client_id, rate, rate_type_id, currency_id, hours) "
-                                                "VALUES(?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)";
+                                                "VALUES(?, ?, ?, ?, 1, ?, ?, ?, ?, ?)";
 
 const std::string ProjectModel::getProject = "SELECT projects.project_id, "
                                              "projects.name AS project_name, "
@@ -710,7 +670,6 @@ const std::string ProjectModel::getProject = "SELECT projects.project_id, "
                                              "projects.billable, "
                                              "projects.is_default,"
                                              "projects.rate, "
-                                             "projects.hours,"
                                              "projects.date_created, "
                                              "projects.date_modified, "
                                              "projects.is_active, "
@@ -729,7 +688,6 @@ const std::string ProjectModel::updateProject =
     "UPDATE projects "
     "SET name = ?, display_name = ?, billable = ?, is_default = ?, date_modified = ?, "
     "employer_id = ?, client_id = ?, rate = ?, rate_type_id = ?, currency_id = ?, "
-    "hours = ? "
     "WHERE project_id = ?";
 
 const std::string ProjectModel::deleteProject = "UPDATE projects"
@@ -742,7 +700,6 @@ const std::string ProjectModel::getProjects = "SELECT projects.project_id, "
                                               "projects.billable, "
                                               "projects.is_default,"
                                               "projects.rate, "
-                                              "projects.hours,"
                                               "projects.date_created, "
                                               "projects.date_modified, "
                                               "projects.is_active, "

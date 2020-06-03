@@ -81,7 +81,6 @@ private:
     wxChoice* pRateChoiceCtrl;
     wxTextCtrl* pRateTextCtrl;
     wxComboBox* pCurrencyComboBoxCtrl;
-    wxTextCtrl* pHoursTextCtrl;
     wxCheckBox* pIsActiveCtrl;
     wxCheckBox* pIsDefaultCtrl;
     wxStaticText* pDateTextCtrl;
@@ -101,7 +100,6 @@ private:
         IDC_RATECHOICE,
         IDC_RATEVALUE,
         IDC_CURRENCYCHOICE,
-        IDC_HOURS,
         IDC_ISDEFAULT,
         IDC_ISACTIVE
     };
