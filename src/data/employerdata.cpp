@@ -27,13 +27,13 @@ namespace app::data
 {
 EmployerData::EmployerData()
 {
-    spdlog::logger("msvc").info("ACQUIRE connection in EmployerData");
+    spdlog::get("msvc")->debug("ACQUIRE connection in EmployerData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
 EmployerData::~EmployerData()
 {
-    spdlog::logger("msvc").info("RELEASE connection in EmployerData");
+    spdlog::get("msvc")->debug("RELEASE connection in EmployerData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 

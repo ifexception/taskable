@@ -28,13 +28,13 @@ namespace app::data
 {
 ClientData::ClientData()
 {
-    spdlog::logger("msvc").info("ACQUIRE connection in ClientData");
+    spdlog::get("msvc")->debug("ACQUIRE connection in ClientData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
 ClientData::~ClientData()
 {
-    spdlog::logger("msvc").info("RELEASE connection in ClientData");
+    spdlog::get("msvc")->debug("RELEASE connection in ClientData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 

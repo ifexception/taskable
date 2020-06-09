@@ -31,13 +31,13 @@ namespace app::data
 {
 ProjectData::ProjectData()
 {
-    spdlog::logger("msvc").info("ACQUIRE connection in ProjectData");
+    spdlog::get("msvc")->debug("ACQUIRE connection in ProjectData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
 ProjectData::~ProjectData()
 {
-    spdlog::logger("msvc").info("RELEASE connection in ProjectData");
+    spdlog::get("msvc")->debug("RELEASE connection in ProjectData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 

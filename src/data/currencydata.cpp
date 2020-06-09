@@ -25,13 +25,13 @@ namespace app::data
 {
 CurrencyData::CurrencyData()
 {
-    spdlog::logger("msvc").info("ACQUIRE connection in CurrencyData");
+    spdlog::get("msvc")->debug("ACQUIRE connection in CurrencyData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
 CurrencyData::~CurrencyData()
 {
-    spdlog::logger("msvc").info("RELEASE connection in CurrencyData");
+    spdlog::get("msvc")->debug("RELEASE connection in CurrencyData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 

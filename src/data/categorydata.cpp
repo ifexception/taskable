@@ -29,13 +29,13 @@ namespace app::data
 {
 CategoryData::CategoryData()
 {
-    spdlog::logger("msvc").info("ACQUIRE connection in CategoryData");
+    spdlog::get("msvc")->debug("ACQUIRE connection in CategoryData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
 CategoryData::~CategoryData()
 {
-    spdlog::logger("msvc").info("RELEASE connection in CategoryData");
+    spdlog::get("msvc")->debug("RELEASE connection in CategoryData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 

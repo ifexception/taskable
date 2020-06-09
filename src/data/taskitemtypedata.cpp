@@ -27,13 +27,13 @@ namespace app::data
 {
 TaskItemTypeData::TaskItemTypeData()
 {
-    spdlog::logger("msvc").info("ACQUIRE connection in TaskItemTypeData");
+    spdlog::get("msvc")->debug("ACQUIRE connection in TaskItemTypeData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
 TaskItemTypeData::~TaskItemTypeData()
 {
-    spdlog::logger("msvc").info("RELEASE connection in TaskItemTypeData");
+    spdlog::get("msvc")->debug("RELEASE connection in TaskItemTypeData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 
