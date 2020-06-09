@@ -19,6 +19,8 @@
 
 #include "categorydata.h"
 
+#include <spdlog/spdlog.h>
+
 #include "projectdata.h"
 
 #include "../common/util.h"
@@ -27,11 +29,13 @@ namespace app::data
 {
 CategoryData::CategoryData()
 {
+    spdlog::logger("msvc").info("ACQUIRE connection in CategoryData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
 CategoryData::~CategoryData()
 {
+    spdlog::logger("msvc").info("RELEASE connection in CategoryData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 

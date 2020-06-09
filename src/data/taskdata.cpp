@@ -19,15 +19,19 @@
 
 #include "taskdata.h"
 
+#include <spdlog/spdlog.h>
+
 namespace app::data
 {
 TaskData::TaskData()
 {
+    spdlog::logger("msvc").info("ACQUIRE connection in TaskData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
 TaskData::~TaskData()
 {
+    spdlog::logger("msvc").info("RELEASE connection in TaskData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 

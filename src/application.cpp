@@ -123,12 +123,6 @@ bool Application::InitializeLogging()
         return false;
     }
 
-#ifdef TASKABLE_DEBUG
-    spdlog::set_level(spdlog::level::info);
-#else
-    spdlog::set_level(spdlog::level::warn);
-#endif
-
     auto logDirectory =
         wxString::Format(wxT("%s\\logs\\%s"), wxStandardPaths::Get().GetUserDataDir(), constants::LogsFilename)
             .ToStdString();
@@ -143,10 +137,10 @@ bool Application::InitializeLogging()
         auto dialySink = std::make_shared<spdlog::sinks::daily_file_sink_st>(logDirectory, 23, 59);
         dialySink->set_level(spdlog::level::err);
 
-        auto dist_sink = std::make_shared<spdlog::sinks::dist_sink_st>();
-        dist_sink->add_sink(msvcSink);
-        dist_sink->add_sink(dialySink);
-        pLogger = std::make_shared<spdlog::logger>(constants::LoggerName, dist_sink);
+        auto combinedLoggers = std::make_shared<spdlog::sinks::dist_sink_st>();
+        combinedLoggers->add_sink(msvcSink);
+        combinedLoggers->add_sink(dialySink);
+        pLogger = std::make_shared<spdlog::logger>(constants::LoggerName, combinedLoggers);
     } catch (const spdlog::spdlog_ex& e) {
         wxMessageBox(wxString::Format(wxT("Error initializing logger: %s"), e.what()),
             common::GetProgramName(),

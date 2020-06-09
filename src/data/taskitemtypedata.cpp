@@ -19,17 +19,21 @@
 
 #include "taskitemtypedata.h"
 
+#include <spdlog/spdlog.h>
+
 #include <wx/string.h>
 
 namespace app::data
 {
 TaskItemTypeData::TaskItemTypeData()
 {
+    spdlog::logger("msvc").info("ACQUIRE connection in TaskItemTypeData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
 TaskItemTypeData::~TaskItemTypeData()
 {
+    spdlog::logger("msvc").info("RELEASE connection in TaskItemTypeData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 

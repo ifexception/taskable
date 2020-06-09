@@ -19,15 +19,19 @@
 
 #include "ratetypedata.h"
 
+#include <spdlog/spdlog.h>
+
 namespace app::data
 {
 RateTypeData::RateTypeData()
 {
+    spdlog::logger("msvc").info("ACQUIRE connection in RateTypeData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
 RateTypeData::~RateTypeData()
 {
+    spdlog::logger("msvc").info("RELEASE connection in RateTypeData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 

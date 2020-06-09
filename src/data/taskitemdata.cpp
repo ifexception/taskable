@@ -19,6 +19,8 @@
 
 #include "taskitemdata.h"
 
+#include <spdlog/spdlog.h>
+
 #include "../common/util.h"
 
 #include "projectdata.h"
@@ -30,11 +32,13 @@ namespace app::data
 {
 TaskItemData::TaskItemData()
 {
+    spdlog::logger("msvc").info("ACQUIRE connection in TaskItemData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
 TaskItemData::~TaskItemData()
 {
+    spdlog::logger("msvc").info("RELEASE connection in TaskItemData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 

@@ -19,15 +19,19 @@
 
 #include "currencydata.h"
 
+#include <spdlog/spdlog.h>
+
 namespace app::data
 {
 CurrencyData::CurrencyData()
 {
+    spdlog::logger("msvc").info("ACQUIRE connection in CurrencyData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
 CurrencyData::~CurrencyData()
 {
+    spdlog::logger("msvc").info("RELEASE connection in CurrencyData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 

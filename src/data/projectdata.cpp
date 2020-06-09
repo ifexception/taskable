@@ -19,6 +19,8 @@
 
 #include "projectdata.h"
 
+#include <spdlog/spdlog.h>
+
 #include "../common/util.h"
 #include "employerdata.h"
 #include "clientdata.h"
@@ -29,11 +31,13 @@ namespace app::data
 {
 ProjectData::ProjectData()
 {
+    spdlog::logger("msvc").info("ACQUIRE connection in ProjectData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
 ProjectData::~ProjectData()
 {
+    spdlog::logger("msvc").info("RELEASE connection in ProjectData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 

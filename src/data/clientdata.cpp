@@ -19,6 +19,8 @@
 
 #include "clientdata.h"
 
+#include <spdlog/spdlog.h>
+
 #include "../common/util.h"
 #include "employerdata.h"
 
@@ -26,11 +28,13 @@ namespace app::data
 {
 ClientData::ClientData()
 {
+    spdlog::logger("msvc").info("ACQUIRE connection in ClientData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
 ClientData::~ClientData()
 {
+    spdlog::logger("msvc").info("RELEASE connection in ClientData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 
