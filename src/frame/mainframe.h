@@ -1,4 +1,5 @@
 // Productivity tool to help you track the time you spend on tasks
+// Productivity tool to help you track the time you spend on tasks
 // Copyright (C) 2020  Szymon Welgus
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,11 +25,11 @@
 #include <sqlite_modern_cpp.h>
 
 #include <wx/wx.h>
-#include <wx/listctrl.h>
+#include <wx/bmpbuttn.h>
 #include <wx/datectrl.h>
 #include <wx/dateevt.h>
 #include <wx/infobar.h>
-#include <wx/bmpbuttn.h>
+#include <wx/listctrl.h>
 #include <wx/timer.h>
 
 #include <spdlog/spdlog.h>
@@ -63,9 +64,15 @@ private:
     void CreateControls();
     void DataToControls();
 
+    /* General Event Handlers */
+    void OnClose(wxCloseEvent& event);
+    void OnIconize(wxIconizeEvent& event);
+    void OnResize(wxSizeEvent& event);
+    void OnDismissInfoBar(wxTimerEvent& event);
+
+    /* Main Menu Event Handlers */
     void OnAbout(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
-    void OnClose(wxCloseEvent& event);
     void OnNewEntryTask(wxCommandEvent& event);
     void OnNewTimedTask(wxCommandEvent& event);
     void OnNewEmployer(wxCommandEvent& event);
@@ -76,27 +83,36 @@ private:
     void OnEditClient(wxCommandEvent& event);
     void OnEditProject(wxCommandEvent& event);
     void OnEditCategory(wxCommandEvent& event);
-    void OnTaskInserted(wxCommandEvent& event);
-    void OnItemDoubleClick(wxListEvent& event);
-    void OnItemRightClick(wxListEvent& event);
-    void OnIconize(wxIconizeEvent& event);
     void OnPreferences(wxCommandEvent& event);
     void OnTaskStopwatch(wxCommandEvent& event);
-    void OnDateChanged(wxDateEvent& event);
-    void OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event);
     void OnCheckForUpdate(wxCommandEvent& event);
-    void OnResize(wxSizeEvent& event);
     void OnRestoreDatabase(wxCommandEvent& event);
     void OnBackupDatabase(wxCommandEvent& event);
+
+    /* Frame Controls Event Handlers */
+    void OnPrevDay(wxCommandEvent& event);
+    void OnDateChanged(wxDateEvent& event);
+    void OnNextDay(wxCommandEvent& event);
     void OnFeedback(wxCommandEvent& event);
     void OnKeyDown(wxKeyEvent& event);
-    void OnDismissInfoBar(wxTimerEvent& event);
+
+    /* ListCtrl Control Event Handlers */
+    void OnItemDoubleClick(wxListEvent& event);
+    void OnItemRightClick(wxListEvent& event);
+    void OnItemMiddleClick(wxListEvent& event);
     void OnPopupMenuCopyToClipboard(wxCommandEvent& event);
     void OnPopupMenuEdit(wxCommandEvent& event);
     void OnPopupMenuDelete(wxCommandEvent& event);
+    void OnColumnBeginDrag(wxListEvent& event);
+
+    /* Uncategorized Event Handlers */
+    void OnTaskInserted(wxCommandEvent& event);
+    void OnTaskUpdated(wxCommandEvent& event);
+    void OnTaskDeleted(wxCommandEvent& event);
+    void OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event);
 
     void CalculateTotalTime(wxDateTime date = wxDateTime::Now());
-    void RefreshItems(wxDateTime date = wxDateTime::Now());
+    void FillListCtrl(wxDateTime date = wxDateTime::Now());
 
     bool RunDatabaseBackup();
 
@@ -104,12 +120,19 @@ private:
     void ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item);
     void ShowInfoBarMessageForDelete(bool success);
 
+    void DateChangedProcedure(wxDateTime dateTime);
+    void CopyToClipboardProcedure(long itemIndex);
+
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<services::TaskStateService> pTaskState;
     std::unique_ptr<services::TaskStorage> pTaskStorage;
+
     std::unique_ptr<wxTimer> pDismissInfoBarTimer;
+
+    wxButton* pPrevDayBtn;
     wxDatePickerCtrl* pDatePickerCtrl;
+    wxButton* pNextDayBtn;
     wxStaticText* pTotalHoursText;
     wxListCtrl* pListCtrl;
     wxStatusBar* pStatusBar;
@@ -119,9 +142,17 @@ private:
     FeedbackPopupWindow* pFeedbackPopupWindow;
 
     bool bHasPendingTaskToResume;
-    long mItemIndexForClipboard;
+    long mItemIndex;
     int mSelectedTaskItemId;
 
-    enum { IDC_GO_TO_DATE = wxID_HIGHEST + 1, IDC_HOURS_TEXT, IDC_LIST, IDC_FEEDBACK, IDC_DISMISS_INFOBAR_TIMER };
+    enum {
+        IDC_PREV_DAY = wxID_HIGHEST + 1,
+        IDC_GO_TO_DATE,
+        IDC_NEXT_DAY,
+        IDC_HOURS_TEXT,
+        IDC_LIST,
+        IDC_FEEDBACK,
+        IDC_DISMISS_INFOBAR_TIMER
+    };
 };
 } // namespace app::frm
