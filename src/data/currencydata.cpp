@@ -25,14 +25,16 @@ namespace app::data
 {
 CurrencyData::CurrencyData()
 {
-    spdlog::get("msvc")->debug("ACQUIRE connection in CurrencyData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
+    spdlog::get("msvc")->debug("ACQUIRE connection in CurrencyData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 CurrencyData::~CurrencyData()
 {
-    spdlog::get("msvc")->debug("RELEASE connection in CurrencyData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
+    spdlog::get("msvc")->debug("RELEASE connection in CurrencyData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 std::unique_ptr<model::CurrencyModel> CurrencyData::GetById(const int id)

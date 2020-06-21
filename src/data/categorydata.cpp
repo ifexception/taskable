@@ -29,14 +29,16 @@ namespace app::data
 {
 CategoryData::CategoryData()
 {
-    spdlog::get("msvc")->debug("ACQUIRE connection in CategoryData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
+    spdlog::get("msvc")->debug("ACQUIRE connection in CategoryData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 CategoryData::~CategoryData()
 {
-    spdlog::get("msvc")->debug("RELEASE connection in CategoryData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
+    spdlog::get("msvc")->debug("RELEASE connection in CategoryData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 int64_t CategoryData::Create(std::unique_ptr<model::CategoryModel> category)

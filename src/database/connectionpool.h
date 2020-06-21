@@ -41,6 +41,8 @@ public:
     std::shared_ptr<T> Acquire();
     void Release(std::shared_ptr<T> connection);
 
+    const std::size_t ConnectionsInUse() const;
+
 private:
     std::size_t mPoolSize;
     std::size_t mConnectionsInUse;
@@ -89,5 +91,10 @@ inline void ConnectionPool<T>::Release(std::shared_ptr<T> connection)
 {
     mPool.push_back(std::dynamic_pointer_cast<IConnection>(connection));
     mConnectionsInUse--;
+}
+template<class T>
+inline const std::size_t ConnectionPool<T>::ConnectionsInUse() const
+{
+    return mConnectionsInUse;
 }
 } // namespace app::db

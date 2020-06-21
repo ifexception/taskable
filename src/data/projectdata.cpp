@@ -31,14 +31,16 @@ namespace app::data
 {
 ProjectData::ProjectData()
 {
-    spdlog::get("msvc")->debug("ACQUIRE connection in ProjectData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
+    spdlog::get("msvc")->debug("ACQUIRE connection in ProjectData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 ProjectData::~ProjectData()
 {
-    spdlog::get("msvc")->debug("RELEASE connection in ProjectData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
+    spdlog::get("msvc")->debug("RELEASE connection in ProjectData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 void ProjectData::Create(std::unique_ptr<model::ProjectModel> project)

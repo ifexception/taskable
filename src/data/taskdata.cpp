@@ -25,14 +25,16 @@ namespace app::data
 {
 TaskData::TaskData()
 {
-    spdlog::get("msvc")->debug("ACQUIRE connection in TaskData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
+    spdlog::get("msvc")->debug("ACQUIRE connection in TaskData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 TaskData::~TaskData()
 {
-    spdlog::get("msvc")->debug("RELEASE connection in TaskData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
+    spdlog::get("msvc")->debug("RELEASE connection in TaskData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 int TaskData::GetId(const wxDateTime date)

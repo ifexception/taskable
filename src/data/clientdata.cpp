@@ -28,14 +28,16 @@ namespace app::data
 {
 ClientData::ClientData()
 {
-    spdlog::get("msvc")->debug("ACQUIRE connection in ClientData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
+    spdlog::get("msvc")->debug("ACQUIRE connection in ClientData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 ClientData::~ClientData()
 {
-    spdlog::get("msvc")->debug("RELEASE connection in ClientData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
+    spdlog::get("msvc")->debug("RELEASE connection in ClientData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 int64_t ClientData::Create(std::unique_ptr<model::ClientModel> client)

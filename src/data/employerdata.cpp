@@ -27,14 +27,16 @@ namespace app::data
 {
 EmployerData::EmployerData()
 {
-    spdlog::get("msvc")->debug("ACQUIRE connection in EmployerData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
+    spdlog::get("msvc")->debug("ACQUIRE connection in EmployerData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 EmployerData::~EmployerData()
 {
-    spdlog::get("msvc")->debug("RELEASE connection in EmployerData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
+    spdlog::get("msvc")->debug("RELEASE connection in EmployerData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 int64_t EmployerData::Create(std::unique_ptr<model::EmployerModel> employer)

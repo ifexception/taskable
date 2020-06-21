@@ -32,14 +32,16 @@ namespace app::data
 {
 TaskItemData::TaskItemData()
 {
-    spdlog::get("msvc")->debug("ACQUIRE connection in TaskItemData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
+    spdlog::get("msvc")->debug("ACQUIRE connection in TaskItemData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 TaskItemData::~TaskItemData()
 {
-    spdlog::get("msvc")->debug("RELEASE connection in TaskItemData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
+    spdlog::get("msvc")->debug("RELEASE connection in TaskItemData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 int64_t TaskItemData::Create(std::unique_ptr<model::TaskItemModel> taskItem)

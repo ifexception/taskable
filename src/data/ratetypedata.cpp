@@ -25,14 +25,16 @@ namespace app::data
 {
 RateTypeData::RateTypeData()
 {
-    spdlog::get("msvc")->debug("ACQUIRE connection in RateTypeData");
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
+    spdlog::get("msvc")->debug("ACQUIRE connection in RateTypeData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 RateTypeData::~RateTypeData()
 {
-    spdlog::get("msvc")->debug("RELEASE connection in RateTypeData");
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
+    spdlog::get("msvc")->debug("RELEASE connection in RateTypeData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 std::unique_ptr<model::RateTypeModel> RateTypeData::GetById(const int rateTypeId)
