@@ -168,7 +168,7 @@ bool Application::CreateLogsDirectory()
 
 bool Application::InitializeDatabaseConnectionProvider()
 {
-    static int ConnectionPoolSize = 10;
+    static int ConnectionPoolSize = 14;
 
     auto sqliteConnectionFactory = std::make_shared<db::SqliteConnectionFactory>(
         common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString());
