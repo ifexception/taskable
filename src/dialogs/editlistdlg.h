@@ -24,11 +24,6 @@
 
 #include <spdlog/spdlog.h>
 
-#include "../data/employerdata.h"
-#include "../data/clientdata.h"
-#include "../data/projectdata.h"
-#include "../data/categorydata.h"
-
 namespace app::dlg
 {
 enum class DialogType { Employer, Client, Project, Category };
@@ -56,7 +51,6 @@ public:
 
 private:
     std::shared_ptr<spdlog::logger> pLogger;
-    data::EmployerData mData;
 };
 
 struct ClientStrategy final : public Strategy
@@ -71,7 +65,6 @@ public:
 
 private:
     std::shared_ptr<spdlog::logger> pLogger;
-    data::ClientData mData;
 };
 
 struct ProjectStrategy final : public Strategy
@@ -86,7 +79,6 @@ public:
 
 private:
     std::shared_ptr<spdlog::logger> pLogger;
-    data::ProjectData mData;
 };
 
 struct CategoryStrategy final : public Strategy
@@ -101,7 +93,6 @@ public:
 
 private:
     std::shared_ptr<spdlog::logger> pLogger;
-    data::CategoryData mData;
 };
 
 class EditListDialog final : public wxDialog

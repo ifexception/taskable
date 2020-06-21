@@ -30,6 +30,7 @@
 
 #include "../data/ratetypedata.h"
 #include "../data/currencydata.h"
+#include "../data/employerdata.h"
 
 #include "../models/employermodel.h"
 #include "../models/clientmodel.h"
@@ -56,7 +57,6 @@ ProjectDialog::ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> l
     , pProject(std::make_unique<model::ProjectModel>())
     , mProjectId(0)
     , bIsEdit(false)
-    , mEmployerData()
     , mClientData()
     , mProjectData()
 {
@@ -91,7 +91,6 @@ ProjectDialog::ProjectDialog(wxWindow* parent,
     , pProject(std::make_unique<model::ProjectModel>(projectId))
     , mProjectId(projectId)
     , bIsEdit(isEdit)
-    , mEmployerData()
     , mClientData()
     , mProjectData()
 {
@@ -368,9 +367,10 @@ void ProjectDialog::ConfigureEventBindings()
 void ProjectDialog::FillControls()
 {
     /* Load Employers */
+    data::EmployerData employerData;
     std::vector<std::unique_ptr<model::EmployerModel>> employers;
     try {
-        employers = mEmployerData.GetAll();
+        employers = employerData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in EmployerData::GetAll()() - {0:d} : {1}", e.get_code(), e.what());
     }
@@ -380,10 +380,9 @@ void ProjectDialog::FillControls()
     }
 
     /* Load Rate Types */
-
+    data::RateTypeData rateTypeData;
     std::vector<std::unique_ptr<model::RateTypeModel>> rateTypes;
     try {
-        data::RateTypeData rateTypeData;
         rateTypes = rateTypeData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in RateTypeData::GetAll() - {0:d} : {1}", e.get_code(), e.what());
@@ -394,9 +393,9 @@ void ProjectDialog::FillControls()
     }
 
     /* Load Currencies */
+    data::CurrencyData currencyData;
     std::vector<std::unique_ptr<model::CurrencyModel>> curriencies;
     try {
-        data::CurrencyData currencyData;
         curriencies = currencyData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in CurrencyData::GetAll() - {0:d} : {1}", e.get_code(), e.what());

@@ -316,8 +316,8 @@ void CategoriesDialog::CreateControls()
 
 void CategoriesDialog::FillControls()
 {
-    std::vector<std::unique_ptr<model::ProjectModel>> projects;
     data::ProjectData mData;
+    std::vector<std::unique_ptr<model::ProjectModel>> projects;
 
     try {
         projects = mData.GetAll();

@@ -29,6 +29,11 @@
 #include "projectdlg.h"
 #include "categorydlg.h"
 
+#include "../data/employerdata.h"
+#include "../data/clientdata.h"
+#include "../data/projectdata.h"
+#include "../data/categorydata.h"
+
 #include "../models/clientmodel.h"
 #include "../models/projectmodel.h"
 #include "../models/categorymodel.h"
@@ -190,7 +195,6 @@ Strategy::Strategy() {}
 
 EmployerStrategy::EmployerStrategy(std::shared_ptr<spdlog::logger> logger)
     : pLogger(logger)
-    , mData()
 {
 }
 
@@ -213,9 +217,11 @@ void EmployerStrategy::CreateControl(wxListCtrl* control)
 
 void EmployerStrategy::DataToControl(wxListCtrl* control)
 {
+    data::EmployerData data;
     std::vector<std::unique_ptr<model::EmployerModel>> employers;
+
     try {
-        employers = mData.GetAll();
+        employers = data.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in EmployerData::GetAll(); - {0:d} : {1}", e.get_code(), e.what());
     }
@@ -237,7 +243,6 @@ wxSize EmployerStrategy::GetSize()
 
 ClientStrategy::ClientStrategy(std::shared_ptr<spdlog::logger> logger)
     : pLogger(logger)
-    , mData()
 {
 }
 
@@ -266,9 +271,11 @@ void ClientStrategy::CreateControl(wxListCtrl* control)
 
 void ClientStrategy::DataToControl(wxListCtrl* control)
 {
+    data::ClientData data;
     std::vector<std::unique_ptr<model::ClientModel>> clients;
+
     try {
-        clients = mData.GetAll();
+        clients = data.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in ClientData::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
@@ -325,9 +332,11 @@ void ProjectStrategy::CreateControl(wxListCtrl* control)
 
 void ProjectStrategy::DataToControl(wxListCtrl* control)
 {
+    data::ProjectData data;
     std::vector<std::unique_ptr<model::ProjectModel>> projects;
+
     try {
-        projects = mData.GetAll();
+        projects = data.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in ProjectModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
@@ -380,9 +389,11 @@ void CategoryStrategy::CreateControl(wxListCtrl* control)
 
 void CategoryStrategy::DataToControl(wxListCtrl* control)
 {
+    data::CategoryData data;
     std::vector<std::unique_ptr<model::CategoryModel>> categories;
+
     try {
-        categories = mData.GetAll();
+        categories = data.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in get_categories() - {0:d} : {1}", e.get_code(), e.what());
     }

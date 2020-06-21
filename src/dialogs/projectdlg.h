@@ -28,7 +28,7 @@
 #include <spdlog/spdlog.h>
 
 #include "../models/projectmodel.h"
-#include "../data/employerdata.h"
+
 #include "../data/clientdata.h"
 #include "../data/projectdata.h"
 
@@ -94,7 +94,6 @@ private:
     int mProjectId;
     bool bIsEdit;
 
-    data::EmployerData mEmployerData;
     data::ClientData mClientData;
     data::ProjectData mProjectData;
 
