@@ -34,6 +34,7 @@ class EmployerData final
 {
 public:
     EmployerData();
+    EmployerData(std::shared_ptr<db::SqliteConnection> connection);
     ~EmployerData();
 
     int64_t Create(std::unique_ptr<model::EmployerModel> employer);
@@ -47,7 +48,7 @@ public:
 private:
     std::shared_ptr<db::SqliteConnection> pConnection;
 
-    int mLastInsertId;
+    bool bBorrowedConnection;
 
     static const std::string createEmployer;
     static const std::string getEmployers;

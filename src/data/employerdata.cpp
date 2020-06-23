@@ -26,17 +26,28 @@
 namespace app::data
 {
 EmployerData::EmployerData()
+    : bBorrowedConnection(false)
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
     spdlog::get("msvc")->debug("ACQUIRE connection in EmployerData|ConnectionTally: {0:d}",
         db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
+EmployerData::EmployerData(std::shared_ptr<db::SqliteConnection> connection)
+    : bBorrowedConnection(true)
+{
+    pConnection = connection;
+    spdlog::get("msvc")->debug("BORROW connection in EmployerData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+}
+
 EmployerData::~EmployerData()
 {
-    db::ConnectionProvider::Get().Handle()->Release(pConnection);
-    spdlog::get("msvc")->debug("RELEASE connection in EmployerData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+    if (!bBorrowedConnection) {
+        db::ConnectionProvider::Get().Handle()->Release(pConnection);
+        spdlog::get("msvc")->debug("RELEASE connection in EmployerData|ConnectionTally: {0:d}",
+            db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+    }
 }
 
 int64_t EmployerData::Create(std::unique_ptr<model::EmployerModel> employer)

@@ -32,6 +32,7 @@ class ProjectData final
 {
 public:
     ProjectData();
+    ProjectData(std::shared_ptr<db::SqliteConnection> connection);
     ~ProjectData();
 
     void Create(std::unique_ptr<model::ProjectModel> project);
@@ -45,6 +46,8 @@ public:
 
 private:
     std::shared_ptr<db::SqliteConnection> pConnection;
+
+    bool bBorrowedConnection;
 
     static const std::string createProject;
     static const std::string getProject;

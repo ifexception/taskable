@@ -28,17 +28,28 @@
 namespace app::data
 {
 CategoryData::CategoryData()
+    : bBorrowedConnection(false)
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
     spdlog::get("msvc")->debug("ACQUIRE connection in CategoryData|ConnectionTally: {0:d}",
         db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
+CategoryData::CategoryData(std::shared_ptr<db::SqliteConnection> connection)
+    : bBorrowedConnection(true)
+{
+    pConnection = connection;
+    spdlog::get("msvc")->debug("BORROW connection in CategoryData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+}
+
 CategoryData::~CategoryData()
 {
-    db::ConnectionProvider::Get().Handle()->Release(pConnection);
-    spdlog::get("msvc")->debug("RELEASE connection in CategoryData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+    if (!bBorrowedConnection) {
+        db::ConnectionProvider::Get().Handle()->Release(pConnection);
+        spdlog::get("msvc")->debug("RELEASE connection in CategoryData|ConnectionTally: {0:d}",
+            db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+    }
 }
 
 int64_t CategoryData::Create(std::unique_ptr<model::CategoryModel> category)
@@ -64,8 +75,8 @@ std::unique_ptr<model::CategoryModel> CategoryData::GetById(const int id)
         category = std::make_unique<model::CategoryModel>(
             categoryId, categoryName, color, dateCreated, dateModified, isActive);
 
-        data::ProjectData mProjectData;
-        category->SetProject(std::move(mProjectData.GetById(projectId)));
+        data::ProjectData projectData(pConnection);
+        category->SetProject(std::move(projectData.GetById(projectId)));
     };
 
     return category;
@@ -100,8 +111,8 @@ std::vector<std::unique_ptr<model::CategoryModel>> CategoryData::GetByProjectId(
             auto category = std::make_unique<model::CategoryModel>(
                 categoryId, categoryName, color, dateCreated, dateModified, isActive);
 
-            data::ProjectData mProjectData;
-            category->SetProject(std::move(mProjectData.GetById(projectId)));
+            data::ProjectData projectData(pConnection);
+            category->SetProject(std::move(projectData.GetById(projectId)));
             categories.push_back(std::move(category));
         };
 
@@ -122,8 +133,8 @@ std::vector<std::unique_ptr<model::CategoryModel>> CategoryData::GetAll()
         auto category = std::make_unique<model::CategoryModel>(
             categoryId, categoryName, color, dateCreated, dateModified, isActive);
 
-        data::ProjectData mProjectData;
-        category->SetProject(std::move(mProjectData.GetById(projectId)));
+        data::ProjectData projectData(pConnection);
+        category->SetProject(std::move(projectData.GetById(projectId)));
         categories.push_back(std::move(category));
     };
 

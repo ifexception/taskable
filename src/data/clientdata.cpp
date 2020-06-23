@@ -27,17 +27,28 @@
 namespace app::data
 {
 ClientData::ClientData()
+    : bBorrowedConnection(false)
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
     spdlog::get("msvc")->debug("ACQUIRE connection in ClientData|ConnectionTally: {0:d}",
         db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
+ClientData::ClientData(std::shared_ptr<db::SqliteConnection> connection)
+    : bBorrowedConnection(true)
+{
+    pConnection = connection;
+    spdlog::get("msvc")->debug("BORROW connection in ClientData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+}
+
 ClientData::~ClientData()
 {
-    db::ConnectionProvider::Get().Handle()->Release(pConnection);
-    spdlog::get("msvc")->debug("RELEASE connection in ClientData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+    if (!bBorrowedConnection) {
+        db::ConnectionProvider::Get().Handle()->Release(pConnection);
+        spdlog::get("msvc")->debug("RELEASE connection in ClientData|ConnectionTally: {0:d}",
+            db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+    }
 }
 
 int64_t ClientData::Create(std::unique_ptr<model::ClientModel> client)
@@ -50,13 +61,13 @@ int64_t ClientData::Create(std::unique_ptr<model::ClientModel> client)
 
 std::unique_ptr<model::ClientModel> ClientData::GetById(const int clientId)
 {
-    data::EmployerData mData;
+    data::EmployerData data(pConnection);
     std::unique_ptr<model::ClientModel> client = nullptr;
 
     *pConnection->DatabaseExecutableHandle() << ClientData::getClientById << clientId >>
         [&](int clientId, std::string clientName, int dateCreated, int dateModified, int isActive, int employerId) {
             client = std::make_unique<model::ClientModel>(clientId, clientName, dateCreated, dateModified, isActive);
-            client->SetEmployer(mData.GetById(employerId));
+            client->SetEmployer(data.GetById(employerId));
         };
     return client;
 }
@@ -75,14 +86,14 @@ void ClientData::Delete(const int clientId)
 
 std::vector<std::unique_ptr<model::ClientModel>> ClientData::GetByEmployerId(const int employerId)
 {
-    data::EmployerData mData;
+    data::EmployerData data(pConnection);
     std::vector<std::unique_ptr<model::ClientModel>> clients;
 
     *pConnection->DatabaseExecutableHandle() << ClientData::getClientsByEmployerId << employerId >>
         [&](int clientId, std::string name, int dateCreated, int dateModified, int isActive, int employerIdDb) {
             auto client =
                 std::make_unique<model::ClientModel>(clientId, wxString(name), dateCreated, dateModified, isActive);
-            client->SetEmployer(mData.GetById(employerId));
+            client->SetEmployer(data.GetById(employerId));
             clients.push_back(std::move(client));
         };
 
@@ -91,14 +102,14 @@ std::vector<std::unique_ptr<model::ClientModel>> ClientData::GetByEmployerId(con
 
 std::vector<std::unique_ptr<model::ClientModel>> ClientData::GetAll()
 {
-    data::EmployerData mData;
+    data::EmployerData data(pConnection);
     std::vector<std::unique_ptr<model::ClientModel>> clients;
 
     *pConnection->DatabaseExecutableHandle() << ClientData::getClients >>
         [&](int clientId, std::string name, int dateCreated, int dateModified, bool isActive, int employerId) {
             auto client =
                 std::make_unique<model::ClientModel>(clientId, wxString(name), dateCreated, dateModified, isActive);
-            client->SetEmployer(mData.GetById(employerId));
+            client->SetEmployer(data.GetById(employerId));
             clients.push_back(std::move(client));
         };
 
@@ -111,42 +122,42 @@ int64_t ClientData::GetLastInsertId() const
 }
 
 const std::string ClientData::createClient = "INSERT INTO "
-                                              "clients (name, is_active, employer_id) "
-                                              "VALUES (?, 1, ?)";
+                                             "clients (name, is_active, employer_id) "
+                                             "VALUES (?, 1, ?)";
 ;
 const std::string ClientData::getClientsByEmployerId = "SELECT clients.client_id, "
-                                                        "clients.name, "
-                                                        "clients.date_created, "
-                                                        "clients.date_modified, "
-                                                        "clients.is_active, "
-                                                        "clients.employer_id "
-                                                        "FROM clients "
-                                                        "WHERE employer_id = ?";
+                                                       "clients.name, "
+                                                       "clients.date_created, "
+                                                       "clients.date_modified, "
+                                                       "clients.is_active, "
+                                                       "clients.employer_id "
+                                                       "FROM clients "
+                                                       "WHERE employer_id = ?";
 ;
 const std::string ClientData::getClients = "SELECT clients.client_id, "
-                                            "clients.name AS client_name, "
-                                            "clients.date_created, "
-                                            "clients.date_modified, "
-                                            "clients.is_active, "
-                                            "clients.employer_id "
-                                            "FROM clients "
-                                            "WHERE clients.is_active = 1";
+                                           "clients.name AS client_name, "
+                                           "clients.date_created, "
+                                           "clients.date_modified, "
+                                           "clients.is_active, "
+                                           "clients.employer_id "
+                                           "FROM clients "
+                                           "WHERE clients.is_active = 1";
 ;
 const std::string ClientData::getClientById = "SELECT clients.client_id, "
-                                               "clients.name AS client_name, "
-                                               "clients.date_created, "
-                                               "clients.date_modified, "
-                                               "clients.is_active, "
-                                               "clients.employer_id "
-                                               "FROM clients "
-                                               "WHERE clients.client_id = ?";
+                                              "clients.name AS client_name, "
+                                              "clients.date_created, "
+                                              "clients.date_modified, "
+                                              "clients.is_active, "
+                                              "clients.employer_id "
+                                              "FROM clients "
+                                              "WHERE clients.client_id = ?";
 ;
 const std::string ClientData::updateClient = "UPDATE clients "
-                                              "SET name = ?, date_modified = ?, employer_id = ? "
-                                              "WHERE client_id = ?";
+                                             "SET name = ?, date_modified = ?, employer_id = ? "
+                                             "WHERE client_id = ?";
 
 const std::string ClientData::deleteClient = "UPDATE clients "
-                                              "SET is_active = 0, date_modified = ? "
-                                              "WHERE client_id = ?";
+                                             "SET is_active = 0, date_modified = ? "
+                                             "WHERE client_id = ?";
 
 } // namespace app::data

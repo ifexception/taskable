@@ -24,17 +24,28 @@
 namespace app::data
 {
 RateTypeData::RateTypeData()
+    : bBorrowedConnection(false)
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
     spdlog::get("msvc")->debug("ACQUIRE connection in RateTypeData|ConnectionTally: {0:d}",
         db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
+RateTypeData::RateTypeData(std::shared_ptr<db::SqliteConnection> connection)
+    : bBorrowedConnection(true)
+{
+    pConnection = connection;
+    spdlog::get("msvc")->debug("BORROW connection in RateTypeData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+}
+
 RateTypeData::~RateTypeData()
 {
-    db::ConnectionProvider::Get().Handle()->Release(pConnection);
-    spdlog::get("msvc")->debug("RELEASE connection in RateTypeData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+    if (!bBorrowedConnection) {
+        db::ConnectionProvider::Get().Handle()->Release(pConnection);
+        spdlog::get("msvc")->debug("RELEASE connection in RateTypeData|ConnectionTally: {0:d}",
+            db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+    }
 }
 
 std::unique_ptr<model::RateTypeModel> RateTypeData::GetById(const int rateTypeId)

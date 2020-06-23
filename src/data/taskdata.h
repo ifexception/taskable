@@ -31,16 +31,19 @@ class TaskData final
 {
 public:
     TaskData();
+    TaskData(std::shared_ptr<db::SqliteConnection> connection);
     ~TaskData();
 
-    std::unique_ptr<model::TaskModel> GetByDate(const wxDateTime date);
+    std::unique_ptr<model::TaskModel> GetByDate(const wxDateTime& date);
     std::unique_ptr<model::TaskModel> GetById(const int taskId);
-    int64_t Create(const wxDateTime date);
+    int64_t Create(const wxDateTime& date);
 
 private:
+    int GetId(const wxDateTime& date);
+
     std::shared_ptr<db::SqliteConnection> pConnection;
 
-    int GetId(const wxDateTime date);
+    bool bBorrowedConnection;
 
     static const std::string getTaskId;
     static const std::string getTaskByDate;

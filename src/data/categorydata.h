@@ -33,6 +33,7 @@ class CategoryData final
 {
 public:
     CategoryData();
+    CategoryData(std::shared_ptr<db::SqliteConnection> connection);
     ~CategoryData();
 
     int64_t Create(std::unique_ptr<model::CategoryModel> category);
@@ -44,6 +45,8 @@ public:
 
 private:
     std::shared_ptr<db::SqliteConnection> pConnection;
+
+    bool bBorrowedConnection;
 
     static const std::string createCategory;
     static const std::string getCategoryById;

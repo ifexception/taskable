@@ -30,17 +30,28 @@
 namespace app::data
 {
 ProjectData::ProjectData()
+    : bBorrowedConnection(false)
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
     spdlog::get("msvc")->debug("ACQUIRE connection in ProjectData|ConnectionTally: {0:d}",
         db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
+ProjectData::ProjectData(std::shared_ptr<db::SqliteConnection> connection)
+    : bBorrowedConnection(true)
+{
+    pConnection = connection;
+    spdlog::get("msvc")->debug("BORROW connection in ProjectData|ConnectionTally: {0:d}",
+        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+}
+
 ProjectData::~ProjectData()
 {
-    db::ConnectionProvider::Get().Handle()->Release(pConnection);
-    spdlog::get("msvc")->debug("RELEASE connection in ProjectData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+    if (!bBorrowedConnection) {
+        db::ConnectionProvider::Get().Handle()->Release(pConnection);
+        spdlog::get("msvc")->debug("RELEASE connection in ProjectData|ConnectionTally: {0:d}",
+            db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
+    }
 }
 
 void ProjectData::Create(std::unique_ptr<model::ProjectModel> project)
@@ -69,10 +80,10 @@ void ProjectData::Create(std::unique_ptr<model::ProjectModel> project)
 std::unique_ptr<model::ProjectModel> ProjectData::GetById(const int projectId)
 {
     std::unique_ptr<model::ProjectModel> project = nullptr;
-    data::EmployerData employerData;
-    data::ClientData clientData;
-    data::RateTypeData rateTypeData;
-    data::CurrencyData currencyData;
+    data::EmployerData employerData(pConnection);
+    data::ClientData clientData(pConnection);
+    data::RateTypeData rateTypeData(pConnection);
+    data::CurrencyData currencyData(pConnection);
 
     *pConnection->DatabaseExecutableHandle() << ProjectData::getProject << projectId >>
         [&](int projectId,
@@ -160,10 +171,10 @@ void ProjectData::Delete(const int projectId)
 std::vector<std::unique_ptr<model::ProjectModel>> ProjectData::GetAll()
 {
     std::vector<std::unique_ptr<model::ProjectModel>> projects;
-    data::EmployerData employerData;
-    data::ClientData clientData;
-    data::RateTypeData rateTypeData;
-    data::CurrencyData currencyData;
+    data::EmployerData employerData(pConnection);
+    data::ClientData clientData(pConnection);
+    data::RateTypeData rateTypeData(pConnection);
+    data::CurrencyData currencyData(pConnection);
 
     *pConnection->DatabaseExecutableHandle() << ProjectData::getProjects >> [&](int projectId,
                                                                                 std::string name,

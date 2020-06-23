@@ -58,8 +58,8 @@ int64_t TaskItemData::Create(std::unique_ptr<model::TaskItemModel> taskItem)
 
     ps << taskItem->GetDuration().ToStdString() << taskItem->GetDescription().ToStdString();
 
-    data::ProjectData mProjectData;
-    taskItem->SetProject(std::move(mProjectData.GetById(taskItem->GetProjectId())));
+    data::ProjectData projectData(pConnection);
+    taskItem->SetProject(std::move(projectData.GetById(taskItem->GetProjectId())));
     if (taskItem->GetProject()->IsNonBillableScenario()) {
         ps << taskItem->IsBillable() << nullptr;
     }
@@ -121,18 +121,18 @@ std::unique_ptr<model::TaskItemModel> TaskItemData::GetById(const int taskItemId
             taskItem->SetTaskItemType(std::move(taskItemType));
 
             taskItem->SetProjectId(projectId);
-            data::ProjectData projectData;
+            data::ProjectData projectData(pConnection);
             auto project = projectData.GetById(projectId);
             taskItem->SetProject(std::move(project));
 
             taskItem->SetCategoryId(categoryId);
-            data::CategoryData categoryData;
+            data::CategoryData categoryData(pConnection);
             auto category = categoryData.GetById(categoryId);
             taskItem->SetCategory(std::move(category));
 
             taskItem->SetTaskId(taskId);
 
-            data::TaskData taskData;
+            data::TaskData taskData(pConnection);
             auto task = taskData.GetById(taskId);
             taskItem->SetTask(std::move(task));
         };
@@ -228,17 +228,17 @@ std::vector<std::unique_ptr<model::TaskItemModel>> TaskItemData::GetByDate(const
             taskItem->SetTaskItemType(std::move(taskItemType));
 
             taskItem->SetProjectId(projectId);
-            data::ProjectData mProjectData;
-            auto project = mProjectData.GetById(projectId);
+            data::ProjectData projectData(pConnection);
+            auto project = projectData.GetById(projectId);
             taskItem->SetProject(std::move(project));
 
             taskItem->SetCategoryId(categoryId);
-            data::CategoryData categoryData;
+            data::CategoryData categoryData(pConnection);
             auto category = categoryData.GetById(categoryId);
             taskItem->SetCategory(std::move(category));
 
             taskItem->SetTaskId(taskId);
-            data::TaskData taskData;
+            data::TaskData taskData(pConnection);
             auto task = taskData.GetById(taskId);
             taskItem->SetTask(std::move(task));
 
