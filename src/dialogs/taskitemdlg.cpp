@@ -580,7 +580,16 @@ void TaskItemDialog::DataToControls()
     try {
         taskItem = mTaskItemData.GetById(mTaskItemId);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in TaskItemModel::GetById() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in TaskItemData::GetById() - {0:d} : {1}", e.get_code(), e.what());
+        wxLogDebug(wxString(e.get_sql()));
+    }
+
+    try {
+        pProject = mProjectData.GetById(taskItem->GetProjectId());
+    }
+    catch(const sqlite::sqlite_exception& e)
+    {
+        pLogger->error("Error occured in ProjectData::GetById() - {0:d} : {1}", e.get_code(), e.what());
         wxLogDebug(wxString(e.get_sql()));
     }
 
@@ -616,7 +625,6 @@ void TaskItemDialog::DataToControls()
     pBillableCtrl->SetValue(taskItem->IsBillable());
 
     SetRateLabel(taskItem->GetProject());
-    CalculateRate();
 
     pDescriptionCtrl->SetValue(taskItem->GetDescription());
 
@@ -629,8 +637,6 @@ void TaskItemDialog::DataToControls()
         taskItem->GetDateModified().FormatISOTime()));
 
     pIsActiveCtrl->SetValue(taskItem->IsActive());
-
-    pProject = mProjectData.GetById(taskItem->GetProjectId());
 }
 
 void TaskItemDialog::CalculateTimeDiff(wxDateTime start, wxDateTime end)
