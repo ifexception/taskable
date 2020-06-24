@@ -62,13 +62,19 @@ wxThread::ExitCode CheckForUpdateThread::Entry()
 
     if (response.status_code == 200) {
         auto jsonText = json::parse(response.text);
-        auto name = jsonText["name"].get<std::string>();
-        auto description = jsonText["description"].get<std::string>();
+        auto version = jsonText["tag_name"].get<std::string>();
+        auto description = jsonText["name"].get<std::string>();
         auto htmlUrl = jsonText["html_url"].get<std::string>();
 
-        auto currentVersion = "v" + common::GetVersion();
-        if (name != currentVersion) {
-            eventString = name + "," + description + "," + htmlUrl;
+        auto versionSplit = util::lib::split(version, '.');
+        auto currentVersionSplit = util::lib::split(common::GetVersion().ToStdString(), '.');
+
+        if (std::stoi(versionSplit[0]) >= std::stoi(currentVersionSplit[0])) {
+            if (std::stoi(versionSplit[1]) >= std::stoi(currentVersionSplit[1])) {
+                if (std::stoi(versionSplit[2]) >= std::stoi(currentVersionSplit[2])) {
+                    eventString = version + "," + description + "," + htmlUrl;
+                }
+            }
         }
     }
 
@@ -94,7 +100,7 @@ CheckForUpdateDialog::CheckForUpdateDialog(wxWindow* parent, const wxString& nam
         wxID_ANY,
         wxT("Check for Update"),
         wxDefaultPosition,
-        wxSize(320, 240),
+        wxSize(480, 480),
         wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
         name);
 
@@ -129,7 +135,6 @@ void CheckForUpdateDialog::Create(wxWindow* parent,
 void CheckForUpdateDialog::CreateControls()
 {
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(mainSizer);
 
     auto sizer = new wxBoxSizer(wxVERTICAL);
     auto mainPanel = new wxPanel(this, wxID_STATIC);
@@ -177,6 +182,8 @@ void CheckForUpdateDialog::CreateControls()
 
     buttonPanelSizer->Add(pOkButton, common::sizers::ControlDefault);
     buttonPanelSizer->Add(cancelButton, common::sizers::ControlDefault);
+
+    SetSizer(mainSizer);
 }
 
 void CheckForUpdateDialog::StartThread()
@@ -249,6 +256,7 @@ void CheckForUpdateDialog::OnThreadCompletion(wxThreadEvent& event)
         pNewReleaseAvailable->SetLabel(text);
         pNewReleaseLink->SetLabel(downloadLink);
         pNewReleaseLink->Show();
+        SetSize(352, 260);
     } else {
         auto text = wxT("No new release available.");
         pNewReleaseAvailable->SetLabel(text);
