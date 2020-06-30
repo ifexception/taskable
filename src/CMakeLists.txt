@@ -27,6 +27,7 @@ set (SRC
     "common/ids.cpp"
     "common/common.cpp"
     "common/util.cpp"
+    "common/datetraverser.cpp"
     "common/constants.cpp"
     "config/configuration.cpp"
 
@@ -50,6 +51,9 @@ set (SRC
     "frame/mainframe.cpp"
     "frame/taskbaricon.cpp"
     "frame/feedbackpopup.cpp"
+
+    "dataview/weeklymodel.cpp"
+    "dialogs/weeklytaskviewdlg.cpp"
 
     "dialogs/editlistdlg.cpp"
     "dialogs/stopwatchtaskdlg.cpp"
@@ -94,7 +98,8 @@ set (SRC
     "dialogs/taskitemdlg.cpp"
     "data/taskdata.cpp"
     "data/taskitemtypedata.cpp"
-    "data/taskitemdata.cpp")
+    "data/taskitemdata.cpp"
+      )
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
 
