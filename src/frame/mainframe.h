@@ -79,6 +79,7 @@ private:
     void OnNewClient(wxCommandEvent& event);
     void OnNewProject(wxCommandEvent& event);
     void OnNewCategory(wxCommandEvent& event);
+    void OnWeeklyView(wxCommandEvent& event);
     void OnEditEmployer(wxCommandEvent& event);
     void OnEditClient(wxCommandEvent& event);
     void OnEditProject(wxCommandEvent& event);

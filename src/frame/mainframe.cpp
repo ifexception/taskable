@@ -46,6 +46,8 @@
 #include "../dialogs/checkforupdatedlg.h"
 #include "../dialogs/categoriesdlg.h"
 
+#include "../dialogs/weeklytaskviewdlg.h"
+
 #include "../dialogs/preferencesdlg.h"
 
 #include "../wizards/databaserestorewizard.h"
@@ -72,6 +74,7 @@ EVT_MENU(ids::ID_NEW_EMPLOYER, MainFrame::OnNewEmployer)
 EVT_MENU(ids::ID_NEW_PROJECT, MainFrame::OnNewProject)
 EVT_MENU(ids::ID_NEW_CLIENT, MainFrame::OnNewClient)
 EVT_MENU(ids::ID_NEW_CATEGORY, MainFrame::OnNewCategory)
+EVT_MENU(ids::ID_WEEKLY_VIEW, MainFrame::OnWeeklyView)
 EVT_MENU(ids::ID_EDIT_EMPLOYER, MainFrame::OnEditEmployer)
 EVT_MENU(ids::ID_EDIT_CLIENT, MainFrame::OnEditClient)
 EVT_MENU(ids::ID_EDIT_PROJECT, MainFrame::OnEditProject)
@@ -214,6 +217,10 @@ void MainFrame::CreateControls()
     fileMenu->Append(ids::ID_NEW_CLIENT, wxT("New &Client"), wxT("Create new client"));
     fileMenu->Append(ids::ID_NEW_PROJECT, wxT("New &Project"), wxT("Create new project"));
     fileMenu->Append(ids::ID_NEW_CATEGORY, wxT("New C&ategory"), wxT("Create new category"));
+    fileMenu->AppendSeparator();
+    auto fileViewMenu = new wxMenu();
+    fileViewMenu->Append(ids::ID_WEEKLY_VIEW, wxT("Week View"));
+    fileMenu->AppendSubMenu(fileViewMenu, wxT("View"));
     fileMenu->AppendSeparator();
     auto exitMenuItem = fileMenu->Append(wxID_EXIT, wxT("Exit"), wxT("Exit the application"));
     exitMenuItem->SetBitmap(common::GetQuitIcon());
@@ -471,6 +478,12 @@ void MainFrame::OnNewCategory(wxCommandEvent& event)
     ShowInfoBarMessageForAdd(retCode, wxT("categories"));
 }
 
+void MainFrame::OnWeeklyView(wxCommandEvent& event)
+{
+    dlg::WeeklyTaskViewDialog* weeklyTaskViewDialog = new dlg::WeeklyTaskViewDialog(this, pLogger);
+    weeklyTaskViewDialog->Show(true);
+}
+
 void MainFrame::OnEditEmployer(wxCommandEvent& event)
 {
     dlg::EditListDialog employerEdit(this, dlg::DialogType::Employer, pLogger);
@@ -510,7 +523,7 @@ void MainFrame::OnTaskStopwatch(wxCommandEvent& event)
     dlg::StopwatchTaskDialog stopwatchTask(this, pConfig, pLogger, pTaskState, pTaskBarIcon);
     stopwatchTask.Launch();
 
-     pListCtrl->SetFocus();
+    pListCtrl->SetFocus();
 }
 
 void MainFrame::OnCheckForUpdate(wxCommandEvent& event)
@@ -713,7 +726,7 @@ void MainFrame::OnTaskInserted(wxCommandEvent& event)
 
         int columnIndex = 0;
         int listIndex = pListCtrl->InsertItem(columnIndex++, taskItem->GetProject()->GetDisplayName());
-        pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetTask()->GetTaskDate().FormatISODate());
+        pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetTask()->GetTaskDate());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDuration());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetCategory()->GetName());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDescription());
@@ -743,7 +756,7 @@ void MainFrame::OnTaskUpdated(wxCommandEvent& event)
 
     int columnIndex = 0;
     pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetProject()->GetDisplayName());
-    pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetTask()->GetTaskDate().FormatISODate());
+    pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetTask()->GetTaskDate());
     pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetDuration());
     pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetCategory()->GetName());
     pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetDescription());
@@ -840,7 +853,7 @@ void MainFrame::FillListCtrl(wxDateTime date)
     int columnIndex = 0;
     for (const auto& taskItem : taskItems) {
         listIndex = pListCtrl->InsertItem(columnIndex++, taskItem->GetProject()->GetDisplayName());
-        pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetTask()->GetTaskDate().FormatISODate());
+        pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetTask()->GetTaskDate());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDuration());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetCategory()->GetName());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDescription());
