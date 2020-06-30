@@ -252,7 +252,7 @@ std::vector<wxString> TaskItemData::GetHours(const wxString& date)
 {
     std::vector<wxString> taskDurations;
 
-    *pConnection->DatabaseExecutableHandle() << TaskItemData::getTaskHoursByTaskId << date >>
+    *pConnection->DatabaseExecutableHandle() << TaskItemData::getTaskHoursByTaskId << date.ToStdString() >>
         [&](std::string duration) { taskDurations.push_back(wxString(duration)); };
 
     return taskDurations;
@@ -265,6 +265,24 @@ int TaskItemData::GetTaskItemTypeIdByTaskItemId(const int taskItemId)
     *pConnection->DatabaseExecutableHandle() << TaskItemData::getTaskItemTypeIdByTaskItemId << taskItemId >>
         [&](int taskItemType) { taskItemTypeId = taskItemType; };
     return taskItemTypeId;
+}
+
+std::vector<std::unique_ptr<model::TaskItemModel>> TaskItemData::GetByWeek(const wxString& fromDate,
+    const wxString& toDate)
+{
+    std::vector<std::unique_ptr<model::TaskItemModel>> taskItems;
+    std::vector<int> taskItemIds;
+
+    *pConnection->DatabaseExecutableHandle() << TaskItemData::getTaskItemsByWeek << fromDate.ToStdString() << toDate.ToStdString() >>
+        [&](int taskItemId) {
+            taskItemIds.push_back(taskItemId);
+        };
+
+    for (auto taskItemId : taskItemIds) {
+        taskItems.push_back(GetById(taskItemId));
+    }
+
+    return taskItems;
 }
 
 const std::string TaskItemData::createTaskItem = "INSERT INTO task_items "
@@ -333,4 +351,12 @@ const std::string TaskItemData::getTaskHoursByTaskId = "SELECT task_items.durati
 const std::string TaskItemData::getTaskItemTypeIdByTaskItemId = "SELECT task_items.task_item_type_id "
                                                                 "FROM task_items "
                                                                 "WHERE task_item_id = ?";
+
+const std::string TaskItemData::getTaskItemsByWeek = "SELECT task_items.task_item_id "
+                                                     "FROM task_items "
+                                                     "INNER JOIN tasks "
+                                                     "ON task_items.task_id = tasks.task_id "
+                                                     "WHERE tasks.task_date >= ? "
+                                                     "AND tasks.task_date <= ? "
+                                                     "AND task_items.is_active = 1";
 } // namespace app::data

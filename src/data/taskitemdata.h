@@ -43,6 +43,7 @@ public:
     std::vector<std::unique_ptr<model::TaskItemModel>> GetByDate(const wxString& date);
     std::vector<wxString> GetHours(const wxString& date);
     int GetTaskItemTypeIdByTaskItemId(const int taskItemId);
+    std::vector<std::unique_ptr<model::TaskItemModel>> GetByWeek(const wxString& fromDate, const wxString& toDate);
 
 private:
     std::shared_ptr<db::SqliteConnection> pConnection;
@@ -54,5 +55,6 @@ private:
     static const std::string deleteTaskItem;
     static const std::string getTaskHoursByTaskId;
     static const std::string getTaskItemTypeIdByTaskItemId;
+    static const std::string getTaskItemsByWeek;
 };
 }
