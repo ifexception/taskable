@@ -31,20 +31,20 @@ public:
     ~TaskModel() = default;
 
     const int GetTaskId() const;
-    const wxDateTime GetTaskDate() const;
+    const wxString GetTaskDate() const;
     const wxDateTime GetDateCreated();
     const wxDateTime GetDateModified();
     const bool IsActive() const;
 
     void SetTaskId(const int taskId);
-    void SetTaskDate(const wxDateTime& date);
+    void SetTaskDate(const wxString& date);
     void SetDateCreated(const wxDateTime& dateCreated);
     void SetDateUpdated(const wxDateTime& dateModified);
     void IsActive(const bool isActive);
 
 private:
     int mTaskId;
-    wxDateTime mTaskDate;
+    wxString mTaskDate;
     wxDateTime mDateCreated;
     wxDateTime mDateModified;
     bool bIsActive;

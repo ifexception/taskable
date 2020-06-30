@@ -25,7 +25,7 @@ namespace app::model
 {
 TaskModel::TaskModel()
     : mTaskId(-1)
-    , mTaskDate(wxDefaultDateTime)
+    , mTaskDate(wxGetEmptyString())
     , mDateCreated(wxDefaultDateTime)
     , mDateModified(wxDefaultDateTime)
     , bIsActive(false)
@@ -36,7 +36,7 @@ TaskModel::TaskModel(int taskId, wxString date, int dateCreated, int dateModifie
     : TaskModel()
 {
     mTaskId = taskId;
-    mTaskDate.ParseISODate(date);
+    mTaskDate= date;
     mDateCreated = util::ToDateTime(dateCreated);
     mDateModified = util::ToDateTime(dateModified);
     bIsActive = isActive;
@@ -47,7 +47,7 @@ const int TaskModel::GetTaskId() const
     return mTaskId;
 }
 
-const wxDateTime TaskModel::GetTaskDate() const
+const wxString TaskModel::GetTaskDate() const
 {
     return mTaskDate;
 }
@@ -72,7 +72,7 @@ void TaskModel::SetTaskId(const int taskId)
     mTaskId = taskId;
 }
 
-void TaskModel::SetTaskDate(const wxDateTime& date)
+void TaskModel::SetTaskDate(const wxString& date)
 {
     mTaskDate = date;
 }
