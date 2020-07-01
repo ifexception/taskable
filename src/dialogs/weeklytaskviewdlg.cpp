@@ -136,11 +136,8 @@ void WeeklyTaskViewDialog::ConfigureEventBindings() {}
 
 void WeeklyTaskViewDialog::FillControls()
 {
-    wxDateTime mondayDate = mDateTraverser.GetMondayDate();
-    wxDateTime sundayDate = mDateTraverser.GetSundayDate();
-
-    wxString mondayISODateString = mondayDate.FormatISODate();
-    wxString sundayISODateString = sundayDate.FormatISODate();
+    wxString mondayISODateString = mDateTraverser.GetDayISODate(DateTraverser::Days::Monday);
+    wxString sundayISODateString = mDateTraverser.GetDayISODate(DateTraverser::Days::Sunday);
 
     data::TaskItemData taskItemData;
     std::vector<std::unique_ptr<model::TaskItemModel>> taskItems;
