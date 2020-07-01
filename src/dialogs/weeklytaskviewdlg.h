@@ -26,6 +26,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include "../common/datetraverser.h"
 #include "../dataview/weeklymodel.h"
 
 namespace app::dlg
@@ -57,6 +58,8 @@ private:
     wxWindow* pParent;
     wxObjectDataPtr<dv::WeeklyTreeModel> pWeeklyTreeModel;
     wxDataViewCtrl* pDataViewCtrl;
+
+    DateTraverser mDateTraverser;
 
     enum { IDC_DATAVIEW = wxID_HIGHEST + 1 };
 };

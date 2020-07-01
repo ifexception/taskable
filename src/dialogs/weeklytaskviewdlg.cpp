@@ -31,6 +31,7 @@ WeeklyTaskViewDialog::WeeklyTaskViewDialog(wxWindow* parent,
     , pLogger(logger)
     , pWeeklyTreeModel(nullptr)
     , pDataViewCtrl(nullptr)
+    , mDateTraverser()
 {
     long style = wxCAPTION | wxCLOSE_BOX | wxMAXIMIZE_BOX | wxMINIMIZE_BOX | wxRESIZE_BORDER;
     wxSize dialogSize = wxSize(800, 600);
@@ -77,7 +78,7 @@ void WeeklyTaskViewDialog::CreateControls()
     mainPanelSizer->Add(pDataViewCtrl, 1, wxEXPAND | wxALL, 5);
 
     /* Data View Model */
-    pWeeklyTreeModel = new dv::WeeklyTreeModel();
+    pWeeklyTreeModel = new dv::WeeklyTreeModel(mDateTraverser);
     pDataViewCtrl->AssociateModel(pWeeklyTreeModel.get());
 
     /* Data View Columns */
@@ -85,6 +86,8 @@ void WeeklyTaskViewDialog::CreateControls()
     auto durationTextRenderer = new wxDataViewTextRenderer("string", wxDATAVIEW_CELL_INERT);
     auto categoryNameTextRenderer = new wxDataViewTextRenderer("string", wxDATAVIEW_CELL_INERT);
     auto descriptionTextRenderer = new wxDataViewTextRenderer("string", wxDATAVIEW_CELL_INERT);
+    descriptionTextRenderer->EnableEllipsize(wxEllipsizeMode::wxELLIPSIZE_END);
+
     auto idRenderer = new wxDataViewTextRenderer("long", wxDATAVIEW_CELL_INERT);
 
     /* Project Column */
@@ -133,13 +136,25 @@ void WeeklyTaskViewDialog::ConfigureEventBindings() {}
 
 void WeeklyTaskViewDialog::FillControls()
 {
+    wxDateTime mondayDate = mDateTraverser.GetMondayDate();
+    wxDateTime sundayDate = mDateTraverser.GetSundayDate();
+
+    wxString mondayISODateString = mondayDate.FormatISODate();
+    wxString sundayISODateString = sundayDate.FormatISODate();
+
     data::TaskItemData taskItemData;
     std::vector<std::unique_ptr<model::TaskItemModel>> taskItems;
     try {
         taskItems = taskItemData.GetByWeek(mondayISODateString, sundayISODateString);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error(
-            "Error occured on TaskItemData::GetTaskItemTypeIdByTaskItemId() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on TaskItemData::GetByWeek({0}, {1}) - {2:d} : {3}",
+            mondayISODateString.ToStdString(),
+            sundayISODateString.ToStdString(),
+            e.get_code(),
+            e.what());
     }
+
+    pWeeklyTreeModel->InitBatch(taskItems);
+    pDataViewCtrl->Expand(pWeeklyTreeModel->ExpandRootNode());
 }
 } // namespace app::dlg
