@@ -144,66 +144,54 @@ void WeeklyTreeModelNode::SetTaskItemId(int taskItemId)
 }
 
 // WeeklyTreeModel
-WeeklyTreeModel::WeeklyTreeModel()
-    : mDateTraverser()
+WeeklyTreeModel::WeeklyTreeModel(const DateTraverser& dateTraverser)
+    : mWeeklyTasksMap()
+    , mDateTraverser(dateTraverser)
 {
-    wxDateTime mondayDate = mDateTraverser.GetMondayDate();
-    wxDateTime sundayDate = mDateTraverser.GetSundayDate();
+    SetupNodes();
 
-    wxString mondayISODateString = mondayDate.FormatISODate();
-    wxString sundayISODateString = sundayDate.FormatISODate();
-
-    wxString weekLabel = wxString::Format(wxT("Week %s - %s"), mondayISODateString, sundayISODateString);
-
-    pRoot = new WeeklyTreeModelNode(nullptr, weekLabel);
-
-    data::TaskItemData taskItemData;
-    std::vector<std::unique_ptr<model::TaskItemModel>> taskItems;
-    try {
-        taskItems = taskItemData.GetByWeek(mondayISODateString, sundayISODateString);
-    } catch (const sqlite::sqlite_exception& e) {
-        /*pLogger->error(
-            "Error occured on TaskItemData::GetTaskItemTypeIdByTaskItemId() - {0:d} : {1}", e.get_code(), e.what());*/
-    }
-
-    std::vector<std::unique_ptr<model::TaskItemModel>> mondayTaskItems;
-    std::vector<std::unique_ptr<model::TaskItemModel>> tuesdayTaskItems;
-    std::vector<std::unique_ptr<model::TaskItemModel>> wednesdayTaskItems;
-    std::vector<std::unique_ptr<model::TaskItemModel>> thursdayTaskItems;
-    std::vector<std::unique_ptr<model::TaskItemModel>> fridayTaskItems;
-    std::vector<std::unique_ptr<model::TaskItemModel>> saturdayTaskItems;
-    std::vector<std::unique_ptr<model::TaskItemModel>> sundayTaskItems;
-
-    std::copy_if(std::make_move_iterator(taskItems.begin()),
-        std::make_move_iterator(taskItems.end()),
-        std::back_inserter(mondayTaskItems),
-        [&](const std::unique_ptr<model::TaskItemModel>& taskItemModel) {
-            return taskItemModel->GetTask()->GetTaskDate() == mDateTraverser.GetMondayDate().FormatISODate();
-        });
-
-    wxString mondayLabel = wxString::Format(wxT("Monday %s"), mondayISODateString);
-
-    pMonday = new WeeklyTreeModelNode(pRoot, mondayLabel);
-    for (const auto& taskItem : mondayTaskItems) {
-        auto node = new WeeklyTreeModelNode(pMonday,
-            taskItem->GetProject()->GetDisplayName(),
-            taskItem->GetDuration(),
-            taskItem->GetCategory()->GetName(),
-            taskItem->GetDescription(),
-            taskItem->GetTaskItemId());
-
-        pMonday->Append(node);
-    }
-
-    pRoot->Append(pMonday);
-
-    pTuesday = new WeeklyTreeModelNode(pRoot, wxT("Tuesday"));
-    pRoot->Append(pTuesday);
+    SetupMondayNode();
+    SetupTuesdayNode();
+    SetupWednesdayNode();
+    SetupThursdayNode();
+    SetupFridayNode();
+    SetupSaturdayNode();
+    SetupSundayNode();
 }
 
 WeeklyTreeModel::~WeeklyTreeModel()
 {
     delete pRoot;
+}
+
+// This method should only be used once from WeeklyTaskViewDialog::FillControls
+void WeeklyTreeModel::InitBatch(std::vector<std::unique_ptr<model::TaskItemModel>>& taskItems)
+{
+    for (auto& taskItem : taskItems) {
+        wxString taskDateIndex = taskItem->GetTask()->GetTaskDate();
+        mWeeklyTasksMap[taskDateIndex].push_back(std::move(taskItem));
+    }
+
+    auto& mondayTaskItems = mWeeklyTasksMap[mDateTraverser.GetDayISODate(DateTraverser::Days::Monday)];
+    AddMany(pMonday, mondayTaskItems);
+
+    auto& tuesdayTaskItems = mWeeklyTasksMap[mDateTraverser.GetDayISODate(DateTraverser::Days::Tuesday)];
+    AddMany(pTuesday, tuesdayTaskItems);
+
+    auto& wednesdayTaskItems = mWeeklyTasksMap[mDateTraverser.GetDayISODate(DateTraverser::Days::Wednesday)];
+    AddMany(pWednesday, wednesdayTaskItems);
+
+    auto& thursdayTaskItems = mWeeklyTasksMap[mDateTraverser.GetDayISODate(DateTraverser::Days::Thursday)];
+    AddMany(pThursday, thursdayTaskItems);
+
+    auto& fridayTaskItems = mWeeklyTasksMap[mDateTraverser.GetDayISODate(DateTraverser::Days::Friday)];
+    AddMany(pFriday, fridayTaskItems);
+
+    auto& saturdayTaskItems = mWeeklyTasksMap[mDateTraverser.GetDayISODate(DateTraverser::Days::Saturday)];
+    AddMany(pSaturday, saturdayTaskItems);
+
+    auto& sundayTaskItems = mWeeklyTasksMap[mDateTraverser.GetDayISODate(DateTraverser::Days::Sunday)];
+    AddMany(pSunday, sundayTaskItems);
 }
 
 unsigned int WeeklyTreeModel::GetColumnCount() const
@@ -328,4 +316,91 @@ unsigned int WeeklyTreeModel::GetChildren(const wxDataViewItem& parent, wxDataVi
 
     return count;
 }
+
+wxDataViewItem WeeklyTreeModel::ExpandRootNode()
+{
+    return wxDataViewItem((void*) pRoot);
+}
+
+void WeeklyTreeModel::SetupNodes()
+{
+    wxString weekLabel = wxString::Format(wxT("Week %s - %s"),
+        mDateTraverser.GetDayISODate(DateTraverser::Days::Monday),
+        mDateTraverser.GetDayISODate(DateTraverser::Days::Sunday));
+
+    pRoot = new WeeklyTreeModelNode(nullptr, weekLabel);
+}
+
+void WeeklyTreeModel::SetupMondayNode()
+{
+    wxString label = wxString::Format(wxT("Monday %s"), mDateTraverser.GetDayISODate(DateTraverser::Days::Monday));
+
+    pMonday = new WeeklyTreeModelNode(pRoot, label);
+
+    pRoot->Append(pMonday);
+}
+
+void WeeklyTreeModel::SetupTuesdayNode()
+{
+    wxString label = wxString::Format(wxT("Tuesday %s"), mDateTraverser.GetDayISODate(DateTraverser::Days::Tuesday));
+
+    pTuesday = new WeeklyTreeModelNode(pRoot, label);
+    pRoot->Append(pTuesday);
+}
+
+void WeeklyTreeModel::SetupWednesdayNode()
+{
+    wxString label = wxString::Format(wxT("Wednesday %s"), mDateTraverser.GetDayISODate(DateTraverser::Days::Wednesday));
+
+    pWednesday = new WeeklyTreeModelNode(pRoot, label);
+    pRoot->Append(pWednesday);
+}
+
+void WeeklyTreeModel::SetupThursdayNode()
+{
+    wxString label = wxString::Format(wxT("Thursday %s"), mDateTraverser.GetDayISODate(DateTraverser::Days::Thursday));
+
+    pThursday = new WeeklyTreeModelNode(pRoot, label);
+    pRoot->Append(pThursday);
+}
+
+void WeeklyTreeModel::SetupFridayNode()
+{
+    wxString label = wxString::Format(wxT("Friday %s"), mDateTraverser.GetDayISODate(DateTraverser::Days::Friday));
+
+    pFriday = new WeeklyTreeModelNode(pRoot, label);
+    pRoot->Append(pFriday);
+}
+
+void WeeklyTreeModel::SetupSaturdayNode()
+{
+    wxString label = wxString::Format(wxT("Saturday %s"), mDateTraverser.GetDayISODate(DateTraverser::Days::Saturday));
+
+    pSaturday = new WeeklyTreeModelNode(pRoot, label);
+    pRoot->Append(pSaturday);
+}
+
+void WeeklyTreeModel::SetupSundayNode()
+{
+    wxString label = wxString::Format(wxT("Sunday %s"), mDateTraverser.GetDayISODate(DateTraverser::Days::Sunday));
+
+    pSunday = new WeeklyTreeModelNode(pRoot, label);
+    pRoot->Append(pSunday);
+}
+
+void WeeklyTreeModel::AddMany(WeeklyTreeModelNode* dayNodeToAdd,
+    std::vector<std::unique_ptr<model::TaskItemModel>>& dayTasksToAdd)
+{
+    for (const auto& taskToAdd : dayTasksToAdd) {
+        auto node = new WeeklyTreeModelNode(dayNodeToAdd,
+            taskToAdd->GetProject()->GetDisplayName(),
+            taskToAdd->GetDuration(),
+            taskToAdd->GetCategory()->GetName(),
+            taskToAdd->GetDescription(),
+            taskToAdd->GetTaskItemId());
+
+        dayNodeToAdd->Append(node);
+    }
+}
+
 } // namespace app::dv

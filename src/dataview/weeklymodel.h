@@ -19,10 +19,14 @@
 
 #pragma once
 
+#include <unordered_map>
+#include <vector>
+
 #include <wx/wx.h>
 #include <wx/dataview.h>
 
 #include "../common/datetraverser.h"
+#include "../models/taskitemmodel.h"
 
 namespace app::dv
 {
@@ -79,13 +83,15 @@ class WeeklyTreeModel : public wxDataViewModel
 public:
     enum { Col_Project = 0, Col_Duration, Col_Category, Col_Description, Col_Id, Col_Max };
 
-    WeeklyTreeModel();
+    WeeklyTreeModel(const DateTraverser& dateTraverser);
     ~WeeklyTreeModel();
 
-    //void AddToMonday(const wxString& projectName,
+    // void AddToMonday(const wxString& projectName,
     //    const wxString& duration,
     //    const wxString& categoryName,
     //    const wxString& description);
+
+    void InitBatch(std::vector<std::unique_ptr<model::TaskItemModel>>& taskItems);
 
     unsigned int GetColumnCount() const override;
     wxString GetColumnType(unsigned int col) const override;
@@ -96,10 +102,31 @@ public:
     bool IsContainer(const wxDataViewItem& item) const override;
     unsigned int GetChildren(const wxDataViewItem& parent, wxDataViewItemArray& array) const override;
 
+    wxDataViewItem ExpandRootNode();
+
 private:
+    void SetupNodes();
+    void SetupMondayNode();
+    void SetupTuesdayNode();
+    void SetupWednesdayNode();
+    void SetupThursdayNode();
+    void SetupFridayNode();
+    void SetupSaturdayNode();
+    void SetupSundayNode();
+
+    void AddMany(WeeklyTreeModelNode* dayNodeToAdd, std::vector<std::unique_ptr<model::TaskItemModel>>& dayTasksToAdd);
+
+    std::unordered_map<wxString, std::vector<std::unique_ptr<model::TaskItemModel>>> mWeeklyTasksMap;
+
     WeeklyTreeModelNode* pRoot;
+
     WeeklyTreeModelNode* pMonday;
     WeeklyTreeModelNode* pTuesday;
+    WeeklyTreeModelNode* pWednesday;
+    WeeklyTreeModelNode* pThursday;
+    WeeklyTreeModelNode* pFriday;
+    WeeklyTreeModelNode* pSaturday;
+    WeeklyTreeModelNode* pSunday;
 
     DateTraverser mDateTraverser;
 };
