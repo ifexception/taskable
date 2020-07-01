@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <array>
+
 #include <wx/datetime.h>
 
 namespace app
@@ -26,6 +28,16 @@ namespace app
 class DateTraverser final
 {
 public:
+    enum Days {
+        Monday = 0,
+        Tuesday,
+        Wednesday,
+        Thursday,
+        Friday,
+        Saturday,
+        Sunday
+    };
+
     DateTraverser();
     ~DateTraverser() = default;
 
@@ -36,6 +48,10 @@ public:
     const wxDateTime GetFridayDate();
     const wxDateTime GetSaturdayDate();
     const wxDateTime GetSundayDate();
+
+    const std::array<wxString, 7> GetISODates();
+
+    const wxString GetDayISODate(Days index);
 
 private:
     void CalculateDayPosition();
@@ -49,6 +65,8 @@ private:
 
     int mDaysToGoBackToMonday;
     wxDateTime mCurrentDate;
+
+    std::array<wxString, 7> mDateStrings;
 
     wxDateTime mMondayDate;
     wxDateTime mTuesdayDate;
