@@ -285,6 +285,14 @@ std::vector<std::unique_ptr<model::TaskItemModel>> TaskItemData::GetByWeek(const
     return taskItems;
 }
 
+wxString TaskItemData::GetDescriptionById(const int taskItemId)
+{
+    wxString rDescription = wxGetEmptyString();
+    *pConnection->DatabaseExecutableHandle() << TaskItemData::getDescriptionById << taskItemId >>
+        [&](std::string description) { rDescription = wxString(description); };
+    return rDescription;
+}
+
 const std::string TaskItemData::createTaskItem = "INSERT INTO task_items "
                                                  "(start_time, end_time, duration, description, "
                                                  "billable, calculated_rate, is_active, "
@@ -359,4 +367,8 @@ const std::string TaskItemData::getTaskItemsByWeek = "SELECT task_items.task_ite
                                                      "WHERE tasks.task_date >= ? "
                                                      "AND tasks.task_date <= ? "
                                                      "AND task_items.is_active = 1";
+
+const std::string TaskItemData::getDescriptionById = "SELECT description "
+                                                     "FROM task_items "
+                                                     "WHERE task_item_id = ?";
 } // namespace app::data
