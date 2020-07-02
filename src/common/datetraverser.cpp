@@ -40,13 +40,25 @@ DateTraverser::DateTraverser()
     CalculateSaturdayDate();
     CalculateSundayDate();
 
-    mDateStrings = { mMondayDate.FormatISODate(),
+    mDate = {
+        mMondayDate,
+        mTuesdayDate,
+        mWednesdayDate,
+        mThursdayDate,
+        mFridayDate,
+        mSaturdayDate,
+        mSundayDate
+    };
+
+    mDateStrings = {
+        mMondayDate.FormatISODate(),
         mTuesdayDate.FormatISODate(),
         mWednesdayDate.FormatISODate(),
         mThursdayDate.FormatISODate(),
         mFridayDate.FormatISODate(),
         mSaturdayDate.FormatISODate(),
-        mSundayDate.FormatISODate() };
+        mSundayDate.FormatISODate()
+    };
 }
 
 const wxDateTime DateTraverser::GetMondayDate()
@@ -87,6 +99,11 @@ const wxDateTime DateTraverser::GetSundayDate()
 const std::array<wxString, 7> DateTraverser::GetISODates()
 {
     return mDateStrings;
+}
+
+const wxDateTime DateTraverser::GetDayDate(Days index)
+{
+    return mDate[index];
 }
 
 const wxString DateTraverser::GetDayISODate(Days index)

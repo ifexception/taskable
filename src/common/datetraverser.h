@@ -51,6 +51,7 @@ public:
 
     const std::array<wxString, 7> GetISODates();
 
+    const wxDateTime GetDayDate(Days index);
     const wxString GetDayISODate(Days index);
 
 private:
@@ -66,6 +67,7 @@ private:
     int mDaysToGoBackToMonday;
     wxDateTime mCurrentDate;
 
+    std::array<wxDateTime, 7> mDate;
     std::array<wxString, 7> mDateStrings;
 
     wxDateTime mMondayDate;
