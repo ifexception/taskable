@@ -322,6 +322,29 @@ wxDataViewItem WeeklyTreeModel::ExpandRootNode()
     return wxDataViewItem((void*) pRoot);
 }
 
+wxDateTime WeeklyTreeModel::GetDateFromDataViewItem(const wxDataViewItem& item)
+{
+    WeeklyTreeModelNode* node = (WeeklyTreeModelNode*) item.GetID();
+
+    if (node->GetParent() == pMonday) {
+        return mDateTraverser.GetDayDate(DateTraverser::Days::Monday);
+    } else if (node->GetParent() == pTuesday) {
+        return mDateTraverser.GetDayDate(DateTraverser::Days::Tuesday);
+    } else if (node->GetParent() == pWednesday) {
+        return mDateTraverser.GetDayDate(DateTraverser::Days::Wednesday);
+    } else if (node->GetParent() == pThursday) {
+        return mDateTraverser.GetDayDate(DateTraverser::Days::Thursday);
+    } else if (node->GetParent() == pFriday) {
+        return mDateTraverser.GetDayDate(DateTraverser::Days::Friday);
+    } else if (node->GetParent() == pSaturday) {
+        return mDateTraverser.GetDayDate(DateTraverser::Days::Saturday);
+    } else if (node->GetParent() == pSunday) {
+        return mDateTraverser.GetDayDate(DateTraverser::Days::Sunday);
+    } else {
+        return wxDateTime::Now();
+    }
+}
+
 void WeeklyTreeModel::SetupNodes()
 {
     wxString weekLabel = wxString::Format(wxT("Week %s - %s"),
@@ -350,7 +373,8 @@ void WeeklyTreeModel::SetupTuesdayNode()
 
 void WeeklyTreeModel::SetupWednesdayNode()
 {
-    wxString label = wxString::Format(wxT("Wednesday %s"), mDateTraverser.GetDayISODate(DateTraverser::Days::Wednesday));
+    wxString label =
+        wxString::Format(wxT("Wednesday %s"), mDateTraverser.GetDayISODate(DateTraverser::Days::Wednesday));
 
     pWednesday = new WeeklyTreeModelNode(pRoot, label);
     pRoot->Append(pWednesday);

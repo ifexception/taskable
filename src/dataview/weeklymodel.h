@@ -104,6 +104,8 @@ public:
 
     wxDataViewItem ExpandRootNode();
 
+    wxDateTime GetDateFromDataViewItem(const wxDataViewItem& item);
+
 private:
     void SetupNodes();
     void SetupMondayNode();
