@@ -27,6 +27,7 @@
 #include <spdlog/spdlog.h>
 
 #include "../common/datetraverser.h"
+#include "../config/configuration.h"
 #include "../dataview/weeklymodel.h"
 
 namespace app::dlg
@@ -37,6 +38,7 @@ public:
     WeeklyTaskViewDialog() = delete;
     WeeklyTaskViewDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
+        std::shared_ptr<cfg::Configuration> config,
         const wxString& name = wxT("weeklytaskviewdlg"));
     virtual ~WeeklyTaskViewDialog() = default;
 
@@ -53,13 +55,22 @@ private:
     void ConfigureEventBindings();
     void FillControls();
 
+    void OnContextMenu(wxDataViewEvent& event);
+    void OnContextMenuCopyToClipboard(wxCommandEvent& event);
+    void OnContextMenuEdit(wxCommandEvent& event);
+    void OnContextMenuDelete(wxCommandEvent& event);
+
     std::shared_ptr<spdlog::logger> pLogger;
+    std::shared_ptr<cfg::Configuration> pConfig;
 
     wxWindow* pParent;
     wxObjectDataPtr<dv::WeeklyTreeModel> pWeeklyTreeModel;
     wxDataViewCtrl* pDataViewCtrl;
 
     DateTraverser mDateTraverser;
+
+    int mSelectedTaskItemId;
+    wxDateTime mDaySelected;
 
     enum { IDC_DATAVIEW = wxID_HIGHEST + 1 };
 };

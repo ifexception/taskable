@@ -480,7 +480,7 @@ void MainFrame::OnNewCategory(wxCommandEvent& event)
 
 void MainFrame::OnWeeklyView(wxCommandEvent& event)
 {
-    dlg::WeeklyTaskViewDialog* weeklyTaskViewDialog = new dlg::WeeklyTaskViewDialog(this, pLogger);
+    dlg::WeeklyTaskViewDialog* weeklyTaskViewDialog = new dlg::WeeklyTaskViewDialog(this, pLogger, pConfig);
     weeklyTaskViewDialog->Show(true);
 }
 

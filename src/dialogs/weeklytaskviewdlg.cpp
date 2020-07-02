@@ -19,19 +19,27 @@
 
 #include "weeklytaskviewdlg.h"
 
+#include <wx/clipbrd.h>
+
 #include "../common/common.h"
 #include "../data/taskitemdata.h"
+
+#include "../dialogs/taskitemdlg.h"
 
 namespace app::dlg
 {
 WeeklyTaskViewDialog::WeeklyTaskViewDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
+    std::shared_ptr<cfg::Configuration> config,
     const wxString& name)
     : pParent(parent)
     , pLogger(logger)
+    , pConfig(config)
     , pWeeklyTreeModel(nullptr)
     , pDataViewCtrl(nullptr)
     , mDateTraverser()
+    , mSelectedTaskItemId(-1)
+    , mDaySelected(wxDefaultDateTime)
 {
     long style = wxCAPTION | wxCLOSE_BOX | wxMAXIMIZE_BOX | wxMINIMIZE_BOX | wxRESIZE_BORDER;
     wxSize dialogSize = wxSize(800, 600);
@@ -132,7 +140,37 @@ void WeeklyTaskViewDialog::CreateControls()
     pDataViewCtrl->AppendColumn(idColumn);
 }
 
-void WeeklyTaskViewDialog::ConfigureEventBindings() {}
+// clang-format off
+void WeeklyTaskViewDialog::ConfigureEventBindings()
+{
+    pDataViewCtrl->Bind(
+        wxEVT_DATAVIEW_ITEM_CONTEXT_MENU,
+        &WeeklyTaskViewDialog::OnContextMenu,
+        this
+    );
+
+    Bind(
+        wxEVT_MENU,
+        &WeeklyTaskViewDialog::OnContextMenuCopyToClipboard,
+        this,
+        wxID_COPY
+    );
+
+    Bind(
+        wxEVT_MENU,
+        &WeeklyTaskViewDialog::OnContextMenuEdit,
+        this,
+        wxID_EDIT
+    );
+
+    Bind(
+        wxEVT_MENU,
+        &WeeklyTaskViewDialog::OnContextMenuDelete,
+        this,
+        wxID_DELETE
+    );
+}
+// clang-format on
 
 void WeeklyTaskViewDialog::FillControls()
 {
@@ -153,5 +191,75 @@ void WeeklyTaskViewDialog::FillControls()
 
     pWeeklyTreeModel->InitBatch(taskItems);
     pDataViewCtrl->Expand(pWeeklyTreeModel->ExpandRootNode());
+}
+
+void WeeklyTaskViewDialog::OnContextMenu(wxDataViewEvent& event)
+{
+    wxDataViewItem item = event.GetItem();
+
+    if (item.IsOk()) {
+        auto contextModel = (dv::WeeklyTreeModelNode*) item.GetID();
+        if (!contextModel->IsContainer()) {
+            mSelectedTaskItemId = contextModel->GetTaskItemId();
+            mDaySelected = pWeeklyTreeModel->GetDateFromDataViewItem(item);
+
+            wxMenu menu;
+
+            menu.Append(wxID_COPY, wxT("&Copy to Clipboard"));
+            menu.Append(wxID_EDIT, wxT("&Edit"));
+            menu.Append(wxID_DELETE, wxT("&Delete"));
+
+            PopupMenu(&menu);
+        }
+    }
+}
+void WeeklyTaskViewDialog::OnContextMenuCopyToClipboard(wxCommandEvent& event)
+{
+    data::TaskItemData data;
+    wxString description = wxGetEmptyString();
+    try {
+        description = data.GetDescriptionById(mSelectedTaskItemId);
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error(
+            "Error occured on TaskItemData::GetTaskItemTypeIdByTaskItemId() - {0:d} : {1}", e.get_code(), e.what());
+        return;
+    }
+
+    auto canOpen = wxTheClipboard->Open();
+    if (canOpen) {
+        auto textData = new wxTextDataObject(description);
+        wxTheClipboard->SetData(textData);
+        wxTheClipboard->Close();
+    }
+}
+
+void WeeklyTaskViewDialog::OnContextMenuEdit(wxCommandEvent& event)
+{
+    data::TaskItemData data;
+    int taskItemTypeId = 0;
+    try {
+        taskItemTypeId = data.GetTaskItemTypeIdByTaskItemId(mSelectedTaskItemId);
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error(
+            "Error occured on TaskItemData::GetTaskItemTypeIdByTaskItemId() - {0:d} : {1}", e.get_code(), e.what());
+        return;
+    }
+
+    constants::TaskItemTypes type = static_cast<constants::TaskItemTypes>(taskItemTypeId);
+    wxDateTime dateContext = mDaySelected;
+
+    dlg::TaskItemDialog editTask(this, pLogger, pConfig, type, true, mSelectedTaskItemId, dateContext);
+    editTask.ShowModal();
+}
+
+void WeeklyTaskViewDialog::OnContextMenuDelete(wxCommandEvent& event)
+{
+    data::TaskItemData data;
+    try {
+        data.Delete(mSelectedTaskItemId);
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured on TaskItemModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
+        return;
+    }
 }
 } // namespace app::dlg
