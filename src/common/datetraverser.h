@@ -22,24 +22,19 @@
 #include <array>
 
 #include <wx/datetime.h>
+#include <wx/string.h>
+
+#include "constants.h"
 
 namespace app
 {
 class DateTraverser final
 {
 public:
-    enum Days {
-        Monday = 0,
-        Tuesday,
-        Wednesday,
-        Thursday,
-        Friday,
-        Saturday,
-        Sunday
-    };
-
     DateTraverser();
     ~DateTraverser() = default;
+
+    void Recalculate(wxDateTime newDate);
 
     const wxDateTime GetMondayDate();
     const wxDateTime GetTuesdayDate();
@@ -51,8 +46,8 @@ public:
 
     const std::array<wxString, 7> GetISODates();
 
-    const wxDateTime GetDayDate(Days index);
-    const wxString GetDayISODate(Days index);
+    const wxDateTime GetDayDate(constants::Days index);
+    const wxString GetDayISODate(constants::Days index);
 
 private:
     void CalculateDayPosition();
@@ -67,15 +62,7 @@ private:
     int mDaysToGoBackToMonday;
     wxDateTime mCurrentDate;
 
-    std::array<wxDateTime, 7> mDate;
+    std::array<wxDateTime, 7> mDates;
     std::array<wxString, 7> mDateStrings;
-
-    wxDateTime mMondayDate;
-    wxDateTime mTuesdayDate;
-    wxDateTime mWednesdayDate;
-    wxDateTime mThursdayDate;
-    wxDateTime mFridayDate;
-    wxDateTime mSaturdayDate;
-    wxDateTime mSundayDate;
 };
 } // namespace app

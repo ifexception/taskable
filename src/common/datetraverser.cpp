@@ -19,19 +19,16 @@
 
 #include "datetraverser.h"
 
+#include <algorithm>
+
 namespace app
 {
 DateTraverser::DateTraverser()
     : mDaysToGoBackToMonday(-1)
     , mCurrentDate(wxDateTime::Now())
-    , mMondayDate(wxDateTime::Now())
-    , mTuesdayDate(wxDateTime::Now())
-    , mWednesdayDate(wxDateTime::Now())
-    , mThursdayDate(wxDateTime::Now())
-    , mFridayDate(wxDateTime::Now())
-    , mSaturdayDate(wxDateTime::Now())
-    , mSundayDate(wxDateTime::Now())
 {
+    std::fill(mDates.begin(), mDates.end(), wxDateTime::Now());
+
     CalculateMondayFromCurrentDate();
     CalculateTuesdayDate();
     CalculateWednesdayDate();
@@ -39,61 +36,59 @@ DateTraverser::DateTraverser()
     CalculateFridayDate();
     CalculateSaturdayDate();
     CalculateSundayDate();
+}
 
-    mDate = {
-        mMondayDate,
-        mTuesdayDate,
-        mWednesdayDate,
-        mThursdayDate,
-        mFridayDate,
-        mSaturdayDate,
-        mSundayDate
-    };
+void DateTraverser::Recalculate(wxDateTime newDate)
+{
+    std::fill(mDates.begin(), mDates.end(), wxDefaultDateTime);
+    std::fill(mDateStrings.begin(), mDateStrings.end(), wxGetEmptyString());
 
-    mDateStrings = {
-        mMondayDate.FormatISODate(),
-        mTuesdayDate.FormatISODate(),
-        mWednesdayDate.FormatISODate(),
-        mThursdayDate.FormatISODate(),
-        mFridayDate.FormatISODate(),
-        mSaturdayDate.FormatISODate(),
-        mSundayDate.FormatISODate()
-    };
+    mCurrentDate = newDate;
+
+    std::fill(mDates.begin(), mDates.end(), newDate);
+
+    CalculateMondayFromCurrentDate();
+    CalculateTuesdayDate();
+    CalculateWednesdayDate();
+    CalculateThursdayDate();
+    CalculateFridayDate();
+    CalculateSaturdayDate();
+    CalculateSundayDate();
 }
 
 const wxDateTime DateTraverser::GetMondayDate()
 {
-    return mMondayDate;
+    return mDates[constants::Days::Monday];
 }
 
 const wxDateTime DateTraverser::GetTuesdayDate()
 {
-    return mTuesdayDate;
+    return mDates[constants::Days::Tuesday];
 }
 
 const wxDateTime DateTraverser::GetWednesdayDate()
 {
-    return mWednesdayDate;
+    return mDates[constants::Days::Wednesday];
 }
 
 const wxDateTime DateTraverser::GetThursdayDate()
 {
-    return mThursdayDate;
+    return mDates[constants::Days::Thursday];
 }
 
 const wxDateTime DateTraverser::GetFridayDate()
 {
-    return mFridayDate;
+    return mDates[constants::Days::Friday];
 }
 
 const wxDateTime DateTraverser::GetSaturdayDate()
 {
-    return mSaturdayDate;
+    return mDates[constants::Days::Saturday];
 }
 
 const wxDateTime DateTraverser::GetSundayDate()
 {
-    return mSundayDate;
+    return mDates[constants::Days::Sunday];
 }
 
 const std::array<wxString, 7> DateTraverser::GetISODates()
@@ -101,12 +96,12 @@ const std::array<wxString, 7> DateTraverser::GetISODates()
     return mDateStrings;
 }
 
-const wxDateTime DateTraverser::GetDayDate(Days index)
+const wxDateTime DateTraverser::GetDayDate(constants::Days index)
 {
-    return mDate[index];
+    return mDates[index];
 }
 
-const wxString DateTraverser::GetDayISODate(Days index)
+const wxString DateTraverser::GetDayISODate(constants::Days index)
 {
     return mDateStrings[index];
 }
@@ -147,42 +142,49 @@ void DateTraverser::CalculateMondayFromCurrentDate()
     CalculateDayPosition();
 
     wxDateSpan toGoBackToMonday(0, 0, 0, mDaysToGoBackToMonday);
-    mMondayDate.Subtract(toGoBackToMonday);
+    mDates[constants::Days::Monday] = mDates[constants::Days::Monday].Subtract(toGoBackToMonday);
+    mDateStrings[constants::Days::Monday] = mDates[constants::Days::Monday].FormatISODate();
 }
 
 void DateTraverser::CalculateTuesdayDate()
 {
     wxDateSpan dateSpan(0, 0, 0, 1);
-    mTuesdayDate = mMondayDate.Add(dateSpan);
+    mDates[constants::Days::Tuesday] = mDates[constants::Days::Monday].Add(dateSpan);
+    mDateStrings[constants::Days::Tuesday] = mDates[constants::Days::Tuesday].FormatISODate();
 }
 
 void DateTraverser::CalculateWednesdayDate()
 {
     wxDateSpan dateSpan(0, 0, 0, 1);
-    mWednesdayDate = mTuesdayDate.Add(dateSpan);
+    mDates[constants::Days::Wednesday] = mDates[constants::Days::Tuesday].Add(dateSpan);
+    mDateStrings[constants::Days::Wednesday] = mDates[constants::Days::Wednesday].FormatISODate();
 }
 
 void DateTraverser::CalculateThursdayDate()
 {
     wxDateSpan dateSpan(0, 0, 0, 1);
-    mThursdayDate = mWednesdayDate.Add(dateSpan);
+    mDates[constants::Days::Thursday] = mDates[constants::Days::Wednesday].Add(dateSpan);
+    mDateStrings[constants::Days::Thursday] = mDates[constants::Days::Thursday].FormatISODate();
 }
 
 void DateTraverser::CalculateFridayDate()
 {
     wxDateSpan dateSpan(0, 0, 0, 1);
-    mFridayDate = mThursdayDate.Add(dateSpan);
+    mDates[constants::Days::Friday] = mDates[constants::Days::Thursday].Add(dateSpan);
+    mDateStrings[constants::Days::Friday] = mDates[constants::Days::Friday].FormatISODate();
 }
 
 void DateTraverser::CalculateSaturdayDate()
 {
     wxDateSpan dateSpan(0, 0, 0, 1);
-    mSaturdayDate = mFridayDate.Add(dateSpan);
+    mDates[constants::Days::Saturday] = mDates[constants::Days::Friday].Add(dateSpan);
+    mDateStrings[constants::Days::Saturday] = mDates[constants::Days::Saturday].FormatISODate();
 }
 
 void DateTraverser::CalculateSundayDate()
 {
     wxDateSpan dateSpan(0, 0, 0, 1);
-    mSundayDate = mSaturdayDate.Add(dateSpan);
+    mDates[constants::Days::Sunday] = mDates[constants::Days::Saturday].Add(dateSpan);
+    mDateStrings[constants::Days::Sunday] = mDates[constants::Days::Sunday].FormatISODate();
 }
 } // namespace app
