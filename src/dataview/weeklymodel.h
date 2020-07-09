@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <array>
 #include <unordered_map>
 #include <vector>
 
@@ -30,6 +31,8 @@
 
 namespace app::dv
 {
+const int NumberOfDays = 7;
+
 class WeeklyTreeModelNode;
 WX_DEFINE_ARRAY_PTR(WeeklyTreeModelNode*, WeeklyTreeModelNodePtrArray);
 
@@ -86,12 +89,7 @@ public:
     WeeklyTreeModel(const DateTraverser& dateTraverser);
     ~WeeklyTreeModel();
 
-    // void AddToMonday(const wxString& projectName,
-    //    const wxString& duration,
-    //    const wxString& categoryName,
-    //    const wxString& description);
-
-    void InitBatch(std::vector<std::unique_ptr<model::TaskItemModel>>& taskItems);
+    void AddToWeek(std::vector<std::unique_ptr<model::TaskItemModel>>& taskItems);
 
     unsigned int GetColumnCount() const override;
     wxString GetColumnType(unsigned int col) const override;
@@ -101,34 +99,27 @@ public:
     wxDataViewItem GetParent(const wxDataViewItem& item) const override;
     bool IsContainer(const wxDataViewItem& item) const override;
     unsigned int GetChildren(const wxDataViewItem& parent, wxDataViewItemArray& array) const override;
+    void Delete(const wxDataViewItem& item);
+    void ClearAll();
 
     wxDataViewItem ExpandRootNode();
-
+    wxDataViewItemArray CollapseDayNodes();
     wxDateTime GetDateFromDataViewItem(const wxDataViewItem& item);
+
+    void SetDateTraverser(const DateTraverser& dateTraverser);
 
 private:
     void SetupNodes();
-    void SetupMondayNode();
-    void SetupTuesdayNode();
-    void SetupWednesdayNode();
-    void SetupThursdayNode();
-    void SetupFridayNode();
-    void SetupSaturdayNode();
-    void SetupSundayNode();
 
     void AddMany(WeeklyTreeModelNode* dayNodeToAdd, std::vector<std::unique_ptr<model::TaskItemModel>>& dayTasksToAdd);
+    void ClearDayNodes(WeeklyTreeModelNode* node);
+
+    void UpdateNodeLabels();
 
     std::unordered_map<wxString, std::vector<std::unique_ptr<model::TaskItemModel>>> mWeeklyTasksMap;
 
     WeeklyTreeModelNode* pRoot;
-
-    WeeklyTreeModelNode* pMonday;
-    WeeklyTreeModelNode* pTuesday;
-    WeeklyTreeModelNode* pWednesday;
-    WeeklyTreeModelNode* pThursday;
-    WeeklyTreeModelNode* pFriday;
-    WeeklyTreeModelNode* pSaturday;
-    WeeklyTreeModelNode* pSunday;
+    std::array<WeeklyTreeModelNode*, NumberOfDays> pDayNodes;
 
     DateTraverser mDateTraverser;
 };
