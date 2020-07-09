@@ -30,7 +30,7 @@ namespace app::util
 {
 wxString ConvertUnixTimestampToString(int timestamp)
 {
-    time_t time = static_cast<time_t>(timestamp);
+    std::time_t time = static_cast<std::time_t>(timestamp);
     wxDateTime asDate(time);
     wxString dateString = asDate.FormatISOCombined();
     return dateString;
@@ -38,13 +38,13 @@ wxString ConvertUnixTimestampToString(int timestamp)
 
 wxDateTime ToDateTime(int timestamp)
 {
-    time_t time = static_cast<time_t>(timestamp);
+    std::time_t time = static_cast<std::time_t>(timestamp);
     return wxDateTime(time);
 }
 
 wxDateTime RoundToNearestInterval(wxDateTime value, int interval)
 {
-    time_t seconds = value.GetTicks();
+    std::time_t seconds = value.GetTicks();
     double timeRoundToInterval = std::round((double)seconds / (interval * 60.0)) * (interval * 60.0);
     std::time_t time = timeRoundToInterval;
     wxDateTime roundedTime(time);
