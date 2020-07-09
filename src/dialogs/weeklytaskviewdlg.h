@@ -19,10 +19,16 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
 
 #include <wx/wx.h>
+#include "wx/calctrl.h"
 #include <wx/dataview.h>
+
+#ifdef wxHAS_NATIVE_CALENDARCTRL
+#include <wx/generic/calctrlg.h>
+#endif
 
 #include <spdlog/spdlog.h>
 
@@ -55,23 +61,45 @@ private:
     void ConfigureEventBindings();
     void FillControls();
 
+    void OnCalendarWeekSelection(wxCalendarEvent& event);
     void OnContextMenu(wxDataViewEvent& event);
     void OnContextMenuCopyToClipboard(wxCommandEvent& event);
     void OnContextMenuEdit(wxCommandEvent& event);
     void OnContextMenuDelete(wxCommandEvent& event);
 
+    void GetTaskItemsForDailyBreakdown();
+    void GetTaskItemsByDateRange(const wxString& fromDate, const wxString& toDate);
+    void GetTaskItemHoursByDateRange(const wxString& fromDate, const wxString& toDate);
+
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<cfg::Configuration> pConfig;
 
     wxWindow* pParent;
+    wxStaticText* pWeekDatesLabel;
+    wxCalendarCtrlBase* pCalendarCtrl;
+    std::array<wxTextCtrl*, 7> pDailyHoursBreakdownTextCtrlArray;
+    wxStaticText* pTotalWeekHoursLabel;
     wxObjectDataPtr<dv::WeeklyTreeModel> pWeeklyTreeModel;
     wxDataViewCtrl* pDataViewCtrl;
 
     DateTraverser mDateTraverser;
 
+    wxDataViewItem mSelectedDataViewItem;
     int mSelectedTaskItemId;
     wxDateTime mDaySelected;
 
-    enum { IDC_DATAVIEW = wxID_HIGHEST + 1 };
+    enum {
+        IDC_WEEK_DATES = wxID_HIGHEST + 1,
+        IDC_CALENDAR,
+        IDC_MONDAY_HOURS,
+        IDC_TUESDAY_HOURS,
+        IDC_WEDNESDAY_HOURS,
+        IDC_THURSDAY_HOURS,
+        IDC_FRIDAY_HOURS,
+        IDC_SATURDAY_HOURS,
+        IDC_SUNDAY_HOURS,
+        IDC_TOTAL_WEEK_HOURS,
+        IDC_DATAVIEW
+    };
 };
 } // namespace app::dlg

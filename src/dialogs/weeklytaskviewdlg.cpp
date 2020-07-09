@@ -22,12 +22,36 @@
 #include <wx/clipbrd.h>
 
 #include "../common/common.h"
+#include "../common/constants.h"
+#include "../common/util.h"
 #include "../data/taskitemdata.h"
 
 #include "../dialogs/taskitemdlg.h"
 
 namespace app::dlg
 {
+const wxString WeekLabel = wxT("Monday %s - Sunday %s");
+const wxString SelectedDateLabel = wxT("%s");
+wxString DayHoursLabels[7] = {
+    wxT("Monday: %H:%M:%S"),
+    wxT("Tuesday: %H:%M:%S"),
+    wxT("Wednesday: %H:%M:%S"),
+    wxT("Thursday: %H:%M:%S"),
+    wxT("Friday: %H:%M:%S"),
+    wxT("Saturday: %H:%M:%S"),
+    wxT("Sunday: %H:%M:%S"),
+};
+
+wxString DayLabels[7] = {
+    wxT("Monday"),
+    wxT("Tuesday"),
+    wxT("Wednesday"),
+    wxT("Thursday"),
+    wxT("Friday"),
+    wxT("Saturday"),
+    wxT("Sunday"),
+};
+
 WeeklyTaskViewDialog::WeeklyTaskViewDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<cfg::Configuration> config,
@@ -35,6 +59,10 @@ WeeklyTaskViewDialog::WeeklyTaskViewDialog(wxWindow* parent,
     : pParent(parent)
     , pLogger(logger)
     , pConfig(config)
+    , pWeekDatesLabel(nullptr)
+    , pCalendarCtrl(nullptr)
+    , pDailyHoursBreakdownTextCtrlArray()
+    , pTotalWeekHoursLabel(nullptr)
     , pWeeklyTreeModel(nullptr)
     , pDataViewCtrl(nullptr)
     , mDateTraverser()
@@ -42,7 +70,7 @@ WeeklyTaskViewDialog::WeeklyTaskViewDialog(wxWindow* parent,
     , mDaySelected(wxDefaultDateTime)
 {
     long style = wxCAPTION | wxCLOSE_BOX | wxMAXIMIZE_BOX | wxMINIMIZE_BOX | wxRESIZE_BORDER;
-    wxSize dialogSize = wxSize(800, 600);
+    wxSize dialogSize = wxSize(740, 640);
     Create(pParent, wxID_ANY, wxT("Weekly Task View"), wxDefaultPosition, dialogSize, style, name);
     SetMinSize(dialogSize);
 }
@@ -74,6 +102,61 @@ void WeeklyTaskViewDialog::CreateControls()
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(mainSizer);
 
+    /* Calendar Ctrl and Total Week Hours Label Panel + Sizer */
+    auto navAndInfoSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto navAndInfoPanel = new wxPanel(this, wxID_ANY);
+    navAndInfoPanel->SetSizer(navAndInfoSizer);
+    mainSizer->Add(navAndInfoPanel);
+
+    /* Dates Label and Calander Sizer */
+    auto dateLabelsAndCalenderBox = new wxStaticBox(navAndInfoPanel, wxID_ANY, wxT("Dates"));
+    auto dateLabelsAndCalenderBoxSizer = new wxStaticBoxSizer(dateLabelsAndCalenderBox, wxVERTICAL);
+    navAndInfoSizer->Add(dateLabelsAndCalenderBoxSizer, 1, wxEXPAND | wxALL, 5);
+
+    /* Week Date Label */
+    pWeekDatesLabel = new wxStaticText(navAndInfoPanel, IDC_WEEK_DATES, wxGetEmptyString());
+    dateLabelsAndCalenderBoxSizer->Add(pWeekDatesLabel, common::sizers::ControlDefault);
+
+    /* Calendar Ctrl */
+    long calendarStyle =
+        wxCAL_MONDAY_FIRST | wxCAL_SHOW_SURROUNDING_WEEKS | wxCAL_SHOW_WEEK_NUMBERS | wxCAL_SEQUENTIAL_MONTH_SELECTION;
+    pCalendarCtrl = new wxGenericCalendarCtrl(
+        navAndInfoPanel, IDC_CALENDAR, wxDefaultDateTime, wxDefaultPosition, wxDefaultSize, calendarStyle);
+    dateLabelsAndCalenderBoxSizer->Add(pCalendarCtrl, 0, wxALIGN_CENTER | wxALL, 10);
+
+    /* Day Breakdown Sizers and Text Ctrls */
+    auto dayAndWeekHoursSizer = new wxBoxSizer(wxVERTICAL);
+    navAndInfoSizer->Add(dayAndWeekHoursSizer);
+
+    auto dayBreakdownBox = new wxStaticBox(navAndInfoPanel, wxID_ANY, wxT("Daily Hours Breakdown"));
+    auto dayBreakdownBoxSizer = new wxStaticBoxSizer(dayBreakdownBox, wxVERTICAL);
+
+    auto dailyHoursBreakdownPanel = new wxPanel(navAndInfoPanel, wxID_STATIC);
+    dayBreakdownBoxSizer->Add(dailyHoursBreakdownPanel, common::sizers::ControlExpand);
+
+    auto dailyHoursBreakdownFlexSizer = new wxFlexGridSizer(3, 3, wxSize(1, 1));
+    dailyHoursBreakdownPanel->SetSizer(dailyHoursBreakdownFlexSizer);
+
+    for (size_t i = 0; i <= constants::Sunday; i++) {
+        pDailyHoursBreakdownTextCtrlArray[i] = new wxTextCtrl(
+            dailyHoursBreakdownPanel, IDC_MONDAY_HOURS, DayHoursLabels[i], wxDefaultPosition, wxSize(122, -1));
+        pDailyHoursBreakdownTextCtrlArray[i]->SetEditable(false);
+        pDailyHoursBreakdownTextCtrlArray[i]->SetToolTip(
+            wxString::Format(wxT("Total hours for %s of the week"), DayLabels[i]));
+        dailyHoursBreakdownFlexSizer->Add(pDailyHoursBreakdownTextCtrlArray[i], common::sizers::ControlDefault);
+    }
+
+    dayAndWeekHoursSizer->Add(dayBreakdownBoxSizer, common::sizers::ControlDefault);
+
+    /* Total Week Hours Label Ctrl */
+    pTotalWeekHoursLabel = new wxStaticText(navAndInfoPanel, IDC_TOTAL_WEEK_HOURS, wxT("Total Week Hours: %s"));
+    pTotalWeekHoursLabel->SetToolTip(wxT("Shows the total hours worked for the selected week"));
+    auto totalWeekHoursLabelFont = pTotalWeekHoursLabel->GetFont();
+    totalWeekHoursLabelFont.SetPointSize(12);
+    totalWeekHoursLabelFont.MakeBold();
+    pTotalWeekHoursLabel->SetFont(totalWeekHoursLabelFont);
+    dayAndWeekHoursSizer->Add(pTotalWeekHoursLabel, common::sizers::ControlCenterHorizontal);
+
     /* Main Dialog Panel */
     auto mainPanelSizer = new wxBoxSizer(wxVERTICAL);
     auto dataViewPanel = new wxPanel(this, wxID_STATIC);
@@ -81,8 +164,8 @@ void WeeklyTaskViewDialog::CreateControls()
     mainSizer->Add(dataViewPanel, 1, wxGROW | wxALL, 1);
 
     /* Data View Ctrl */
-    long style = wxDV_SINGLE | wxDV_ROW_LINES | wxDV_HORIZ_RULES | wxDV_VERT_RULES;
-    pDataViewCtrl = new wxDataViewCtrl(dataViewPanel, IDC_DATAVIEW, wxDefaultPosition, wxDefaultSize, style);
+    long dataViewStyle = wxDV_SINGLE | wxDV_ROW_LINES | wxDV_HORIZ_RULES | wxDV_VERT_RULES;
+    pDataViewCtrl = new wxDataViewCtrl(dataViewPanel, IDC_DATAVIEW, wxDefaultPosition, wxDefaultSize, dataViewStyle);
     mainPanelSizer->Add(pDataViewCtrl, 1, wxEXPAND | wxALL, 5);
 
     /* Data View Model */
@@ -143,6 +226,12 @@ void WeeklyTaskViewDialog::CreateControls()
 // clang-format off
 void WeeklyTaskViewDialog::ConfigureEventBindings()
 {
+    pCalendarCtrl->Bind(
+        wxEVT_CALENDAR_WEEK_CLICKED,
+        &WeeklyTaskViewDialog::OnCalendarWeekSelection,
+        this
+    );
+
     pDataViewCtrl->Bind(
         wxEVT_DATAVIEW_ITEM_CONTEXT_MENU,
         &WeeklyTaskViewDialog::OnContextMenu,
@@ -174,23 +263,39 @@ void WeeklyTaskViewDialog::ConfigureEventBindings()
 
 void WeeklyTaskViewDialog::FillControls()
 {
-    wxString mondayISODateString = mDateTraverser.GetDayISODate(DateTraverser::Days::Monday);
-    wxString sundayISODateString = mDateTraverser.GetDayISODate(DateTraverser::Days::Sunday);
+    wxString mondayISODateString = mDateTraverser.GetDayISODate(constants::Days::Monday);
+    wxString sundayISODateString = mDateTraverser.GetDayISODate(constants::Days::Sunday);
 
-    data::TaskItemData taskItemData;
-    std::vector<std::unique_ptr<model::TaskItemModel>> taskItems;
-    try {
-        taskItems = taskItemData.GetByWeek(mondayISODateString, sundayISODateString);
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on TaskItemData::GetByWeek({0}, {1}) - {2:d} : {3}",
-            mondayISODateString.ToStdString(),
-            sundayISODateString.ToStdString(),
-            e.get_code(),
-            e.what());
+    pWeekDatesLabel->SetLabel(wxString::Format(WeekLabel, mondayISODateString, sundayISODateString));
+
+    GetTaskItemsForDailyBreakdown();
+    GetTaskItemsByDateRange(mondayISODateString, sundayISODateString);
+    GetTaskItemHoursByDateRange(mondayISODateString, sundayISODateString);
+    pDataViewCtrl->Expand(pWeeklyTreeModel->ExpandRootNode());
+}
+
+void WeeklyTaskViewDialog::OnCalendarWeekSelection(wxCalendarEvent& event)
+{
+    if (event.GetDate().FormatISODate() == mDateTraverser.GetDayISODate(constants::Days::Monday)) {
+        return;
     }
 
-    pWeeklyTreeModel->InitBatch(taskItems);
-    pDataViewCtrl->Expand(pWeeklyTreeModel->ExpandRootNode());
+    mDateTraverser.Recalculate(event.GetDate());
+    pWeeklyTreeModel->SetDateTraverser(mDateTraverser);
+    pWeeklyTreeModel->ClearAll();
+    for (auto& item : pWeeklyTreeModel->CollapseDayNodes()) {
+        pDataViewCtrl->Collapse(item);
+    }
+
+    wxString mondayISODateString = mDateTraverser.GetDayISODate(constants::Days::Monday);
+    wxString sundayISODateString = mDateTraverser.GetDayISODate(constants::Days::Sunday);
+
+    pWeekDatesLabel->SetLabel(wxString::Format(WeekLabel, mondayISODateString, sundayISODateString));
+
+    GetTaskItemsForDailyBreakdown();
+    GetTaskItemsByDateRange(mondayISODateString, sundayISODateString);
+    GetTaskItemHoursByDateRange(mondayISODateString, sundayISODateString);
+    pDataViewCtrl->Refresh();
 }
 
 void WeeklyTaskViewDialog::OnContextMenu(wxDataViewEvent& event)
@@ -202,6 +307,7 @@ void WeeklyTaskViewDialog::OnContextMenu(wxDataViewEvent& event)
         if (!contextModel->IsContainer()) {
             mSelectedTaskItemId = contextModel->GetTaskItemId();
             mDaySelected = pWeeklyTreeModel->GetDateFromDataViewItem(item);
+            mSelectedDataViewItem = item;
 
             wxMenu menu;
 
@@ -220,8 +326,10 @@ void WeeklyTaskViewDialog::OnContextMenuCopyToClipboard(wxCommandEvent& event)
     try {
         description = data.GetDescriptionById(mSelectedTaskItemId);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error(
-            "Error occured on TaskItemData::GetTaskItemTypeIdByTaskItemId() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on TaskItemData::GetDescriptionById({0:d}) - {1:d} : {2}",
+            mSelectedTaskItemId,
+            e.get_code(),
+            e.what());
         return;
     }
 
@@ -233,15 +341,17 @@ void WeeklyTaskViewDialog::OnContextMenuCopyToClipboard(wxCommandEvent& event)
     }
 }
 
-void WeeklyTaskViewDialog::OnContextMenuEdit(wxCommandEvent& event)
+void WeeklyTaskViewDialog::OnContextMenuEdit(wxCommandEvent& WXUNUSED(event))
 {
     data::TaskItemData data;
     int taskItemTypeId = 0;
     try {
         taskItemTypeId = data.GetTaskItemTypeIdByTaskItemId(mSelectedTaskItemId);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error(
-            "Error occured on TaskItemData::GetTaskItemTypeIdByTaskItemId() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured on TaskItemData::GetTaskItemTypeIdByTaskItemId({0:d}) - {1:d} : {2}",
+            mSelectedTaskItemId,
+            e.get_code(),
+            e.what());
         return;
     }
 
@@ -252,14 +362,92 @@ void WeeklyTaskViewDialog::OnContextMenuEdit(wxCommandEvent& event)
     editTask.ShowModal();
 }
 
-void WeeklyTaskViewDialog::OnContextMenuDelete(wxCommandEvent& event)
+void WeeklyTaskViewDialog::OnContextMenuDelete(wxCommandEvent& WXUNUSED(event))
 {
     data::TaskItemData data;
     try {
         data.Delete(mSelectedTaskItemId);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on TaskItemModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error(
+            "Error occured on TaskItemData::Delete({0:d}) - {1:d} : {2}", mSelectedTaskItemId, e.get_code(), e.what());
         return;
     }
+
+    pWeeklyTreeModel->Delete(mSelectedDataViewItem);
+}
+
+void WeeklyTaskViewDialog::GetTaskItemsForDailyBreakdown()
+{
+    const auto& dateArray = mDateTraverser.GetISODates();
+    data::TaskItemData taskItemData;
+    for (std::size_t i = 0; i <= constants::Sunday; i++) {
+        std::vector<wxString> durations;
+        try {
+            durations = taskItemData.GetHours(dateArray[i]);
+        } catch (const sqlite::sqlite_exception& e) {
+            pLogger->error("Error occured on TaskItemData::GetHours({0}) - {1:d} : {2}",
+                dateArray[i].ToStdString(),
+                e.get_code(),
+                e.what());
+        }
+
+        wxTimeSpan totalDuration;
+        for (auto& duration : durations) {
+            std::vector<std::string> durationSplit = util::lib::split(duration.ToStdString(), ':');
+
+            wxTimeSpan currentDuration(std::atol(durationSplit[0].c_str()),
+                std::atol(durationSplit[1].c_str()),
+                (wxLongLong) std::atoll(durationSplit[2].c_str()));
+
+            totalDuration += currentDuration;
+        }
+
+        pDailyHoursBreakdownTextCtrlArray[i]->SetLabel(totalDuration.Format(DayHoursLabels[i]));
+    }
+}
+
+void WeeklyTaskViewDialog::GetTaskItemsByDateRange(const wxString& fromDate, const wxString& toDate)
+{
+    data::TaskItemData taskItemData;
+    std::vector<std::unique_ptr<model::TaskItemModel>> taskItems;
+    try {
+        taskItems = taskItemData.GetByWeek(fromDate, toDate);
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured on TaskItemData::GetByWeek({0}, {1}) - {2:d} : {3}",
+            fromDate.ToStdString(),
+            toDate.ToStdString(),
+            e.get_code(),
+            e.what());
+    }
+
+    pWeeklyTreeModel->AddToWeek(taskItems);
+}
+
+void WeeklyTaskViewDialog::GetTaskItemHoursByDateRange(const wxString& fromDate, const wxString& toDate)
+{
+    data::TaskItemData taskItemData;
+    std::vector<wxString> durations;
+    try {
+        durations = taskItemData.GetHoursByWeek(fromDate, toDate);
+    } catch (const sqlite::sqlite_exception& e) {
+        pLogger->error("Error occured on TaskItemData::GetHoursByWeek({0}, {1}) - {2:d} : {3}",
+            fromDate.ToStdString(),
+            toDate.ToStdString(),
+            e.get_code(),
+            e.what());
+    }
+
+    wxTimeSpan totalDuration;
+    for (auto& duration : durations) {
+        std::vector<std::string> durationSplit = util::lib::split(duration.ToStdString(), ':');
+
+        wxTimeSpan currentDuration(std::atol(durationSplit[0].c_str()),
+            std::atol(durationSplit[1].c_str()),
+            (wxLongLong) std::atoll(durationSplit[2].c_str()));
+
+        totalDuration += currentDuration;
+    }
+
+    pTotalWeekHoursLabel->SetLabel(totalDuration.Format(constants::TotalHours));
 }
 } // namespace app::dlg
