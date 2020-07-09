@@ -46,6 +46,10 @@ enum class TaskItemTypes : int {
     TimedTask = 2,
 };
 
+enum Days { Monday = 0, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday };
+
+Days MapIndexToEnum(int index);
+
 wxString OnSuccessfulAdd(const wxString& item);
 wxString OnSuccessfulEdit(const wxString& item);
 
