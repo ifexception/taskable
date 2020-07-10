@@ -1,43 +1,40 @@
+![Taskable Logo](logo2.png)
+
 # Taskable
-A desktop app to help you manage how you've spent your time on tasks during the day by tracking the time you've spent on tasks throughout the day
+
+A desktop app to help you manage your tasks done during the day by helping you track the time you spent on a task
 
 ## Getting Started
-Ensure you have downloaded a suitable [version](https://cmake.org/download/) of CMake. CMake **3.8** is the minimum supported version.
+
+Ensure you have downloaded a suitable [version](https://cmake.org/download/) of CMake and Visual Studio. CMake **3.8** is the minimum supported version. Visual Studio 2019 is used (not sure about previous versions).
 
 ### Windows
+
 You will need [vcpkg](https://github.com/Microsoft/vcpkg) to compile and manage the dependencies.
 Once you've installed and configured `vcpkg`, install the following libraries:
 
- * sqlite3 (3.0 +)
- * spdlog (1.2 +)
- * wxwidgets (3.1 +)
+- sqlite3 (3.0 +)
+- sqlite-modern-cpp (3.2 +)
+- spdlog (1.4 +)
+- wxwidgets (3.1 +)
+- cpr (1.3 +)
+- nlohmann-json (3.7 +)
 
-Ensure that when you have started Visual Studio that the _CMake Server_ does not give any warnings about missing packages.
-You can now use Visual Studio to build the project. Currently _Visual Studio 2019_ is supported to the version of CMake being used by Visual Studio.
-
-### Linux
-`//TODO`
+Ensure that the Visual Studio _Ouput Window_ when the _CMake Server_ is runng that it does not give any warnings about missing packages.
+You can now use Visual Studio to build the project by selecting the `x86-Release` configuration in the toolbar.
 
 ## Installing
-### Building from source
-#### Windows
-* Open the folder in Visual Studio
-* Switch to `x86-Release` mode
-* Build the project
-* ~Run the install target~ TODO
-
-#### Linux
-`//TODO`
 
 ### Windows Binaries
-`// TODO`
+
+You can get a Windows Installer [here](https://github.com/ifexception/taskable/releases)
 
 ## Version
-_Still work in progress, no release timeline yet_
+
+`v1.0.0` was officially released on 21/04/2020
 
 ## License
+
 This project is licensed under the GPL-3 license - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgements
-
-

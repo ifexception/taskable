@@ -47,7 +47,6 @@ const wxString TaskItemDialog::DateModifiedLabel = wxT("Updated: %s @ %s");
 const wxString TaskItemDialog::CalculatedRateLabelNonBillable = wxT("%s is not billable");
 const wxString TaskItemDialog::CalculatedRateLabelBillableUnknownRate = wxT("%s is billable with unknown rate");
 const wxString TaskItemDialog::CalculatedRateLabelBillableHourlyRate = wxT("%s %.2f");
-const wxString TaskItemDialog::CalculatedRateLabelBillableDailyRate = wxT("%s is billed at a daily rate");
 
 TaskItemDialog::TaskItemDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,

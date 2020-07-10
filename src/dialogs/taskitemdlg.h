@@ -167,6 +167,5 @@ private:
     static const wxString CalculatedRateLabelNonBillable;
     static const wxString CalculatedRateLabelBillableUnknownRate;
     static const wxString CalculatedRateLabelBillableHourlyRate;
-    static const wxString CalculatedRateLabelBillableDailyRate;
 };
 } // namespace app::dlg
