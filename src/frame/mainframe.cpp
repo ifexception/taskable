@@ -637,6 +637,8 @@ void MainFrame::OnKeyDown(wxKeyEvent& event)
 
 void MainFrame::OnItemDoubleClick(wxListEvent& event)
 {
+    mItemIndex = event.GetIndex();
+
     data::TaskItemData data;
     auto taskItemId = event.GetData();
     int taskItemTypeId = 0;
@@ -788,6 +790,8 @@ void MainFrame::OnTaskUpdated(wxCommandEvent& event)
     pListCtrl->SetItemBackgroundColour(mItemIndex, taskItem->GetCategory()->GetColor());
 
     pListCtrl->SetItemPtrData(mItemIndex, static_cast<wxUIntPtr>(taskItem->GetTaskItemId()));
+
+    pListCtrl->RefreshItem(mItemIndex);
 
     mItemIndex = -1;
 }
