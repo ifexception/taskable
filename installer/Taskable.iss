@@ -1,7 +1,7 @@
 ; -- Taskable.iss --
 ; Installer file for Taskable application
 
-#define TaskableVersion "1.0.0"
+#define TaskableVersion "1.3.1"
 
 [Setup]
 AppName=Taskable
@@ -18,7 +18,7 @@ UninstallDisplayIcon={app}\Taskable.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=Installer
-OutputBaseFilename=Taskable-x86.1.0.0-Installer
+OutputBaseFilename=Taskable-x86.1.3.1-Installer
 LicenseFile=License.txt
 WindowResizable=no
 DisableWelcomePage=no
