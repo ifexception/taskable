@@ -94,7 +94,6 @@ EVT_BUTTON(MainFrame::IDC_NEXT_DAY, MainFrame::OnNextDay)
 EVT_LIST_COL_BEGIN_DRAG(MainFrame::IDC_LIST, MainFrame::OnColumnBeginDrag)
 EVT_LIST_ITEM_ACTIVATED(MainFrame::IDC_LIST, MainFrame::OnItemDoubleClick)
 EVT_LIST_ITEM_RIGHT_CLICK(MainFrame::IDC_LIST, MainFrame::OnItemRightClick)
-EVT_LIST_ITEM_MIDDLE_CLICK(MainFrame::IDC_LIST, MainFrame::OnItemMiddleClick)
 EVT_MENU(wxID_COPY, MainFrame::OnPopupMenuCopyToClipboard)
 EVT_MENU(wxID_EDIT, MainFrame::OnPopupMenuEdit)
 EVT_MENU(wxID_DELETE, MainFrame::OnPopupMenuDelete)
@@ -669,12 +668,6 @@ void MainFrame::OnItemRightClick(wxListEvent& event)
     menu.Append(wxID_DELETE, wxT("&Delete"));
 
     PopupMenu(&menu);
-}
-
-void MainFrame::OnItemMiddleClick(wxListEvent& event)
-{
-    auto index = event.GetIndex();
-    CopyToClipboardProcedure(index);
 }
 
 void MainFrame::OnPopupMenuCopyToClipboard(wxCommandEvent& event)

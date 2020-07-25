@@ -100,7 +100,6 @@ private:
     /* ListCtrl Control Event Handlers */
     void OnItemDoubleClick(wxListEvent& event);
     void OnItemRightClick(wxListEvent& event);
-    void OnItemMiddleClick(wxListEvent& event);
     void OnPopupMenuCopyToClipboard(wxCommandEvent& event);
     void OnPopupMenuEdit(wxCommandEvent& event);
     void OnPopupMenuDelete(wxCommandEvent& event);
