@@ -38,6 +38,7 @@ set (SRC
     "database/sqliteconnectionfactory.cpp"
     "database/connectionprovider.cpp"
 
+    "services/outlookintegrator.cpp"
     "services/taskstateservice.cpp"
     "services/taskstorageservice.cpp"
     "services/databasebackup.cpp"
@@ -99,7 +100,10 @@ set (SRC
     "data/taskdata.cpp"
     "data/taskitemtypedata.cpp"
     "data/taskitemdata.cpp"
-      )
+
+    "data/meetingdata.cpp"
+    "models/meetingmodel.cpp"
+    )
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
 
