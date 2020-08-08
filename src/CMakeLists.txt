@@ -11,7 +11,7 @@ endif ()
 message (STATUS "CMAKE_CONFIGURATION_TYPES:${CMAKE_CONFIGURATION_TYPES}")
 
 find_package(ZLIB REQUIRED)
-find_package (sqlite3 CONFIG REQUIRED)
+find_package(unofficial-sqlite3 CONFIG REQUIRED)
 find_package (spdlog CONFIG REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
@@ -125,7 +125,7 @@ target_compile_definitions (${PROJECT_NAME} PUBLIC
 target_link_libraries (${PROJECT_NAME}
     ${wxWidgets_LIBRARIES}
     ZLIB::ZLIB
-    sqlite3
+    unofficial::sqlite3::sqlite3
     spdlog::spdlog
     cpr
     nlohmann_json nlohmann_json::nlohmann_json)
