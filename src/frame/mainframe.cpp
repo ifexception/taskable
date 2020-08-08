@@ -358,9 +358,9 @@ void MainFrame::CreateControls()
     wxListItem durationColumn;
     durationColumn.SetAlign(wxLIST_FORMAT_CENTER);
     durationColumn.SetId(4);
-    mask = dateColumn.GetMask();
+    mask = durationColumn.GetMask();
     mask |= wxLIST_MASK_FORMAT;
-    dateColumn.SetMask(mask);
+    durationColumn.SetMask(mask);
     durationColumn.SetText(wxT("Duration"));
     durationColumn.SetWidth(wxLIST_AUTOSIZE);
     pListCtrl->InsertColumn(4, durationColumn);
