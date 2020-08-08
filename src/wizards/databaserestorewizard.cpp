@@ -171,6 +171,7 @@ void SelectDatabaseVersionPage::CreateControls()
     pListCtrl->InsertColumn(0, databaseColumn);
 
     wxListItem dateColumn;
+    dateColumn.SetAlign(wxLIST_FORMAT_CENTER);
     dateColumn.SetId(1);
     dateColumn.SetText(wxT("Date Modified"));
     dateColumn.SetWidth(98);
@@ -401,8 +402,8 @@ bool DatabaseRestoredPage::InitializeDatabaseConnectionProvider()
 {
     auto sqliteConnectionFactory = std::make_shared<db::SqliteConnectionFactory>(
         common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString());
-    auto connectionPool = std::make_unique<db::ConnectionPool<db::SqliteConnection>>(sqliteConnectionFactory, 2);
-    db::ConnectionProvider::Get().InitializeConnectionPool(std::move(connectionPool));
+    auto connectionPool = std::make_unique<db::ConnectionPool<db::SqliteConnection>>(sqliteConnectionFactory, 14);
+    db::ConnectionProvider::Get().ReInitializeConnectionPool(std::move(connectionPool));
 
     return true;
 }
