@@ -19,6 +19,8 @@
 
 #include "databaserestorewizard.h"
 
+#include <string>
+
 #include <wx/file.h>
 #include <wx/filefn.h>
 #include <wx/filename.h>
@@ -28,6 +30,8 @@
 #include "../database/sqliteconnectionfactory.h"
 #include "../database/sqliteconnection.h"
 #include "../database/connectionprovider.h"
+
+#include "../common/util.h"
 
 namespace app::wizard
 {
@@ -173,7 +177,7 @@ void SelectDatabaseVersionPage::CreateControls()
     wxListItem dateColumn;
     dateColumn.SetAlign(wxLIST_FORMAT_CENTER);
     dateColumn.SetId(1);
-    dateColumn.SetText(wxT("Date Modified"));
+    dateColumn.SetText(wxT("Modified"));
     dateColumn.SetWidth(98);
     pListCtrl->InsertColumn(1, dateColumn);
 

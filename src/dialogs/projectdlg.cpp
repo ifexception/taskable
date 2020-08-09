@@ -37,8 +37,6 @@
 
 namespace app::dlg
 {
-const wxString& ProjectDialog::DateLabel = wxT("Created %s | Updated %s");
-
 ProjectDialog::ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, const wxString& name)
     : pLogger(logger)
     , pNameTextCtrl(nullptr)
@@ -478,9 +476,9 @@ void ProjectDialog::DataToControls()
     pIsActiveCtrl->SetValue(project->IsActive());
 
     /* When was the project created and modified */
-    pDateTextCtrl->SetLabel(wxString::Format(ProjectDialog::DateLabel,
-        project->GetDateCreated().FormatISOCombined(),
-        project->GetDateModified().FormatISOCombined()));
+    pDateTextCtrl->SetLabel(wxString::Format(constants::DateLabel,
+        util::ToFriendlyDateTimeString(project->GetDateCreated()),
+        util::ToFriendlyDateTimeString(project->GetDateModified())));
 }
 
 void ProjectDialog::OnNameChange(wxCommandEvent& event)

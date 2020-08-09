@@ -85,7 +85,5 @@ private:
         MIN_WIDTH = 320,
         MIN_HEIGHT = 240
     };
-
-    static const wxString& DateLabel;
 };
 } // namespace app::dlg

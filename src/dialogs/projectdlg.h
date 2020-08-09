@@ -109,7 +109,5 @@ private:
         IDC_ISDEFAULT,
         IDC_ISACTIVE
     };
-
-    static const wxString& DateLabel;
 };
 } // namespace app::dlg

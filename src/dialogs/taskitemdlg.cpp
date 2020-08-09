@@ -42,8 +42,6 @@ namespace app::dlg
 {
 static const wxString TaskContextWithoutClient = wxT("Employer %s");
 static const wxString TaskContextWithClient = wxT("Employer %s | Client %s");
-const wxString TaskItemDialog::DateCreatedLabel = wxT("Created: %s @ %s");
-const wxString TaskItemDialog::DateModifiedLabel = wxT("Updated: %s @ %s");
 const wxString TaskItemDialog::CalculatedRateLabelNonBillable = wxT("%s is not billable");
 const wxString TaskItemDialog::CalculatedRateLabelBillableUnknownRate = wxT("%s is billable with unknown rate");
 const wxString TaskItemDialog::CalculatedRateLabelBillableHourlyRate = wxT("%s %.2f");
@@ -627,13 +625,11 @@ void TaskItemDialog::DataToControls()
 
     pDescriptionCtrl->SetValue(taskItem->GetDescription());
 
-    pDateCreatedTextCtrl->SetLabel(wxString::Format(TaskItemDialog::DateCreatedLabel,
-        taskItem->GetDateCreated().FormatISODate(),
-        taskItem->GetDateCreated().FormatISOTime()));
+    pDateCreatedTextCtrl->SetLabel(wxString::Format(constants::DateCreatedLabel,
+        util::ToFriendlyDateTimeString(taskItem->GetDateCreated())));
 
-    pDateModifiedTextCtrl->SetLabel(wxString::Format(TaskItemDialog::DateModifiedLabel,
-        taskItem->GetDateModified().FormatISODate(),
-        taskItem->GetDateModified().FormatISOTime()));
+    pDateModifiedTextCtrl->SetLabel(wxString::Format(constants::DateModifiedLabel,
+        util::ToFriendlyDateTimeString(taskItem->GetDateModified())));
 
     pIsActiveCtrl->SetValue(taskItem->IsActive());
 }

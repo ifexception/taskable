@@ -30,8 +30,6 @@
 
 namespace app::dlg
 {
-const wxString& EmployerDialog::DateLabel = wxT("Created %s | Updated %s");
-
 EmployerDialog::EmployerDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, const wxString& name)
     : pLogger(logger)
     , bIsEdit(false)
@@ -205,9 +203,9 @@ void EmployerDialog::DataToControls()
 
     pNameTextCtrl->ChangeValue(employer->GetName());
 
-    pDateTextCtrl->SetLabel(wxString::Format(EmployerDialog::DateLabel,
-        employer->GetDateCreated().FormatISOCombined(),
-        employer->GetDateModified().FormatISOCombined()));
+    pDateTextCtrl->SetLabel(wxString::Format(constants::DateLabel,
+        util::ToFriendlyDateTimeString(employer->GetDateCreated()),
+        util::ToFriendlyDateTimeString(employer->GetDateModified())));
 
     pIsActiveCtrl->SetValue(employer->IsActive());
 }

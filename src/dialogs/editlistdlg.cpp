@@ -48,19 +48,19 @@ namespace app::dlg
 wxBEGIN_EVENT_TABLE(EditListDialog, wxDialog)
 EVT_LIST_ITEM_ACTIVATED(EditListDialog::IDC_LIST, EditListDialog::OnItemDoubleClick)
 wxEND_EVENT_TABLE()
-    // clang-format on
 
-    EditListDialog::EditListDialog(wxWindow* parent,
-        DialogType dialogType,
-        std::shared_ptr<spdlog::logger> logger,
-        const wxString& name)
+EditListDialog::EditListDialog(wxWindow* parent,
+    DialogType dialogType,
+    std::shared_ptr<spdlog::logger> logger,
+    const wxString& name)
     : mType(dialogType)
     , pLogger(logger)
     , mStrategy(nullptr)
+// clang-format on
 {
     SetStrategy();
     std::string title = MapEnumToValue();
-    long style = wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU;
+    long style = wxCAPTION | wxCLOSE_BOX;
     Create(parent, wxID_ANY, wxString(title), wxDefaultPosition, mStrategy->GetSize(), style, name);
 }
 
@@ -108,7 +108,7 @@ void EditListDialog::CreateControls()
 
     long style = wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES;
     pListCtrl = new wxListCtrl(panel, IDC_LIST, wxDefaultPosition, wxDefaultSize, style);
-    sizer->Add(pListCtrl, 1, wxEXPAND | wxALL, 5);
+    sizer->Add(pListCtrl, 1, wxEXPAND | wxALL, 4);
 
     mStrategy->CreateControl(pListCtrl);
 }
@@ -209,8 +209,9 @@ void EmployerStrategy::CreateControl(wxListCtrl* control)
     control->InsertColumn(0, nameColumn);
 
     wxListItem dateModifiedColumn;
+    dateModifiedColumn.SetAlign(wxLIST_FORMAT_CENTER);
     dateModifiedColumn.SetId(1);
-    dateModifiedColumn.SetText(wxT("Date Modified"));
+    dateModifiedColumn.SetText(wxT("Modified"));
     dateModifiedColumn.SetWidth(148);
     control->InsertColumn(1, dateModifiedColumn);
 }
@@ -230,7 +231,7 @@ void EmployerStrategy::DataToControl(wxListCtrl* control)
     int columnIndex = 0;
     for (auto& employer : employers) {
         listIndex = control->InsertItem(columnIndex++, employer->GetName());
-        control->SetItem(listIndex, columnIndex++, employer->GetDateModified().FormatISOCombined());
+        control->SetItem(listIndex, columnIndex++, util::ToFriendlyDateTimeString(employer->GetDateModified()));
         control->SetItemPtrData(listIndex, employer->GetEmployerId());
         columnIndex = 0;
     }
@@ -263,8 +264,9 @@ void ClientStrategy::CreateControl(wxListCtrl* control)
     control->InsertColumn(1, nameColumn);
 
     wxListItem dateModifiedColumn;
+    dateModifiedColumn.SetAlign(wxLIST_FORMAT_CENTER);
     dateModifiedColumn.SetId(2);
-    dateModifiedColumn.SetText(wxT("Date Modified"));
+    dateModifiedColumn.SetText(wxT("Modified"));
     dateModifiedColumn.SetWidth(148);
     control->InsertColumn(2, dateModifiedColumn);
 }
@@ -285,7 +287,7 @@ void ClientStrategy::DataToControl(wxListCtrl* control)
     for (auto& client : clients) {
         listIndex = control->InsertItem(columnIndex++, client->GetEmployer()->GetName());
         control->SetItem(listIndex, columnIndex++, client->GetName());
-        control->SetItem(listIndex, columnIndex++, client->GetDateModified().FormatISOCombined());
+        control->SetItem(listIndex, columnIndex++, util::ToFriendlyDateTimeString(client->GetDateModified()));
         control->SetItemPtrData(listIndex, client->GetClientId());
         columnIndex = 0;
     }
@@ -324,8 +326,9 @@ void ProjectStrategy::CreateControl(wxListCtrl* control)
     control->InsertColumn(2, clientColumn);
 
     wxListItem dateModifiedColumn;
+    dateModifiedColumn.SetAlign(wxLIST_FORMAT_CENTER);
     dateModifiedColumn.SetId(3);
-    dateModifiedColumn.SetText(wxT("Date Modified"));
+    dateModifiedColumn.SetText(wxT("Modified"));
     dateModifiedColumn.SetWidth(148);
     control->InsertColumn(3, dateModifiedColumn);
 }
@@ -348,7 +351,7 @@ void ProjectStrategy::DataToControl(wxListCtrl* control)
         control->SetItem(
             listIndex, columnIndex++, project->HasClientLinked() ? project->GetClient()->GetName() : wxT("n/a"));
         control->SetItem(listIndex, columnIndex++, project->GetName());
-        control->SetItem(listIndex, columnIndex++, project->GetDateModified().FormatISOCombined());
+        control->SetItem(listIndex, columnIndex++, util::ToFriendlyDateTimeString(project->GetDateModified()));
         control->SetItemPtrData(listIndex, project->GetProjectId());
         columnIndex = 0;
     }
@@ -381,8 +384,9 @@ void CategoryStrategy::CreateControl(wxListCtrl* control)
     control->InsertColumn(1, nameColumn);
 
     wxListItem dateModifiedColumn;
+    dateModifiedColumn.SetAlign(wxLIST_FORMAT_CENTER);
     dateModifiedColumn.SetId(2);
-    dateModifiedColumn.SetText(wxT("Date Modified"));
+    dateModifiedColumn.SetText(wxT("Modified"));
     dateModifiedColumn.SetWidth(148);
     control->InsertColumn(2, dateModifiedColumn);
 }
@@ -403,7 +407,8 @@ void CategoryStrategy::DataToControl(wxListCtrl* control)
     for (auto& category : categories) {
         listIndex = control->InsertItem(columnIndex++, category->GetProject()->GetDisplayName());
         control->SetItem(listIndex, columnIndex++, category->GetName());
-        control->SetItem(listIndex, columnIndex++, category->GetDateModified().FormatISOCombined());
+        control->SetItem(
+            listIndex, columnIndex++, util::ToFriendlyDateTimeString(category->GetDateModified()));
         control->SetItemPtrData(listIndex, category->GetCategoryId());
         columnIndex = 0;
     }
@@ -413,5 +418,4 @@ wxSize CategoryStrategy::GetSize()
 {
     return wxSize(360, 260);
 }
-
 } // namespace app::dlg

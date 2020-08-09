@@ -34,8 +34,6 @@
 
 namespace app::dlg
 {
-const wxString& CategoryDialog::DateLabel = wxT("Created %s | Updated %s");
-
 CategoryDialog::CategoryDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
     int categoryId,
@@ -222,9 +220,9 @@ void CategoryDialog::DataToControls()
 
     pColorPickerCtrl->SetColour(category->GetColor());
 
-    pDateTextCtrl->SetLabel(wxString::Format(CategoryDialog::DateLabel,
-        category->GetDateCreated().FormatISOCombined(),
-        category->GetDateModified().FormatISOCombined()));
+    pDateTextCtrl->SetLabel(wxString::Format(constants::DateLabel,
+        util::ToFriendlyDateTimeString(category->GetDateCreated()),
+        util::ToFriendlyDateTimeString(category->GetDateModified())));
 
     pIsActiveCtrl->SetValue(category->IsActive());
 }

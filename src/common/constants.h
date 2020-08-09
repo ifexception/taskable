@@ -50,6 +50,10 @@ enum Days { Monday = 0, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday }
 
 Days MapIndexToEnum(int index);
 
+static const wxString DateCreatedLabel = wxT("Created: %s");
+static const wxString DateModifiedLabel = wxT("Updated: %s");
+static const wxString DateLabel = wxT("Created %s | Updated %s");
+
 wxString OnSuccessfulAdd(const wxString& item);
 wxString OnSuccessfulEdit(const wxString& item);
 

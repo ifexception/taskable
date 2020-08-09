@@ -161,9 +161,6 @@ private:
         IDC_DATEUPDATED,
         IDC_ISACTIVE
     };
-
-    static const wxString DateCreatedLabel;
-    static const wxString DateModifiedLabel;
     static const wxString CalculatedRateLabelNonBillable;
     static const wxString CalculatedRateLabelBillableUnknownRate;
     static const wxString CalculatedRateLabelBillableHourlyRate;

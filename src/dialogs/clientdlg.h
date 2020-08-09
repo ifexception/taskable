@@ -81,7 +81,5 @@ private:
     data::ClientData mClientData;
 
     enum { IDC_NAME = wxID_HIGHEST + 1, IDC_EMPLOYERCHOICE, IDC_ISACTIVE };
-
-    static const wxString& DateLabel;
 };
 } // namespace app::dlg

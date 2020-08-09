@@ -45,7 +45,7 @@ wxDateTime ToDateTime(int timestamp)
 wxDateTime RoundToNearestInterval(wxDateTime value, int interval)
 {
     std::time_t seconds = value.GetTicks();
-    double timeRoundToInterval = std::round((double)seconds / (interval * 60.0)) * (interval * 60.0);
+    double timeRoundToInterval = std::round((double) seconds / (interval * 60.0)) * (interval * 60.0);
     std::time_t time = timeRoundToInterval;
     wxDateTime roundedTime(time);
     roundedTime.SetSecond(0);
@@ -81,6 +81,12 @@ void* IntToVoidPointer(int value)
     intptr_t p = static_cast<intptr_t>(value);
     return reinterpret_cast<void*>(p);
 }
+wxString ToFriendlyDateTimeString(const wxDateTime& value)
+{
+    std::string input = value.FormatISOCombined().ToStdString();
+    wxString formattedDate = wxString(util::lib::replace(input, "T", " "));
+    return formattedDate;
+}
 } // namespace app::util
 
 std::vector<std::string> app::util::lib::split(const std::string& in, char delimiter)
@@ -93,4 +99,14 @@ std::vector<std::string> app::util::lib::split(const std::string& in, char delim
     }
 
     return tokens;
+}
+
+std::string app::util::lib::replace(std::string& input, const std::string& search, const std::string& replace)
+{
+    size_t start_pos = 0;
+    while ((start_pos = input.find(search, start_pos)) != std::string::npos) {
+        input.replace(start_pos, search.length(), replace);
+        start_pos += replace.length(); // Handles case where 'replace' is a substring of 'search'
+    }
+    return input;
 }

@@ -31,8 +31,6 @@
 
 namespace app::dlg
 {
-const wxString& ClientDialog::DateLabel = wxT("Created %s | Updated %s");
-
 ClientDialog::ClientDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, const wxString& name)
     : pLogger(logger)
     , pNameTextCtrl(nullptr)
@@ -244,9 +242,9 @@ void ClientDialog::DataToControls()
 
     pEmployerChoiceCtrl->SetStringSelection(client->GetEmployer()->GetName());
 
-    pDateTextCtrl->SetLabel(wxString::Format(ClientDialog::DateLabel,
-        client->GetDateCreated().FormatISOCombined(),
-        client->GetDateModified().FormatISOCombined()));
+    pDateTextCtrl->SetLabel(wxString::Format(constants::DateLabel,
+        util::ToFriendlyDateTimeString(client->GetDateCreated()),
+        util::ToFriendlyDateTimeString(client->GetDateModified())));
 
     pIsActiveCtrl->SetValue(client->IsActive());
 }

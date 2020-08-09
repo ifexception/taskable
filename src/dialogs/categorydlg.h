@@ -79,7 +79,5 @@ private:
     data::CategoryData mCategoryData;
 
     enum { IDC_PROJECTCHOICE = wxID_HIGHEST + 1, IDC_NAME, IDC_COLOR, IDC_ISACTIVE };
-
-    static const wxString& DateLabel;
 };
 } // namespace app::dlg
