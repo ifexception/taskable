@@ -124,7 +124,7 @@ void DatabasePage::CreateControls()
         wxSize(42, -1),
         wxTE_CENTRE,
         integerValidator);
-    pDeleteBackupsAfterCtrl->SetToolTip(wxT("Number of days to keep a backup for"));
+    pDeleteBackupsAfterCtrl->SetToolTip(wxT("Number of days to keep a backup"));
     backupOptionsSizer->Add(pDeleteBackupsAfterCtrl, common::sizers::ControlDefault);
 
     sizer->Add(databaseBackupsSizer, 0, wxLEFT | wxRIGHT | wxEXPAND, 5);
@@ -134,11 +134,13 @@ void DatabasePage::CreateControls()
 
 void DatabasePage::ConfigureEventBindings()
 {
-    pBrowseDatabasePathButton->Bind(wxEVT_BUTTON, &DatabasePage::OnOpenDirectoryForDatabaseLocation, this, IDC_DATABASE_PATH_BUTTON);
+    pBrowseDatabasePathButton->Bind(
+        wxEVT_BUTTON, &DatabasePage::OnOpenDirectoryForDatabaseLocation, this, IDC_DATABASE_PATH_BUTTON);
 
     pBackupDatabaseCtrl->Bind(wxEVT_CHECKBOX, &DatabasePage::OnBackupDatabaseCheck, this);
 
-    pBrowseBackupPathButton->Bind(wxEVT_BUTTON, &DatabasePage::OnOpenDirectoryForBackupLocation, this, IDC_BACKUP_PATH_BUTTON);
+    pBrowseBackupPathButton->Bind(
+        wxEVT_BUTTON, &DatabasePage::OnOpenDirectoryForBackupLocation, this, IDC_BACKUP_PATH_BUTTON);
 }
 
 void DatabasePage::FillControls()
@@ -151,12 +153,18 @@ void DatabasePage::FillControls()
     if (!pBackupDatabaseCtrl->GetValue()) {
         pBackupPathTextCtrl->Disable();
         pBrowseBackupPathButton->Disable();
+        pDeleteBackupsAfterCtrl->Disable();
     }
 }
 
 void DatabasePage::OnOpenDirectoryForDatabaseLocation(wxCommandEvent& event)
 {
-    wxString pathDirectory = pConfig->GetDatabasePath();
+    wxString pathDirectory = wxGetEmptyString();
+    if (pConfig->GetDatabasePath().length() == 0 && !wxDirExists(pConfig->GetDatabasePath())) {
+        pathDirectory = wxStandardPaths::Get().GetAppDocumentsDir();
+    } else {
+        pathDirectory = pConfig->GetDatabasePath();
+    }
 
     auto openDirDialog =
         new wxDirDialog(this, wxT("Select a Database Directory"), pathDirectory, wxDD_DEFAULT_STYLE, wxDefaultPosition);
@@ -176,16 +184,18 @@ void DatabasePage::OnBackupDatabaseCheck(wxCommandEvent& event)
     if (event.IsChecked()) {
         pBackupPathTextCtrl->Enable();
         pBrowseBackupPathButton->Enable();
+        pDeleteBackupsAfterCtrl->Enable();
     } else {
         pBackupPathTextCtrl->Disable();
         pBrowseBackupPathButton->Disable();
+        pDeleteBackupsAfterCtrl->Disable();
     }
 }
 
 void DatabasePage::OnOpenDirectoryForBackupLocation(wxCommandEvent& event)
 {
-    wxString pathDirectory;
-    if (pConfig->GetBackupPath().length() == 0) {
+    wxString pathDirectory = wxGetEmptyString();
+    if (pConfig->GetBackupPath().length() == 0 && !wxDirExists(pConfig->GetBackupPath())) {
         pathDirectory = wxStandardPaths::Get().GetAppDocumentsDir();
     } else {
         pathDirectory = pConfig->GetBackupPath();
