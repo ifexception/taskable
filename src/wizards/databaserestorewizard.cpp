@@ -31,8 +31,6 @@
 #include "../database/sqliteconnection.h"
 #include "../database/connectionprovider.h"
 
-#include "../common/util.h"
-
 namespace app::wizard
 {
 DatabaseRestoreWizard::DatabaseRestoreWizard(frm::MainFrame* frame,

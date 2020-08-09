@@ -49,6 +49,6 @@ namespace lib
 {
 std::vector<std::string> split(const std::string& in, char delimiter);
 
-std::string replace(std::string& inpuy, const std::string& search, const std::string& replace);
+std::string replace(std::string& input, const std::string& search, const std::string& replace);
 } // namespace lib
 } // namespace app::util
