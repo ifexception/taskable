@@ -89,6 +89,7 @@ private:
     void OnCheckForUpdate(wxCommandEvent& event);
     void OnRestoreDatabase(wxCommandEvent& event);
     void OnBackupDatabase(wxCommandEvent& event);
+    void OnReturnToCurrentDate(wxCommandEvent& event);
 
     /* Frame Controls Event Handlers */
     void OnPrevDay(wxCommandEvent& event);

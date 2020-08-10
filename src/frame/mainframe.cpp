@@ -84,6 +84,7 @@ EVT_MENU(ids::ID_STOPWATCH_TASK, MainFrame::OnTaskStopwatch)
 EVT_MENU(ids::ID_CHECK_FOR_UPDATE, MainFrame::OnCheckForUpdate)
 EVT_MENU(ids::ID_RESTORE_DATABASE, MainFrame::OnRestoreDatabase)
 EVT_MENU(ids::ID_BACKUP_DATABASE, MainFrame::OnBackupDatabase)
+EVT_MENU(ids::ID_RETURN_TO_CURRENT_DATE, MainFrame::OnReturnToCurrentDate)
 /* Frame Control Event Handlers */
 EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 EVT_BUTTON(MainFrame::IDC_FEEDBACK, MainFrame::OnFeedback)
@@ -266,11 +267,12 @@ void MainFrame::CreateControls()
     SetMenuBar(menuBar);
 
     /* Accelerator Table */
-    wxAcceleratorEntry entries[4];
+    wxAcceleratorEntry entries[5];
     entries[0].Set(wxACCEL_CTRL, (int) 'N', ids::ID_NEW_ENTRY_TASK);
     entries[1].Set(wxACCEL_CTRL, (int) 'T', ids::ID_NEW_TIMED_TASK);
     entries[2].Set(wxACCEL_CTRL, (int) 'P', ids::ID_PREFERENCES);
     entries[3].Set(wxACCEL_CTRL, (int) 'W', ids::ID_STOPWATCH_TASK);
+    entries[4].Set(wxACCEL_CTRL, (int) 'G', ids::ID_RETURN_TO_CURRENT_DATE);
 
     wxAcceleratorTable table(ARRAYSIZE(entries), entries);
     SetAcceleratorTable(table);
@@ -582,6 +584,17 @@ void MainFrame::OnBackupDatabase(wxCommandEvent& event)
         wxMessageBox(
             wxT("Warning! Backup option is turned off"), common::GetProgramName(), wxOK_DEFAULT | wxICON_WARNING);
     }
+}
+
+void MainFrame::OnReturnToCurrentDate(wxCommandEvent& WXUNUSED(event))
+{
+    wxDateTime currentDate = wxDateTime::Now();
+    if (currentDate.FormatISODate() == pDatePickerCtrl->GetValue().FormatISODate())
+    {
+        return;
+    }
+
+    DateChangedProcedure(currentDate);
 }
 
 void MainFrame::OnPrevDay(wxCommandEvent& event)

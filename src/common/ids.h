@@ -38,6 +38,8 @@ enum class MenuIds : int {
     Help_CheckForUpdateId,
     Tools_RestoreDatabaseId,
     Tools_BackupDatabaseId,
+
+    Unp_ReturnToCurrentDate = 32,
 };
 
 static const int ID_NEW_ENTRY_TASK = static_cast<int>(ids::MenuIds::File_NewEntryTaskId);
@@ -60,6 +62,8 @@ static const int ID_CHECK_FOR_UPDATE = static_cast<int>(MenuIds::Help_CheckForUp
 
 static const int ID_RESTORE_DATABASE = static_cast<int>(MenuIds::Tools_RestoreDatabaseId);
 static const int ID_BACKUP_DATABASE = static_cast<int>(MenuIds::Tools_BackupDatabaseId);
+
+static const int ID_RETURN_TO_CURRENT_DATE = static_cast<int>(MenuIds::Unp_ReturnToCurrentDate);
 
 enum class DialogIds : int { ErrorOccured = 5999 };
 
