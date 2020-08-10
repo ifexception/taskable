@@ -19,6 +19,7 @@
 
 #include "weeklytaskviewdlg.h"
 
+#include <wx/utils.h>
 #include <wx/clipbrd.h>
 
 #include "../common/common.h"
@@ -268,9 +269,13 @@ void WeeklyTaskViewDialog::FillControls()
 
     pWeekDatesLabel->SetLabel(wxString::Format(WeekLabel, mondayISODateString, sundayISODateString));
 
-    GetTaskItemsForDailyBreakdown();
-    GetTaskItemsByDateRange(mondayISODateString, sundayISODateString);
-    GetTaskItemHoursByDateRange(mondayISODateString, sundayISODateString);
+    {
+        wxWindowDisabler disableAll;
+        wxBusyCursor wait;
+        GetTaskItemsForDailyBreakdown();
+        GetTaskItemsByDateRange(mondayISODateString, sundayISODateString);
+        GetTaskItemHoursByDateRange(mondayISODateString, sundayISODateString);
+    }
     pDataViewCtrl->Expand(pWeeklyTreeModel->ExpandRootNode());
 }
 
@@ -280,21 +285,27 @@ void WeeklyTaskViewDialog::OnCalendarWeekSelection(wxCalendarEvent& event)
         return;
     }
 
-    mDateTraverser.Recalculate(event.GetDate());
-    pWeeklyTreeModel->SetDateTraverser(mDateTraverser);
-    pWeeklyTreeModel->ClearAll();
-    for (auto& item : pWeeklyTreeModel->CollapseDayNodes()) {
-        pDataViewCtrl->Collapse(item);
+    {
+        wxWindowDisabler disableAll;
+        wxBusyCursor wait;
+
+        mDateTraverser.Recalculate(event.GetDate());
+        pWeeklyTreeModel->SetDateTraverser(mDateTraverser);
+        pWeeklyTreeModel->ClearAll();
+        for (auto& item : pWeeklyTreeModel->CollapseDayNodes()) {
+            pDataViewCtrl->Collapse(item);
+        }
+
+        wxString mondayISODateString = mDateTraverser.GetDayISODate(constants::Days::Monday);
+        wxString sundayISODateString = mDateTraverser.GetDayISODate(constants::Days::Sunday);
+
+        pWeekDatesLabel->SetLabel(wxString::Format(WeekLabel, mondayISODateString, sundayISODateString));
+
+        GetTaskItemsForDailyBreakdown();
+        GetTaskItemsByDateRange(mondayISODateString, sundayISODateString);
+        GetTaskItemHoursByDateRange(mondayISODateString, sundayISODateString);
     }
 
-    wxString mondayISODateString = mDateTraverser.GetDayISODate(constants::Days::Monday);
-    wxString sundayISODateString = mDateTraverser.GetDayISODate(constants::Days::Sunday);
-
-    pWeekDatesLabel->SetLabel(wxString::Format(WeekLabel, mondayISODateString, sundayISODateString));
-
-    GetTaskItemsForDailyBreakdown();
-    GetTaskItemsByDateRange(mondayISODateString, sundayISODateString);
-    GetTaskItemHoursByDateRange(mondayISODateString, sundayISODateString);
     pDataViewCtrl->Refresh();
 }
 

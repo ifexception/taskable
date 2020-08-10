@@ -23,7 +23,7 @@
 #include <memory>
 
 #include <wx/wx.h>
-#include "wx/calctrl.h"
+#include <wx/calctrl.h>
 #include <wx/dataview.h>
 
 #ifdef wxHAS_NATIVE_CALENDARCTRL
