@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <memory>
-
 #include <wx/datetime.h>
 
 namespace app::model
@@ -29,38 +27,26 @@ class TaskModel final
 {
 public:
     TaskModel();
-    TaskModel(int taskId, bool initializeFromDatabase);
     TaskModel(int taskId, wxString date, int dateCreated, int dateModified, bool isActive);
     ~TaskModel() = default;
 
     const int GetTaskId() const;
-    const wxDateTime GetTaskDate() const;
+    const wxString GetTaskDate() const;
     const wxDateTime GetDateCreated();
     const wxDateTime GetDateModified();
     const bool IsActive() const;
 
     void SetTaskId(const int taskId);
-    void SetTaskDate(const wxDateTime& date);
+    void SetTaskDate(const wxString& date);
     void SetDateCreated(const wxDateTime& dateCreated);
     void SetDateUpdated(const wxDateTime& dateModified);
     void IsActive(const bool isActive);
 
-    static std::unique_ptr<TaskModel> GetByDate(const wxDateTime date);
-    static std::unique_ptr<TaskModel> GetById(const int taskId);
-    static void Create(const wxDateTime date);
-
 private:
     int mTaskId;
-    wxDateTime mTaskDate;
+    wxString mTaskDate;
     wxDateTime mDateCreated;
     wxDateTime mDateModified;
     bool bIsActive;
-
-    static int GetId(const wxDateTime date);
-
-    static const std::string getTaskId;
-    static const std::string getTaskByDate;
-    static const std::string getTaskById;
-    static const std::string createTask;
 };
 } // namespace app::model

@@ -27,13 +27,16 @@
 #include "../common/common.h"
 #include "../common/ids.h"
 #include "../common/util.h"
+
+#include "../data/ratetypedata.h"
+#include "../data/currencydata.h"
+#include "../data/employerdata.h"
+
 #include "../models/employermodel.h"
 #include "../models/clientmodel.h"
 
 namespace app::dlg
 {
-const wxString& ProjectDialog::DateLabel = wxT("Created %s | Updated %s");
-
 ProjectDialog::ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, const wxString& name)
     : pLogger(logger)
     , pNameTextCtrl(nullptr)
@@ -52,6 +55,8 @@ ProjectDialog::ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> l
     , pProject(std::make_unique<model::ProjectModel>())
     , mProjectId(0)
     , bIsEdit(false)
+    , mClientData()
+    , mProjectData()
 {
     Create(parent,
         wxID_ANY,
@@ -84,6 +89,8 @@ ProjectDialog::ProjectDialog(wxWindow* parent,
     , pProject(std::make_unique<model::ProjectModel>(projectId))
     , mProjectId(projectId)
     , bIsEdit(isEdit)
+    , mClientData()
+    , mProjectData()
 {
     Create(parent,
         wxID_ANY,
@@ -358,11 +365,12 @@ void ProjectDialog::ConfigureEventBindings()
 void ProjectDialog::FillControls()
 {
     /* Load Employers */
+    data::EmployerData employerData;
     std::vector<std::unique_ptr<model::EmployerModel>> employers;
     try {
-        employers = model::EmployerModel::GetAll();
+        employers = employerData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in EmployerModel::GetAll()() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in EmployerData::GetAll()() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (const auto& employer : employers) {
@@ -370,11 +378,12 @@ void ProjectDialog::FillControls()
     }
 
     /* Load Rate Types */
+    data::RateTypeData rateTypeData;
     std::vector<std::unique_ptr<model::RateTypeModel>> rateTypes;
     try {
-        rateTypes = model::RateTypeModel::GetAll();
+        rateTypes = rateTypeData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in RateTypeModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in RateTypeData::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (const auto& rateType : rateTypes) {
@@ -382,11 +391,12 @@ void ProjectDialog::FillControls()
     }
 
     /* Load Currencies */
+    data::CurrencyData currencyData;
     std::vector<std::unique_ptr<model::CurrencyModel>> curriencies;
     try {
-        curriencies = model::CurrencyModel::GetAll();
+        curriencies = currencyData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in CurrencyModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in CurrencyData::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (const auto& currency : curriencies) {
@@ -400,7 +410,7 @@ void ProjectDialog::DataToControls()
     std::unique_ptr<model::ProjectModel> project;
 
     try {
-        project = model::ProjectModel::GetById(mProjectId);
+        project = mProjectData.GetById(mProjectId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in ProjectModel::GetById() - {0:d} : {1}", e.get_code(), e.what());
     }
@@ -418,7 +428,7 @@ void ProjectDialog::DataToControls()
         pClientChoiceCtrl->AppendString(wxT("Select a client"));
         std::vector<std::unique_ptr<model::ClientModel>> clients;
         try {
-            clients = model::ClientModel::GetByEmployerId(project->GetEmployer()->GetEmployerId());
+            clients = mClientData.GetByEmployerId(project->GetEmployer()->GetEmployerId());
         } catch (const sqlite::sqlite_exception& e) {
             pLogger->error("Error occured in ClientModel::GetByEmployerId() - {0:d} : {1}", e.get_code(), e.what());
         }
@@ -466,9 +476,9 @@ void ProjectDialog::DataToControls()
     pIsActiveCtrl->SetValue(project->IsActive());
 
     /* When was the project created and modified */
-    pDateTextCtrl->SetLabel(wxString::Format(ProjectDialog::DateLabel,
-        project->GetDateCreated().FormatISOCombined(),
-        project->GetDateModified().FormatISOCombined()));
+    pDateTextCtrl->SetLabel(wxString::Format(constants::DateLabel,
+        util::ToFriendlyDateTimeString(project->GetDateCreated()),
+        util::ToFriendlyDateTimeString(project->GetDateModified())));
 }
 
 void ProjectDialog::OnNameChange(wxCommandEvent& event)
@@ -490,7 +500,7 @@ void ProjectDialog::OnEmployerChoiceSelection(wxCommandEvent& event)
     } else {
         std::vector<std::unique_ptr<model::ClientModel>> clients;
         try {
-            clients = model::ClientModel::GetByEmployerId(employerId);
+            clients = mClientData.GetByEmployerId(employerId);
         } catch (const sqlite::sqlite_exception& e) {
             pLogger->error("Error occured in ClientModel::GetByEmployerId() - {0:d} : {1}", e.get_code(), e.what());
         }
@@ -543,16 +553,12 @@ void ProjectDialog::OnRateChoiceSelection(wxCommandEvent& event)
         pRateTextCtrl->Enable();
         pCurrencyComboBoxCtrl->Enable();
     }
-    if (selection == static_cast<int>(constants::RateTypes::Daily)) {
-        pRateTextCtrl->Enable();
-        pCurrencyComboBoxCtrl->Enable();
-    }
 }
 
 void ProjectDialog::OnIsDefaultCheck(wxCommandEvent& event)
 {
     if (event.IsChecked()) {
-        model::ProjectModel::UnmarkDefaultProjects();
+        mProjectData.UnmarkDefaultProjects();
     }
 }
 
@@ -561,7 +567,7 @@ void ProjectDialog::OnOk(wxCommandEvent& WXUNUSED(event))
     if (TryTransferValuesFromControls()) {
         if (!bIsEdit) {
             try {
-                model::ProjectModel::Create(std::move(pProject));
+                mProjectData.Create(std::move(pProject));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in ProjectModel::Create() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
@@ -570,7 +576,7 @@ void ProjectDialog::OnOk(wxCommandEvent& WXUNUSED(event))
 
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
             try {
-                model::ProjectModel::Update(std::move(pProject));
+                mProjectData.Update(std::move(pProject));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in ProjectModel::Update() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
@@ -579,7 +585,7 @@ void ProjectDialog::OnOk(wxCommandEvent& WXUNUSED(event))
 
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
             try {
-                model::ProjectModel::Delete(std::move(pProject));
+                mProjectData.Delete(mProjectId);
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in ProjectModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
@@ -683,20 +689,6 @@ bool ProjectDialog::TryTransferValuesFromControls()
                 return false;
             }
             pProject->SetRate(std::move(std::make_unique<double>(std::stod(pRateTextCtrl->GetValue().ToStdString()))));
-            if (pCurrencyComboBoxCtrl->GetSelection() == 0) {
-                common::validations::ForRequiredChoiceSelection(pCurrencyComboBoxCtrl, wxT("currency"));
-                return false;
-            }
-            pProject->SetCurrencyId(
-                util::VoidPointerToInt(pCurrencyComboBoxCtrl->GetClientData(pCurrencyComboBoxCtrl->GetSelection())));
-        }
-        if (selection == static_cast<int>(constants::RateTypes::Daily)) {
-            wxString value = pRateTextCtrl->GetValue();
-            if (value.empty()) {
-                common::validations::ForRequiredNumber(pRateTextCtrl, wxT("Rate amount"));
-                return false;
-            }
-            pProject->SetRate(std::move(std::make_unique<double>(std::stod(value.ToStdString()))));
             if (pCurrencyComboBoxCtrl->GetSelection() == 0) {
                 common::validations::ForRequiredChoiceSelection(pCurrencyComboBoxCtrl, wxT("currency"));
                 return false;

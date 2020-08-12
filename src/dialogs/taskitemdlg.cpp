@@ -32,14 +32,16 @@
 #include "../common/ids.h"
 #include "../common/util.h"
 
+#include "../data/taskdata.h"
+
 wxDEFINE_EVENT(EVT_TASK_ITEM_INSERTED, wxCommandEvent);
+wxDEFINE_EVENT(EVT_TASK_ITEM_UPDATED, wxCommandEvent);
+wxDEFINE_EVENT(EVT_TASK_ITEM_DELETED, wxCommandEvent);
 
 namespace app::dlg
 {
 static const wxString TaskContextWithoutClient = wxT("Employer %s");
 static const wxString TaskContextWithClient = wxT("Employer %s | Client %s");
-const wxString TaskItemDialog::DateCreatedLabel = wxT("Created: %s @ %s");
-const wxString TaskItemDialog::DateModifiedLabel = wxT("Updated: %s @ %s");
 const wxString TaskItemDialog::CalculatedRateLabelNonBillable = wxT("%s is not billable");
 const wxString TaskItemDialog::CalculatedRateLabelBillableUnknownRate = wxT("%s is billable with unknown rate");
 const wxString TaskItemDialog::CalculatedRateLabelBillableHourlyRate = wxT("%s %.2f");
@@ -75,6 +77,8 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
     , mCalculatedRate(0.0)
     , pTaskItem(std::make_unique<model::TaskItemModel>())
     , pProject(nullptr)
+    , mProjectData()
+    , mTaskItemData()
 {
     Create(parent,
         wxID_ANY,
@@ -118,6 +122,8 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
     , mCalculatedRate(0.0)
     , pTaskItem(std::make_unique<model::TaskItemModel>(mTaskItemId))
     , pProject(nullptr)
+    , mProjectData()
+    , mTaskItemData()
 {
     Create(parent,
         wxID_ANY,
@@ -508,7 +514,7 @@ void TaskItemDialog::FillControls()
     std::vector<std::unique_ptr<model::ProjectModel>> projects;
 
     try {
-        projects = model::ProjectModel::GetAll();
+        projects = mProjectData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in ProjectModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
         wxLogDebug(wxString(e.get_sql()));
@@ -527,7 +533,7 @@ void TaskItemDialog::FillControls()
             pProjectChoiceCtrl->SetStringSelection(iterator->get()->GetDisplayName());
             FillCategoryControl(iterator->get()->GetProjectId());
 
-            pProject = model::ProjectModel::GetById(iterator->get()->GetProjectId());
+            pProject = mProjectData.GetById(iterator->get()->GetProjectId());
 
             if (iterator->get()->HasClientLinked()) {
                 pTaskContextTextCtrl->SetLabel(wxString::Format(TaskContextWithClient,
@@ -569,9 +575,18 @@ void TaskItemDialog::DataToControls()
     std::unique_ptr<model::TaskItemModel> taskItem = nullptr;
 
     try {
-        taskItem = model::TaskItemModel::GetById(mTaskItemId);
+        taskItem = mTaskItemData.GetById(mTaskItemId);
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in TaskItemModel::GetById() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in TaskItemData::GetById() - {0:d} : {1}", e.get_code(), e.what());
+        wxLogDebug(wxString(e.get_sql()));
+    }
+
+    try {
+        pProject = mProjectData.GetById(taskItem->GetProjectId());
+    }
+    catch(const sqlite::sqlite_exception& e)
+    {
+        pLogger->error("Error occured in ProjectData::GetById() - {0:d} : {1}", e.get_code(), e.what());
         wxLogDebug(wxString(e.get_sql()));
     }
 
@@ -610,17 +625,13 @@ void TaskItemDialog::DataToControls()
 
     pDescriptionCtrl->SetValue(taskItem->GetDescription());
 
-    pDateCreatedTextCtrl->SetLabel(wxString::Format(TaskItemDialog::DateCreatedLabel,
-        taskItem->GetDateCreated().FormatISODate(),
-        taskItem->GetDateCreated().FormatISOTime()));
+    pDateCreatedTextCtrl->SetLabel(wxString::Format(constants::DateCreatedLabel,
+        util::ToFriendlyDateTimeString(taskItem->GetDateCreated())));
 
-    pDateModifiedTextCtrl->SetLabel(wxString::Format(TaskItemDialog::DateModifiedLabel,
-        taskItem->GetDateModified().FormatISODate(),
-        taskItem->GetDateModified().FormatISOTime()));
+    pDateModifiedTextCtrl->SetLabel(wxString::Format(constants::DateModifiedLabel,
+        util::ToFriendlyDateTimeString(taskItem->GetDateModified())));
 
     pIsActiveCtrl->SetValue(taskItem->IsActive());
-
-    pProject = model::ProjectModel::GetById(taskItem->GetProjectId());
 }
 
 void TaskItemDialog::CalculateTimeDiff(wxDateTime start, wxDateTime end)
@@ -682,6 +693,27 @@ void TaskItemDialog::CalculateRate(wxTimeSpan time)
     }
 }
 
+void TaskItemDialog::GenerateTaskInsertedEvent(int taskItemId)
+{
+    wxCommandEvent taskInsertedEvent(EVT_TASK_ITEM_INSERTED);
+    taskInsertedEvent.SetId(taskItemId);
+    wxPostEvent(pParent, taskInsertedEvent);
+}
+
+void TaskItemDialog::GenerateTaskUpdatedEvent(int taskItemId)
+{
+    wxCommandEvent taskInsertedEvent(EVT_TASK_ITEM_UPDATED);
+    taskInsertedEvent.SetId(taskItemId);
+    wxPostEvent(pParent, taskInsertedEvent);
+}
+
+void TaskItemDialog::GenerateTaskDeletedEvent(int taskItemId)
+{
+    wxCommandEvent taskInsertedEvent(EVT_TASK_ITEM_DELETED);
+    taskInsertedEvent.SetId(taskItemId);
+    wxPostEvent(pParent, taskInsertedEvent);
+}
+
 void TaskItemDialog::OnDateContextChange(wxDateEvent& event)
 {
     mDateContext = pDateContextCtrl->GetValue();
@@ -702,7 +734,7 @@ void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
     FillCategoryControl(projectId);
 
     try {
-        pProject = model::ProjectModel::GetById(projectId);
+        pProject = mProjectData.GetById(projectId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in ProjectModel::GetById() - {0:d} : {1}", e.get_code(), e.what());
         wxLogDebug(wxString(e.get_sql()));
@@ -821,36 +853,39 @@ void TaskItemDialog::OnOk(wxCommandEvent& event)
 {
     if (TransferDataAndValidate()) {
         if (!bIsEdit) {
+            int64_t id = -1;
             try {
-                model::TaskItemModel::Create(std::move(pTaskItem));
+                id = mTaskItemData.Create(std::move(pTaskItem));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in TaskItemModel::Create() - {0:d} : {1}", e.get_code(), e.what());
                 wxLogDebug(wxString(e.get_sql()));
                 EndModal(ids::ID_ERROR_OCCURED);
             }
+            GenerateTaskInsertedEvent(id);
         }
 
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
             try {
-                model::TaskItemModel::Update(std::move(pTaskItem));
+                mTaskItemData.Update(std::move(pTaskItem));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in TaskItemModel::Update() - {0:d} : {1}", e.get_code(), e.what());
                 wxLogDebug(wxString(e.get_sql()));
                 EndModal(ids::ID_ERROR_OCCURED);
             }
+            GenerateTaskUpdatedEvent(mTaskItemId);
         }
 
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
             try {
-                model::TaskItemModel::Delete(std::move(pTaskItem));
+                mTaskItemData.Delete(mTaskItemId);
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in TaskItemModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
                 wxLogDebug(wxString(e.get_sql()));
                 EndModal(ids::ID_ERROR_OCCURED);
             }
+            GenerateTaskDeletedEvent(mTaskItemId);
         }
 
-        GenerateTaskSavedEvent();
         EndModal(wxID_OK);
     }
 }
@@ -862,9 +897,10 @@ void TaskItemDialog::OnCancel(wxCommandEvent& event)
 
 void TaskItemDialog::FillCategoryControl(int projectId)
 {
+    data::CategoryData categoryData;
     std::vector<std::unique_ptr<model::CategoryModel>> categories;
     try {
-        categories = model::CategoryModel::GetByProjectId(projectId);
+        categories = categoryData.GetByProjectId(projectId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in CategoryModel::GetByProjectId() - {0:d} : {1}", e.get_code(), e.what());
         wxLogDebug(wxString(e.get_sql()));
@@ -922,12 +958,6 @@ void TaskItemDialog::SetRateLabel(model::ProjectModel* project)
     pCalculatedRateTextCtrl->SetFont(font);
 }
 
-void TaskItemDialog::GenerateTaskSavedEvent()
-{
-    wxCommandEvent taskInsertedEvent(EVT_TASK_ITEM_INSERTED);
-    wxPostEvent(pParent, taskInsertedEvent);
-}
-
 bool TaskItemDialog::TransferDataAndValidate()
 {
     pTaskItem->SetTaskItemTypeId(static_cast<int>(mType));
@@ -945,7 +975,7 @@ bool TaskItemDialog::TransferDataAndValidate()
     pTaskItem->SetProjectId(projectId);
 
     if (bIsEdit) {
-        pTaskItem->SetProject(std::move(model::ProjectModel::GetById(projectId)));
+        pTaskItem->SetProject(std::move(mProjectData.GetById(projectId)));
     }
 
     if (mType == constants::TaskItemTypes::TimedTask) {
@@ -1011,9 +1041,10 @@ bool TaskItemDialog::TransferDataAndValidate()
     }
     pTaskItem->SetDescription(description);
 
+    data::TaskData taskData;
     int taskId = -1;
     try {
-        taskId = model::TaskModel::GetByDate(pDateContextCtrl->GetValue())->GetTaskId();
+        taskId = taskData.GetByDate(pDateContextCtrl->GetValue())->GetTaskId();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in TaskModel::GetByDate() - {0:d} : {1}", e.get_code(), e.what());
         wxLogDebug(wxString(e.get_sql()));

@@ -20,28 +20,30 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
-#include <sqlite_modern_cpp.h>
+#include "../database/connectionprovider.h"
+#include "../database/sqliteconnection.h"
+#include "../models/ratetypemodel.h"
 
-namespace app::svc
+namespace app::data
 {
-class DatabaseConnection final
+class RateTypeData
 {
 public:
-    static DatabaseConnection& Get();
+    RateTypeData();
+    RateTypeData(std::shared_ptr<db::SqliteConnection> connection);
+    ~RateTypeData();
 
-    DatabaseConnection(const DatabaseConnection&) = delete;
-    DatabaseConnection& operator=(const DatabaseConnection&) = delete;
-
-    sqlite::database* GetHandle();
-
-    void SetHandle(sqlite::database* database);
-    void ResetHandle(sqlite::database* database);
-    void UnsetHandle();
+    std::unique_ptr<model::RateTypeModel> GetById(const int rateTypeId);
+    std::vector<std::unique_ptr<model::RateTypeModel>> GetAll();
 
 private:
-    DatabaseConnection();
+    std::shared_ptr<db::SqliteConnection> pConnection;
 
-    sqlite::database* pDatabase;
+    bool bBorrowedConnection;
+
+    static const std::string getRateTypeById;
+    static const std::string getRateTypes;
 };
 }

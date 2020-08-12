@@ -26,6 +26,8 @@
 #include <wx/string.h>
 
 #include "../config/configuration.h"
+#include "../database/connectionprovider.h"
+#include "../database/sqliteconnection.h"
 
 namespace app::svc
 {
@@ -33,9 +35,8 @@ class DatabaseBackup final
 {
 public:
     DatabaseBackup() = delete;
-    DatabaseBackup(std::shared_ptr<cfg::Configuration> config,
-        std::shared_ptr<spdlog::logger> logger,
-        sqlite::database* database);
+    DatabaseBackup(std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger);
+    ~DatabaseBackup();
 
     bool Execute();
 
@@ -44,10 +45,9 @@ private:
     wxString CreateBackupPath(const wxString& fileName);
     bool CreateBackupFile(const wxString& fileName);
     bool ExecuteBackup(const wxString& fileName);
-    bool MoveBackupFileToBackupDirectory(const wxString& fileName);
 
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
-    sqlite::database* pDatabase;
+    std::shared_ptr<db::SqliteConnection> pConnection;
 };
 } // namespace app::svc

@@ -19,9 +19,7 @@
 
 #include "employermodel.h"
 
-#include "../common/constants.h"
 #include "../common/util.h"
-#include "../services/databaseconnection.h"
 
 namespace app::model
 {
@@ -40,16 +38,11 @@ EmployerModel::EmployerModel(const int employerId)
     mEmployerId = employerId;
 }
 
-EmployerModel::EmployerModel(const int employerId, bool initializeFromDatabase)
+EmployerModel::EmployerModel(const wxString& employerName)
     : EmployerModel()
 {
-    assert(initializeFromDatabase == true);
-    auto employer = EmployerModel::GetById(employerId);
-    mEmployerId = employer->GetEmployerId();
-    mName = employer->GetName();
-    mDateCreated = employer->GetDateCreated();
-    mDateModified = employer->GetDateModified();
-    bIsActive = employer->IsActive();
+    mName = employerName;
+    bIsActive = true;
 }
 
 EmployerModel::EmployerModel(int employerId, wxString name, int dateCreated, int dateModified, bool isActive)
@@ -111,77 +104,4 @@ void EmployerModel::IsActive(const bool isActive)
 {
     bIsActive = isActive;
 }
-
-void EmployerModel::Create(std::unique_ptr<EmployerModel> employer)
-{
-    auto db = svc::DatabaseConnection::Get().GetHandle();
-    *db << EmployerModel::createEmployer << employer->GetName().ToStdString();
-}
-
-std::unique_ptr<EmployerModel> EmployerModel::GetById(const int id)
-{
-    std::unique_ptr<EmployerModel> employer;
-
-    auto db = svc::DatabaseConnection::Get().GetHandle();
-    *db << EmployerModel::getEmployer << id >>
-        [&](int employerId, std::string employerName, int dateCreated, int dateModified, int isActive) {
-            employer = std::make_unique<EmployerModel>(
-                employerId, wxString(employerName), dateCreated, dateModified, isActive);
-        };
-
-    return std::move(employer);
-}
-
-std::vector<std::unique_ptr<EmployerModel>> EmployerModel::GetAll()
-{
-    std::vector<std::unique_ptr<EmployerModel>> employers;
-
-    auto db = svc::DatabaseConnection::Get().GetHandle();
-    *db << model::EmployerModel::getEmployers >>
-        [&](int employerId, std::string employerName, int dateCreated, int dateModified, int isActive) {
-            auto employer = std::make_unique<EmployerModel>(
-                employerId, wxString(employerName), dateCreated, dateModified, isActive);
-            employers.push_back(std::move(employer));
-        };
-
-    return employers;
-}
-
-void EmployerModel::Update(std::unique_ptr<EmployerModel> employer)
-{
-    auto db = svc::DatabaseConnection::Get().GetHandle();
-    *db << EmployerModel::updateEmployer << employer->GetName().ToStdString() << util::UnixTimestamp()
-        << employer->GetEmployerId();
-}
-
-void EmployerModel::Delete(std::unique_ptr<EmployerModel> employer)
-{
-    auto db = svc::DatabaseConnection::Get().GetHandle();
-
-    *db << EmployerModel::deleteEmployer << util::UnixTimestamp() << employer->GetEmployerId();
-}
-
-const std::string EmployerModel::createEmployer = "INSERT INTO employers (name, is_active) VALUES (?, 1);";
-
-const std::string EmployerModel::getEmployers = "SELECT employer_id, "
-                                                "name, "
-                                                "date_created, "
-                                                "date_modified, "
-                                                "is_active "
-                                                "FROM employers "
-                                                "WHERE is_active = 1;";
-
-const std::string EmployerModel::getEmployer = "SELECT employer_id, "
-                                               "name, "
-                                               "date_created, "
-                                               "date_modified, "
-                                               "is_active "
-                                               "FROM employers "
-                                               "WHERE employer_id = ?";
-
-const std::string EmployerModel::updateEmployer =
-    "UPDATE employers SET name = ?, date_modified = ? WHERE employer_id = ?";
-
-const std::string EmployerModel::deleteEmployer =
-    "UPDATE employers SET is_active = 0, date_modified = ? WHERE employer_id = ?";
 } // namespace app::model

@@ -28,6 +28,8 @@
 #include "../common/ids.h"
 #include "../common/util.h"
 
+#include "../data/projectdata.h"
+
 namespace app::dlg
 {
 CategoriesDialog::CategoriesDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, const wxString& name)
@@ -51,6 +53,7 @@ CategoriesDialog::CategoriesDialog(wxWindow* parent, std::shared_ptr<spdlog::log
     , pCategory(std::make_unique<model::CategoryModel>())
     , mCategories()
     , bEditFromListCtrl(false)
+    , mCategoryData()
 {
     Create(pParent,
         wxID_ANY,
@@ -313,12 +316,13 @@ void CategoriesDialog::CreateControls()
 
 void CategoriesDialog::FillControls()
 {
+    data::ProjectData mData;
     std::vector<std::unique_ptr<model::ProjectModel>> projects;
 
     try {
-        projects = model::ProjectModel::GetAll();
+        projects = mData.GetAll();
     } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in ProjectModel::GetAll()() - {0:d} : {1}", e.get_code(), e.what());
+        pLogger->error("Error occured in ProjectModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
     }
 
     for (const auto& project : projects) {
@@ -425,7 +429,7 @@ void CategoriesDialog::OnOK(wxCommandEvent& event)
 {
     for (auto& category : mCategories) {
         try {
-            model::CategoryModel::Create(std::move(category));
+            mCategoryData.Create(std::move(category));
         } catch (const sqlite::sqlite_exception& e) {
             pLogger->error("Error occured in category CategoryModel::Create() - {0:d} : {1}", e.get_code(), e.what());
             EndModal(ids::ID_ERROR_OCCURED);

@@ -26,7 +26,11 @@
 
 #include "common/common.h"
 #include "common/constants.h"
+#include "database/sqliteconnectionfactory.h"
+#include "database/sqliteconnection.h"
+#include "database/connectionprovider.h"
 #include "frame/mainframe.h"
+#include "services/setupdatabase.h"
 #include "services/databasebackup.h"
 #include "wizards/setupwizard.h"
 #include "wizards/databaserestorewizard.h"
@@ -36,7 +40,6 @@ namespace app
 Application::Application()
     : pInstanceChecker(std::make_unique<wxSingleInstanceChecker>())
     , pConfig(nullptr)
-    , pDatabase(nullptr)
 {
 }
 
@@ -56,6 +59,10 @@ bool Application::OnInit()
         return false;
     }
 
+    if (!ConfigurationFileExists()) {
+        return false;
+    }
+
     if (IsSetup()) {
         if (!StartupInitialization()) {
             return false;
@@ -66,7 +73,7 @@ bool Application::OnInit()
         }
     }
 
-    auto frame = new frm::MainFrame(pConfig, pLogger, pDatabase);
+    auto frame = new frm::MainFrame(pConfig, pLogger);
     frame->CreateFrame();
     frame->Show(true);
     SetTopWindow(frame);
@@ -76,11 +83,19 @@ bool Application::OnInit()
 
 bool Application::FirstStartupInitialization()
 {
-    if (!ConfigurationFileExists()) {
+    if (!CreateDatabaseFile()) {
+        return false;
+    }
+
+    InitializeDatabaseConnectionProvider();
+
+    if (!InitializeDatabaseTables()) {
         return false;
     }
 
     if (!RunSetupWizard()) {
+        db::ConnectionProvider::Get().PurgeConnectionPool();
+        DeleteDatabaseFile();
         return false;
     }
 
@@ -88,22 +103,16 @@ bool Application::FirstStartupInitialization()
         return false;
     }
 
-    InitializeSqliteConnection();
-
     return true;
 }
 
 bool Application::StartupInitialization()
 {
-    if (!ConfigurationFileExists()) {
-        return false;
-    }
-
     if (!DatabaseFileExists()) {
         return false;
+    } else {
+        InitializeDatabaseConnectionProvider();
     }
-
-    InitializeSqliteConnection();
 
     return true;
 }
@@ -114,18 +123,24 @@ bool Application::InitializeLogging()
         return false;
     }
 
-#ifdef TASKABLE_DEBUG
-    spdlog::set_level(spdlog::level::info);
-#else
-    spdlog::set_level(spdlog::level::warn);
-#endif
-
     auto logDirectory =
         wxString::Format(wxT("%s\\logs\\%s"), wxStandardPaths::Get().GetUserDataDir(), constants::LogsFilename)
             .ToStdString();
 
     try {
-        pLogger = spdlog::daily_logger_st(constants::LoggerName, logDirectory);
+        auto msvcSink = std::make_shared<spdlog::sinks::msvc_sink_st>();
+
+        auto msvcLogger = std::make_shared<spdlog::logger>("msvc", msvcSink);
+        msvcLogger->set_level(spdlog::level::debug);
+        spdlog::register_logger(msvcLogger);
+
+        auto dialySink = std::make_shared<spdlog::sinks::daily_file_sink_st>(logDirectory, 23, 59);
+        dialySink->set_level(spdlog::level::err);
+
+        auto combinedLoggers = std::make_shared<spdlog::sinks::dist_sink_st>();
+        combinedLoggers->add_sink(msvcSink);
+        combinedLoggers->add_sink(dialySink);
+        pLogger = std::make_shared<spdlog::logger>(constants::LoggerName, combinedLoggers);
     } catch (const spdlog::spdlog_ex& e) {
         wxMessageBox(wxString::Format(wxT("Error initializing logger: %s"), e.what()),
             common::GetProgramName(),
@@ -149,6 +164,19 @@ bool Application::CreateLogsDirectory()
     }
 
     return logDirectoryExists;
+}
+
+bool Application::InitializeDatabaseConnectionProvider()
+{
+    static int ConnectionPoolSize = 14;
+
+    auto sqliteConnectionFactory = std::make_shared<db::SqliteConnectionFactory>(
+        common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString());
+    auto connectionPool =
+        std::make_unique<db::ConnectionPool<db::SqliteConnection>>(sqliteConnectionFactory, ConnectionPoolSize);
+    db::ConnectionProvider::Get().InitializeConnectionPool(std::move(connectionPool));
+
+    return true;
 }
 
 bool Application::IsSetup()
@@ -202,15 +230,11 @@ bool Application::ConfigurationFileExists()
 {
     bool configFileExists = wxFileExists(common::GetConfigFilePath());
     if (!configFileExists) {
-        int res = wxMessageBox(wxT("Error: Program cannot locate configuration file!\nRecreate configuration file?"),
+        wxMessageBox(wxT("Error: Program cannot locate configuration file!"),
             common::GetProgramName(),
-            wxYES_NO | wxICON_ERROR);
-        if (res == wxYES) {
-            pConfig->RecreateIfNotExists();
-            return true;
-        } else {
-            return false;
-        }
+            wxOK_DEFAULT | wxICON_ERROR);
+        pLogger->error("Unable to locate configuration file at specified location.");
+        return false;
     }
 
     pConfig = std::make_shared<cfg::Configuration>();
@@ -240,77 +264,89 @@ bool Application::CreateBackupsDirectory()
     return true;
 }
 
+bool Application::CreateDatabaseFile()
+{
+    if (!wxDirExists(pConfig->GetDatabasePath())) {
+        if (!wxMkdir(pConfig->GetDatabasePath())) {
+            pLogger->error("Unable to create database directory at specified location.");
+        }
+    }
+
+    wxFile file;
+    auto succeeded = file.Create(common::GetDatabaseFilePath(pConfig->GetDatabasePath()));
+    if (!succeeded) {
+        pLogger->error("Unable to create database file at specified location.");
+    }
+    file.Close();
+
+    return succeeded;
+}
+
+void Application::DeleteDatabaseFile()
+{
+    if (wxFileExists(common::GetDatabaseFilePath(pConfig->GetDatabasePath()))) {
+        if (!wxRemoveFile(common::GetDatabaseFilePath(pConfig->GetDatabasePath()))) {
+            pLogger->error("Unable to delete database file.");
+        }
+    }
+}
+
 bool Application::DatabaseFileExists()
 {
-    /* Check if the 'data' directory is missing */
+    /* Check if the database directory is missing */
     if (!wxDirExists(pConfig->GetDatabasePath())) {
-        /* Backups are enabled so create the directory and to restore database */
-        if (pConfig->IsBackupEnabled()) {
-            int ret = wxMessageBox(wxT("Error: Program cannot find database file!\nRestore database from backup?"),
-                common::GetProgramName(),
-                wxYES_NO | wxICON_WARNING);
-            if (ret == wxYES) {
-                if (!wxMkdir(pConfig->GetDatabasePath())) {
-                    return false;
-                }
-                auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pConfig, pLogger, pDatabase, true);
-                restoreDatabase->CenterOnParent();
-                return restoreDatabase->Run();
-            } else {
-                return false;
-            }
-        } else {
-            /* Backups are disabled so run the setup wizard to create the directory and setup the database again */
-            int ret = wxMessageBox(wxT("Error! Program cannot find database file\n"
-                                       "and database backups are turned off.\n"
-                                       "Run setup wizard?"),
-                common::GetProgramName(),
-                wxYES_NO | wxICON_ERROR);
-            if (ret == wxYES) {
-                return RunSetupWizard();
-            } else {
-                return false;
-            }
+        /* Create the database directory */
+        if (!wxMkdir(pConfig->GetDatabasePath())) {
+            return false;
         }
     }
 
     /* Check if the database file is missing */
-    bool databaseFileExists = wxFileExists(common::GetDatabaseFilePath(pConfig->GetDatabasePath()));
-
-    if (!databaseFileExists) {
+    if (!wxFileExists(common::GetDatabaseFilePath(pConfig->GetDatabasePath()))) {
         /* Backups are enabled so run the database restore wizard to restore database */
         if (pConfig->IsBackupEnabled()) {
-            int ret = wxMessageBox(wxT("Error: Program cannot find database file!\nRestore database from backup?"),
+            int ret = wxMessageBox(wxT("Error: Program cannot find database file\nRestore database from backup?"),
                 common::GetProgramName(),
-                wxYES_NO | wxICON_WARNING);
+                wxYES_NO | wxICON_ERROR);
             if (ret == wxYES) {
-                auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pConfig, pLogger, pDatabase, true);
+                auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pConfig, pLogger, true);
                 restoreDatabase->CenterOnParent();
                 return restoreDatabase->Run();
             }
-        }
-
-        /* Backups are disabled so run the setup wizard to setup the database again */
-        if (!pConfig->IsBackupEnabled()) {
-            int ret = wxMessageBox(wxT("Error! Missing database file\n"
+        } else { /* Backups are disabled so run the setup wizard to setup the database again */
+            int ret = wxMessageBox(wxT("Error: Program cannot find database file\n"
                                        "and database backups are turned off.\n"
                                        "Run setup wizard?"),
                 common::GetProgramName(),
                 wxYES_NO | wxICON_ERROR);
             if (ret == wxYES) {
-                return RunSetupWizard();
+                if (!CreateDatabaseFile()) {
+                    return false;
+                }
+
+                InitializeDatabaseConnectionProvider();
+
+                if (!InitializeDatabaseTables()) {
+                    return false;
+                }
+
+                if (!RunSetupWizard()) {
+                    db::ConnectionProvider::Get().PurgeConnectionPool();
+                    DeleteDatabaseFile();
+                }
             } else {
                 return false;
             }
         }
     }
-    return databaseFileExists;
+
+    return true;
 }
 
-void Application::InitializeSqliteConnection()
+bool Application::InitializeDatabaseTables()
 {
-    auto config = sqlite::sqlite_config{ sqlite::OpenFlags::READWRITE, nullptr, sqlite::Encoding::UTF8 };
-    pDatabase = new sqlite::database(common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString(), config);
+    svc::SetupTables tables(pLogger);
+    return tables.CreateTables();
 }
 } // namespace app
 

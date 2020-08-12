@@ -17,38 +17,34 @@
 //  Contact:
 //    szymonwelgus at gmail dot com
 
-#include "databaseconnection.h"
+#pragma once
 
-namespace app::svc
-{
-DatabaseConnection& DatabaseConnection::Get()
-{
-    static DatabaseConnection instance;
-    return instance;
-}
+#include <memory>
 
-sqlite::database* DatabaseConnection::GetHandle()
-{
-    return pDatabase;
-}
+#include "sqliteconnection.h"
+#include "connectionpool.h"
 
-void DatabaseConnection::SetHandle(sqlite::database* database)
+namespace app::db
 {
-    pDatabase = database;
-}
-
-void DatabaseConnection::ResetHandle(sqlite::database* database)
+class ConnectionProvider
 {
-    pDatabase = nullptr;
-    pDatabase = database;
-}
+public:
+    static ConnectionProvider& Get();
 
-void DatabaseConnection::UnsetHandle()
-{
-    pDatabase = nullptr;
-}
+    ConnectionProvider(const ConnectionProvider&) = delete;
+    ConnectionProvider& operator=(const ConnectionProvider&) = delete;
 
-DatabaseConnection::DatabaseConnection()
-    : pDatabase(nullptr)
-{}
-} // namespace app::svc
+    void InitializeConnectionPool(std::unique_ptr<ConnectionPool<SqliteConnection>> connectionPool);
+    void ReInitializeConnectionPool(std::unique_ptr<ConnectionPool<SqliteConnection>> newConnectionPool);
+    void PurgeConnectionPool();
+
+    ConnectionPool<SqliteConnection>* Handle();
+
+private:
+    ConnectionProvider();
+
+    std::unique_ptr<ConnectionPool<SqliteConnection>> pConnectionPool;
+
+    bool bInitialized;
+};
+} // namespace app::db

@@ -29,6 +29,9 @@
 
 #include "../models/projectmodel.h"
 
+#include "../data/clientdata.h"
+#include "../data/projectdata.h"
+
 namespace app::dlg
 {
 class ProjectDialog final : public wxDialog
@@ -91,6 +94,9 @@ private:
     int mProjectId;
     bool bIsEdit;
 
+    data::ClientData mClientData;
+    data::ProjectData mProjectData;
+
     enum {
         IDC_NAME = wxID_HIGHEST + 1,
         IDC_DISPLAYNAME,
@@ -103,7 +109,5 @@ private:
         IDC_ISDEFAULT,
         IDC_ISACTIVE
     };
-
-    static const wxString& DateLabel;
 };
 } // namespace app::dlg

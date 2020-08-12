@@ -28,7 +28,8 @@ namespace app::svc
 {
 DatabaseBackupDeleter::DatabaseBackupDeleter(std::shared_ptr<cfg::Configuration> config)
     : pConfig(config)
-{}
+{
+}
 
 bool DatabaseBackupDeleter::Execute()
 {

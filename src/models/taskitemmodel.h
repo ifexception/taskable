@@ -20,8 +20,6 @@
 #pragma once
 
 #include <memory>
-#include <string>
-#include <vector>
 
 #include <wx/datetime.h>
 
@@ -29,43 +27,15 @@
 #include "projectmodel.h"
 #include "categorymodel.h"
 #include "taskmodel.h"
+#include "taskitemtypemodel.h"
 
 namespace app::model
 {
-class TaskItemTypeModel final
-{
-public:
-    TaskItemTypeModel();
-    TaskItemTypeModel(const int taskItemTypeId);
-    TaskItemTypeModel(const int taskItemTypeId, bool initializeFromDatabase);
-    TaskItemTypeModel(int taskItemTypeId, wxString name);
-    ~TaskItemTypeModel() = default;
-
-    const int GetTaskItemTypeId() const;
-    const wxString GetName() const;
-    const constants::TaskItemTypes GetType() const;
-
-    void SetTaskItemTypeId(const int taskItemTypeId);
-    void SetName(const wxString& name);
-
-    static std::unique_ptr<TaskItemTypeModel> GetById(const int taskItemTypeId);
-    static std::vector<std::unique_ptr<TaskItemTypeModel>> GetAll();
-
-private:
-    int mTaskItemTypeId;
-    wxString mName;
-    constants::TaskItemTypes mType;
-
-    static const std::string getTaskItemTypeById;
-    static const std::string getTaskItemTypes;
-};
-
 class TaskItemModel final
 {
 public:
     TaskItemModel();
     TaskItemModel(int taskItemId);
-    TaskItemModel(int taskItemId, bool initializeFromDatabase);
     TaskItemModel(int taskItemId,
         wxString duration,
         wxString description,
@@ -125,15 +95,6 @@ public:
     void SetCategory(std::unique_ptr<CategoryModel> category);
     void SetTask(std::unique_ptr<TaskModel> task);
 
-    static void Create(std::unique_ptr<TaskItemModel> taskItem);
-    static std::unique_ptr<TaskItemModel> GetById(const int taskItemId);
-    static void Update(std::unique_ptr<TaskItemModel> taskItem);
-    static void Delete(std::unique_ptr<TaskItemModel> taskItem);
-    static void Delete(int taskItemId);
-    static std::vector<std::unique_ptr<TaskItemModel>> GetByDate(const wxString& date);
-    static std::vector<wxString> GetHours(const wxString& date);
-    static int GetTaskItemTypeIdByTaskItemId(const int taskItemId);
-
 private:
     int mTaskItemId;
     std::unique_ptr<wxDateTime> pStartTime;
@@ -156,13 +117,5 @@ private:
     std::unique_ptr<ProjectModel> pProject;
     std::unique_ptr<CategoryModel> pCategory;
     std::unique_ptr<TaskModel> pTask;
-
-    static const std::string createTaskItem;
-    static const std::string getTaskItemsByDate;
-    static const std::string getTaskItemById;
-    static const std::string updateTaskItem;
-    static const std::string deleteTaskItem;
-    static const std::string getTaskHoursByTaskId;
-    static const std::string getTaskItemTypeIdByTaskItemId;
 };
 } // namespace app::model

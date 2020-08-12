@@ -1,4 +1,4 @@
--- wx-timesheets-tracker database setup scripts --
+-- taskable database setup scripts --
 
 -- employers table
 CREATE TABLE employers

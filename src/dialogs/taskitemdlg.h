@@ -31,11 +31,17 @@
 #include "../models/taskmodel.h"
 #include "../models/taskitemmodel.h"
 
+#include "../data/projectdata.h"
+#include "../data/taskitemdata.h"
+#include "../data/categorydata.h"
+
 class wxDateEvent;
 class wxDatePickerCtrl;
 class wxTimePickerCtrl;
 
 wxDECLARE_EVENT(EVT_TASK_ITEM_INSERTED, wxCommandEvent);
+wxDECLARE_EVENT(EVT_TASK_ITEM_UPDATED, wxCommandEvent);
+wxDECLARE_EVENT(EVT_TASK_ITEM_DELETED, wxCommandEvent);
 
 namespace app::dlg
 {
@@ -100,7 +106,9 @@ private:
     void CalculateRate(wxDateTime start, wxDateTime end);
     void CalculateRate(wxTimeSpan timeSpan);
 
-    void GenerateTaskSavedEvent();
+    void GenerateTaskInsertedEvent(int taskItemId);
+    void GenerateTaskUpdatedEvent(int taskItemId);
+    void GenerateTaskDeletedEvent(int taskItemId);
 
     bool TransferDataAndValidate();
 
@@ -134,6 +142,9 @@ private:
     std::unique_ptr<model::TaskItemModel> pTaskItem;
     std::unique_ptr<model::ProjectModel> pProject;
 
+    data::ProjectData mProjectData;
+    data::TaskItemData mTaskItemData;
+
     enum {
         IDC_TASKCONTEXTINFO = wxID_HIGHEST + 1,
         IDC_DATECONTEXT,
@@ -150,9 +161,6 @@ private:
         IDC_DATEUPDATED,
         IDC_ISACTIVE
     };
-
-    static const wxString DateCreatedLabel;
-    static const wxString DateModifiedLabel;
     static const wxString CalculatedRateLabelNonBillable;
     static const wxString CalculatedRateLabelBillableUnknownRate;
     static const wxString CalculatedRateLabelBillableHourlyRate;

@@ -21,6 +21,26 @@
 
 #include "constants.h"
 
+app::constants::Days app::constants::MapIndexToEnum(int index)
+{
+    if (index == 0) {
+        return Days::Monday;
+    } else if (index == 1) {
+        return Days::Tuesday;
+    } else if (index == 2) {
+        return Days::Wednesday;
+    } else if (index == 3) {
+        return Days::Thursday;
+    } else if (index == 4) {
+        return Days::Friday;
+    } else if (index == 5) {
+        return Days::Saturday;
+    } else if (index == 6) {
+        return Days::Sunday;
+    }
+    return Days::Monday;
+}
+
 wxString app::constants::OnSuccessfulAdd(const wxString& item)
 {
     return wxString::Format(wxT("Successfully added %s!"), item);

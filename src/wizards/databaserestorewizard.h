@@ -21,7 +21,6 @@
 
 #include <memory>
 
-#include <sqlite_modern_cpp.h>
 #include <sqlite_modern_cpp/errors.h>
 #include <wx/wx.h>
 #include <wx/dir.h>
@@ -46,7 +45,6 @@ public:
     DatabaseRestoreWizard(frm::MainFrame* frame,
         std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
-        sqlite::database* database,
         bool restoreWithNoPreviousFileExisting = false);
     virtual ~DatabaseRestoreWizard() = default;
 
@@ -56,7 +54,6 @@ public:
     const bool IsRestoreWithNoPreviousFileExisting() const;
 
     void SetDatabaseVersionToRestore(const wxString& value);
-    void SetNewDatabaseHandle(sqlite::database* database);
 
 private:
     frm::MainFrame* pFrame;
@@ -64,8 +61,6 @@ private:
     std::shared_ptr<spdlog::logger> pLogger;
 
     DatabaseRestoreWelcomePage* pPage1;
-
-    sqlite::database* pDatabase;
 
     wxString mDatabaseFileToRestore;
     bool bRestoreWithNoPreviousFileExisting;
@@ -113,11 +108,8 @@ public:
     DatabaseRestoredPage() = delete;
     DatabaseRestoredPage(DatabaseRestoreWizard* parent,
         std::shared_ptr<cfg::Configuration> config,
-        std::shared_ptr<spdlog::logger> logger,
-        sqlite::database* database);
+        std::shared_ptr<spdlog::logger> logger);
     virtual ~DatabaseRestoredPage() = default;
-
-    // bool TransferDataFromWindow() override;
 
 private:
     void CreateControls();
@@ -128,10 +120,12 @@ private:
 
     void FileOperationErrorFeedback();
 
+    bool InitializeDatabaseConnectionProvider();
+
     DatabaseRestoreWizard* pParent;
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
-    sqlite::database* pDatabase;
+
     wxStaticText* pStatusInOperationLabel;
     wxGauge* pGaugeCtrl;
     wxStaticText* pStatusCompleteLabel;

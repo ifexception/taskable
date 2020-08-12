@@ -1,7 +1,7 @@
 ; -- Taskable.iss --
 ; Installer file for Taskable application
 
-#define TaskableVersion "1.0.0"
+#define TaskableVersion "1.3.0"
 
 [Setup]
 AppName=Taskable
@@ -18,7 +18,7 @@ UninstallDisplayIcon={app}\Taskable.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=Installer
-OutputBaseFilename=Taskable-x86.1.0.0-Installer
+OutputBaseFilename=Taskable-x86.1.3.0-Installer
 LicenseFile=License.txt
 WindowResizable=no
 DisableWelcomePage=no
@@ -37,6 +37,8 @@ Source: "wxbase313u_vc_custom.dll"; DestDir: "{app}"
 Source: "wxmsw313u_core_vc_custom.dll"; DestDir: "{app}"
 Source: "zlib1.dll"; DestDir: "{app}"
 Source: "taskable.ini"; DestDir: "{userappdata}\Taskable"; Flags: onlyifdoesntexist
+Source: "create-taskable.sql"; DestDir: "{app}"
+Source: "seed-taskable.sql"; DestDir: "{app}"
 
 [Dirs]
 Name: "{userdocs}\Taskable"

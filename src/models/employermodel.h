@@ -19,10 +19,6 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
-#include <vector>
-
 #include <wx/string.h>
 #include <wx/datetime.h>
 
@@ -33,7 +29,7 @@ class EmployerModel final
 public:
     EmployerModel();
     EmployerModel(const int employerId);
-    EmployerModel(const int employerId, bool initializeFromDatabase);
+    EmployerModel(const wxString& employerName);
     EmployerModel(int employerId, wxString name, int dateCreated, int dateModified, bool isActive);
     ~EmployerModel() = default;
 
@@ -49,23 +45,11 @@ public:
     void SetDateModified(const wxDateTime& dateModified);
     void IsActive(const bool isActive);
 
-    static void Create(std::unique_ptr<EmployerModel> employer);
-    static std::unique_ptr<EmployerModel> GetById(const int employerId);
-    static std::vector<std::unique_ptr<EmployerModel>> GetAll();
-    static void Update(std::unique_ptr<EmployerModel> employer);
-    static void Delete(std::unique_ptr<EmployerModel> employer);
-
 private:
     int mEmployerId;
     wxString mName;
     wxDateTime mDateCreated;
     wxDateTime mDateModified;
     bool bIsActive;
-
-    static const std::string createEmployer;
-    static const std::string getEmployers;
-    static const std::string getEmployer;
-    static const std::string updateEmployer;
-    static const std::string deleteEmployer;
 };
 } // namespace app::model

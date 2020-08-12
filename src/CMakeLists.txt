@@ -11,7 +11,7 @@ endif ()
 message (STATUS "CMAKE_CONFIGURATION_TYPES:${CMAKE_CONFIGURATION_TYPES}")
 
 find_package(ZLIB REQUIRED)
-find_package (sqlite3 CONFIG REQUIRED)
+find_package(unofficial-sqlite3 CONFIG REQUIRED)
 find_package (spdlog CONFIG REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
@@ -27,19 +27,34 @@ set (SRC
     "common/ids.cpp"
     "common/common.cpp"
     "common/util.cpp"
+    "common/datetraverser.cpp"
     "common/constants.cpp"
     "config/configuration.cpp"
+
+    "database/connection.cpp"
+    "database/connectionfactory.cpp"
+    "database/connectionpool.cpp"
+    "database/sqliteconnection.cpp"
+    "database/sqliteconnectionfactory.cpp"
+    "database/connectionprovider.cpp"
+
     "services/taskstateservice.cpp"
     "services/taskstorageservice.cpp"
     "services/databasebackup.cpp"
-    "services/databaseconnection.cpp"
     "services/databasebackupdeleter.cpp"
+    "services/setupdatabase.cpp"
+
     "application.cpp"
     "resources.rc"
     "application.manifest"
+
     "frame/mainframe.cpp"
     "frame/taskbaricon.cpp"
     "frame/feedbackpopup.cpp"
+
+    "dataview/weeklymodel.cpp"
+    "dialogs/weeklytaskviewdlg.cpp"
+
     "dialogs/editlistdlg.cpp"
     "dialogs/stopwatchtaskdlg.cpp"
     "dialogs/checkforupdatedlg.cpp"
@@ -51,26 +66,40 @@ set (SRC
     "dialogs/preferencesdlg.cpp"
 
     "wizards/setupwizard.cpp"
-    "wizards/setupdatabase.cpp"
+    "wizards/entitycompositor.cpp"
     "wizards/databaserestorewizard.cpp"
 
     "dialogs/employerdlg.cpp"
     "models/employermodel.cpp"
+    "data/employerdata.cpp"
 
     "dialogs/clientdlg.cpp"
     "models/clientmodel.cpp"
+    "data/clientdata.cpp"
+
+    "data/ratetypedata.cpp"
+    "models/ratetypemodel.cpp"
+
+    "data/currencydata.cpp"
+    "models/currencymodel.cpp"
 
     "dialogs/projectdlg.cpp"
     "models/projectmodel.cpp"
+    "data/projectdata.cpp"
 
     "dialogs/categorydlg.cpp"
     "dialogs/categoriesdlg.cpp"
     "models/categorymodel.cpp"
+    "data/categorydata.cpp"
 
     "models/taskmodel.cpp"
+    "models/taskitemtypemodel.cpp"
     "models/taskitemmodel.cpp"
     "dialogs/taskitemdlg.cpp"
-    )
+    "data/taskdata.cpp"
+    "data/taskitemtypedata.cpp"
+    "data/taskitemdata.cpp"
+      )
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
 
@@ -90,12 +119,13 @@ target_compile_definitions (${PROJECT_NAME} PUBLIC
     wxUSE_TIMEPICKCTRL=1
     __WXMSW__
     $<$<CONFIG:Debug>:TASKABLE_DEBUG>
-    $<$<CONFIG:Debug>:NDEBUG>)
+    $<$<CONFIG:Release>:NDEBUG>
+    $<$<CONFIG:Debug>:WXDEBUG>)
 
 target_link_libraries (${PROJECT_NAME}
     ${wxWidgets_LIBRARIES}
     ZLIB::ZLIB
-    sqlite3
+    unofficial::sqlite3::sqlite3
     spdlog::spdlog
     cpr
     nlohmann_json nlohmann_json::nlohmann_json)

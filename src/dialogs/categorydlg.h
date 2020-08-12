@@ -27,6 +27,7 @@
 #include <spdlog/spdlog.h>
 
 #include "../models/categorymodel.h"
+#include "../data/categorydata.h"
 
 namespace app::dlg
 {
@@ -75,8 +76,8 @@ private:
     std::unique_ptr<model::CategoryModel> pCategory;
     int mCategoryId;
 
-    enum { IDC_PROJECTCHOICE = wxID_HIGHEST + 1, IDC_NAME, IDC_COLOR, IDC_ISACTIVE };
+    data::CategoryData mCategoryData;
 
-    static const wxString& DateLabel;
+    enum { IDC_PROJECTCHOICE = wxID_HIGHEST + 1, IDC_NAME, IDC_COLOR, IDC_ISACTIVE };
 };
 } // namespace app::dlg

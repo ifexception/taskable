@@ -21,13 +21,13 @@
 
 #include <memory>
 
-#include <sqlite_modern_cpp.h>
-
 #include <wx/wx.h>
 #include <wx/snglinst.h>
 
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/dist_sink.h>
 #include <spdlog/sinks/daily_file_sink.h>
+#include <spdlog/sinks/msvc_sink.h>
 
 #include "config/configuration.h"
 
@@ -47,6 +47,7 @@ private:
 
     bool InitializeLogging();
     bool CreateLogsDirectory();
+    bool InitializeDatabaseConnectionProvider();
 
     bool IsSetup();
     bool RunSetupWizard();
@@ -56,14 +57,14 @@ private:
 
     bool CreateBackupsDirectory();
 
+    bool CreateDatabaseFile();
+    void DeleteDatabaseFile();
     bool DatabaseFileExists();
 
-    void InitializeSqliteConnection();
+    bool InitializeDatabaseTables();
 
     std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
     std::unique_ptr<wxSingleInstanceChecker> pInstanceChecker;
-
-    sqlite::database* pDatabase;
 };
 } // namespace app

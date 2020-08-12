@@ -38,12 +38,10 @@ wxEND_EVENT_TABLE()
 
 TaskBarIcon::TaskBarIcon(wxFrame* parent,
     std::shared_ptr<cfg::Configuration> config,
-    std::shared_ptr<spdlog::logger> logger,
-    sqlite::database* database)
+    std::shared_ptr<spdlog::logger> logger)
     : pParent(parent)
     , pLogger(logger)
     , pConfig(config)
-    , pDatabase(database)
 // clang-format on
 {
 }
