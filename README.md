@@ -31,7 +31,7 @@ You can get a Windows Installer [here](https://github.com/ifexception/taskable/r
 
 ## Version
 
-`v1.0.0` was officially released on 21/04/2020
+`v1.3.0`
 
 ## License
 
