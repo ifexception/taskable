@@ -6,6 +6,7 @@
     - Allow to user to set all attributes of a project
     - Improve error handling in wizard
 - Add week breakdown of tasks
+- `Ctrl + G` to quickly return to today on main window
 - Various bug fixes
 
 ### 1.0.2
