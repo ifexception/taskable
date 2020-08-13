@@ -33,6 +33,16 @@ You can get a Windows Installer [here](https://github.com/ifexception/taskable/r
 
 `v1.3.0`
 
+## Roadmap
+`v1.4.0` - October 2020
+- Outlook integration
+
+`v1.5.0` - March 2021
+- Export [Excel|CSV]
+
+`1.6.0` - July 2021
+- Reporting
+
 ## License
 
 This project is licensed under the GPL-3 license - see the [LICENSE.md](LICENSE.md) file for details
