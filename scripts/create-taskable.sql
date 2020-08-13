@@ -86,6 +86,24 @@ CREATE TABLE task_item_types
     name TEXT NOT NULL
 );
 
+CREATE TABLE meetings
+(
+    meeting_id INTEGER PRIMARY KEY NOT NULL,
+    attended INTEGER NULL,
+    duration INTEGER NOT NULL,
+    starting TEXT NOT NULL,
+    ending TEXT NOT NULL,
+    location TEXT NOT NULL,
+    body TEXT NOT NULL,
+    date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
+    date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
+    is_active INTEGER NOT NULL,
+
+    task_id INTEGER NOT NULL,
+
+    FOREIGN KEY (task_id) REFERENCES tasks(task_id)
+);
+
 CREATE TABLE task_items
 (
     task_item_id INTEGER PRIMARY KEY NOT NULL,
@@ -103,9 +121,11 @@ CREATE TABLE task_items
     project_id INTEGER NOT NULL,
     task_id INTEGER NOT NULL,
     category_id INTEGER NOT NULL,
+    meeting_id INTEGER NULL,
 
     FOREIGN KEY (task_item_type_id) REFERENCES task_item_types(task_item_type_id),
     FOREIGN KEY (project_id) REFERENCES projects(project_id),
     FOREIGN KEY (task_id) REFERENCES tasks(task_id),
-    FOREIGN KEY (category_id) REFERENCES categories(category_id)
+    FOREIGN KEY (category_id) REFERENCES categories(category_id),
+    FOREIGN KEY (meeting_id) REFERENCES meetings(meeting_id)
 );
