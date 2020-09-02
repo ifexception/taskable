@@ -94,6 +94,7 @@ CREATE TABLE meetings
     starting TEXT NOT NULL,
     ending TEXT NOT NULL,
     location TEXT NOT NULL,
+    subject TEXT NOT NULL,
     body TEXT NOT NULL,
     date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
     date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),

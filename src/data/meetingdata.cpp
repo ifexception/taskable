@@ -50,7 +50,7 @@ int64_t MeetingData::Create(std::unique_ptr<model::MeetingModel> meeting)
     }
 
     ps << meeting->GetDuration() << meeting->GetStart() << meeting->GetEnd() << meeting->GetLocation()
-       << meeting->GetBody() << meeting->GetTaskId();
+       << meeting->GetSubject() << meeting->GetBody() << meeting->GetTaskId();
 
     ps.execute();
 
@@ -68,6 +68,7 @@ std::unique_ptr<model::MeetingModel> MeetingData::GetById(const int meetingId)
             std::string meetingsStarting,
             std::string meetingsEnding,
             std::string meetingsLocation,
+            std::string meetingsSubject,
             std::string meetingsBody,
             int meetingsDateCreated,
             int meetingsDateModified,
@@ -83,6 +84,7 @@ std::unique_ptr<model::MeetingModel> MeetingData::GetById(const int meetingId)
                 meetingsStarting,
                 meetingsEnding,
                 meetingsLocation,
+                meetingsSubject,
                 meetingsBody,
                 meetingsDateCreated,
                 meetingsDateModified,
@@ -112,7 +114,8 @@ void MeetingData::Update(std::unique_ptr<model::MeetingModel> meeting)
     }
 
     ps << meeting->GetDuration() << meeting->GetStart().ToStdString() << meeting->GetEnd().ToStdString()
-       << meeting->GetLocation().ToStdString() << meeting->GetBody().ToStdString();
+       << meeting->GetLocation().ToStdString() << meeting->GetSubject().ToStdString()
+       << meeting->GetBody().ToStdString();
 
     ps << util::UnixTimestamp();
     ps << meeting->GetMeetingId();
@@ -129,29 +132,29 @@ std::vector<std::unique_ptr<model::MeetingModel>> MeetingData::GetAll()
 {
     std::vector<std::unique_ptr<model::MeetingModel>> meetings;
 
-    *pConnection->DatabaseExecutableHandle()
-        << MeetingData::getMeetings
-        >> [&](int meetingsMeetingId,
-            std::unique_ptr<bool> meetingsAttended,
-            int meetingsDuration,
-            std::string meetingsStarting,
-            std::string meetingsEnding,
-            std::string meetingsLocation,
-            std::string meetingsBody,
-            int meetingsDateCreated,
-            int meetingsDateModified,
-            bool meetingsIsActive,
-            int meetingsTaskId,
-            int tasksTaskId,
-            std::string tasksTaskDate,
-            int tasksDateCreated,
-            int tasksDateModified,
-            bool tasksIsActive) {
+    *pConnection->DatabaseExecutableHandle() << MeetingData::getMeetings >> [&](int meetingsMeetingId,
+                                                                                std::unique_ptr<bool> meetingsAttended,
+                                                                                int meetingsDuration,
+                                                                                std::string meetingsStarting,
+                                                                                std::string meetingsEnding,
+                                                                                std::string meetingsLocation,
+                                                                                std::string meetingsSubject,
+                                                                                std::string meetingsBody,
+                                                                                int meetingsDateCreated,
+                                                                                int meetingsDateModified,
+                                                                                bool meetingsIsActive,
+                                                                                int meetingsTaskId,
+                                                                                int tasksTaskId,
+                                                                                std::string tasksTaskDate,
+                                                                                int tasksDateCreated,
+                                                                                int tasksDateModified,
+                                                                                bool tasksIsActive) {
         auto meeting = std::make_unique<model::MeetingModel>(meetingsMeetingId,
             meetingsDuration,
             meetingsStarting,
             meetingsEnding,
             meetingsLocation,
+            meetingsSubject,
             meetingsBody,
             meetingsDateCreated,
             meetingsDateModified,
@@ -175,8 +178,8 @@ std::vector<std::unique_ptr<model::MeetingModel>> MeetingData::GetAll()
 
 const std::string MeetingData::createMeeting =
     "INSERT INTO "
-    "meetings(attended, duration, starting, ending, location, body, is_active, task_id) "
-    "VALUES (?, ?, ?, ?, ?, ?, 1, ?)";
+    "meetings(attended, duration, starting, ending, location, subject, body, is_active, task_id) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)";
 
 const std::string MeetingData::getMeeting = "SELECT "
                                             "	  meetings.meeting_id"
@@ -185,6 +188,7 @@ const std::string MeetingData::getMeeting = "SELECT "
                                             "	, meetings.starting"
                                             "	, meetings.ending"
                                             "	, meetings.location"
+                                            "	, meetings.subject"
                                             "	, meetings.body"
                                             "	, meetings.date_created"
                                             "	, meetings.date_modified"
@@ -202,7 +206,7 @@ const std::string MeetingData::getMeeting = "SELECT "
 
 const std::string MeetingData::updateMeeting = "UPDATE meetings "
                                                "SET attended = ?, duration = ?, starting = ?, "
-                                               "ending = ?, location = ?, body = ?, "
+                                               "ending = ?, location = ?, subject = ?, body = ?, "
                                                "date_modified = ?,"
                                                "task_id = ? "
                                                "WHERE meeting_id = ?";
@@ -218,6 +222,7 @@ const std::string MeetingData::getMeetings = "SELECT "
                                              "	, meetings.starting"
                                              "	, meetings.ending"
                                              "	, meetings.location"
+                                             "	, meetings.subject"
                                              "	, meetings.body"
                                              "	, meetings.date_created"
                                              "	, meetings.date_modified"

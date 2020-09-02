@@ -38,6 +38,7 @@ public:
         wxString start,
         wxString end,
         wxString location,
+        wxString subject,
         wxString body,
         int dateCreated,
         int dateModified,
@@ -46,9 +47,10 @@ public:
 
     const int GetMeetingId();
     const int GetDuration();
-    const wxString GetStart();
-    const wxString GetEnd();
-    const wxString GetLocation();
+    const wxString GetStart() const;
+    const wxString GetEnd() const;
+    const wxString GetLocation() const;
+    const wxString GetSubject() const;
     const wxString GetBody();
     const bool* Attended();
     const wxDateTime GetDateCreated();
@@ -63,6 +65,7 @@ public:
     void SetStart(const wxString& start);
     void SetEnd(const wxString& end);
     void SetLocation(const wxString& location);
+    void SetSubject(const wxString& subject);
     void SetBody(const wxString& body);
     void Attended(std::unique_ptr<bool> attended);
     void SetDateCreated(const wxDateTime& dateCreated);
@@ -78,6 +81,7 @@ private:
     wxString mStarting;
     wxString mEnding;
     wxString mLocation;
+    wxString mSubject;
     wxString mBody;
     std::unique_ptr<bool> pAttended;
     wxDateTime mDateCreated;

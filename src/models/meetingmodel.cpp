@@ -49,6 +49,7 @@ MeetingModel::MeetingModel(int meetingId,
     wxString start,
     wxString end,
     wxString location,
+    wxString subject,
     wxString body,
     int dateCreated,
     int dateModified,
@@ -60,6 +61,7 @@ MeetingModel::MeetingModel(int meetingId,
     mStarting = start;
     mEnding = end;
     mLocation = location;
+    mSubject = subject;
     mBody = body;
     mDateCreated = util::ToDateTime(dateCreated);
     mDateModified = util::ToDateTime(dateModified);
@@ -76,19 +78,24 @@ const int MeetingModel::GetDuration()
     return mDuration;
 }
 
-const wxString MeetingModel::GetStart()
+const wxString MeetingModel::GetStart() const
 {
     return mStarting;
 }
 
-const wxString MeetingModel::GetEnd()
+const wxString MeetingModel::GetEnd() const
 {
     return mEnding;
 }
 
-const wxString MeetingModel::GetLocation()
+const wxString MeetingModel::GetLocation() const
 {
     return mLocation;
+}
+
+const wxString MeetingModel::GetSubject() const
+{
+    return mSubject;
 }
 
 const wxString MeetingModel::GetBody()
@@ -149,6 +156,11 @@ void MeetingModel::SetEnd(const wxString& end)
 void MeetingModel::SetLocation(const wxString& location)
 {
     mLocation = location;
+}
+
+void MeetingModel::SetSubject(const wxString& subject)
+{
+    mSubject = subject;
 }
 
 void MeetingModel::SetBody(const wxString& body)
