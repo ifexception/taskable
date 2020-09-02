@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <map>
+#include <vector>
 
 #include <wx/wx.h>
 #include <wx/msw/ole/automtn.h>
@@ -28,26 +28,29 @@
 #include "../models/meetingmodel.h"
 
 #ifdef __WINDOWS__
-BOOL IsElevated()
-{
-    BOOL bRet = FALSE;
-    HANDLE hToken = NULL;
-    if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
-        TOKEN_ELEVATION Elevation;
-        DWORD cbSize = sizeof(TOKEN_ELEVATION);
-        if (GetTokenInformation(hToken, TokenElevation, &Elevation, sizeof(Elevation), &cbSize)) {
-            bRet = Elevation.TokenIsElevated;
-        }
-    }
-    if (hToken) {
-        CloseHandle(hToken);
-    }
-    return bRet;
-}
+BOOL IsElevated();
 #endif // __WINDOWS__
 
 namespace app::svc
 {
+struct Meeting {
+    wxString Subject;
+    wxString Body;
+    wxString Start;
+    wxString End;
+    int Duration;
+    wxString Location;
+
+    Meeting() {
+        Subject = wxGetEmptyString();
+        Body = wxGetEmptyString();
+        Start = wxGetEmptyString();
+        End = wxGetEmptyString();
+        Duration = -1;
+        Location = wxGetEmptyString();
+    }
+};
+
 class OutlookIntegrator
 {
 public:
@@ -58,11 +61,13 @@ public:
 
     bool Execute();
 
+    std::vector<Meeting*> GetMeetings();
+
 private:
     bool IterateAndGetCalendarMeetings();
 
     wxAutomationObject mOutlookApplication;
 
-    std::map<wxString, model::MeetingModel> mMeetingsMap;
+    std::vector<Meeting*> mMeetingsList;
 };
-}
+} // namespace app::svc

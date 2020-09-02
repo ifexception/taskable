@@ -19,19 +19,38 @@
 
 #include "outlookintegrator.h"
 
+#ifdef __WINDOWS__
+BOOL IsElevated()
+{
+    BOOL bRet = FALSE;
+    HANDLE hToken = NULL;
+    if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+        TOKEN_ELEVATION Elevation;
+        DWORD cbSize = sizeof(TOKEN_ELEVATION);
+        if (GetTokenInformation(hToken, TokenElevation, &Elevation, sizeof(Elevation), &cbSize)) {
+            bRet = Elevation.TokenIsElevated;
+        }
+    }
+    if (hToken) {
+        CloseHandle(hToken);
+    }
+    return bRet;
+}
+#endif // __WINDOWS__
+
 namespace app::svc
 {
 const wxString OutlookName = wxT("Outlook.Application");
 
 OutlookIntegrator::OutlookIntegrator()
     : mOutlookApplication()
-    , mMeetingsMap()
+    , mMeetingsList()
 {
-    mOutlookApplication.SetLCID(MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT));
 }
 
 bool OutlookIntegrator::TryGetOutlookInstance()
 {
+    mOutlookApplication.SetLCID(MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT));
     if (!mOutlookApplication.GetInstance(OutlookName)) {
         if (!mOutlookApplication.CreateInstance(OutlookName)) {
             // log error
@@ -44,6 +63,11 @@ bool OutlookIntegrator::TryGetOutlookInstance()
 bool OutlookIntegrator::Execute()
 {
     return IterateAndGetCalendarMeetings();
+}
+
+std::vector<Meeting*> OutlookIntegrator::GetMeetings()
+{
+    return mMeetingsList;
 }
 
 bool OutlookIntegrator::IterateAndGetCalendarMeetings()
@@ -78,7 +102,7 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
     }
 
     if (!(accountCountProperty.IsType("long") && accountCountProperty.GetLong() > 0)) {
-        return;
+        return false;
     }
 
     const long accountCount = accountCountProperty.GetLong();
@@ -98,8 +122,6 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
             // log error
             return false;
         }
-        wxString accountName = displayName.GetString();
-        mMeetingsMap[accountName];
 
         const wxVariant deliveryStoreDispatchPtr = accountObject.GetProperty("DeliveryStore");
         if (deliveryStoreDispatchPtr.IsNull() || !deliveryStoreDispatchPtr.IsType("void*")) {
@@ -159,35 +181,42 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
         itemObject.SetDispatchPtr(itemObjectDispatchPtr);
 
         do {
+            if (!itemObject.IsOk()) {
+                break;
+            }
+
+            Meeting* meeting = new Meeting;
 
             wxVariant subjectProperty = itemObject.GetProperty("Subject");
             if (!subjectProperty.IsNull()) {
-                wxLogMessage("Subject %s", subjectProperty.GetString());
+                meeting->Subject = subjectProperty.GetString();
             }
             wxVariant bodyProperty = itemObject.GetProperty("Body");
             if (!bodyProperty.IsNull()) {
-                wxLogMessage("Body %s", bodyProperty.GetString());
+                meeting->Body = bodyProperty.GetString();
             }
             wxVariant startProperty = itemObject.GetProperty("Start");
             if (!startProperty.IsNull()) {
-                wxLogMessage("Start %s", startProperty.GetString());
+                meeting->Start = startProperty.GetString();
             }
             wxVariant endProperty = itemObject.GetProperty("End");
             if (!endProperty.IsNull()) {
-                wxLogMessage("End %s", endProperty.GetString());
+                meeting->End = endProperty.GetString();
             }
             wxVariant durationProperty = itemObject.GetProperty("Duration");
             if (!durationProperty.IsNull()) {
-                wxLogMessage("Duration %s", durationProperty.GetString());
+                meeting->Duration = durationProperty.GetInteger();
             }
             wxVariant locationProperty = itemObject.GetProperty("Location");
             if (!locationProperty.IsNull()) {
-                wxLogMessage("Location %s", locationProperty.GetString());
+                meeting->Location = locationProperty.GetString();
             }
+
+            mMeetingsList.push_back(meeting);
 
             itemObjectDispatchPtr = filteredItemsObject.CallMethod("GetNext");
             if (itemObjectDispatchPtr.IsNull() || !itemObjectDispatchPtr.IsType("void*")) {
-                wxLogError("Error calling GetNext method");
+                // log error
                 break;
             }
 
