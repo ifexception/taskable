@@ -29,6 +29,7 @@ enum class MenuIds : int {
     File_NewTimedTaskId,
     File_NewCategoryId,
     File_View_WeeklyView,
+    File_View_MeetingsView,
     Edit_EditEmployerId,
     Edit_EditClientId,
     Edit_EditProjectId,
@@ -50,6 +51,7 @@ static const int ID_NEW_PROJECT = static_cast<int>(ids::MenuIds::File_NewProject
 static const int ID_NEW_CATEGORY = static_cast<int>(ids::MenuIds::File_NewCategoryId);
 static const int ID_STOPWATCH_TASK = static_cast<int>(ids::MenuIds::File_StopwatchTaskId);
 static const int ID_WEEKLY_VIEW = static_cast<int>(ids::MenuIds::File_View_WeeklyView);
+static const int ID_MEETINGS_VIEW = static_cast<int>(ids::MenuIds::File_View_MeetingsView);
 
 static const int ID_EDIT_EMPLOYER = static_cast<int>(MenuIds::Edit_EditEmployerId);
 static const int ID_EDIT_CLIENT = static_cast<int>(MenuIds::Edit_EditClientId);

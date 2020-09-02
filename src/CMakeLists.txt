@@ -103,6 +103,7 @@ set (SRC
 
     "data/meetingdata.cpp"
     "models/meetingmodel.cpp"
+    "dialogs/meetingsviewdlg.cpp"
     )
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
