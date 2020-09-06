@@ -90,6 +90,14 @@ MeetingsViewDialog::MeetingsViewDialog(wxWindow* parent, std::shared_ptr<spdlog:
     Create(parent, wxID_ANY, wxT("Meetings View"), wxDefaultPosition, wxSize(420, 720), wxCAPTION | wxCLOSE_BOX, name);
 }
 
+MeetingsViewDialog::~MeetingsViewDialog()
+{
+    while (!mMeetings.empty()) {
+        delete mMeetings.back();
+        mMeetings.pop_back();
+    }
+}
+
 void MeetingsViewDialog::LaunchModeless()
 {
     if (IsElevated()) {
@@ -130,8 +138,9 @@ void MeetingsViewDialog::GetMeetingDataFromThread(std::vector<svc::Meeting*> mee
     } else {
         for (auto meeting : meetings) {
             AppendMeetingControls(meeting);
-            delete meeting;
         }
+
+        mMeetings = meetings;
     }
     pScrolledWindow->GetSizer()->Layout();
 }
@@ -247,6 +256,7 @@ void MeetingsViewDialog::AppendMeetingControls(svc::Meeting* meeting)
 
     auto attendedCheckbox = new wxCheckBox(meetingStaticBox, wxID_ANY, wxT("Attended"));
     wxWindowID attendedCheckboxControlId = attendedCheckbox->GetId();
+    meeting->Identifier = attendedCheckboxControlId;
     attendedCheckbox->Bind(
         wxEVT_CHECKBOX, &MeetingsViewDialog::OnAttendedCheckboxCheck, this, attendedCheckboxControlId);
     meetingStaticBoxSizer->Add(attendedCheckbox, common::sizers::ControlDefault);
@@ -310,6 +320,7 @@ void MeetingsViewDialog::OnThreadError(wxThreadEvent& event)
 
     pScrolledWindow->GetSizer()->AddSpacer(64);
     pScrolledWindow->GetSizer()->Add(errorOccuredLabel, wxSizerFlags(1).Center());
+    pScrolledWindow->GetSizer()->Layout();
 }
 
 void MeetingsViewDialog::OnAttendedCheckboxCheck(wxCommandEvent& event)

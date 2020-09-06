@@ -63,7 +63,7 @@ public:
     MeetingsViewDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
         const wxString& name = "meetingsviewdlg");
-    virtual ~MeetingsViewDialog() = default;
+    virtual ~MeetingsViewDialog();
 
     void LaunchModeless();
 
@@ -104,6 +104,8 @@ private:
     wxScrolledWindow* pScrolledWindow;
     wxStaticText* pTodayDateLabel;
     wxActivityIndicator* pActivityIndicator;
+
+    std::vector<svc::Meeting*> mMeetings;
 
     enum { IDC_TODAYDATE = wxID_HIGHEST + 1, IDC_ACTIVITYINDICATOR };
 };

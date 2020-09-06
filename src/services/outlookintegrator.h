@@ -34,6 +34,7 @@ BOOL IsElevated();
 namespace app::svc
 {
 struct Meeting {
+    wxWindowID Identifier;
     wxString Subject;
     wxString Body;
     wxString Start;
@@ -42,6 +43,7 @@ struct Meeting {
     wxString Location;
 
     Meeting() {
+        Identifier = wxID_ANY;
         Subject = wxGetEmptyString();
         Body = wxGetEmptyString();
         Start = wxGetEmptyString();
