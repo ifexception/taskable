@@ -37,21 +37,13 @@ public:
     MeetingData();
     ~MeetingData();
 
-    int64_t Create(std::unique_ptr<model::MeetingModel> project);
-    std::unique_ptr<model::MeetingModel> GetById(const int projectId);
-    void Update(std::unique_ptr<model::MeetingModel> project);
-    void Delete(const int projectId);
-    std::vector<std::unique_ptr<model::MeetingModel>> GetAll();
+    int64_t Create(std::unique_ptr<model::MeetingModel> meeting);
+    void Delete(const int64_t taskItemId);
 
 private:
     std::shared_ptr<db::SqliteConnection> pConnection;
 
-    bool bBorrowedConnection;
-
     static const std::string createMeeting;
-    static const std::string getMeeting;
-    static const std::string updateMeeting;
     static const std::string deleteMeeting;
-    static const std::string getMeetings;
 };
-}
+} // namespace app::data
