@@ -510,7 +510,7 @@ void MainFrame::OnWeeklyView(wxCommandEvent& event)
 
 void MainFrame::OnMeetingsView(wxCommandEvent& event)
 {
-    dlg::MeetingsViewDialog* meetingViewDialog = new dlg::MeetingsViewDialog(this, pLogger);
+    dlg::MeetingsViewDialog* meetingViewDialog = new dlg::MeetingsViewDialog(this, pLogger, pConfig);
     meetingViewDialog->LaunchModeless();
 }
 
