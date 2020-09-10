@@ -134,6 +134,11 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
         name);
 }
 
+const int64_t TaskItemDialog::GetTaskItemId() const
+{
+    return static_cast<int64_t>(mTaskItemId);
+}
+
 void TaskItemDialog::SetDurationFromStopwatchTask(wxTimeSpan duration)
 {
     wxDateTime durationTime;
@@ -152,6 +157,17 @@ void TaskItemDialog::SetTimesFromStopwatchTask(wxDateTime startTime, wxDateTime 
 void TaskItemDialog::SetDescriptionFromStopwatchTask(const wxString& value)
 {
     pDescriptionCtrl->ChangeValue(value);
+}
+
+void TaskItemDialog::SetMeetingData(svc::Meeting* meeting)
+{
+    wxString value = wxString::Format(wxT("%s\n%s"), meeting->Subject, meeting->Body);
+    pDescriptionCtrl->ChangeValue(value);
+
+    pStartTimeCtrl->SetValue(meeting->Start);
+    pEndTimeCtrl->SetValue(meeting->End);
+
+    CalculateTimeDiff(meeting->Start, meeting->End);
 }
 
 /* --PRIVATE METHODS-- */
@@ -856,6 +872,7 @@ void TaskItemDialog::OnOk(wxCommandEvent& event)
             int64_t id = -1;
             try {
                 id = mTaskItemData.Create(std::move(pTaskItem));
+                mTaskItemId = id;
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in TaskItemModel::Create() - {0:d} : {1}", e.get_code(), e.what());
                 wxLogDebug(wxString(e.get_sql()));

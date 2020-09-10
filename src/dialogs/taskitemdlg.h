@@ -35,6 +35,8 @@
 #include "../data/taskitemdata.h"
 #include "../data/categorydata.h"
 
+#include "../services/outlookintegrator.h"
+
 class wxDateEvent;
 class wxDatePickerCtrl;
 class wxTimePickerCtrl;
@@ -67,9 +69,12 @@ public:
 
     virtual ~TaskItemDialog() = default;
 
+    const int64_t GetTaskItemId() const;
+
     void SetDurationFromStopwatchTask(wxTimeSpan duration);
     void SetTimesFromStopwatchTask(wxDateTime startTime, wxDateTime endTime);
     void SetDescriptionFromStopwatchTask(const wxString& value);
+    void SetMeetingData(svc::Meeting* meeting);
 
 private:
     bool Create(wxWindow* parent,
