@@ -37,8 +37,8 @@ struct Meeting {
     wxWindowID Identifier;
     wxString Subject;
     wxString Body;
-    wxString Start;
-    wxString End;
+    wxDateTime Start;
+    wxDateTime End;
     int Duration;
     wxString Location;
 
@@ -46,8 +46,8 @@ struct Meeting {
         Identifier = wxID_ANY;
         Subject = wxGetEmptyString();
         Body = wxGetEmptyString();
-        Start = wxGetEmptyString();
-        End = wxGetEmptyString();
+        Start = wxDefaultDateTime;
+        End = wxDefaultDateTime;
         Duration = -1;
         Location = wxGetEmptyString();
     }

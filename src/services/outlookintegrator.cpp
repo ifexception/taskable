@@ -197,11 +197,11 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
             }
             wxVariant startProperty = itemObject.GetProperty("Start");
             if (!startProperty.IsNull()) {
-                meeting->Start = startProperty.GetString();
+                meeting->Start = startProperty.GetDateTime();
             }
             wxVariant endProperty = itemObject.GetProperty("End");
             if (!endProperty.IsNull()) {
-                meeting->End = endProperty.GetString();
+                meeting->End = endProperty.GetDateTime();
             }
             wxVariant durationProperty = itemObject.GetProperty("Duration");
             if (!durationProperty.IsNull()) {
