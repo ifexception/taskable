@@ -19,12 +19,13 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 
 #include <wx/string.h>
 #include <wx/datetime.h>
 
-#include "taskmodel.h"
+#include "taskitemmodel.h"
 
 namespace app::model
 {
@@ -35,8 +36,6 @@ public:
     MeetingModel(int meetingId);
     MeetingModel(int meetingId,
         int duration,
-        wxString start,
-        wxString end,
         wxString location,
         wxString subject,
         wxString body,
@@ -47,8 +46,8 @@ public:
 
     const int GetMeetingId();
     const int GetDuration();
-    const wxString GetStart() const;
-    const wxString GetEnd() const;
+    const wxDateTime GetStart() const;
+    const wxDateTime GetEnd() const;
     const wxString GetLocation() const;
     const wxString GetSubject() const;
     const wxString GetBody();
@@ -56,14 +55,16 @@ public:
     const wxDateTime GetDateCreated();
     const wxDateTime GetDateModified();
     const bool IsActive();
-    const int GetTaskId();
+    const int64_t GetTaskItemId();
 
-    TaskModel* GetTaskModel();
+    TaskItemModel* GetTaskItemModel();
 
     void SetMeetingId(int meetingId);
     void SetDuration(int duration);
     void SetStart(const wxString& start);
     void SetEnd(const wxString& end);
+    void SetStart(const wxDateTime& start);
+    void SetEnd(const wxDateTime& end);
     void SetLocation(const wxString& location);
     void SetSubject(const wxString& subject);
     void SetBody(const wxString& body);
@@ -71,15 +72,15 @@ public:
     void SetDateCreated(const wxDateTime& dateCreated);
     void SetDateUpdated(const wxDateTime& dateModified);
     void IsActive(bool isActive);
-    void SetTaskId(int taskId);
+    void SetTaskItemId(int64_t taskItemId);
 
-    void SetTaskModel(std::unique_ptr<TaskModel> taskModel);
+    void SetTaskItemModel(std::unique_ptr<TaskItemModel> taskItemModel);
 
 private:
     int mMeetingId;
     int mDuration;
-    wxString mStarting;
-    wxString mEnding;
+    wxDateTime mStarting;
+    wxDateTime mEnding;
     wxString mLocation;
     wxString mSubject;
     wxString mBody;
@@ -87,8 +88,8 @@ private:
     wxDateTime mDateCreated;
     wxDateTime mDateModified;
     bool bIsActive;
-    int mTaskId;
+    int mTaskItemId;
 
-    std::unique_ptr<TaskModel> pTaskModel;
+    std::unique_ptr<model::TaskItemModel> pTaskItem;
 };
 } // namespace app::model

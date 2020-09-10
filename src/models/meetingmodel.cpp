@@ -26,17 +26,18 @@ namespace app::model
 MeetingModel::MeetingModel()
     : mMeetingId(-1)
     , mDuration(-1)
-    , mStarting(wxGetEmptyString())
-    , mEnding(wxGetEmptyString())
+    , mStarting(wxDefaultDateTime)
+    , mEnding(wxDefaultDateTime)
     , mLocation(wxGetEmptyString())
     , mBody(wxGetEmptyString())
     , pAttended(nullptr)
     , mDateCreated(wxDefaultDateTime)
     , mDateModified(wxDefaultDateTime)
     , bIsActive(false)
-    , mTaskId(-1)
-    , pTaskModel(nullptr)
-{}
+    , mTaskItemId(-1)
+    , pTaskItem(nullptr)
+{
+}
 
 MeetingModel::MeetingModel(int meetingId)
     : MeetingModel()
@@ -46,8 +47,6 @@ MeetingModel::MeetingModel(int meetingId)
 
 MeetingModel::MeetingModel(int meetingId,
     int duration,
-    wxString start,
-    wxString end,
     wxString location,
     wxString subject,
     wxString body,
@@ -58,8 +57,6 @@ MeetingModel::MeetingModel(int meetingId,
 {
     mMeetingId = meetingId;
     mDuration = duration;
-    mStarting = start;
-    mEnding = end;
     mLocation = location;
     mSubject = subject;
     mBody = body;
@@ -78,12 +75,12 @@ const int MeetingModel::GetDuration()
     return mDuration;
 }
 
-const wxString MeetingModel::GetStart() const
+const wxDateTime MeetingModel::GetStart() const
 {
     return mStarting;
 }
 
-const wxString MeetingModel::GetEnd() const
+const wxDateTime MeetingModel::GetEnd() const
 {
     return mEnding;
 }
@@ -123,14 +120,14 @@ const bool MeetingModel::IsActive()
     return bIsActive;
 }
 
-const int MeetingModel::GetTaskId()
+const int64_t MeetingModel::GetTaskItemId()
 {
-    return mTaskId;
+    return mTaskItemId;
 }
 
-TaskModel* MeetingModel::GetTaskModel()
+TaskItemModel* MeetingModel::GetTaskItemModel()
 {
-    return pTaskModel.get();
+    return pTaskItem.get();
 }
 
 void MeetingModel::SetMeetingId(int meetingId)
@@ -145,10 +142,24 @@ void MeetingModel::SetDuration(int duration)
 
 void MeetingModel::SetStart(const wxString& start)
 {
-    mStarting = start;
+    wxDateTime startDateTime;
+    startDateTime.ParseISOTime(start);
+    mStarting = startDateTime;
 }
 
 void MeetingModel::SetEnd(const wxString& end)
+{
+    wxDateTime endDateTime;
+    endDateTime.ParseISOTime(end);
+    mEnding = endDateTime;
+}
+
+void MeetingModel::SetStart(const wxDateTime& start)
+{
+    mStarting = start;
+}
+
+void MeetingModel::SetEnd(const wxDateTime& end)
 {
     mEnding = end;
 }
@@ -188,13 +199,13 @@ void MeetingModel::IsActive(bool isActive)
     bIsActive = isActive;
 }
 
-void MeetingModel::SetTaskId(int taskId)
+void MeetingModel::SetTaskItemId(int64_t taskItemId)
 {
-    mTaskId = taskId;
+    mTaskItemId = taskItemId;
 }
 
-void MeetingModel::SetTaskModel(std::unique_ptr<TaskModel> taskModel)
+void MeetingModel::SetTaskItemModel(std::unique_ptr<TaskItemModel> taskItemModel)
 {
-    pTaskModel = std::move(taskModel);
+    pTaskItem = std::move(taskItemModel);
 }
 } // namespace app::model
