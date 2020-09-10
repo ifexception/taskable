@@ -26,6 +26,7 @@
 #include <wx/activityindicator.h>
 #include <wx/thread.h>
 
+#include "../config/configuration.h"
 #include "../models/meetingmodel.h"
 #include "../services/outlookintegrator.h"
 
@@ -62,6 +63,7 @@ public:
     MeetingsViewDialog() = default;
     MeetingsViewDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
+        std::shared_ptr<cfg::Configuration> config,
         const wxString& name = "meetingsviewdlg");
     virtual ~MeetingsViewDialog();
 
@@ -100,6 +102,7 @@ private:
     friend class GetMeetingsThread;
 
     std::shared_ptr<spdlog::logger> pLogger;
+    std::shared_ptr<cfg::Configuration> pConfig;
 
     wxScrolledWindow* pScrolledWindow;
     wxStaticText* pTodayDateLabel;

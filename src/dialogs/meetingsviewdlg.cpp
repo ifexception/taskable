@@ -24,6 +24,8 @@
 #include <wx/statline.h>
 
 #include "../common/common.h"
+#include "../data/meetingdata.h"
+#include "../dialogs/taskitemdlg.h"
 
 wxDEFINE_EVENT(GET_MEETINGS_THREAD_COMPLETED, wxThreadEvent);
 wxDEFINE_EVENT(GET_MEETINGS_THREAD_ERROR, wxThreadEvent);
@@ -53,7 +55,7 @@ wxThread::ExitCode GetMeetingsThread::Entry()
         auto event = new wxThreadEvent(GET_MEETINGS_THREAD_ERROR);
         event->SetString(eventMessage);
         wxQueueEvent(pHandler, event);
-        return (wxThread::ExitCode) 0;
+        return (wxThread::ExitCode) 1;
     }
 
     if (!outlookIntegrator.Execute()) {
@@ -61,7 +63,7 @@ wxThread::ExitCode GetMeetingsThread::Entry()
         auto event = new wxThreadEvent(GET_MEETINGS_THREAD_ERROR);
         event->SetString(eventMessage);
         wxQueueEvent(pHandler, event);
-        return (wxThread::ExitCode) 0;
+        return (wxThread::ExitCode) 1;
     }
 
     auto event = new wxThreadEvent(GET_MEETINGS_THREAD_COMPLETED);
@@ -79,15 +81,19 @@ void GetMeetingsThread::OnExit()
     wxThread::OnExit();
 }
 
-MeetingsViewDialog::MeetingsViewDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> logger, const wxString& name)
+MeetingsViewDialog::MeetingsViewDialog(wxWindow* parent,
+    std::shared_ptr<spdlog::logger> logger,
+    std::shared_ptr<cfg::Configuration> config,
+    const wxString& name)
     : pThread(nullptr)
     , mCriticalSection()
     , pLogger(logger)
+    , pConfig(config)
     , pScrolledWindow(nullptr)
     , pTodayDateLabel(nullptr)
     , pActivityIndicator(nullptr)
 {
-    Create(parent, wxID_ANY, wxT("Meetings View"), wxDefaultPosition, wxSize(420, 720), wxCAPTION | wxCLOSE_BOX, name);
+    Create(parent, wxID_ANY, wxT("Meetings View"), wxDefaultPosition, wxSize(400, 700), wxCAPTION | wxCLOSE_BOX, name);
 }
 
 MeetingsViewDialog::~MeetingsViewDialog()
@@ -245,12 +251,13 @@ void MeetingsViewDialog::AppendMeetingControls(svc::Meeting* meeting)
     locationLabel->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT));
     meetingStaticBoxSizer->Add(locationLabel, common::sizers::ControlDefault);
 
-    auto startLabel =
-        new wxStaticText(meetingStaticBox, wxID_ANY, wxString::Format(wxT("  Start: %s"), meeting->Start));
+    auto startLabel = new wxStaticText(
+        meetingStaticBox, wxID_ANY, wxString::Format(wxT("  Start: %s"), meeting->Start.FormatISOCombined(' ')));
     startLabel->Wrap(-1);
     meetingStaticBoxSizer->Add(startLabel, common::sizers::ControlDefault);
 
-    auto endLabel = new wxStaticText(meetingStaticBox, wxID_ANY, wxString::Format(wxT("  End: %s"), meeting->End));
+    auto endLabel = new wxStaticText(
+        meetingStaticBox, wxID_ANY, wxString::Format(wxT("  End: %s"), meeting->End.FormatISOCombined(' ')));
     endLabel->Wrap(-1);
     meetingStaticBoxSizer->Add(endLabel, common::sizers::ControlDefault);
 
@@ -325,6 +332,45 @@ void MeetingsViewDialog::OnThreadError(wxThreadEvent& event)
 
 void MeetingsViewDialog::OnAttendedCheckboxCheck(wxCommandEvent& event)
 {
-    wxLogDebug("Event ID %d ", event.GetId());
+    auto iterator = std::find_if(mMeetings.begin(), mMeetings.end(), [&](svc::Meeting* meeting) {
+        return meeting->Identifier == static_cast<wxWindowID>(event.GetId());
+    });
+
+    if (iterator != mMeetings.end()) {
+        auto meeting = *iterator;
+
+        dlg::TaskItemDialog taskItemMeetingDialog(
+            this->GetParent(), pLogger, pConfig, constants::TaskItemTypes::TimedTask);
+        taskItemMeetingDialog.SetMeetingData(meeting);
+        int retCode = taskItemMeetingDialog.ShowModal();
+
+        auto selectedCheckbox = (wxCheckBox*) wxWindow::FindWindowById(event.GetId());
+
+        if (retCode == wxID_OK) {
+            data::MeetingData meetingData;
+            selectedCheckbox->Disable();
+
+            auto meetingModel = std::make_unique<model::MeetingModel>();
+            auto meetingAttended = std::make_unique<bool>(selectedCheckbox->GetValue());
+            meetingModel->Attended(std::move(meetingAttended));
+            meetingModel->SetBody(meeting->Body);
+            meetingModel->SetDuration(meeting->Duration);
+            meetingModel->SetLocation(meeting->Location);
+            meetingModel->SetSubject(meeting->Subject);
+            meetingModel->SetStart(meeting->Start);
+            meetingModel->SetEnd(meeting->End);
+
+            meetingModel->SetTaskItemId(taskItemMeetingDialog.GetTaskItemId());
+
+            try {
+                meetingData.Create(std::move(meetingModel));
+            } catch (const sqlite::sqlite_exception& e) {
+                pLogger->error("Error occured in MeetingData::Create() - {0:d} : {1}", e.get_code(), e.what());
+                wxLogDebug(wxString(e.get_sql()));
+            }
+        } else {
+            selectedCheckbox->SetValue(false);
+        }
+    }
 }
 } // namespace app::dlg
