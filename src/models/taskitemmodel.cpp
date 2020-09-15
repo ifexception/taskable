@@ -41,10 +41,12 @@ TaskItemModel::TaskItemModel()
     , mProjectId(-1)
     , mCategoryId(-1)
     , mTaskId(-1)
+    , pMeetingId(nullptr)
     , pTaskItemType(nullptr)
     , pProject(nullptr)
     , pCategory(nullptr)
     , pTask(nullptr)
+    , pMeeting(nullptr)
 {
 }
 
@@ -159,6 +161,11 @@ const int TaskItemModel::GetTaskId() const
     return mTaskId;
 }
 
+const int64_t* TaskItemModel::GetMeetingId() const
+{
+    return pMeetingId.get();
+}
+
 TaskItemTypeModel* TaskItemModel::GetTaskItemType()
 {
     return pTaskItemType.get();
@@ -177,6 +184,11 @@ CategoryModel* TaskItemModel::GetCategory()
 TaskModel* TaskItemModel::GetTask()
 {
     return pTask.get();
+}
+
+MeetingModel* TaskItemModel::GetMeeting()
+{
+    return pMeeting.get();
 }
 
 void TaskItemModel::SetTaskItemId(const int taskItemId)
@@ -275,6 +287,11 @@ void TaskItemModel::SetTaskId(const int taskId)
     mTaskId = taskId;
 }
 
+void TaskItemModel::SetMeetingId(std::unique_ptr<int64_t> meetingId)
+{
+    pMeetingId = std::move(meetingId);
+}
+
 void TaskItemModel::SetTaskItemType(std::unique_ptr<TaskItemTypeModel> taskItemType)
 {
     pTaskItemType = std::move(taskItemType);
@@ -293,5 +310,10 @@ void TaskItemModel::SetCategory(std::unique_ptr<CategoryModel> category)
 void TaskItemModel::SetTask(std::unique_ptr<TaskModel> task)
 {
     pTask = std::move(task);
+}
+
+void TaskItemModel::SetMeeting(std::unique_ptr<MeetingModel> meeting)
+{
+    pMeeting = std::move(meeting);
 }
 } // namespace app::model

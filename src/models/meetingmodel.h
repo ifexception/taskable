@@ -25,8 +25,6 @@
 #include <wx/string.h>
 #include <wx/datetime.h>
 
-#include "taskitemmodel.h"
-
 namespace app::model
 {
 class MeetingModel final
@@ -55,9 +53,6 @@ public:
     const wxDateTime GetDateCreated();
     const wxDateTime GetDateModified();
     const bool IsActive();
-    const int64_t GetTaskItemId();
-
-    TaskItemModel* GetTaskItemModel();
 
     void SetMeetingId(int meetingId);
     void SetDuration(int duration);
@@ -72,9 +67,6 @@ public:
     void SetDateCreated(const wxDateTime& dateCreated);
     void SetDateUpdated(const wxDateTime& dateModified);
     void IsActive(bool isActive);
-    void SetTaskItemId(int64_t taskItemId);
-
-    void SetTaskItemModel(std::unique_ptr<TaskItemModel> taskItemModel);
 
 private:
     int mMeetingId;
@@ -88,8 +80,5 @@ private:
     wxDateTime mDateCreated;
     wxDateTime mDateModified;
     bool bIsActive;
-    int mTaskItemId;
-
-    std::unique_ptr<model::TaskItemModel> pTaskItem;
 };
 } // namespace app::model

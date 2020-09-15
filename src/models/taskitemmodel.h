@@ -28,6 +28,7 @@
 #include "categorymodel.h"
 #include "taskmodel.h"
 #include "taskitemtypemodel.h"
+#include "meetingmodel.h"
 
 namespace app::model
 {
@@ -64,11 +65,13 @@ public:
     const int GetProjectId() const;
     const int GetCategoryId() const;
     const int GetTaskId() const;
+    const int64_t* GetMeetingId() const;
 
     TaskItemTypeModel* GetTaskItemType();
     ProjectModel* GetProject();
     CategoryModel* GetCategory();
     TaskModel* GetTask();
+    MeetingModel* GetMeeting();
 
     void SetTaskItemId(const int taskItemId);
     void SetStartTime(std::unique_ptr<wxDateTime> startTime);
@@ -89,11 +92,13 @@ public:
     void SetProjectId(const int projectId);
     void SetCategoryId(const int categoryId);
     void SetTaskId(const int taskId);
+    void SetMeetingId(std::unique_ptr<int64_t> meetingId);
 
     void SetTaskItemType(std::unique_ptr<TaskItemTypeModel> taskItemType);
     void SetProject(std::unique_ptr<ProjectModel> projcet);
     void SetCategory(std::unique_ptr<CategoryModel> category);
     void SetTask(std::unique_ptr<TaskModel> task);
+    void SetMeeting(std::unique_ptr<MeetingModel> meeting);
 
 private:
     int mTaskItemId;
@@ -112,10 +117,12 @@ private:
     int mProjectId;
     int mCategoryId;
     int mTaskId;
+    std::unique_ptr<int64_t> pMeetingId;
 
     std::unique_ptr<TaskItemTypeModel> pTaskItemType;
     std::unique_ptr<ProjectModel> pProject;
     std::unique_ptr<CategoryModel> pCategory;
     std::unique_ptr<TaskModel> pTask;
+    std::unique_ptr<MeetingModel> pMeeting;
 };
 } // namespace app::model
