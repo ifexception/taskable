@@ -51,7 +51,7 @@ int64_t MeetingData::Create(std::unique_ptr<model::MeetingModel> meeting)
 
     ps << meeting->GetDuration() << meeting->GetStart().FormatISOCombined().ToStdString()
        << meeting->GetEnd().FormatISOCombined().ToStdString() << meeting->GetLocation() << meeting->GetSubject()
-       << meeting->GetBody() << meeting->GetTaskItemId();
+       << meeting->GetBody();
 
     ps.execute();
 
@@ -65,10 +65,10 @@ void MeetingData::Delete(const int64_t taskItemId)
 
 const std::string MeetingData::createMeeting =
     "INSERT INTO "
-    "meetings(attended, duration, starting, ending, location, subject, body, is_active, task_item_id) "
-    "VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)";
+    "meetings(attended, duration, starting, ending, location, subject, body, is_active) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?, 1)";
 
 const std::string MeetingData::deleteMeeting = "UPDATE meetings "
                                                "SET date_modified = ?, is_active = 0 "
-                                               "WHERE task_item_id = ?";
+                                               "WHERE meeting_id = ?";
 } // namespace app::data

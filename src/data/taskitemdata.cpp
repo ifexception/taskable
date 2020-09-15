@@ -75,6 +75,12 @@ int64_t TaskItemData::Create(std::unique_ptr<model::TaskItemModel> taskItem)
     ps << taskItem->GetTaskItemTypeId() << taskItem->GetProjectId() << taskItem->GetCategoryId()
        << taskItem->GetTaskId();
 
+    if (taskItem->GetMeetingId() != nullptr) {
+        ps << *taskItem->GetMeetingId();
+    } else {
+        ps << nullptr;
+    }
+
     ps.execute();
 
     return pConnection->DatabaseExecutableHandle()->last_insert_rowid();
@@ -98,7 +104,8 @@ std::unique_ptr<model::TaskItemModel> TaskItemData::GetById(const int taskItemId
             int taskItemTypeId,
             int projectId,
             int categoryId,
-            int taskId) {
+            int taskId,
+            std::unique_ptr<int64_t> meetingId) {
             taskItem = std::make_unique<model::TaskItemModel>(
                 taskItemId, duration, description, billable, dateCreated, dateModified, isActive);
 
@@ -135,6 +142,8 @@ std::unique_ptr<model::TaskItemModel> TaskItemData::GetById(const int taskItemId
             data::TaskData taskData(pConnection);
             auto task = taskData.GetById(taskId);
             taskItem->SetTask(std::move(task));
+
+            taskItem->SetMeetingId(std::move(meetingId));
         };
 
     return std::move(taskItem);
@@ -303,11 +312,16 @@ std::vector<wxString> TaskItemData::GetHoursByWeek(const wxString& fromDate, con
     return taskDurations;
 }
 
+void TaskItemData::UpdateTaskItemWithMeetingId(const int64_t taskItemId, const int64_t meetingId)
+{
+    *pConnection->DatabaseExecutableHandle() << TaskItemData::updateTaskItemWithMeetingId << meetingId << taskItemId;
+}
+
 const std::string TaskItemData::createTaskItem = "INSERT INTO task_items "
                                                  "(start_time, end_time, duration, description, "
                                                  "billable, calculated_rate, is_active, "
-                                                 "task_item_type_id, project_id, category_id, task_id) "
-                                                 "VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)";
+                                                 "task_item_type_id, project_id, category_id, task_id, meeting_id) "
+                                                 "VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)";
 
 const std::string TaskItemData::getTaskItemById = "SELECT task_items.task_item_id, "
                                                   "task_items.start_time, "
@@ -389,4 +403,8 @@ const std::string TaskItemData::getTaskHoursByWeek = "SELECT task_items.duration
                                                      "WHERE tasks.task_date >= ? "
                                                      "AND tasks.task_date <= ? "
                                                      "AND task_items.is_active = 1";
+
+const std::string TaskItemData::updateTaskItemWithMeetingId = "UPDATE task_items "
+                                                              "SET meeting_id = ? "
+                                                              "WHERE task_item_id = ?";
 } // namespace app::data
