@@ -19,12 +19,14 @@
 
 #include "meetingsviewdlg.h"
 
+#include <algorithm>
 #include <functional>
 
 #include <wx/statline.h>
 
 #include "../common/common.h"
 #include "../data/meetingdata.h"
+#include "../data/taskitemdata.h"
 #include "../dialogs/taskitemdlg.h"
 
 wxDEFINE_EVENT(GET_MEETINGS_THREAD_COMPLETED, wxThreadEvent);
@@ -109,7 +111,8 @@ void MeetingsViewDialog::LaunchModeless()
     if (IsElevated()) {
         pActivityIndicator->Hide();
         wxString runAsAdminErrorText =
-            wxT("Error! Cannot read meetings from Outlook\nwhen host process is run as administrator.");
+            wxString::Format(wxT("Error! Cannot read meetings from Outlook\nwhen %s is run as administrator."),
+                common::GetProgramName());
         auto runAsAdminErrorLabel = new wxStaticText(pScrolledWindow, wxID_ANY, runAsAdminErrorText);
         runAsAdminErrorLabel->SetFont(wxFont(wxNORMAL_FONT->GetPointSize(),
             wxFONTFAMILY_DEFAULT,
@@ -326,7 +329,7 @@ void MeetingsViewDialog::OnThreadError(wxThreadEvent& event)
     errorOccuredLabel->Wrap(-1);
 
     pScrolledWindow->GetSizer()->AddSpacer(64);
-    pScrolledWindow->GetSizer()->Add(errorOccuredLabel, wxSizerFlags(1).Center());
+    pScrolledWindow->GetSizer()->Add(errorOccuredLabel, wxSizerFlags(1).Center().Border(wxALL | 5));
     pScrolledWindow->GetSizer()->Layout();
 }
 
@@ -343,11 +346,11 @@ void MeetingsViewDialog::OnAttendedCheckboxCheck(wxCommandEvent& event)
             this->GetParent(), pLogger, pConfig, constants::TaskItemTypes::TimedTask);
         taskItemMeetingDialog.SetMeetingData(meeting);
         int retCode = taskItemMeetingDialog.ShowModal();
+        int64_t taskItemId = taskItemMeetingDialog.GetTaskItemId();
 
         auto selectedCheckbox = (wxCheckBox*) wxWindow::FindWindowById(event.GetId());
 
         if (retCode == wxID_OK) {
-            data::MeetingData meetingData;
             selectedCheckbox->Disable();
 
             auto meetingModel = std::make_unique<model::MeetingModel>();
@@ -360,13 +363,23 @@ void MeetingsViewDialog::OnAttendedCheckboxCheck(wxCommandEvent& event)
             meetingModel->SetStart(meeting->Start);
             meetingModel->SetEnd(meeting->End);
 
-            meetingModel->SetTaskItemId(taskItemMeetingDialog.GetTaskItemId());
-
+            data::MeetingData meetingData;
+            int64_t meetingId = 0;
             try {
-                meetingData.Create(std::move(meetingModel));
+                meetingId = meetingData.Create(std::move(meetingModel));
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in MeetingData::Create() - {0:d} : {1}", e.get_code(), e.what());
                 wxLogDebug(wxString(e.get_sql()));
+                return;
+            }
+
+            data::TaskItemData taskItemData;
+            try {
+                taskItemData.UpdateTaskItemWithMeetingId(taskItemId, meetingId);
+            } catch (const sqlite::sqlite_exception& e) {
+                pLogger->error("Error occured in TaskItemData::UpdateTaskItemWithMeetingId() - {0:d} : {1}", e.get_code(), e.what());
+                wxLogDebug(wxString(e.get_sql()));
+                return;
             }
         } else {
             selectedCheckbox->SetValue(false);
