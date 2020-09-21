@@ -44,6 +44,7 @@ set (SRC
     "services/databasebackup.cpp"
     "services/databasebackupdeleter.cpp"
     "services/setupdatabase.cpp"
+    "services/databaseschemaupdater.cpp"
 
     "application.cpp"
     "resources.rc"
