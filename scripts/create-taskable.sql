@@ -98,7 +98,11 @@ CREATE TABLE meetings
     body TEXT NOT NULL,
     date_created INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
     date_modified INTEGER NOT NULL DEFAULT (strftime('%s','now', 'localtime')),
-    is_active INTEGER NOT NULL
+    is_active INTEGER NOT NULL,
+
+    task_id INTEGER NOT NULL,
+
+    FOREIGN KEY (task_id) REFERENCES tasks(task_id)
 );
 
 CREATE TABLE task_items

@@ -34,6 +34,8 @@ MeetingModel::MeetingModel()
     , mDateCreated(wxDefaultDateTime)
     , mDateModified(wxDefaultDateTime)
     , bIsActive(false)
+    , mTaskId(-1)
+    , pTask(nullptr)
 {
 }
 
@@ -118,6 +120,16 @@ const bool MeetingModel::IsActive()
     return bIsActive;
 }
 
+const int64_t MeetingModel::GetTaskId()
+{
+    return mTaskId;
+}
+
+TaskModel* MeetingModel::GetTask()
+{
+    return pTask.get();
+}
+
 void MeetingModel::SetMeetingId(int meetingId)
 {
     mMeetingId = meetingId;
@@ -131,14 +143,14 @@ void MeetingModel::SetDuration(int duration)
 void MeetingModel::SetStart(const wxString& start)
 {
     wxDateTime startDateTime;
-    startDateTime.ParseISOTime(start);
+    startDateTime.ParseISOCombined(start);
     mStarting = startDateTime;
 }
 
 void MeetingModel::SetEnd(const wxString& end)
 {
     wxDateTime endDateTime;
-    endDateTime.ParseISOTime(end);
+    endDateTime.ParseISOCombined(end);
     mEnding = endDateTime;
 }
 
@@ -185,5 +197,15 @@ void MeetingModel::SetDateUpdated(const wxDateTime& dateModified)
 void MeetingModel::IsActive(bool isActive)
 {
     bIsActive = isActive;
+}
+
+void MeetingModel::SetTaskId(int64_t taskId)
+{
+    mTaskId = taskId;
+}
+
+void MeetingModel::SetTask(std::unique_ptr<TaskModel> taskModel)
+{
+    pTask = std::move(taskModel);
 }
 } // namespace app::model
