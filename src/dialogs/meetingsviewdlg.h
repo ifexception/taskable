@@ -30,11 +30,6 @@
 #include "../models/meetingmodel.h"
 #include "../services/outlookintegrator.h"
 
-/*
- Run Outlook integrator in a thread
- Display of all meetings in a scrolled window
-*/
-
 wxDECLARE_EVENT(GET_MEETINGS_THREAD_COMPLETED, wxThreadEvent);
 wxDECLARE_EVENT(GET_MEETINGS_THREAD_ERROR, wxThreadEvent);
 
@@ -88,7 +83,7 @@ private:
     void ConfigureEventBindings();
     void FillControls();
 
-    void AppendMeetingControls(svc::Meeting* meeting);
+    void AppendMeetingControls(svc::Meeting* meeting, bool attended = false);
 
     void StartThread();
 

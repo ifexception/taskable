@@ -25,7 +25,9 @@
 #include <wx/statline.h>
 
 #include "../common/common.h"
+#include "../models/meetingmodel.h"
 #include "../data/meetingdata.h"
+#include "../data/taskdata.h"
 #include "../data/taskitemdata.h"
 #include "../dialogs/taskitemdlg.h"
 
@@ -145,8 +147,54 @@ void MeetingsViewDialog::GetMeetingDataFromThread(std::vector<svc::Meeting*> mee
         noMeetingsLabel->Wrap(-1);
         pScrolledWindow->GetSizer()->Add(noMeetingsLabel, wxSizerFlags().Center());
     } else {
-        for (auto meeting : meetings) {
-            AppendMeetingControls(meeting);
+        auto today = wxDateTime::Now();
+
+        data::MeetingData meetingData;
+        std::vector<std::unique_ptr<model::MeetingModel>> savedMeetings;
+        try {
+            savedMeetings = meetingData.GetByDate(today.FormatISODate());
+        } catch (const sqlite::sqlite_exception& e) {
+            pLogger->error("Error occured in MeetingData::GetByDate() - {0:d} : {1}", e.get_code(), e.what());
+            wxLogDebug(wxString(e.get_sql()));
+
+            wxString databaseErrorText = wxT("A database error occured and the operation was aborted.");
+            auto databaseErrorLabel = new wxStaticText(pScrolledWindow, wxID_ANY, databaseErrorText);
+            databaseErrorLabel->SetFont(wxFont(wxNORMAL_FONT->GetPointSize(),
+                wxFONTFAMILY_DEFAULT,
+                wxFONTSTYLE_ITALIC,
+                wxFONTWEIGHT_NORMAL,
+                false,
+                wxEmptyString));
+            databaseErrorLabel->Wrap(-1);
+            pScrolledWindow->GetSizer()->Add(databaseErrorLabel, wxSizerFlags().Center());
+            pScrolledWindow->GetSizer()->Layout();
+            return;
+        }
+
+        if (savedMeetings.empty()) {
+            for (auto meeting : meetings) {
+                AppendMeetingControls(meeting);
+            }
+        } else {
+            for (auto meeting : meetings) {
+                auto meetingExists = std::find_if(savedMeetings.begin(),
+                    savedMeetings.end(),
+                    [&](const std::unique_ptr<model::MeetingModel>& savedMeeting) {
+                        bool isStartTimesEqual =
+                            meeting->Start.FormatISOTime() == savedMeeting->GetStart().FormatISOTime();
+                        bool isEndTimesEqual = meeting->End.FormatISOTime() == savedMeeting->GetEnd().FormatISOTime();
+                        bool isLocationEqual = meeting->Location == savedMeeting->GetLocation();
+                        bool isSubjectEqual = meeting->Subject == savedMeeting->GetSubject();
+
+                        return isStartTimesEqual && isEndTimesEqual && isLocationEqual && isSubjectEqual;
+                    });
+
+                if (meetingExists != savedMeetings.end()) {
+                    AppendMeetingControls(meeting, true);
+                } else {
+                    AppendMeetingControls(meeting);
+                }
+            }
         }
 
         mMeetings = meetings;
@@ -232,7 +280,7 @@ void MeetingsViewDialog::FillControls()
     pTodayDateLabel->SetLabel(today.FormatISODate());
 }
 
-void MeetingsViewDialog::AppendMeetingControls(svc::Meeting* meeting)
+void MeetingsViewDialog::AppendMeetingControls(svc::Meeting* meeting, bool attended)
 {
     auto meetingStaticBox = new wxStaticBox(pScrolledWindow, wxID_ANY, wxGetEmptyString());
     auto meetingStaticBoxSizer = new wxStaticBoxSizer(meetingStaticBox, wxVERTICAL);
@@ -269,6 +317,9 @@ void MeetingsViewDialog::AppendMeetingControls(svc::Meeting* meeting)
     meeting->Identifier = attendedCheckboxControlId;
     attendedCheckbox->Bind(
         wxEVT_CHECKBOX, &MeetingsViewDialog::OnAttendedCheckboxCheck, this, attendedCheckboxControlId);
+    if (attended) {
+        attendedCheckbox->Disable();
+    }
     meetingStaticBoxSizer->Add(attendedCheckbox, common::sizers::ControlDefault);
 }
 
@@ -363,10 +414,22 @@ void MeetingsViewDialog::OnAttendedCheckboxCheck(wxCommandEvent& event)
             meetingModel->SetStart(meeting->Start);
             meetingModel->SetEnd(meeting->End);
 
+            data::TaskData taskData;
+            auto today = wxDateTime::Now();
+            int64_t taskId = 0;
+            try {
+                auto task = taskData.GetByDate(today);
+                taskId = task->GetTaskId();
+            } catch (const sqlite::sqlite_exception& e) {
+                pLogger->error("Error occured in MeetingData::Create() - {0:d} : {1}", e.get_code(), e.what());
+                wxLogDebug(wxString(e.get_sql()));
+                return;
+            }
+
             data::MeetingData meetingData;
             int64_t meetingId = 0;
             try {
-                meetingId = meetingData.Create(std::move(meetingModel));
+                meetingId = meetingData.Create(std::move(meetingModel), taskId);
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in MeetingData::Create() - {0:d} : {1}", e.get_code(), e.what());
                 wxLogDebug(wxString(e.get_sql()));
@@ -377,7 +440,9 @@ void MeetingsViewDialog::OnAttendedCheckboxCheck(wxCommandEvent& event)
             try {
                 taskItemData.UpdateTaskItemWithMeetingId(taskItemId, meetingId);
             } catch (const sqlite::sqlite_exception& e) {
-                pLogger->error("Error occured in TaskItemData::UpdateTaskItemWithMeetingId() - {0:d} : {1}", e.get_code(), e.what());
+                pLogger->error("Error occured in TaskItemData::UpdateTaskItemWithMeetingId() - {0:d} : {1}",
+                    e.get_code(),
+                    e.what());
                 wxLogDebug(wxString(e.get_sql()));
                 return;
             }
