@@ -1,5 +1,8 @@
 # Changelog
 
+### 1.4.0
+- Outlook meetings integration
+
 ### 1.3.0
 - Use connection pooling for SQLite
 - Update Setup Wizard
