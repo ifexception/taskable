@@ -94,6 +94,8 @@ private:
     void OnThreadError(wxThreadEvent& event);
     void OnAttendedCheckboxCheck(wxCommandEvent& event);
 
+    void FeedbackLabel(const wxString& message);
+
     friend class GetMeetingsThread;
 
     std::shared_ptr<spdlog::logger> pLogger;

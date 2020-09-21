@@ -115,16 +115,7 @@ void MeetingsViewDialog::LaunchModeless()
         wxString runAsAdminErrorText =
             wxString::Format(wxT("Error! Cannot read meetings from Outlook\nwhen %s is run as administrator."),
                 common::GetProgramName());
-        auto runAsAdminErrorLabel = new wxStaticText(pScrolledWindow, wxID_ANY, runAsAdminErrorText);
-        runAsAdminErrorLabel->SetFont(wxFont(wxNORMAL_FONT->GetPointSize(),
-            wxFONTFAMILY_DEFAULT,
-            wxFONTSTYLE_ITALIC,
-            wxFONTWEIGHT_NORMAL,
-            false,
-            wxEmptyString));
-        runAsAdminErrorLabel->Wrap(-1);
-        pScrolledWindow->GetSizer()->Add(runAsAdminErrorLabel, wxSizerFlags().Center());
-        pScrolledWindow->GetSizer()->Layout();
+        FeedbackLabel(runAsAdminErrorText);
     } else {
         pActivityIndicator->Start();
         StartThread();
@@ -137,15 +128,7 @@ void MeetingsViewDialog::GetMeetingDataFromThread(std::vector<svc::Meeting*> mee
 {
     if (meetings.empty()) {
         wxString noMeetingsText = wxT("No meetings found...");
-        auto noMeetingsLabel = new wxStaticText(pScrolledWindow, wxID_ANY, noMeetingsText);
-        noMeetingsLabel->SetFont(wxFont(wxNORMAL_FONT->GetPointSize(),
-            wxFONTFAMILY_DEFAULT,
-            wxFONTSTYLE_ITALIC,
-            wxFONTWEIGHT_NORMAL,
-            false,
-            wxEmptyString));
-        noMeetingsLabel->Wrap(-1);
-        pScrolledWindow->GetSizer()->Add(noMeetingsLabel, wxSizerFlags().Center());
+        FeedbackLabel(noMeetingsText);
     } else {
         auto today = wxDateTime::Now();
 
@@ -158,16 +141,7 @@ void MeetingsViewDialog::GetMeetingDataFromThread(std::vector<svc::Meeting*> mee
             wxLogDebug(wxString(e.get_sql()));
 
             wxString databaseErrorText = wxT("A database error occured and the operation was aborted.");
-            auto databaseErrorLabel = new wxStaticText(pScrolledWindow, wxID_ANY, databaseErrorText);
-            databaseErrorLabel->SetFont(wxFont(wxNORMAL_FONT->GetPointSize(),
-                wxFONTFAMILY_DEFAULT,
-                wxFONTSTYLE_ITALIC,
-                wxFONTWEIGHT_NORMAL,
-                false,
-                wxEmptyString));
-            databaseErrorLabel->Wrap(-1);
-            pScrolledWindow->GetSizer()->Add(databaseErrorLabel, wxSizerFlags().Center());
-            pScrolledWindow->GetSizer()->Layout();
+            FeedbackLabel(databaseErrorText);
             return;
         }
 
@@ -198,8 +172,8 @@ void MeetingsViewDialog::GetMeetingDataFromThread(std::vector<svc::Meeting*> mee
         }
 
         mMeetings = meetings;
+        pScrolledWindow->GetSizer()->Layout();
     }
-    pScrolledWindow->GetSizer()->Layout();
 }
 
 bool MeetingsViewDialog::Create(wxWindow* parent,
@@ -374,14 +348,8 @@ void MeetingsViewDialog::OnThreadError(wxThreadEvent& event)
     pActivityIndicator->Stop();
     pActivityIndicator->Hide();
 
-    wxString errorOccuredText = wxT("Error occured: %s");
-    auto errorOccuredLabel =
-        new wxStaticText(pScrolledWindow, wxID_ANY, wxString::Format(errorOccuredText, event.GetString()));
-    errorOccuredLabel->Wrap(-1);
-
-    pScrolledWindow->GetSizer()->AddSpacer(64);
-    pScrolledWindow->GetSizer()->Add(errorOccuredLabel, wxSizerFlags(1).Center().Border(wxALL | 5));
-    pScrolledWindow->GetSizer()->Layout();
+    wxString errorOccuredText = wxString::Format(wxT("Error occured: %s"), event.GetString());
+    FeedbackLabel(errorOccuredText);
 }
 
 void MeetingsViewDialog::OnAttendedCheckboxCheck(wxCommandEvent& event)
@@ -450,5 +418,19 @@ void MeetingsViewDialog::OnAttendedCheckboxCheck(wxCommandEvent& event)
             selectedCheckbox->SetValue(false);
         }
     }
+}
+
+void MeetingsViewDialog::FeedbackLabel(const wxString& message)
+{
+    auto messageLabel = new wxStaticText(pScrolledWindow, wxID_ANY, message);
+    messageLabel->SetFont(wxFont(wxNORMAL_FONT->GetPointSize(),
+        wxFONTFAMILY_DEFAULT,
+        wxFONTSTYLE_ITALIC,
+        wxFONTWEIGHT_NORMAL,
+        false,
+        wxEmptyString));
+    messageLabel->Wrap(-1);
+    pScrolledWindow->GetSizer()->Add(messageLabel, wxSizerFlags().Center());
+    pScrolledWindow->GetSizer()->Layout();
 }
 } // namespace app::dlg
