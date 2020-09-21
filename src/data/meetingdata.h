@@ -37,13 +37,15 @@ public:
     MeetingData();
     ~MeetingData();
 
-    int64_t Create(std::unique_ptr<model::MeetingModel> meeting);
+    int64_t Create(std::unique_ptr<model::MeetingModel> meeting, int64_t taskId);
     void Delete(const int64_t taskItemId);
+    std::vector<std::unique_ptr<model::MeetingModel>> GetByDate(const wxString& date);
 
 private:
     std::shared_ptr<db::SqliteConnection> pConnection;
 
     static const std::string createMeeting;
     static const std::string deleteMeeting;
+    static const std::string getByDate;
 };
 } // namespace app::data
