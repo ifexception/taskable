@@ -35,11 +35,11 @@ public:
     DatabaseStructureUpdater(std::shared_ptr<spdlog::logger> logger);
     ~DatabaseStructureUpdater() = default;
 
-    void ExecuteScripts();
+    bool ExecuteScripts();
 
 private:
-    void CreateMeetingsTableScript();
-    void AddMeetingForeignKeyToTaskItemsTable();
+    bool CreateMeetingsTableScript();
+    bool AddMeetingForeignKeyToTaskItemsTable();
 
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<db::SqliteConnection> pConnection;

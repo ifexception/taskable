@@ -31,13 +31,15 @@ DatabaseStructureUpdater::DatabaseStructureUpdater(std::shared_ptr<spdlog::logge
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
 
-void DatabaseStructureUpdater::ExecuteScripts()
+bool DatabaseStructureUpdater::ExecuteScripts()
 {
-    CreateMeetingsTableScript();
-    AddMeetingForeignKeyToTaskItemsTable();
+    bool meetingsTableCreated = CreateMeetingsTableScript();
+    bool meetingForeignKeyAdded = AddMeetingForeignKeyToTaskItemsTable();
+
+    return meetingsTableCreated && meetingForeignKeyAdded;
 }
 
-void DatabaseStructureUpdater::CreateMeetingsTableScript()
+bool DatabaseStructureUpdater::CreateMeetingsTableScript()
 {
     const std::string CreateMeetingsTableOperationName = "CreateMeetingsTableScript";
 
@@ -64,10 +66,13 @@ void DatabaseStructureUpdater::CreateMeetingsTableScript()
             CreateMeetingsTableOperationName,
             e.get_code(),
             e.what());
+        return false;
     }
+
+    return true;
 }
 
-void DatabaseStructureUpdater::AddMeetingForeignKeyToTaskItemsTable()
+bool DatabaseStructureUpdater::AddMeetingForeignKeyToTaskItemsTable()
 {
     const std::string AddMeetingForeignKeyToTaskItemsTableOperationName = "AddMeetingForeignKeyToTaskItemsTable";
     const std::string MeetingForeignKeyColumnName = "meeting_id";
@@ -81,21 +86,24 @@ void DatabaseStructureUpdater::AddMeetingForeignKeyToTaskItemsTable()
                                                                            std::string type,
                                                                            int notnull,
                                                                            std::unique_ptr<std::string> dlft_value,
-                                                                           int pk) { columnNames.push_back(name); };
+                                                                           int pk) {
+            spdlog::get("msvc")->debug(name);
+            columnNames.push_back(name);
+        };
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error in database structure update operation {0} | {1:d} : {2}",
             AddMeetingForeignKeyToTaskItemsTableOperationName,
             e.get_code(),
             e.what());
-        return;
+        return false;
     }
 
-    auto meetingForeignKeyExistsIterator = std::find_if(columnNames.begin(),
+    auto meetingForeignKeyExistsIterator = std::find_if_not(columnNames.begin(),
         columnNames.end(),
         [=](const std::string& columnName) { return columnName == MeetingForeignKeyColumnName; });
 
     if (meetingForeignKeyExistsIterator == columnNames.end()) {
-        return;
+        return true;
     }
 
     const std::string CreateTempTable =
@@ -137,7 +145,7 @@ void DatabaseStructureUpdater::AddMeetingForeignKeyToTaskItemsTable()
         "task_item_type_id, "
         "project_id, "
         "task_id, "
-        "category_id "
+        "category_id, NULL "
         "FROM task_items";
 
     const std::string DropOldTable = "DROP TABLE task_items;";
@@ -159,6 +167,8 @@ void DatabaseStructureUpdater::AddMeetingForeignKeyToTaskItemsTable()
             AddMeetingForeignKeyToTaskItemsTableOperationName,
             e.get_code(),
             e.what());
+        return false;
     }
+    return true;
 }
 } // namespace app::svc

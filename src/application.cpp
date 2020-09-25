@@ -32,6 +32,7 @@
 #include "frame/mainframe.h"
 #include "services/setupdatabase.h"
 #include "services/databasebackup.h"
+#include "services/databasestructureupdater.h"
 #include "wizards/setupwizard.h"
 #include "wizards/databaserestorewizard.h"
 
@@ -112,6 +113,23 @@ bool Application::StartupInitialization()
         return false;
     } else {
         InitializeDatabaseConnectionProvider();
+    }
+
+    if (CheckForDatabaseUpgrade()) {
+        svc::DatabaseStructureUpdater dbStructureUpdater(pLogger);
+
+        if (!dbStructureUpdater.ExecuteScripts()) {
+            wxString errorMessage =
+                wxString::Format(wxT("%s encountered an error while executing a database update operation.\n"
+                                     "The operation was aborted."),
+                    common::GetProgramName);
+            wxMessageBox(errorMessage, common::GetProgramName(), wxICON_ERROR | wxOK_DEFAULT);
+            return false;
+        }
+
+        if (!CompleteDatabaseUpgrade()) {
+            return false;
+        }
     }
 
     return true;
@@ -341,6 +359,41 @@ bool Application::DatabaseFileExists()
     }
 
     return true;
+}
+
+bool Application::CheckForDatabaseUpgrade()
+{
+#ifdef TASKABLE_DEBUG
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled");
+#else
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskable");
+#endif // TASKABLE_DEBUG
+
+    if (key.HasValue(wxT("DatabaseUpgrade"))) {
+        long value = 0;
+        key.QueryValue(wxT("DatabaseUpgrade"), &value);
+
+        return !!value;
+    }
+    return false;
+}
+
+bool Application::CompleteDatabaseUpgrade()
+{
+#ifdef TASKABLE_DEBUG
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled");
+#else
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskable");
+#endif // TASKABLE_DEBUG
+
+    if (key.HasValue(wxT("DatabaseUpgrade"))) {
+        long value = 0;
+        key.SetValue(wxT("DatabaseUpgrade"), value);
+
+        return true;
+    }
+
+    return false;
 }
 
 bool Application::InitializeDatabaseTables()
