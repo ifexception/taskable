@@ -388,9 +388,7 @@ bool Application::CompleteDatabaseUpgrade()
 
     if (key.HasValue(wxT("DatabaseUpgrade"))) {
         long value = 0;
-        key.SetValue(wxT("DatabaseUpgrade"), value);
-
-        return true;
+        return key.SetValue(wxT("DatabaseUpgrade"), value);
     }
 
     return false;
