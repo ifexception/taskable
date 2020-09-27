@@ -98,7 +98,7 @@ const char** app::common::GetFeedbackIcon()
 
 std::string app::common::GetLicense()
 {
-    return "Taskable is a desktop that aids you in tracking your timesheets\n"
+    return "Taskable is a desktop app that aids you in tracking your timesheets\n"
            "and seeing what work you have done.\n"
            "Copyright(C) 2019 Szymon Welgus\n"
            "This program is free software : you can redistribute it and /\n"
