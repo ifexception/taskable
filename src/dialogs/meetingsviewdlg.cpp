@@ -25,6 +25,7 @@
 #include <wx/statline.h>
 
 #include "../common/common.h"
+#include "../common/resources.h"
 #include "../models/meetingmodel.h"
 #include "../data/meetingdata.h"
 #include "../data/taskdata.h"
@@ -193,7 +194,7 @@ bool MeetingsViewDialog::Create(wxWindow* parent,
 
         // GetSizer()->Fit(this);
         // GetSizer()->SetSizeHints(this);
-        SetIcon(common::GetProgramIcon());
+        SetIcon(rc::GetProgramIcon());
         Center();
     }
 

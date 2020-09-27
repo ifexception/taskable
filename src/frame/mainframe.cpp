@@ -30,6 +30,7 @@
 #include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
+#include "../common/resources.h"
 #include "../common/util.h"
 #include "../common/version.h"
 
@@ -153,7 +154,7 @@ bool MainFrame::CreateFrame()
 
     bool success = Create();
     SetMinSize(wxSize(850, 580));
-    SetIcon(common::GetProgramIcon());
+    SetIcon(rc::GetProgramIcon());
 
     if (pConfig->IsBackupEnabled()) {
         svc::DatabaseBackupDeleter dbBackupDeleter(pConfig);
@@ -192,7 +193,7 @@ void MainFrame::CreateControls()
 
     pFeedbackButton = new wxBitmapButton(pStatusBar,
         IDC_FEEDBACK,
-        common::GetFeedbackIcon(),
+        rc::GetFeedbackIcon(),
         statusBarRect.GetPosition(),
         wxSize(32, 20),
         wxBU_LEFT | wxBU_RIGHT);
@@ -202,17 +203,17 @@ void MainFrame::CreateControls()
 
     auto entryTaskMenuItem =
         fileMenu->Append(ids::ID_NEW_ENTRY_TASK, wxT("New &Entry Task\tCtrl-E"), wxT("Create new entry task"));
-    entryTaskMenuItem->SetBitmap(common::GetEntryTaskIcon());
+    entryTaskMenuItem->SetBitmap(rc::GetEntryTaskIcon());
 
     auto timedTaskMenuItem =
         fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("New &Timed Task\tCtrl-T"), wxT("Create new timed task"));
-    timedTaskMenuItem->SetBitmap(common::GetTimedTaskIcon());
+    timedTaskMenuItem->SetBitmap(rc::GetTimedTaskIcon());
 
     fileMenu->AppendSeparator();
 
     auto stopwatchMenuItem =
         fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("Stop&watch\tCtrl-W"), wxT("Start task stopwatch"));
-    stopwatchMenuItem->SetBitmap(common::GetStopwatchIcon());
+    stopwatchMenuItem->SetBitmap(rc::GetStopwatchIcon());
 
     fileMenu->AppendSeparator();
     fileMenu->Append(ids::ID_NEW_EMPLOYER, wxT("New &Employer"), wxT("Create new employer"));
@@ -226,7 +227,7 @@ void MainFrame::CreateControls()
     fileMenu->AppendSubMenu(fileViewMenu, wxT("View"));
     fileMenu->AppendSeparator();
     auto exitMenuItem = fileMenu->Append(wxID_EXIT, wxT("Exit"), wxT("Exit the application"));
-    exitMenuItem->SetBitmap(common::GetQuitIcon());
+    exitMenuItem->SetBitmap(rc::GetQuitIcon());
 
     /* Edit Menu Control */
     auto editMenu = new wxMenu();
@@ -237,7 +238,7 @@ void MainFrame::CreateControls()
     editMenu->AppendSeparator();
     auto preferencesMenuItem =
         editMenu->Append(ids::ID_PREFERENCES, wxT("&Preferences\tCtrl-P"), wxT("Edit application preferences"));
-    preferencesMenuItem->SetBitmap(common::GetSettingsIcon());
+    preferencesMenuItem->SetBitmap(rc::GetSettingsIcon());
 
     /* Export Menu Control */
     // auto exportMenu = new wxMenu();
@@ -246,18 +247,18 @@ void MainFrame::CreateControls()
     auto toolsMenu = new wxMenu();
     auto restoreMenuItem = toolsMenu->Append(
         ids::ID_RESTORE_DATABASE, wxT("Restore Database"), wxT("Restore database to a previous point"));
-    restoreMenuItem->SetBitmap(common::GetDatabaseRestoreIcon());
+    restoreMenuItem->SetBitmap(rc::GetDatabaseRestoreIcon());
     auto backupMenuItem = toolsMenu->Append(
         ids::ID_BACKUP_DATABASE, wxT("Backup Database"), wxT("Backup database at the current snapshot"));
-    backupMenuItem->SetBitmap(common::GetDatabaseBackupIcon());
+    backupMenuItem->SetBitmap(rc::GetDatabaseBackupIcon());
 
     /* Help Menu Control */
     wxMenu* helpMenu = new wxMenu();
     auto helpMenuItem = helpMenu->Append(wxID_ABOUT);
-    helpMenuItem->SetBitmap(common::GetAboutIcon());
+    helpMenuItem->SetBitmap(rc::GetAboutIcon());
     auto checkUpdateMenuItem = helpMenu->Append(
         ids::ID_CHECK_FOR_UPDATE, wxT("Check for update"), wxT("Check if an update is available for application"));
-    checkUpdateMenuItem->SetBitmap(common::GetCheckForUpdateIcon());
+    checkUpdateMenuItem->SetBitmap(rc::GetCheckForUpdateIcon());
 
     /* Menu Bar */
     wxMenuBar* menuBar = new wxMenuBar();
@@ -439,7 +440,7 @@ void MainFrame::OnDismissInfoBar(wxTimerEvent& event)
 void MainFrame::OnAbout(wxCommandEvent& event)
 {
     wxAboutDialogInfo aboutInfo;
-    aboutInfo.SetIcon(common::GetProgramIcon64());
+    aboutInfo.SetIcon(rc::GetProgramIcon64());
     aboutInfo.SetName(common::GetProgramName());
     aboutInfo.SetVersion(wxString::Format("%d.%d.%d", TASKABLE_MAJOR, TASKABLE_MINOR, TASKABLE_PATCH));
     aboutInfo.SetDescription(wxT("A desktop application to help you manage how you've spent\n"

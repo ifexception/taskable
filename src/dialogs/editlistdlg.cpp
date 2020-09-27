@@ -40,6 +40,7 @@
 
 #include "../common/common.h"
 #include "../common/ids.h"
+#include "../common/resources.h"
 #include "../common/util.h"
 
 namespace app::dlg
@@ -85,7 +86,7 @@ bool EditListDialog::Create(wxWindow* parent,
         DataToControls();
 
         GetSizer()->Fit(this);
-        SetIcon(common::GetProgramIcon());
+        SetIcon(rc::GetProgramIcon());
         Center();
     }
 

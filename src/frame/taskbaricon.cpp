@@ -22,6 +22,7 @@
 #include <wx/taskbarbutton.h>
 
 #include "../common/common.h"
+#include "../common/resources.h"
 #include "../dialogs/taskitemdlg.h"
 #include "../dialogs/preferencesdlg.h"
 
@@ -48,7 +49,7 @@ TaskBarIcon::TaskBarIcon(wxFrame* parent,
 
 void TaskBarIcon::SetTaskBarIcon()
 {
-    SetIcon(wxIcon(common::GetProgramIcon()), common::GetProgramName());
+    SetIcon(wxIcon(rc::GetProgramIcon()), common::GetProgramName());
 }
 
 wxMenu* TaskBarIcon::CreatePopupMenu()
@@ -56,18 +57,18 @@ wxMenu* TaskBarIcon::CreatePopupMenu()
     auto menu = new wxMenu();
 
     auto entryMenu = menu->Append(ID_ADD_ENTRY_TASK, wxT("Add Entry Task"));
-    entryMenu->SetBitmap(common::GetEntryTaskIcon());
+    entryMenu->SetBitmap(rc::GetEntryTaskIcon());
 
     auto timedMenuItem = menu->Append(ID_ADD_TIMED_TASK, wxT("Add Timed Task"));
-    timedMenuItem->SetBitmap(common::GetTimedTaskIcon());
+    timedMenuItem->SetBitmap(rc::GetTimedTaskIcon());
 
     menu->AppendSeparator();
     auto preferencesMenuItem = menu->Append(ID_SETTINGS, wxT("Preferences"));
-    preferencesMenuItem->SetBitmap(common::GetSettingsIcon());
+    preferencesMenuItem->SetBitmap(rc::GetSettingsIcon());
 
     menu->AppendSeparator();
     auto exitMenuItem = menu->Append(wxID_EXIT, wxT("Exit"));
-    exitMenuItem->SetBitmap(common::GetQuitIcon());
+    exitMenuItem->SetBitmap(rc::GetQuitIcon());
 
     return menu;
 }

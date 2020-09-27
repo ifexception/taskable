@@ -26,6 +26,7 @@
 #include <wx/statline.h>
 
 #include "../common/common.h"
+#include "../common/resources.h"
 #include "../common/util.h"
 
 using json = nlohmann::json;
@@ -127,7 +128,7 @@ void CheckForUpdateDialog::Create(wxWindow* parent,
         CreateControls();
 
         GetSizer()->Fit(this);
-        SetIcon(common::GetProgramIcon());
+        SetIcon(rc::GetProgramIcon());
         Center();
     }
 }

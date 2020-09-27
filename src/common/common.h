@@ -46,20 +46,6 @@ void ForRequiredNumber(wxWindow* window, wxString label);
 void ForInvalidTime(wxWindow* window, wxString message);
 } // namespace validations
 
-// TODO Check licensing https://icons8.com/icon/pack/time-and-date/cute-clipart
-extern const char** GetProgramIcon();
-extern const char** GetAboutIcon();
-extern const char** GetCheckForUpdateIcon();
-extern const char** GetEntryTaskIcon();
-extern const char** GetTimedTaskIcon();
-extern const char** GetStopwatchIcon();
-extern const char** GetDatabaseRestoreIcon();
-extern const char** GetDatabaseBackupIcon();
-extern const char** GetProgramIcon64();
-extern const char** GetSettingsIcon();
-extern const char** GetQuitIcon();
-extern const char** GetFeedbackIcon();
-
 std::string GetLicense();
 
 wxString GetVersion();

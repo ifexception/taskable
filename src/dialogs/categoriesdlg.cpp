@@ -26,6 +26,7 @@
 #include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
+#include "../common/resources.h"
 #include "../common/util.h"
 
 #include "../data/projectdata.h"
@@ -82,7 +83,7 @@ bool CategoriesDialog::Create(wxWindow* parent,
 
         GetSizer()->Fit(this);
         GetSizer()->SetSizeHints(this);
-        SetIcon(common::GetProgramIcon());
+        SetIcon(rc::GetProgramIcon());
         Center();
     }
 

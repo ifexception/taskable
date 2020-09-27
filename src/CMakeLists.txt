@@ -26,6 +26,7 @@ message (STATUS "nlohmann_json_FOUND: ${nlohmann_json_FOUND}")
 set (SRC
     "common/ids.cpp"
     "common/common.cpp"
+    "common/resources.cpp"
     "common/util.cpp"
     "common/datetraverser.cpp"
     "common/constants.cpp"

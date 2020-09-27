@@ -26,6 +26,7 @@
 #include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
+#include "../common/resources.h"
 #include "../common/util.h"
 
 namespace app::dlg
@@ -85,7 +86,7 @@ bool EmployerDialog::Create(wxWindow* parent,
         }
 
         GetSizer()->Fit(this);
-        SetIcon(common::GetProgramIcon());
+        SetIcon(rc::GetProgramIcon());
         Centre();
     }
 
