@@ -56,6 +56,7 @@ EmployerDialog::EmployerDialog(wxWindow* parent,
     : pLogger(logger)
     , bIsEdit(isEdit)
     , mEmployerId(employerId)
+    , pEmployer(std::make_unique<model::EmployerModel>())
     , mData()
 {
     Create(parent,
