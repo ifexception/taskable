@@ -39,7 +39,7 @@ ProjectModel::ProjectModel()
     , mCurrencyId(-1)
     , pEmployer(std::make_unique<EmployerModel>())
     , pClient(nullptr)
-    , pRateType(std::make_unique<RateTypeModel>())
+    , pRateType(nullptr)
     , pCurrency(nullptr)
 {
 }
