@@ -612,16 +612,16 @@ void TaskItemDialog::DataToControls()
     auto bottomDateContext = wxDateTime::Now().SetYear(bottomRangeDate);
     pDateContextCtrl->SetRange(bottomDateContext, mDateContext);
 
-    if (taskItem->GetProject()->HasClientLinked()) {
+    if (pProject->HasClientLinked()) {
         pTaskContextTextCtrl->SetLabel(wxString::Format(TaskContextWithClient,
-            wxString(taskItem->GetProject()->GetEmployer()->GetName()),
-            wxString(taskItem->GetProject()->GetClient()->GetName())));
+            wxString(pProject->GetEmployer()->GetName()),
+            wxString(pProject->GetClient()->GetName())));
     } else {
         pTaskContextTextCtrl->SetLabel(
-            wxString::Format(TaskContextWithoutClient, wxString(taskItem->GetProject()->GetEmployer()->GetName())));
+            wxString::Format(TaskContextWithoutClient, wxString(pProject->GetEmployer()->GetName())));
     }
 
-    pProjectChoiceCtrl->SetStringSelection(taskItem->GetProject()->GetDisplayName());
+    pProjectChoiceCtrl->SetStringSelection(pProject->GetDisplayName());
 
     if (mType == constants::TaskItemTypes::TimedTask) {
         pStartTimeCtrl->SetValue(*taskItem->GetStartTime());
