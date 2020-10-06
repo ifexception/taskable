@@ -2,6 +2,8 @@
 
 ### 1.4.0
 - Outlook meetings integration
+- Fixed bug when editing a employer
+- Database query performance improvements
 
 ### 1.3.0
 - Use connection pooling for SQLite
