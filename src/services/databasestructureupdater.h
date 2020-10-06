@@ -33,34 +33,16 @@ class DatabaseStructureUpdater final
 {
 public:
     DatabaseStructureUpdater(std::shared_ptr<spdlog::logger> logger);
-    ~DatabaseStructureUpdater() = default;
+    ~DatabaseStructureUpdater();
 
     bool ExecuteScripts();
 
 private:
+    bool DropProjectsHoursColumn();
     bool CreateMeetingsTableScript();
     bool AddMeetingForeignKeyToTaskItemsTable();
 
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<db::SqliteConnection> pConnection;
 };
-
-struct Scripts {
-    std::wstring CreateMeetingsTable = L"CREATE TABLE IF NOT EXISTS meetings "
-                                       "(meeting_id INTEGER PRIMARY KEY NOT NULL,"
-                                       "attended INTEGER NULL,"
-                                       "duration INTEGER NOT NULL,"
-                                       "starting TEXT NOT NULL,"
-                                       "ending TEXT NOT NULL,"
-                                       "location TEXT NOT NULL,"
-                                       "subject TEXT NOT NULL,"
-                                       "body TEXT NOT NULL,"
-                                       "date_created INTEGER NOT NULL DEFAULT(strftime('%s', 'now', 'localtime')),"
-                                       "date_modified INTEGER NOT NULL DEFAULT(strftime('%s', 'now', 'localtime')),"
-                                       "is_active INTEGER NOT NULL,"
-                                       "task_id INTEGER NOT NULL,"
-                                       "FOREIGN KEY(task_id) REFERENCES tasks(task_id));";
-
-    std::wstring AddForeignKeyToTaskItemsTable;
-};
-}
+} // namespace app::svc
