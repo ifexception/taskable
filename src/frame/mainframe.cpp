@@ -733,6 +733,14 @@ void MainFrame::OnPopupMenuDelete(wxCommandEvent& event)
     }
 
     ShowInfoBarMessageForDelete(true);
+
+    auto selectedDate = pDatePickerCtrl->GetValue();
+
+    CalculateTotalTime(selectedDate);
+
+    pListCtrl->DeleteItem(mItemIndex);
+
+    mItemIndex = -1;
 }
 
 void MainFrame::OnColumnBeginDrag(wxListEvent& event)
@@ -824,17 +832,6 @@ void MainFrame::OnTaskDeleted(wxCommandEvent& event)
     auto selectedDate = pDatePickerCtrl->GetValue();
 
     CalculateTotalTime(selectedDate);
-
-    int id = event.GetId();
-
-    data::TaskItemData taskItemData;
-    std::unique_ptr<model::TaskItemModel> taskItem;
-    try {
-        taskItemData.Delete(id);
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on TaskItemData::GetById() - {0:d} : {1}", e.get_code(), e.what());
-        return;
-    }
 
     pListCtrl->DeleteItem(mItemIndex);
 

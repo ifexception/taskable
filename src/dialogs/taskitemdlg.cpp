@@ -992,9 +992,9 @@ bool TaskItemDialog::TransferDataAndValidate()
     }
     pTaskItem->SetProjectId(projectId);
 
-    if (bIsEdit) {
+    // if (bIsEdit) {
         pTaskItem->SetProject(std::move(mProjectData.GetById(projectId)));
-    }
+    // }
 
     if (mType == constants::TaskItemTypes::TimedTask) {
         auto startTime = pStartTimeCtrl->GetValue();

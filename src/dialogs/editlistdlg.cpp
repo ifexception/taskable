@@ -388,7 +388,7 @@ void CategoryStrategy::CreateControl(wxListCtrl* control)
     dateModifiedColumn.SetAlign(wxLIST_FORMAT_CENTER);
     dateModifiedColumn.SetId(2);
     dateModifiedColumn.SetText(wxT("Modified"));
-    dateModifiedColumn.SetWidth(148);
+    dateModifiedColumn.SetWidth(146);
     control->InsertColumn(2, dateModifiedColumn);
 }
 
