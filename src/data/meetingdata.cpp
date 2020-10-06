@@ -19,8 +19,6 @@
 
 #include "meetingdata.h"
 
-#include <spdlog/spdlog.h>
-
 #include "../common/util.h"
 
 namespace app::data
@@ -28,15 +26,11 @@ namespace app::data
 MeetingData::MeetingData()
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
-    spdlog::get("msvc")->debug("ACQUIRE connection in TaskItemData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 MeetingData::~MeetingData()
 {
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
-    spdlog::get("msvc")->debug("RELEASE connection in TaskItemData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 int64_t MeetingData::Create(std::unique_ptr<model::MeetingModel> meeting, int64_t taskId)

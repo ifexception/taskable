@@ -23,7 +23,7 @@
 #include <memory>
 #include <vector>
 
-#include <spdlog/spdlog.h>
+#include <wx/string.h>
 
 #include "../database/connectionprovider.h"
 #include "../database/sqliteconnection.h"

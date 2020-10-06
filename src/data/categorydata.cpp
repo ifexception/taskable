@@ -19,37 +19,21 @@
 
 #include "categorydata.h"
 
-#include <spdlog/spdlog.h>
-
-#include "projectdata.h"
+#include <wx/string.h>
 
 #include "../common/util.h"
+#include "projectdata.h"
 
 namespace app::data
 {
 CategoryData::CategoryData()
-    : bBorrowedConnection(false)
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
-    spdlog::get("msvc")->debug("ACQUIRE connection in CategoryData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
-}
-
-CategoryData::CategoryData(std::shared_ptr<db::SqliteConnection> connection)
-    : bBorrowedConnection(true)
-{
-    pConnection = connection;
-    spdlog::get("msvc")->debug("BORROW connection in CategoryData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 CategoryData::~CategoryData()
 {
-    if (!bBorrowedConnection) {
-        db::ConnectionProvider::Get().Handle()->Release(pConnection);
-        spdlog::get("msvc")->debug("RELEASE connection in CategoryData|ConnectionTally: {0:d}",
-            db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
-    }
+    db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 
 int64_t CategoryData::Create(std::unique_ptr<model::CategoryModel> category)
@@ -65,19 +49,63 @@ std::unique_ptr<model::CategoryModel> CategoryData::GetById(const int id)
 {
     std::unique_ptr<model::CategoryModel> category = nullptr;
 
-    *pConnection->DatabaseExecutableHandle() << CategoryData::getCategoryById << id >> [&](int categoryId,
-                                                                                           std::string categoryName,
-                                                                                           unsigned int color,
-                                                                                           int dateCreated,
-                                                                                           int dateModified,
-                                                                                           int isActive,
-                                                                                           int projectId) {
-        category = std::make_unique<model::CategoryModel>(
-            categoryId, categoryName, color, dateCreated, dateModified, isActive);
+    *pConnection->DatabaseExecutableHandle() << CategoryData::getCategoryById << id >>
+        [&](int categoriesCategoryId,
+            std::string categoriesName,
+            unsigned int categoriesColor,
+            int categoriesDateCreated,
+            int categoriesDateModified,
+            int categoriesIsActive,
+            int categoriesProjectId,
+            int projectsProjectId,
+            std::string projectsName,
+            std::string projectsDisplayName,
+            int projectsBillable,
+            int projectsIsDefault,
+            std::unique_ptr<double> projectsRate,
+            int projectsDateCreated,
+            int projectsDateModified,
+            int projectsIsActive,
+            int projectsEmployerId,
+            std::unique_ptr<int> projectsClientId,
+            std::unique_ptr<int> projectsRateTypeId,
+            std::unique_ptr<int> projectsCurrencyId) {
+            category = std::make_unique<model::CategoryModel>(categoriesCategoryId,
+                categoriesName,
+                categoriesColor,
+                categoriesDateCreated,
+                categoriesDateModified,
+                categoriesIsActive);
 
-        data::ProjectData projectData(pConnection);
-        category->SetProject(std::move(projectData.GetById(projectId)));
-    };
+            auto project = std::make_unique<model::ProjectModel>(projectsProjectId,
+                wxString(projectsName),
+                wxString(projectsDisplayName),
+                projectsBillable,
+                projectsIsDefault,
+                projectsDateCreated,
+                projectsDateModified,
+                projectsIsActive);
+
+            if (projectsRate != nullptr) {
+                project->SetRate(std::move(projectsRate));
+            }
+
+            project->SetEmployerId(projectsEmployerId);
+
+            if (projectsClientId != nullptr) {
+                project->SetClientId(*projectsClientId);
+            }
+
+            if (projectsRateTypeId != nullptr) {
+                project->SetRateTypeId(*projectsRateTypeId);
+            }
+
+            if (projectsCurrencyId != nullptr) {
+                project->SetCurrencyId(*projectsCurrencyId);
+            }
+
+            category->SetProject(std::move(project));
+        };
 
     return category;
 }
@@ -101,18 +129,61 @@ std::vector<std::unique_ptr<model::CategoryModel>> CategoryData::GetByProjectId(
     std::vector<std::unique_ptr<model::CategoryModel>> categories;
 
     *pConnection->DatabaseExecutableHandle() << CategoryData::getCategoriesByProjectId << projectId >>
-        [&](int categoryId,
-            std::string categoryName,
-            unsigned int color,
-            int dateCreated,
-            int dateModified,
-            int isActive,
-            int projectId) {
-            auto category = std::make_unique<model::CategoryModel>(
-                categoryId, categoryName, color, dateCreated, dateModified, isActive);
+        [&](int categoriesCategoryId,
+            std::string categoriesName,
+            unsigned int categoriesColor,
+            int categoriesDateCreated,
+            int categoriesDateModified,
+            int categoriesIsActive,
+            int categoriesProjectId,
+            int projectsProjectId,
+            std::string projectsName,
+            std::string projectsDisplayName,
+            int projectsBillable,
+            int projectsIsDefault,
+            std::unique_ptr<double> projectsRate,
+            int projectsDateCreated,
+            int projectsDateModified,
+            int projectsIsActive,
+            int projectsEmployerId,
+            std::unique_ptr<int> projectsClientId,
+            std::unique_ptr<int> projectsRateTypeId,
+            std::unique_ptr<int> projectsCurrencyId) {
+            auto category = std::make_unique<model::CategoryModel>(categoriesCategoryId,
+                categoriesName,
+                categoriesColor,
+                categoriesDateCreated,
+                categoriesDateModified,
+                categoriesIsActive);
 
-            data::ProjectData projectData(pConnection);
-            category->SetProject(std::move(projectData.GetById(projectId)));
+            auto project = std::make_unique<model::ProjectModel>(projectsProjectId,
+                wxString(projectsName),
+                wxString(projectsDisplayName),
+                projectsBillable,
+                projectsIsDefault,
+                projectsDateCreated,
+                projectsDateModified,
+                projectsIsActive);
+
+            if (projectsRate != nullptr) {
+                project->SetRate(std::move(projectsRate));
+            }
+
+            project->SetEmployerId(projectsEmployerId);
+
+            if (projectsClientId != nullptr) {
+                project->SetClientId(*projectsClientId);
+            }
+
+            if (projectsRateTypeId != nullptr) {
+                project->SetRateTypeId(*projectsRateTypeId);
+            }
+
+            if (projectsCurrencyId != nullptr) {
+                project->SetCurrencyId(*projectsCurrencyId);
+            }
+
+            category->SetProject(std::move(project));
             categories.push_back(std::move(category));
         };
 
@@ -123,20 +194,64 @@ std::vector<std::unique_ptr<model::CategoryModel>> CategoryData::GetAll()
 {
     std::vector<std::unique_ptr<model::CategoryModel>> categories;
 
-    *pConnection->DatabaseExecutableHandle() << CategoryData::getCategories >> [&](int categoryId,
-                                                                                   std::string categoryName,
-                                                                                   unsigned int color,
-                                                                                   int dateCreated,
-                                                                                   int dateModified,
-                                                                                   int isActive,
-                                                                                   int projectId) {
-        auto category = std::make_unique<model::CategoryModel>(
-            categoryId, categoryName, color, dateCreated, dateModified, isActive);
+    *pConnection->DatabaseExecutableHandle() << CategoryData::getCategories >>
+        [&](int categoriesCategoryId,
+            std::string categoriesName,
+            unsigned int categoriesColor,
+            int categoriesDateCreated,
+            int categoriesDateModified,
+            int categoriesIsActive,
+            int categoriesProjectId,
+            int projectsProjectId,
+            std::string projectsName,
+            std::string projectsDisplayName,
+            int projectsBillable,
+            int projectsIsDefault,
+            std::unique_ptr<double> projectsRate,
+            int projectsDateCreated,
+            int projectsDateModified,
+            int projectsIsActive,
+            int projectsEmployerId,
+            std::unique_ptr<int> projectsClientId,
+            std::unique_ptr<int> projectsRateTypeId,
+            std::unique_ptr<int> projectsCurrencyId) {
+            auto category = std::make_unique<model::CategoryModel>(categoriesCategoryId,
+                categoriesName,
+                categoriesColor,
+                categoriesDateCreated,
+                categoriesDateModified,
+                categoriesIsActive);
 
-        data::ProjectData projectData(pConnection);
-        category->SetProject(std::move(projectData.GetById(projectId)));
-        categories.push_back(std::move(category));
-    };
+            auto project = std::make_unique<model::ProjectModel>(projectsProjectId,
+                wxString(projectsName),
+                wxString(projectsDisplayName),
+                projectsBillable,
+                projectsIsDefault,
+                projectsDateCreated,
+                projectsDateModified,
+                projectsIsActive);
+
+            if (projectsRate != nullptr) {
+                project->SetRate(std::move(projectsRate));
+            }
+
+            project->SetEmployerId(projectsEmployerId);
+
+            if (projectsClientId != nullptr) {
+                project->SetClientId(*projectsClientId);
+            }
+
+            if (projectsRateTypeId != nullptr) {
+                project->SetRateTypeId(*projectsRateTypeId);
+            }
+
+            if (projectsCurrencyId != nullptr) {
+                project->SetCurrencyId(*projectsCurrencyId);
+            }
+
+            category->SetProject(std::move(project));
+            categories.push_back(std::move(category));
+        };
 
     return categories;
 }
@@ -150,7 +265,20 @@ const std::string CategoryData::getCategoryById = "SELECT categories.category_id
                                                   "categories.date_created, "
                                                   "categories.date_modified, "
                                                   "categories.is_active, "
-                                                  "projects.project_id "
+                                                  "categories.project_id, "
+                                                  "projects.project_id, "
+                                                  "projects.name AS project_name, "
+                                                  "projects.display_name, "
+                                                  "projects.billable, "
+                                                  "projects.is_default, "
+                                                  "projects.rate, "
+                                                  "projects.date_created, "
+                                                  "projects.date_modified, "
+                                                  "projects.is_active, "
+                                                  "projects.employer_id, "
+                                                  "projects.client_id, "
+                                                  "projects.rate_type_id, "
+                                                  "projects.currency_id "
                                                   "FROM categories "
                                                   "INNER JOIN projects ON categories.project_id = projects.project_id "
                                                   "WHERE categories.category_id = ? "
@@ -162,15 +290,30 @@ const std::string CategoryData::updateCategory = "UPDATE categories SET name = ?
 const std::string CategoryData::deleteCategory = "UPDATE categories SET is_active = 0, date_modified = ? "
                                                  "WHERE category_id = ?";
 
-const std::string CategoryData::getCategoriesByProjectId = "SELECT categories.category_id, "
-                                                           "categories.name, "
-                                                           "categories.color, "
-                                                           "categories.date_created, "
-                                                           "categories.date_modified, "
-                                                           "categories.is_active, "
-                                                           "categories.project_id "
-                                                           "FROM categories "
-                                                           "WHERE categories.project_id = ?";
+const std::string CategoryData::getCategoriesByProjectId =
+    "SELECT categories.category_id, "
+    "categories.name, "
+    "categories.color, "
+    "categories.date_created, "
+    "categories.date_modified, "
+    "categories.is_active, "
+    "categories.project_id, "
+    "projects.project_id, "
+    "projects.name AS project_name, "
+    "projects.display_name, "
+    "projects.billable, "
+    "projects.is_default, "
+    "projects.rate, "
+    "projects.date_created, "
+    "projects.date_modified, "
+    "projects.is_active, "
+    "projects.employer_id, "
+    "projects.client_id, "
+    "projects.rate_type_id, "
+    "projects.currency_id "
+    "FROM categories "
+    "INNER JOIN projects ON categories.project_id = projects.project_id "
+    "WHERE categories.project_id = ?";
 
 const std::string CategoryData::getCategories = "SELECT categories.category_id, "
                                                 "categories.name, "
@@ -178,7 +321,21 @@ const std::string CategoryData::getCategories = "SELECT categories.category_id, 
                                                 "categories.date_created, "
                                                 "categories.date_modified, "
                                                 "categories.is_active, "
-                                                "categories.project_id "
+                                                "categories.project_id, "
+                                                "projects.project_id, "
+                                                "projects.name AS project_name, "
+                                                "projects.display_name, "
+                                                "projects.billable, "
+                                                "projects.is_default, "
+                                                "projects.rate, "
+                                                "projects.date_created, "
+                                                "projects.date_modified, "
+                                                "projects.is_active, "
+                                                "projects.employer_id, "
+                                                "projects.client_id, "
+                                                "projects.rate_type_id, "
+                                                "projects.currency_id "
                                                 "FROM categories "
+                                                "INNER JOIN projects ON categories.project_id = projects.project_id "
                                                 "WHERE categories.is_active = 1";
 } // namespace app::data

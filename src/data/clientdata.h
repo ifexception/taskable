@@ -33,7 +33,6 @@ class ClientData final
 {
 public:
     ClientData();
-    ClientData(std::shared_ptr<db::SqliteConnection> connection);
     ~ClientData();
 
     int64_t Create(std::unique_ptr<model::ClientModel> client);
@@ -43,12 +42,8 @@ public:
     std::vector<std::unique_ptr<model::ClientModel>> GetByEmployerId(const int employerId);
     std::vector<std::unique_ptr<model::ClientModel>> GetAll();
 
-    int64_t GetLastInsertId() const;
-
 private:
     std::shared_ptr<db::SqliteConnection> pConnection;
-
-    bool bBorrowedConnection;
 
     static const std::string createClient;
     static const std::string getClientsByEmployerId;

@@ -19,8 +19,6 @@
 
 #include "taskitemdata.h"
 
-#include <spdlog/spdlog.h>
-
 #include "../common/util.h"
 
 #include "projectdata.h"
@@ -33,15 +31,11 @@ namespace app::data
 TaskItemData::TaskItemData()
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
-    spdlog::get("msvc")->debug("ACQUIRE connection in TaskItemData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 TaskItemData::~TaskItemData()
 {
     db::ConnectionProvider::Get().Handle()->Release(pConnection);
-    spdlog::get("msvc")->debug("RELEASE connection in TaskItemData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 int64_t TaskItemData::Create(std::unique_ptr<model::TaskItemModel> taskItem)
@@ -58,8 +52,6 @@ int64_t TaskItemData::Create(std::unique_ptr<model::TaskItemModel> taskItem)
 
     ps << taskItem->GetDuration().ToStdString() << taskItem->GetDescription().ToStdString();
 
-    data::ProjectData projectData(pConnection);
-    taskItem->SetProject(std::move(projectData.GetById(taskItem->GetProjectId())));
     if (taskItem->GetProject()->IsNonBillableScenario()) {
         ps << taskItem->IsBillable() << nullptr;
     }
@@ -91,59 +83,156 @@ std::unique_ptr<model::TaskItemModel> TaskItemData::GetById(const int taskItemId
     std::unique_ptr<model::TaskItemModel> taskItem = nullptr;
 
     *pConnection->DatabaseExecutableHandle() << TaskItemData::getTaskItemById << taskItemId >>
-        [&](int taskItemId,
-            std::unique_ptr<std::string> startTime,
-            std::unique_ptr<std::string> endTime,
-            std::string duration,
-            std::string description,
-            bool billable,
-            std::unique_ptr<double> calculatedRate,
-            int dateCreated,
-            int dateModified,
-            bool isActive,
-            int taskItemTypeId,
-            int projectId,
-            int categoryId,
-            int taskId,
-            std::unique_ptr<int64_t> meetingId) {
-            taskItem = std::make_unique<model::TaskItemModel>(
-                taskItemId, duration, description, billable, dateCreated, dateModified, isActive);
+        [&](int taskItemsTaskItemId,
+            std::unique_ptr<std::string> taskItemsStartTime,
+            std::unique_ptr<std::string> taskItemsEndTime,
+            std::string taskItemsDuration,
+            std::string taskItemsDescription,
+            bool taskItemsBillable,
+            std::unique_ptr<double> taskItemsCalculatedRate,
+            int taskItemsDateCreated,
+            int taskItemsDateModified,
+            bool taskItemsIsActive,
+            int taskItemsTaskItemTypeId,
+            int taskItemsProjectId,
+            int taskItemsCategoryId,
+            int taskItemsTaskId,
+            std::unique_ptr<int64_t> taskItemsMeetingId,
+            int taskItemTypesTaskItemTypeId,
+            std::string taskItemTypesName,
+            int projectsProjectId,
+            std::string projectsName,
+            std::string projectsDisplayName,
+            int projectsBillable,
+            int projectsIsDefault,
+            std::unique_ptr<double> projectsRate,
+            int projectsDateCreated,
+            int projectsDateModified,
+            int projectsIsActive,
+            int projectsEmployerId,
+            std::unique_ptr<int> projectsClientId,
+            std::unique_ptr<int> projectsRateTypeId,
+            std::unique_ptr<int> projectsCurrencyId,
+            int categoriesCategoryId,
+            std::string categoriesName,
+            unsigned int categoriesColor,
+            int categoriesDateCreated,
+            int categoriesDateModified,
+            int categoriesIsActive,
+            int categoriesProjectId,
+            int tasksTaskId,
+            std::string tasksDate,
+            int tasksDateCreated,
+            int tasksDateModified,
+            bool tasksIsActive,
+            std::unique_ptr<int> meetingsMeetingId,
+            std::unique_ptr<bool> meetingsAttended,
+            std::unique_ptr<int> meetingsDuration,
+            std::unique_ptr<std::string> meetingsStarting,
+            std::unique_ptr<std::string> meetingsEnding,
+            std::unique_ptr<std::string> meetingsLocation,
+            std::unique_ptr<std::string> meetingsSubject,
+            std::unique_ptr<std::string> meetingsBody,
+            std::unique_ptr<int> meetingsDateCreated,
+            std::unique_ptr<int> meetingsDateModified,
+            std::unique_ptr<bool> meetingsIsActive,
+            std::unique_ptr<int> meetingsTaskId) {
+            taskItem = std::make_unique<model::TaskItemModel>(taskItemsTaskItemId,
+                taskItemsDuration,
+                taskItemsDescription,
+                taskItemsBillable,
+                taskItemsDateCreated,
+                taskItemsDateModified,
+                taskItemsIsActive);
 
-            if (startTime == nullptr && endTime == nullptr) {
-                taskItem->SetDurationTime(wxString(duration));
+            if (taskItemsStartTime == nullptr && taskItemsEndTime == nullptr) {
+                taskItem->SetDurationTime(wxString(taskItemsDuration));
             }
 
-            if (startTime != nullptr && endTime != nullptr) {
-                taskItem->SetStartTime(wxString(*startTime));
-                taskItem->SetEndTime(wxString(*endTime));
+            if (taskItemsStartTime != nullptr && taskItemsEndTime != nullptr) {
+                taskItem->SetStartTime(wxString(*taskItemsStartTime));
+                taskItem->SetEndTime(wxString(*taskItemsEndTime));
             }
 
-            if (calculatedRate != nullptr) {
-                taskItem->SetCalculatedRate(std::move(calculatedRate));
+            if (taskItemsCalculatedRate != nullptr) {
+                taskItem->SetCalculatedRate(std::move(taskItemsCalculatedRate));
             }
 
-            taskItem->SetTaskItemTypeId(taskItemTypeId);
-            data::TaskItemTypeData taskItemTypeData;
-            auto taskItemType = taskItemTypeData.GetById(taskItemTypeId);
+            taskItem->SetTaskItemTypeId(taskItemsTaskItemTypeId);
+
+            auto taskItemType =
+                std::make_unique<model::TaskItemTypeModel>(taskItemTypesTaskItemTypeId, wxString(taskItemTypesName));
             taskItem->SetTaskItemType(std::move(taskItemType));
 
-            taskItem->SetProjectId(projectId);
-            data::ProjectData projectData(pConnection);
-            auto project = projectData.GetById(projectId);
+            taskItem->SetProjectId(taskItemsProjectId);
+
+            auto project = std::make_unique<model::ProjectModel>(projectsProjectId,
+                wxString(projectsName),
+                wxString(projectsDisplayName),
+                projectsBillable,
+                projectsIsDefault,
+                projectsDateCreated,
+                projectsDateModified,
+                projectsIsActive);
+
+            if (projectsRate != nullptr) {
+                project->SetRate(std::move(projectsRate));
+            }
+
+            project->SetEmployerId(projectsEmployerId);
+
+            if (projectsClientId != nullptr) {
+                project->SetClientId(*projectsClientId);
+            }
+
+            if (projectsRateTypeId != nullptr) {
+                project->SetRateTypeId(*projectsRateTypeId);
+            }
+
+            if (projectsCurrencyId != nullptr) {
+                project->SetCurrencyId(*projectsCurrencyId);
+            }
             taskItem->SetProject(std::move(project));
 
-            taskItem->SetCategoryId(categoryId);
-            data::CategoryData categoryData(pConnection);
-            auto category = categoryData.GetById(categoryId);
+            taskItem->SetCategoryId(taskItemsCategoryId);
+
+            auto category = std::make_unique<model::CategoryModel>(categoriesCategoryId,
+                categoriesName,
+                categoriesColor,
+                categoriesDateCreated,
+                categoriesDateModified,
+                categoriesIsActive);
             taskItem->SetCategory(std::move(category));
 
-            taskItem->SetTaskId(taskId);
+            taskItem->SetTaskId(taskItemsTaskId);
 
-            data::TaskData taskData(pConnection);
-            auto task = taskData.GetById(taskId);
+            auto task = std::make_unique<model::TaskModel>(
+                tasksTaskId, wxString(tasksDate), tasksDateCreated, tasksDateModified, tasksIsActive);
             taskItem->SetTask(std::move(task));
 
-            taskItem->SetMeetingId(std::move(meetingId));
+            if (taskItemsMeetingId != nullptr) {
+                taskItem->SetMeetingId(std::move(taskItemsMeetingId));
+
+                auto meeting = std::make_unique<model::MeetingModel>(*meetingsMeetingId,
+                    *meetingsDuration,
+                    *meetingsLocation,
+                    *meetingsSubject,
+                    *meetingsBody,
+                    *meetingsDateCreated,
+                    *meetingsDateModified,
+                    *meetingsIsActive);
+
+                meeting->SetStart(wxString(*meetingsStarting));
+                meeting->SetEnd(wxString(*meetingsEnding));
+
+                meeting->SetTaskId(*meetingsTaskId);
+
+                if (meetingsAttended != nullptr) {
+                    meeting->Attended(std::move(meetingsAttended));
+                }
+
+                taskItem->SetMeeting(std::move(meeting));
+            }
         };
 
     return std::move(taskItem);
@@ -200,56 +289,156 @@ std::vector<std::unique_ptr<model::TaskItemModel>> TaskItemData::GetByDate(const
     std::vector<std::unique_ptr<model::TaskItemModel>> taskItems;
 
     *pConnection->DatabaseExecutableHandle() << TaskItemData::getTaskItemsByDate << date >>
-        [&](int taskItemId,
-            std::string taskDate,
-            std::unique_ptr<std::string> startTime,
-            std::unique_ptr<std::string> endTime,
-            std::string duration,
-            std::string description,
-            bool billable,
-            std::unique_ptr<double> calculatedRate,
-            int dateCreated,
-            int dateModified,
-            bool isActive,
-            int taskItemTypeId,
-            int projectId,
-            int categoryId,
-            int taskId) {
-            auto taskItem = std::make_unique<model::TaskItemModel>(
-                taskItemId, duration, description, billable, dateCreated, dateModified, isActive);
+        [&](int taskItemsTaskItemId,
+            std::unique_ptr<std::string> taskItemsStartTime,
+            std::unique_ptr<std::string> taskItemsEndTime,
+            std::string taskItemsDuration,
+            std::string taskItemsDescription,
+            bool taskItemsBillable,
+            std::unique_ptr<double> taskItemsCalculatedRate,
+            int taskItemsDateCreated,
+            int taskItemsDateModified,
+            bool taskItemsIsActive,
+            int taskItemsTaskItemTypeId,
+            int taskItemsProjectId,
+            int taskItemsCategoryId,
+            int taskItemsTaskId,
+            std::unique_ptr<int64_t> taskItemsMeetingId,
+            int taskItemTypesTaskItemTypeId,
+            std::string taskItemTypesName,
+            int projectsProjectId,
+            std::string projectsName,
+            std::string projectsDisplayName,
+            int projectsBillable,
+            int projectsIsDefault,
+            std::unique_ptr<double> projectsRate,
+            int projectsDateCreated,
+            int projectsDateModified,
+            int projectsIsActive,
+            int projectsEmployerId,
+            std::unique_ptr<int> projectsClientId,
+            std::unique_ptr<int> projectsRateTypeId,
+            std::unique_ptr<int> projectsCurrencyId,
+            int categoriesCategoryId,
+            std::string categoriesName,
+            unsigned int categoriesColor,
+            int categoriesDateCreated,
+            int categoriesDateModified,
+            int categoriesIsActive,
+            int categoriesProjectId,
+            int tasksTaskId,
+            std::string tasksDate,
+            int tasksDateCreated,
+            int tasksDateModified,
+            bool tasksIsActive,
+            std::unique_ptr<int> meetingsMeetingId,
+            std::unique_ptr<bool> meetingsAttended,
+            std::unique_ptr<int> meetingsDuration,
+            std::unique_ptr<std::string> meetingsStarting,
+            std::unique_ptr<std::string> meetingsEnding,
+            std::unique_ptr<std::string> meetingsLocation,
+            std::unique_ptr<std::string> meetingsSubject,
+            std::unique_ptr<std::string> meetingsBody,
+            std::unique_ptr<int> meetingsDateCreated,
+            std::unique_ptr<int> meetingsDateModified,
+            std::unique_ptr<bool> meetingsIsActive,
+            std::unique_ptr<int> meetingsTaskId) {
+            auto taskItem = std::make_unique<model::TaskItemModel>(taskItemsTaskItemId,
+                taskItemsDuration,
+                taskItemsDescription,
+                taskItemsBillable,
+                taskItemsDateCreated,
+                taskItemsDateModified,
+                taskItemsIsActive);
 
-            if (startTime == nullptr && endTime == nullptr) {
-                taskItem->SetDurationTime(wxString(duration));
+            if (taskItemsStartTime == nullptr && taskItemsEndTime == nullptr) {
+                taskItem->SetDurationTime(wxString(taskItemsDuration));
             }
 
-            if (startTime != nullptr && endTime != nullptr) {
-                taskItem->SetStartTime(wxString(*startTime));
-                taskItem->SetEndTime(wxString(*endTime));
+            if (taskItemsStartTime != nullptr && taskItemsEndTime != nullptr) {
+                taskItem->SetStartTime(wxString(*taskItemsStartTime));
+                taskItem->SetEndTime(wxString(*taskItemsEndTime));
             }
 
-            if (calculatedRate != nullptr) {
-                taskItem->SetCalculatedRate(std::move(calculatedRate));
+            if (taskItemsCalculatedRate != nullptr) {
+                taskItem->SetCalculatedRate(std::move(taskItemsCalculatedRate));
             }
 
-            taskItem->SetTaskItemTypeId(taskItemTypeId);
-            data::TaskItemTypeData taskItemTypeData;
-            auto taskItemType = taskItemTypeData.GetById(taskItemTypeId);
+            taskItem->SetTaskItemTypeId(taskItemsTaskItemTypeId);
+
+            auto taskItemType =
+                std::make_unique<model::TaskItemTypeModel>(taskItemTypesTaskItemTypeId, wxString(taskItemTypesName));
             taskItem->SetTaskItemType(std::move(taskItemType));
 
-            taskItem->SetProjectId(projectId);
-            data::ProjectData projectData(pConnection);
-            auto project = projectData.GetById(projectId);
+            taskItem->SetProjectId(taskItemsProjectId);
+
+            auto project = std::make_unique<model::ProjectModel>(projectsProjectId,
+                wxString(projectsName),
+                wxString(projectsDisplayName),
+                projectsBillable,
+                projectsIsDefault,
+                projectsDateCreated,
+                projectsDateModified,
+                projectsIsActive);
+
+            if (projectsRate != nullptr) {
+                project->SetRate(std::move(projectsRate));
+            }
+
+            project->SetEmployerId(projectsEmployerId);
+
+            if (projectsClientId != nullptr) {
+                project->SetClientId(*projectsClientId);
+            }
+
+            if (projectsRateTypeId != nullptr) {
+                project->SetRateTypeId(*projectsRateTypeId);
+            }
+
+            if (projectsCurrencyId != nullptr) {
+                project->SetCurrencyId(*projectsCurrencyId);
+            }
             taskItem->SetProject(std::move(project));
 
-            taskItem->SetCategoryId(categoryId);
-            data::CategoryData categoryData(pConnection);
-            auto category = categoryData.GetById(categoryId);
+            taskItem->SetCategoryId(taskItemsCategoryId);
+
+            auto category = std::make_unique<model::CategoryModel>(categoriesCategoryId,
+                categoriesName,
+                categoriesColor,
+                categoriesDateCreated,
+                categoriesDateModified,
+                categoriesIsActive);
             taskItem->SetCategory(std::move(category));
 
-            taskItem->SetTaskId(taskId);
-            data::TaskData taskData(pConnection);
-            auto task = taskData.GetById(taskId);
+            taskItem->SetTaskId(taskItemsTaskId);
+
+            auto task = std::make_unique<model::TaskModel>(
+                tasksTaskId, wxString(tasksDate), tasksDateCreated, tasksDateModified, tasksIsActive);
             taskItem->SetTask(std::move(task));
+
+            if (taskItemsMeetingId != nullptr) {
+                taskItem->SetMeetingId(std::move(taskItemsMeetingId));
+
+                auto meeting = std::make_unique<model::MeetingModel>(*meetingsMeetingId,
+                    *meetingsDuration,
+                    *meetingsLocation,
+                    *meetingsSubject,
+                    *meetingsBody,
+                    *meetingsDateCreated,
+                    *meetingsDateModified,
+                    *meetingsIsActive);
+
+                meeting->SetStart(wxString(*meetingsStarting));
+                meeting->SetEnd(wxString(*meetingsEnding));
+
+                meeting->SetTaskId(*meetingsTaskId);
+
+                if (meetingsAttended != nullptr) {
+                    meeting->Attended(std::move(meetingsAttended));
+                }
+
+                taskItem->SetMeeting(std::move(meeting));
+            }
 
             taskItems.push_back(std::move(taskItem));
         };
@@ -323,22 +512,73 @@ const std::string TaskItemData::createTaskItem = "INSERT INTO task_items "
                                                  "task_item_type_id, project_id, category_id, task_id, meeting_id) "
                                                  "VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)";
 
-const std::string TaskItemData::getTaskItemById = "SELECT task_items.task_item_id, "
-                                                  "task_items.start_time, "
-                                                  "task_items.end_time, "
-                                                  "task_items.duration, "
-                                                  "task_items.description as description, "
-                                                  "task_items.billable, "
-                                                  "task_items.calculated_rate, "
-                                                  "task_items.date_created, "
-                                                  "task_items.date_modified, "
-                                                  "task_items.is_active, "
-                                                  "task_items.task_item_type_id, "
-                                                  "task_items.project_id, "
-                                                  "task_items.category_id,"
-                                                  "task_items.task_id "
+const std::string TaskItemData::getTaskItemById = "SELECT "
+                                                  "  task_items.task_item_id "
+                                                  ", task_items.start_time "
+                                                  ", task_items.end_time "
+                                                  ", task_items.duration "
+                                                  ", task_items.description "
+                                                  ", task_items.billable "
+                                                  ", task_items.calculated_rate "
+                                                  ", task_items.date_created "
+                                                  ", task_items.date_modified "
+                                                  ", task_items.is_active "
+                                                  ", task_items.task_item_type_id "
+                                                  ", task_items.project_id "
+                                                  ", task_items.category_id "
+                                                  ", task_items.task_id "
+                                                  ", task_items.meeting_id "
+                                                  ", task_item_types.task_item_type_id "
+                                                  ", task_item_types.name "
+                                                  ", projects.project_id "
+                                                  ", projects.name "
+                                                  ", projects.display_name "
+                                                  ", projects.billable "
+                                                  ", projects.is_default "
+                                                  ", projects.rate "
+                                                  ", projects.date_created "
+                                                  ", projects.date_modified "
+                                                  ", projects.is_active "
+                                                  ", projects.employer_id "
+                                                  ", projects.client_id "
+                                                  ", projects.rate_type_id "
+                                                  ", projects.currency_id "
+                                                  ", categories.category_id "
+                                                  ", categories.name "
+                                                  ", categories.color "
+                                                  ", categories.date_created "
+                                                  ", categories.date_modified "
+                                                  ", categories.is_active "
+                                                  ", categories.project_id "
+                                                  ", tasks.task_id "
+                                                  ", tasks.task_date "
+                                                  ", tasks.date_created "
+                                                  ", tasks.date_modified "
+                                                  ", tasks.is_active "
+                                                  ", meetings.meeting_id "
+                                                  ", meetings.attended "
+                                                  ", meetings.duration "
+                                                  ", meetings.starting "
+                                                  ", meetings.ending "
+                                                  ", meetings.location "
+                                                  ", meetings.subject "
+                                                  ", meetings.body "
+                                                  ", meetings.date_created "
+                                                  ", meetings.date_modified "
+                                                  ", meetings.is_active "
+                                                  ", meetings.task_id "
                                                   "FROM task_items "
-                                                  "WHERE task_item_id = ?";
+                                                  "INNER JOIN task_item_types "
+                                                  "ON task_items.task_item_type_id = task_item_types.task_item_type_id "
+                                                  "INNER JOIN projects "
+                                                  "ON task_items.project_id = projects.project_id "
+                                                  "INNER JOIN categories "
+                                                  "ON task_items.category_id = categories.category_id "
+                                                  "INNER JOIN tasks "
+                                                  "ON task_items.task_id = tasks.task_id "
+                                                  "LEFT JOIN meetings "
+                                                  "ON task_items.meeting_id = meetings.meeting_id "
+                                                  "WHERE task_item_id = ?;";
 
 const std::string TaskItemData::updateTaskItem = "UPDATE task_items "
                                                  "SET start_time = ?, end_time = ?, duration = ?, "
@@ -352,33 +592,80 @@ const std::string TaskItemData::deleteTaskItem = "UPDATE task_items "
                                                  "WHERE task_item_id = ?";
 
 const std::string TaskItemData::getTaskItemsByDate =
-    "SELECT task_items.task_item_id, "
-    "tasks.task_date, "
-    "task_items.start_time, "
-    "task_items.end_time, "
-    "task_items.duration, "
-    "task_items.description as description, "
-    "task_items.billable, "
-    "task_items.calculated_rate, "
-    "task_items.date_created, "
-    "task_items.date_modified, "
-    "task_items.is_active, "
-    "task_items.task_item_type_id, "
-    "task_items.project_id, "
-    "task_items.category_id,"
-    "task_items.task_id "
+    "SELECT "
+    "  task_items.task_item_id "
+    ", task_items.start_time "
+    ", task_items.end_time "
+    ", task_items.duration "
+    ", task_items.description "
+    ", task_items.billable "
+    ", task_items.calculated_rate "
+    ", task_items.date_created "
+    ", task_items.date_modified "
+    ", task_items.is_active "
+    ", task_items.task_item_type_id "
+    ", task_items.project_id "
+    ", task_items.category_id "
+    ", task_items.task_id "
+    ", task_items.meeting_id "
+    ", task_item_types.task_item_type_id "
+    ", task_item_types.name "
+    ", projects.project_id "
+    ", projects.name "
+    ", projects.display_name "
+    ", projects.billable "
+    ", projects.is_default "
+    ", projects.rate "
+    ", projects.date_created "
+    ", projects.date_modified "
+    ", projects.is_active "
+    ", projects.employer_id "
+    ", projects.client_id "
+    ", projects.rate_type_id "
+    ", projects.currency_id "
+    ", categories.category_id "
+    ", categories.name "
+    ", categories.color "
+    ", categories.date_created "
+    ", categories.date_modified "
+    ", categories.is_active "
+    ", categories.project_id "
+    ", tasks.task_id "
+    ", tasks.task_date "
+    ", tasks.date_created "
+    ", tasks.date_modified "
+    ", tasks.is_active "
+    ", meetings.meeting_id "
+    ", meetings.attended "
+    ", meetings.duration "
+    ", meetings.starting "
+    ", meetings.ending "
+    ", meetings.location "
+    ", meetings.subject "
+    ", meetings.body "
+    ", meetings.date_created "
+    ", meetings.date_modified "
+    ", meetings.is_active "
+    ", meetings.task_id "
     "FROM task_items "
-    "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
-    "INNER JOIN categories ON task_items.category_id = categories.category_id "
-    "INNER JOIN projects ON task_items.project_id = projects.project_id "
-    "INNER JOIN task_item_types ON task_items.task_item_type_id = task_item_types.task_item_type_id "
+    "INNER JOIN task_item_types "
+    "ON task_items.task_item_type_id = task_item_types.task_item_type_id "
+    "INNER JOIN projects "
+    "ON task_items.project_id = projects.project_id "
+    "INNER JOIN categories "
+    "ON task_items.category_id = categories.category_id "
+    "INNER JOIN tasks "
+    "ON task_items.task_id = tasks.task_id "
+    "LEFT JOIN meetings "
+    "ON task_items.meeting_id = meetings.meeting_id "
     "WHERE task_date = ? "
     "AND task_items.is_active = 1";
 
 const std::string TaskItemData::getTaskHoursByTaskId = "SELECT task_items.duration "
                                                        "FROM task_items "
                                                        "INNER JOIN tasks ON task_items.task_id = tasks.task_id "
-                                                       "WHERE task_date = ?";
+                                                       "WHERE task_date = ?"
+                                                       "AND task_items.is_active = 1";
 
 const std::string TaskItemData::getTaskItemTypeIdByTaskItemId = "SELECT task_items.task_item_type_id "
                                                                 "FROM task_items "

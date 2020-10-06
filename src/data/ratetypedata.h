@@ -32,7 +32,6 @@ class RateTypeData
 {
 public:
     RateTypeData();
-    RateTypeData(std::shared_ptr<db::SqliteConnection> connection);
     ~RateTypeData();
 
     std::unique_ptr<model::RateTypeModel> GetById(const int rateTypeId);
@@ -40,8 +39,6 @@ public:
 
 private:
     std::shared_ptr<db::SqliteConnection> pConnection;
-
-    bool bBorrowedConnection;
 
     static const std::string getRateTypeById;
     static const std::string getRateTypes;

@@ -32,7 +32,6 @@ class CurrencyData final
 {
 public:
     CurrencyData();
-    CurrencyData(std::shared_ptr<db::SqliteConnection> connection);
     ~CurrencyData();
 
     std::unique_ptr<model::CurrencyModel> GetById(const int id);
@@ -40,8 +39,6 @@ public:
 
 private:
     std::shared_ptr<db::SqliteConnection> pConnection;
-
-    bool bBorrowedConnection;
 
     static const std::string getCurrencies;
     static const std::string getCurrencyById;
