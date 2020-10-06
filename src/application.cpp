@@ -122,7 +122,7 @@ bool Application::StartupInitialization()
             wxString errorMessage =
                 wxString::Format(wxT("%s encountered an error while executing a database update operation.\n"
                                      "The operation was aborted."),
-                    common::GetProgramName);
+                    common::GetProgramName());
             wxMessageBox(errorMessage, common::GetProgramName(), wxICON_ERROR | wxOK_DEFAULT);
             return false;
         }
