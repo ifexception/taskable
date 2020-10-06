@@ -294,6 +294,7 @@ void MeetingsViewDialog::AppendMeetingControls(svc::Meeting* meeting, bool atten
         wxEVT_CHECKBOX, &MeetingsViewDialog::OnAttendedCheckboxCheck, this, attendedCheckboxControlId);
     if (attended) {
         attendedCheckbox->Disable();
+        attendedCheckbox->SetValue(true);
     }
     meetingStaticBoxSizer->Add(attendedCheckbox, common::sizers::ControlDefault);
 }
