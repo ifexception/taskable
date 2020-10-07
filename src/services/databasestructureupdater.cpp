@@ -144,7 +144,8 @@ bool DatabaseStructureUpdater::CreateMeetingsTableScript()
 
     const std::string CreateMeetingsTable =
         "CREATE TABLE IF NOT EXISTS meetings "
-        "(meeting_id INTEGER PRIMARY KEY NOT NULL,"
+        "( "
+        "meeting_id INTEGER PRIMARY KEY NOT NULL,"
         "attended INTEGER NULL,"
         "duration INTEGER NOT NULL,"
         "starting TEXT NOT NULL,"
@@ -156,7 +157,8 @@ bool DatabaseStructureUpdater::CreateMeetingsTableScript()
         "date_modified INTEGER NOT NULL DEFAULT(strftime('%s', 'now', 'localtime')),"
         "is_active INTEGER NOT NULL,"
         "task_id INTEGER NOT NULL,"
-        "FOREIGN KEY(task_id) REFERENCES tasks(task_id));";
+        "FOREIGN KEY(task_id) REFERENCES tasks(task_id)"
+        ");";
 
     try {
         *pConnection->DatabaseExecutableHandle() << CreateMeetingsTable;
