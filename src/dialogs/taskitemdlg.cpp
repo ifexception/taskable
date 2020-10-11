@@ -686,7 +686,7 @@ void TaskItemDialog::CalculateRate(wxDateTime time)
 
 void TaskItemDialog::CalculateRate(wxDateTime start, wxDateTime end)
 {
-    if (pProject != nullptr) {
+    if (pProject != nullptr && pProject->GetRateType() != nullptr) {
         if (pProject->GetRateType()->GetType() == constants::RateTypes::Hourly) {
             wxTimeSpan diff = end.Subtract(start);
             CalculateRate(diff);
@@ -696,7 +696,7 @@ void TaskItemDialog::CalculateRate(wxDateTime start, wxDateTime end)
 
 void TaskItemDialog::CalculateRate(wxTimeSpan time)
 {
-    if (pProject != nullptr) {
+    if (pProject != nullptr && pProject->GetRateType() != nullptr) {
         if (pProject->GetRateType()->GetType() == constants::RateTypes::Hourly) {
             int minutes = time.GetMinutes();
             double time = ((double) minutes / 60.0);

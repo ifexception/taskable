@@ -43,7 +43,7 @@ EmployerDialog::EmployerDialog(wxWindow* parent, std::shared_ptr<spdlog::logger>
         wxT("Add Employer"),
         wxDefaultPosition,
         wxSize(330, 300),
-        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        wxCAPTION | wxCLOSE_BOX,
         name);
     SetMinClientSize(wxSize(MIN_WIDTH, MIN_HEIGHT));
 }
@@ -64,7 +64,7 @@ EmployerDialog::EmployerDialog(wxWindow* parent,
         wxT("Edit Employer"),
         wxDefaultPosition,
         wxSize(330, 400),
-        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        wxCAPTION | wxCLOSE_BOX,
         name);
     SetMinClientSize(wxSize(MIN_WIDTH, MIN_HEIGHT));
 }
@@ -222,6 +222,7 @@ void EmployerDialog::OnOk(wxCommandEvent& event)
                 pLogger->error(
                     "Error occured in category EmployerData::Create() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
+                return;
             }
         }
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
@@ -231,6 +232,7 @@ void EmployerDialog::OnOk(wxCommandEvent& event)
                 pLogger->error(
                     "Error occured in category EmployerData::Update() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
+                return;
             }
         }
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
@@ -240,6 +242,7 @@ void EmployerDialog::OnOk(wxCommandEvent& event)
                 pLogger->error(
                     "Error occured in category EmployerData::Delete() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
+                return;
             }
         }
 

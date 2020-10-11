@@ -137,12 +137,15 @@ bool Application::StartupInitialization()
 
 bool Application::InitializeLogging()
 {
+    const std::string LoggerName = "Taskable_Daily";
+    const char* LogsFilename = "Taskable.log.txt";
+
     if (!CreateLogsDirectory()) {
         return false;
     }
 
     auto logDirectory =
-        wxString::Format(wxT("%s\\logs\\%s"), wxStandardPaths::Get().GetUserDataDir(), constants::LogsFilename)
+        wxString::Format(wxT("%s\\logs\\%s"), wxStandardPaths::Get().GetUserDataDir(), LogsFilename)
             .ToStdString();
 
     try {
@@ -158,7 +161,7 @@ bool Application::InitializeLogging()
         auto combinedLoggers = std::make_shared<spdlog::sinks::dist_sink_st>();
         combinedLoggers->add_sink(msvcSink);
         combinedLoggers->add_sink(dialySink);
-        pLogger = std::make_shared<spdlog::logger>(constants::LoggerName, combinedLoggers);
+        pLogger = std::make_shared<spdlog::logger>(LoggerName, combinedLoggers);
     } catch (const spdlog::spdlog_ex& e) {
         wxMessageBox(wxString::Format(wxT("Error initializing logger: %s"), e.what()),
             common::GetProgramName(),

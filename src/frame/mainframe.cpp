@@ -385,7 +385,7 @@ void MainFrame::CreateControls()
 void MainFrame::DataToControls()
 {
     CalculateTotalTime();
-    FillListCtrl();
+    FillListControl();
 }
 
 void MainFrame::OnClose(wxCloseEvent& event)
@@ -464,7 +464,7 @@ void MainFrame::OnNewEntryTask(wxCommandEvent& event)
     wxDateTime date = pDatePickerCtrl->GetValue();
     dlg::TaskItemDialog entryTask(this, pLogger, pConfig, constants::TaskItemTypes::EntryTask, date);
     int retCode = entryTask.ShowModal();
-    ShowInfoBarMessageForAdd(retCode, wxT("task"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnNewTimedTask(wxCommandEvent& event)
@@ -472,35 +472,35 @@ void MainFrame::OnNewTimedTask(wxCommandEvent& event)
     wxDateTime date = pDatePickerCtrl->GetValue();
     dlg::TaskItemDialog timedTask(this, pLogger, pConfig, constants::TaskItemTypes::TimedTask, date);
     int retCode = timedTask.ShowModal();
-    ShowInfoBarMessageForAdd(retCode, wxT("task"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnNewEmployer(wxCommandEvent& event)
 {
     dlg::EmployerDialog newEmployer(this, pLogger);
     int retCode = newEmployer.ShowModal();
-    ShowInfoBarMessageForAdd(retCode, wxT("employer"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnNewClient(wxCommandEvent& event)
 {
     dlg::ClientDialog newClient(this, pLogger);
     int retCode = newClient.ShowModal();
-    ShowInfoBarMessageForAdd(retCode, wxT("client"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnNewProject(wxCommandEvent& event)
 {
     dlg::ProjectDialog newProject(this, pLogger);
     int retCode = newProject.ShowModal();
-    ShowInfoBarMessageForAdd(retCode, wxT("project"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnNewCategory(wxCommandEvent& event)
 {
     dlg::CategoriesDialog categoriesDialog(this, pLogger);
     int retCode = categoriesDialog.ShowModal();
-    ShowInfoBarMessageForAdd(retCode, wxT("categories"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnWeeklyView(wxCommandEvent& event)
@@ -519,28 +519,28 @@ void MainFrame::OnEditEmployer(wxCommandEvent& event)
 {
     dlg::EditListDialog employerEdit(this, dlg::DialogType::Employer, pLogger);
     int retCode = employerEdit.ShowModal();
-    ShowInfoBarMessageForEdit(retCode, wxT("employer"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnEditClient(wxCommandEvent& event)
 {
     dlg::EditListDialog clientEdit(this, dlg::DialogType::Client, pLogger);
     int retCode = clientEdit.ShowModal();
-    ShowInfoBarMessageForEdit(retCode, wxT("client"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnEditProject(wxCommandEvent& event)
 {
     dlg::EditListDialog projectEdit(this, dlg::DialogType::Project, pLogger);
     int retCode = projectEdit.ShowModal();
-    ShowInfoBarMessageForEdit(retCode, wxT("project"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnEditCategory(wxCommandEvent& event)
 {
     dlg::EditListDialog categoryEdit(this, dlg::DialogType::Category, pLogger);
     int retCode = categoryEdit.ShowModal();
-    ShowInfoBarMessageForEdit(retCode, wxT("category"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnPreferences(wxCommandEvent& event)
@@ -599,8 +599,7 @@ void MainFrame::OnBackupDatabase(wxCommandEvent& event)
 void MainFrame::OnReturnToCurrentDate(wxCommandEvent& WXUNUSED(event))
 {
     wxDateTime currentDate = wxDateTime::Now();
-    if (currentDate.FormatISODate() == pDatePickerCtrl->GetValue().FormatISODate())
-    {
+    if (currentDate.FormatISODate() == pDatePickerCtrl->GetValue().FormatISODate()) {
         return;
     }
 
@@ -678,7 +677,7 @@ void MainFrame::OnItemDoubleClick(wxListEvent& event)
 
     dlg::TaskItemDialog editTask(this, pLogger, pConfig, type, true, taskItemId, dateContext);
     int retCode = editTask.ShowModal();
-    ShowInfoBarMessageForEdit(retCode, wxT("task"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnItemRightClick(wxListEvent& event)
@@ -718,7 +717,7 @@ void MainFrame::OnPopupMenuEdit(wxCommandEvent& event)
 
     dlg::TaskItemDialog editTask(this, pLogger, pConfig, type, true, mSelectedTaskItemId, dateContext);
     int retCode = editTask.ShowModal();
-    ShowInfoBarMessageForEdit(retCode, wxT("task"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnPopupMenuDelete(wxCommandEvent& event)
@@ -728,11 +727,11 @@ void MainFrame::OnPopupMenuDelete(wxCommandEvent& event)
         data.Delete(mSelectedTaskItemId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured on TaskItemModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
-        ShowInfoBarMessageForDelete(false);
+        ShowInfoBarMessage(ids::ID_ERROR_OCCURED);
         return;
     }
 
-    ShowInfoBarMessageForDelete(true);
+    ShowInfoBarMessage(wxID_OK);
 
     auto selectedDate = pDatePickerCtrl->GetValue();
 
@@ -884,7 +883,7 @@ void MainFrame::CalculateTotalTime(wxDateTime date)
     pTotalHoursText->SetLabel(totalDuration.Format(constants::TotalHours));
 }
 
-void MainFrame::FillListCtrl(wxDateTime date)
+void MainFrame::FillListControl(wxDateTime date)
 {
     wxString dateString = date.FormatISODate();
 
@@ -929,34 +928,12 @@ bool MainFrame::RunDatabaseBackup()
     return true;
 }
 
-void MainFrame::ShowInfoBarMessageForAdd(int modalRetCode, const wxString& item)
+void MainFrame::ShowInfoBarMessage(int modalRetCode)
 {
     if (modalRetCode == wxID_OK) {
-        pInfoBar->ShowMessage(constants::OnSuccessfulAdd(item), wxICON_INFORMATION);
-    } else if (modalRetCode == ids::ID_ERROR_OCCURED) {
-        pInfoBar->ShowMessage(constants::OnErrorAdd(item), wxICON_ERROR);
-    }
-
-    pDismissInfoBarTimer->Start(1500);
-}
-
-void MainFrame::ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item)
-{
-    if (modalRetCode == wxID_OK) {
-        pInfoBar->ShowMessage(constants::OnSuccessfulEdit(item), wxICON_INFORMATION);
-    } else if (modalRetCode == ids::ID_ERROR_OCCURED) {
-        pInfoBar->ShowMessage(constants::OnErrorEdit(item), wxICON_ERROR);
-    }
-
-    pDismissInfoBarTimer->Start(1500);
-}
-
-void MainFrame::ShowInfoBarMessageForDelete(bool success)
-{
-    if (success) {
-        pInfoBar->ShowMessage(wxT("Successfully deleted"), wxICON_INFORMATION);
+        pInfoBar->ShowMessage(constants::OperationCompletedSuccessfully, wxICON_INFORMATION);
     } else {
-        pInfoBar->ShowMessage(wxT("Error deleting task"), wxICON_ERROR);
+        pInfoBar->ShowMessage(constants::OperationEncounteredErrors, wxICON_ERROR);
     }
 
     pDismissInfoBarTimer->Start(1500);
@@ -968,7 +945,7 @@ void MainFrame::DateChangedProcedure(wxDateTime dateTime)
     pDatePickerCtrl->SetValue(dateTime);
 
     CalculateTotalTime(dateTime);
-    FillListCtrl(dateTime);
+    FillListControl(dateTime);
 
     pListCtrl->SetFocus();
 }

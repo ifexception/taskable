@@ -114,13 +114,11 @@ private:
     void OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event);
 
     void CalculateTotalTime(wxDateTime date = wxDateTime::Now());
-    void FillListCtrl(wxDateTime date = wxDateTime::Now());
+    void FillListControl(wxDateTime date = wxDateTime::Now());
 
     bool RunDatabaseBackup();
 
-    void ShowInfoBarMessageForAdd(int modalRetCode, const wxString& item);
-    void ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item);
-    void ShowInfoBarMessageForDelete(bool success);
+    void ShowInfoBarMessage(int modalRetCode);
 
     void DateChangedProcedure(wxDateTime dateTime);
     void CopyToClipboardProcedure(long itemIndex);
