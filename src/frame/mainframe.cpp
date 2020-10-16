@@ -932,8 +932,10 @@ void MainFrame::ShowInfoBarMessage(int modalRetCode)
 {
     if (modalRetCode == wxID_OK) {
         pInfoBar->ShowMessage(constants::OperationCompletedSuccessfully, wxICON_INFORMATION);
-    } else {
+    } else if (modalRetCode == ids::ID_ERROR_OCCURED) {
         pInfoBar->ShowMessage(constants::OperationEncounteredErrors, wxICON_ERROR);
+    } else {
+        return;
     }
 
     pDismissInfoBarTimer->Start(1500);
