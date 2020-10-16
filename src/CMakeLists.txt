@@ -26,6 +26,7 @@ message (STATUS "nlohmann_json_FOUND: ${nlohmann_json_FOUND}")
 set (SRC
     "common/ids.cpp"
     "common/common.cpp"
+    "common/resources.cpp"
     "common/util.cpp"
     "common/datetraverser.cpp"
     "common/constants.cpp"
@@ -38,11 +39,13 @@ set (SRC
     "database/sqliteconnectionfactory.cpp"
     "database/connectionprovider.cpp"
 
+    "services/outlookintegrator.cpp"
     "services/taskstateservice.cpp"
     "services/taskstorageservice.cpp"
     "services/databasebackup.cpp"
     "services/databasebackupdeleter.cpp"
     "services/setupdatabase.cpp"
+    "services/databasestructureupdater.cpp"
 
     "application.cpp"
     "resources.rc"
@@ -99,7 +102,11 @@ set (SRC
     "data/taskdata.cpp"
     "data/taskitemtypedata.cpp"
     "data/taskitemdata.cpp"
-      )
+
+    "data/meetingdata.cpp"
+    "models/meetingmodel.cpp"
+    "dialogs/meetingsviewdlg.cpp"
+    )
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
 

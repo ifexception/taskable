@@ -26,6 +26,7 @@
 #include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
+#include "../common/resources.h"
 #include "../common/util.h"
 
 namespace app::dlg
@@ -42,7 +43,7 @@ EmployerDialog::EmployerDialog(wxWindow* parent, std::shared_ptr<spdlog::logger>
         wxT("Add Employer"),
         wxDefaultPosition,
         wxSize(330, 300),
-        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        wxCAPTION | wxCLOSE_BOX,
         name);
     SetMinClientSize(wxSize(MIN_WIDTH, MIN_HEIGHT));
 }
@@ -55,6 +56,7 @@ EmployerDialog::EmployerDialog(wxWindow* parent,
     : pLogger(logger)
     , bIsEdit(isEdit)
     , mEmployerId(employerId)
+    , pEmployer(std::make_unique<model::EmployerModel>())
     , mData()
 {
     Create(parent,
@@ -62,7 +64,7 @@ EmployerDialog::EmployerDialog(wxWindow* parent,
         wxT("Edit Employer"),
         wxDefaultPosition,
         wxSize(330, 400),
-        wxCAPTION | wxCLOSE_BOX | wxSYSTEM_MENU,
+        wxCAPTION | wxCLOSE_BOX,
         name);
     SetMinClientSize(wxSize(MIN_WIDTH, MIN_HEIGHT));
 }
@@ -85,7 +87,7 @@ bool EmployerDialog::Create(wxWindow* parent,
         }
 
         GetSizer()->Fit(this);
-        SetIcon(common::GetProgramIcon());
+        SetIcon(rc::GetProgramIcon());
         Centre();
     }
 
@@ -220,6 +222,7 @@ void EmployerDialog::OnOk(wxCommandEvent& event)
                 pLogger->error(
                     "Error occured in category EmployerData::Create() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
+                return;
             }
         }
         if (bIsEdit && pIsActiveCtrl->IsChecked()) {
@@ -229,6 +232,7 @@ void EmployerDialog::OnOk(wxCommandEvent& event)
                 pLogger->error(
                     "Error occured in category EmployerData::Update() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
+                return;
             }
         }
         if (bIsEdit && !pIsActiveCtrl->IsChecked()) {
@@ -238,6 +242,7 @@ void EmployerDialog::OnOk(wxCommandEvent& event)
                 pLogger->error(
                     "Error occured in category EmployerData::Delete() - {0:d} : {1}", e.get_code(), e.what());
                 EndModal(ids::ID_ERROR_OCCURED);
+                return;
             }
         }
 

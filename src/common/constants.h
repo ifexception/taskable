@@ -25,10 +25,6 @@
 
 namespace app::constants
 {
-static const std::string LoggerName = "Taskable_Daily";
-static const char* LogsDirectory = "logs";
-static const char* LogsFilename = "Taskable.log.txt";
-
 static const char* TotalHours = "Total Hours %H:%M:%S";
 
 static const int MinLength = 2;
@@ -54,9 +50,6 @@ static const wxString DateCreatedLabel = wxT("Created: %s");
 static const wxString DateModifiedLabel = wxT("Updated: %s");
 static const wxString DateLabel = wxT("Created %s | Updated %s");
 
-wxString OnSuccessfulAdd(const wxString& item);
-wxString OnSuccessfulEdit(const wxString& item);
-
-wxString OnErrorAdd(const wxString& item);
-wxString OnErrorEdit(const wxString& item);
+static const wxString OperationCompletedSuccessfully = wxT("Operation completed successfully");
+static const wxString OperationEncounteredErrors = wxT("Operation encountered error(s)");
 } // namespace app::constants

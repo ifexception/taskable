@@ -19,36 +19,30 @@
 
 #pragma once
 
-#include <cstdint>
 #include <memory>
+#include <string>
+
+#include <spdlog/spdlog.h>
 
 #include "../database/connectionprovider.h"
 #include "../database/sqliteconnection.h"
-#include "../models/employermodel.h"
 
-namespace app::data
+namespace app::svc
 {
-class EmployerData final
+class DatabaseStructureUpdater final
 {
 public:
-    EmployerData();
-    ~EmployerData();
+    DatabaseStructureUpdater(std::shared_ptr<spdlog::logger> logger);
+    ~DatabaseStructureUpdater();
 
-    int64_t Create(std::unique_ptr<model::EmployerModel> employer);
-    std::unique_ptr<model::EmployerModel> GetById(const int employerId);
-    std::vector<std::unique_ptr<model::EmployerModel>> GetAll();
-    void Update(std::unique_ptr<model::EmployerModel> employer);
-    void Delete(const int employerId);
-
-    int64_t GetLastInsertId() const;
+    bool ExecuteScripts();
 
 private:
-    std::shared_ptr<db::SqliteConnection> pConnection;
+    bool DropProjectsHoursColumn();
+    bool CreateMeetingsTableScript();
+    bool AddMeetingForeignKeyToTaskItemsTable();
 
-    static const std::string createEmployer;
-    static const std::string getEmployers;
-    static const std::string getEmployer;
-    static const std::string updateEmployer;
-    static const std::string deleteEmployer;
+    std::shared_ptr<spdlog::logger> pLogger;
+    std::shared_ptr<db::SqliteConnection> pConnection;
 };
-} // namespace app::data
+} // namespace app::svc

@@ -19,7 +19,7 @@
 
 #include "projectdata.h"
 
-#include <spdlog/spdlog.h>
+#include <wx/string.h>
 
 #include "../common/util.h"
 #include "employerdata.h"
@@ -30,31 +30,16 @@
 namespace app::data
 {
 ProjectData::ProjectData()
-    : bBorrowedConnection(false)
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
-    spdlog::get("msvc")->debug("ACQUIRE connection in ProjectData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
-}
-
-ProjectData::ProjectData(std::shared_ptr<db::SqliteConnection> connection)
-    : bBorrowedConnection(true)
-{
-    pConnection = connection;
-    spdlog::get("msvc")->debug("BORROW connection in ProjectData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 ProjectData::~ProjectData()
 {
-    if (!bBorrowedConnection) {
-        db::ConnectionProvider::Get().Handle()->Release(pConnection);
-        spdlog::get("msvc")->debug("RELEASE connection in ProjectData|ConnectionTally: {0:d}",
-            db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
-    }
+    db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 
-void ProjectData::Create(std::unique_ptr<model::ProjectModel> project)
+int64_t ProjectData::Create(std::unique_ptr<model::ProjectModel> project)
 {
     auto ps = *pConnection->DatabaseExecutableHandle() << ProjectData::createProject;
     ps << project->GetName() << project->GetDisplayName() << project->IsBillable() << project->IsDefault()
@@ -75,62 +60,88 @@ void ProjectData::Create(std::unique_ptr<model::ProjectModel> project)
         ps << *project->GetRate() << project->GetRateTypeId() << project->GetCurrencyId();
 
     ps.execute();
+
+    return pConnection->DatabaseExecutableHandle()->last_insert_rowid();
 }
 
 std::unique_ptr<model::ProjectModel> ProjectData::GetById(const int projectId)
 {
     std::unique_ptr<model::ProjectModel> project = nullptr;
-    data::EmployerData employerData(pConnection);
-    data::ClientData clientData(pConnection);
-    data::RateTypeData rateTypeData(pConnection);
-    data::CurrencyData currencyData(pConnection);
 
     *pConnection->DatabaseExecutableHandle() << ProjectData::getProject << projectId >>
-        [&](int projectId,
-            std::string name,
-            std::string displayName,
-            int billable,
-            int isDefault,
-            std::unique_ptr<double> rate,
-            int dateCreated,
-            int dateModified,
-            int isActive,
-            int employerId,
-            std::unique_ptr<int> clientId,
-            std::unique_ptr<int> rateTypeId,
-            std::unique_ptr<int> currencyId) {
-            project = std::make_unique<model::ProjectModel>(projectId,
-                wxString(name),
-                wxString(displayName),
-                billable,
-                isDefault,
-                dateCreated,
-                dateModified,
-                isActive);
+        [&](int projectsProjectId,
+            std::string projectsName,
+            std::string projectsDisplayName,
+            int projectsBillable,
+            int projectsIsDefault,
+            std::unique_ptr<double> projectsRate,
+            int projectsDateCreated,
+            int projectsDateModified,
+            int projectsIsActive,
+            int projectsEmployerId,
+            std::unique_ptr<int> projectsClientId,
+            std::unique_ptr<int> projectsRateTypeId,
+            std::unique_ptr<int> projectsCurrencyId,
+            int employersEmployerId,
+            std::string employersName,
+            int employersDateCreated,
+            int employersDateModified,
+            int employersIsActive,
+            std::unique_ptr<int> clientsClientId,
+            std::unique_ptr<std::string> clientsName,
+            std::unique_ptr<int> clientsDateCreated,
+            std::unique_ptr<int> clientsDateModified,
+            std::unique_ptr<int> clientIsActive,
+            std::unique_ptr<int> clientsEmployerId,
+            std::unique_ptr<int> rateTypesRateTypeId,
+            std::unique_ptr<std::string> rateTypesName,
+            std::unique_ptr<int> currenciesCurrencyId,
+            std::unique_ptr<std::string> currenciesName,
+            std::unique_ptr<std::string> currenciesCode,
+            std::unique_ptr<std::string> currenciesSymbol) {
+            project = std::make_unique<model::ProjectModel>(projectsProjectId,
+                wxString(projectsName),
+                wxString(projectsDisplayName),
+                projectsBillable,
+                projectsIsDefault,
+                projectsDateCreated,
+                projectsDateModified,
+                projectsIsActive);
 
-            if (rate != nullptr) {
-                project->SetRate(std::move(rate));
+            if (projectsRate != nullptr) {
+                project->SetRate(std::move(projectsRate));
             }
 
-            project->SetEmployerId(employerId);
-            auto employer = employerData.GetById(employerId);
+            project->SetEmployerId(projectsEmployerId);
+            auto employer = std::make_unique<model::EmployerModel>(employersEmployerId,
+                wxString(employersName),
+                employersDateCreated,
+                employersDateModified,
+                employersIsActive);
             project->SetEmployer(std::move(employer));
 
-            if (clientId != nullptr) {
-                project->SetClientId(*clientId);
-                auto client = clientData.GetById(*clientId);
+            if (projectsClientId != nullptr) {
+                project->SetClientId(*projectsClientId);
+                auto client = std::make_unique<model::ClientModel>(*clientsClientId,
+                    wxString(*clientsName),
+                    *clientsDateCreated,
+                    *clientsDateModified,
+                    *clientIsActive);
                 project->SetClient(std::move(client));
             }
 
-            if (rateTypeId != nullptr) {
-                project->SetRateTypeId(*rateTypeId);
-                auto rateType = rateTypeData.GetById(*rateTypeId);
+            if (projectsRateTypeId != nullptr) {
+                project->SetRateTypeId(*projectsRateTypeId);
+                auto rateType = std::make_unique<model::RateTypeModel>(*rateTypesRateTypeId, wxString(*rateTypesName));
                 project->SetRateType(std::move(rateType));
             }
 
-            if (currencyId != nullptr) {
-                project->SetCurrencyId(*currencyId);
-                auto currency = currencyData.GetById(*currencyId);
+            if (projectsCurrencyId != nullptr) {
+                project->SetCurrencyId(*projectsCurrencyId);
+                auto currency = std::make_unique<model::CurrencyModel>(*currenciesCurrencyId,
+                    wxString(*currenciesName),
+                    wxString(*currenciesCode),
+                    wxString(*currenciesSymbol));
                 project->SetCurrency(std::move(currency));
             }
         };
@@ -171,54 +182,86 @@ void ProjectData::Delete(const int projectId)
 std::vector<std::unique_ptr<model::ProjectModel>> ProjectData::GetAll()
 {
     std::vector<std::unique_ptr<model::ProjectModel>> projects;
-    data::EmployerData employerData(pConnection);
-    data::ClientData clientData(pConnection);
-    data::RateTypeData rateTypeData(pConnection);
-    data::CurrencyData currencyData(pConnection);
 
-    *pConnection->DatabaseExecutableHandle() << ProjectData::getProjects >> [&](int projectId,
-                                                                                std::string name,
-                                                                                std::string displayName,
-                                                                                int billable,
-                                                                                int isDefault,
-                                                                                std::unique_ptr<double> rate,
-                                                                                int dateCreated,
-                                                                                int dateModified,
-                                                                                int isActive,
-                                                                                int employerId,
-                                                                                std::unique_ptr<int> clientId,
-                                                                                std::unique_ptr<int> rateTypeId,
-                                                                                std::unique_ptr<int> currencyId) {
-        auto project = std::make_unique<model::ProjectModel>(
-            projectId, wxString(name), wxString(displayName), billable, isDefault, dateCreated, dateModified, isActive);
+    *pConnection->DatabaseExecutableHandle() << ProjectData::getProjects >>
+        [&](int projectsProjectId,
+            std::string projectsName,
+            std::string projectsDisplayName,
+            int projectsBillable,
+            int projectsIsDefault,
+            std::unique_ptr<double> projectsRate,
+            int projectsDateCreated,
+            int projectsDateModified,
+            int projectsIsActive,
+            int projectsEmployerId,
+            std::unique_ptr<int> projectsClientId,
+            std::unique_ptr<int> projectsRateTypeId,
+            std::unique_ptr<int> projectsCurrencyId,
+            int employersEmployerId,
+            std::string employersName,
+            int employersDateCreated,
+            int employersDateModified,
+            int employersIsActive,
+            std::unique_ptr<int> clientsClientId,
+            std::unique_ptr<std::string> clientsName,
+            std::unique_ptr<int> clientsDateCreated,
+            std::unique_ptr<int> clientsDateModified,
+            std::unique_ptr<int> clientIsActive,
+            std::unique_ptr<int> clientsEmployerId,
+            std::unique_ptr<int> rateTypesRateTypeId,
+            std::unique_ptr<std::string> rateTypesName,
+            std::unique_ptr<int> currenciesCurrencyId,
+            std::unique_ptr<std::string> currenciesName,
+            std::unique_ptr<std::string> currenciesCode,
+            std::unique_ptr<std::string> currenciesSymbol) {
+            auto project = std::make_unique<model::ProjectModel>(projectsProjectId,
+                wxString(projectsName),
+                wxString(projectsDisplayName),
+                projectsBillable,
+                projectsIsDefault,
+                projectsDateCreated,
+                projectsDateModified,
+                projectsIsActive);
 
-        if (rate != nullptr) {
-            project->SetRate(std::move(rate));
-        }
+            if (projectsRate != nullptr) {
+                project->SetRate(std::move(projectsRate));
+            }
 
-        project->SetEmployerId(employerId);
-        auto employer = employerData.GetById(employerId);
-        project->SetEmployer(std::move(employer));
-        if (clientId != nullptr) {
-            project->SetClientId(*clientId);
-            auto client = clientData.GetById(*clientId);
-            project->SetClient(std::move(client));
-        }
+            project->SetEmployerId(projectsEmployerId);
+            auto employer = std::make_unique<model::EmployerModel>(employersEmployerId,
+                wxString(employersName),
+                employersDateCreated,
+                employersDateModified,
+                employersIsActive);
+            project->SetEmployer(std::move(employer));
 
-        if (rateTypeId != nullptr) {
-            project->SetRateTypeId(*rateTypeId);
-            auto rateType = rateTypeData.GetById(*rateTypeId);
-            project->SetRateType(std::move(rateType));
-        }
+            if (projectsClientId != nullptr) {
+                project->SetClientId(*projectsClientId);
+                auto client = std::make_unique<model::ClientModel>(*clientsClientId,
+                    wxString(*clientsName),
+                    *clientsDateCreated,
+                    *clientsDateModified,
+                    *clientIsActive);
+                project->SetClient(std::move(client));
+            }
 
-        if (currencyId != nullptr) {
-            project->SetCurrencyId(*currencyId);
-            auto currency = currencyData.GetById(*currencyId);
-            project->SetCurrency(std::move(currency));
-        }
+            if (projectsRateTypeId != nullptr) {
+                project->SetRateTypeId(*projectsRateTypeId);
+                auto rateType = std::make_unique<model::RateTypeModel>(*rateTypesRateTypeId, wxString(*rateTypesName));
+                project->SetRateType(std::move(rateType));
+            }
 
-        projects.push_back(std::move(project));
-    };
+            if (projectsCurrencyId != nullptr) {
+                project->SetCurrencyId(*projectsCurrencyId);
+                auto currency = std::make_unique<model::CurrencyModel>(*currenciesCurrencyId,
+                    wxString(*currenciesName),
+                    wxString(*currenciesCode),
+                    wxString(*currenciesSymbol));
+                project->SetCurrency(std::move(currency));
+            }
+
+            projects.push_back(std::move(project));
+        };
 
     return projects;
 }
@@ -226,11 +269,6 @@ std::vector<std::unique_ptr<model::ProjectModel>> ProjectData::GetAll()
 void ProjectData::UnmarkDefaultProjects()
 {
     *pConnection->DatabaseExecutableHandle() << ProjectData::unmarkDefaultProjects << util::UnixTimestamp();
-}
-
-int ProjectData::GetLastInsertId() const
-{
-    return (int) pConnection->DatabaseExecutableHandle()->last_insert_rowid();
 }
 
 const std::string ProjectData::createProject = "INSERT INTO "
@@ -242,21 +280,38 @@ const std::string ProjectData::getProject = "SELECT projects.project_id, "
                                             "projects.name AS project_name, "
                                             "projects.display_name, "
                                             "projects.billable, "
-                                            "projects.is_default,"
+                                            "projects.is_default, "
                                             "projects.rate, "
                                             "projects.date_created, "
                                             "projects.date_modified, "
                                             "projects.is_active, "
+                                            "projects.employer_id, "
+                                            "projects.client_id, "
+                                            "projects.rate_type_id, "
+                                            "projects.currency_id, "
                                             "employers.employer_id, "
-                                            "clients.client_id AS client_id, "
-                                            "rate_types.rate_type_id AS rate_type_id, "
-                                            "currencies.currency_id AS currency_id "
+                                            "employers.name, "
+                                            "employers.date_created, "
+                                            "employers.date_modified, "
+                                            "employers.is_active, "
+                                            "clients.client_id, "
+                                            "clients.name, "
+                                            "clients.date_created, "
+                                            "clients.date_modified, "
+                                            "clients.is_active, "
+                                            "clients.employer_id, "
+                                            "rate_types.rate_type_id, "
+                                            "rate_types.name, "
+                                            "currencies.currency_id, "
+                                            "currencies.name, "
+                                            "currencies.code, "
+                                            "currencies.symbol "
                                             "FROM projects "
                                             "INNER JOIN employers ON projects.employer_id = employers.employer_id "
                                             "LEFT JOIN clients ON projects.client_id = clients.client_id "
                                             "LEFT JOIN rate_types ON projects.rate_type_id = rate_types.rate_type_id "
                                             "LEFT JOIN currencies ON projects.currency_id = currencies.currency_id "
-                                            "WHERE projects.project_id = ?";
+                                            "WHERE projects.project_id = ?;";
 
 const std::string ProjectData::updateProject =
     "UPDATE projects "
@@ -272,15 +327,32 @@ const std::string ProjectData::getProjects = "SELECT projects.project_id, "
                                              "projects.name AS project_name, "
                                              "projects.display_name, "
                                              "projects.billable, "
-                                             "projects.is_default,"
+                                             "projects.is_default, "
                                              "projects.rate, "
                                              "projects.date_created, "
                                              "projects.date_modified, "
                                              "projects.is_active, "
+                                             "projects.employer_id, "
+                                             "projects.client_id, "
+                                             "projects.rate_type_id, "
+                                             "projects.currency_id, "
                                              "employers.employer_id, "
-                                             "clients.client_id AS client_id, "
-                                             "rate_types.rate_type_id AS rate_type_id, "
-                                             "currencies.currency_id AS currency_id "
+                                             "employers.name, "
+                                             "employers.date_created, "
+                                             "employers.date_modified, "
+                                             "employers.is_active, "
+                                             "clients.client_id, "
+                                             "clients.name, "
+                                             "clients.date_created, "
+                                             "clients.date_modified, "
+                                             "clients.is_active, "
+                                             "clients.employer_id, "
+                                             "rate_types.rate_type_id, "
+                                             "rate_types.name, "
+                                             "currencies.currency_id, "
+                                             "currencies.name, "
+                                             "currencies.code, "
+                                             "currencies.symbol "
                                              "FROM projects "
                                              "INNER JOIN employers ON projects.employer_id = employers.employer_id "
                                              "LEFT JOIN clients ON projects.client_id = clients.client_id "

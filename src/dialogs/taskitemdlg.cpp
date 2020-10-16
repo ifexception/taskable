@@ -30,6 +30,7 @@
 #include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
+#include "../common/resources.h"
 #include "../common/util.h"
 
 #include "../data/taskdata.h"
@@ -134,6 +135,11 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
         name);
 }
 
+const int64_t TaskItemDialog::GetTaskItemId() const
+{
+    return static_cast<int64_t>(mTaskItemId);
+}
+
 void TaskItemDialog::SetDurationFromStopwatchTask(wxTimeSpan duration)
 {
     wxDateTime durationTime;
@@ -152,6 +158,17 @@ void TaskItemDialog::SetTimesFromStopwatchTask(wxDateTime startTime, wxDateTime 
 void TaskItemDialog::SetDescriptionFromStopwatchTask(const wxString& value)
 {
     pDescriptionCtrl->ChangeValue(value);
+}
+
+void TaskItemDialog::SetMeetingData(svc::Meeting* meeting)
+{
+    wxString value = wxString::Format(wxT("%s\n%s"), meeting->Subject, meeting->Body);
+    pDescriptionCtrl->ChangeValue(value);
+
+    pStartTimeCtrl->SetValue(meeting->Start);
+    pEndTimeCtrl->SetValue(meeting->End);
+
+    CalculateTimeDiff(meeting->Start, meeting->End);
 }
 
 /* --PRIVATE METHODS-- */
@@ -175,7 +192,7 @@ bool TaskItemDialog::Create(wxWindow* parent,
 
         GetSizer()->Fit(this);
         GetSizer()->SetSizeHints(this);
-        SetIcon(common::GetProgramIcon());
+        SetIcon(rc::GetProgramIcon());
         Center();
     }
 
@@ -595,16 +612,16 @@ void TaskItemDialog::DataToControls()
     auto bottomDateContext = wxDateTime::Now().SetYear(bottomRangeDate);
     pDateContextCtrl->SetRange(bottomDateContext, mDateContext);
 
-    if (taskItem->GetProject()->HasClientLinked()) {
+    if (pProject->HasClientLinked()) {
         pTaskContextTextCtrl->SetLabel(wxString::Format(TaskContextWithClient,
-            wxString(taskItem->GetProject()->GetEmployer()->GetName()),
-            wxString(taskItem->GetProject()->GetClient()->GetName())));
+            wxString(pProject->GetEmployer()->GetName()),
+            wxString(pProject->GetClient()->GetName())));
     } else {
         pTaskContextTextCtrl->SetLabel(
-            wxString::Format(TaskContextWithoutClient, wxString(taskItem->GetProject()->GetEmployer()->GetName())));
+            wxString::Format(TaskContextWithoutClient, wxString(pProject->GetEmployer()->GetName())));
     }
 
-    pProjectChoiceCtrl->SetStringSelection(taskItem->GetProject()->GetDisplayName());
+    pProjectChoiceCtrl->SetStringSelection(pProject->GetDisplayName());
 
     if (mType == constants::TaskItemTypes::TimedTask) {
         pStartTimeCtrl->SetValue(*taskItem->GetStartTime());
@@ -669,7 +686,7 @@ void TaskItemDialog::CalculateRate(wxDateTime time)
 
 void TaskItemDialog::CalculateRate(wxDateTime start, wxDateTime end)
 {
-    if (pProject != nullptr) {
+    if (pProject != nullptr && pProject->GetRateType() != nullptr) {
         if (pProject->GetRateType()->GetType() == constants::RateTypes::Hourly) {
             wxTimeSpan diff = end.Subtract(start);
             CalculateRate(diff);
@@ -679,7 +696,7 @@ void TaskItemDialog::CalculateRate(wxDateTime start, wxDateTime end)
 
 void TaskItemDialog::CalculateRate(wxTimeSpan time)
 {
-    if (pProject != nullptr) {
+    if (pProject != nullptr && pProject->GetRateType() != nullptr) {
         if (pProject->GetRateType()->GetType() == constants::RateTypes::Hourly) {
             int minutes = time.GetMinutes();
             double time = ((double) minutes / 60.0);
@@ -856,6 +873,7 @@ void TaskItemDialog::OnOk(wxCommandEvent& event)
             int64_t id = -1;
             try {
                 id = mTaskItemData.Create(std::move(pTaskItem));
+                mTaskItemId = id;
             } catch (const sqlite::sqlite_exception& e) {
                 pLogger->error("Error occured in TaskItemModel::Create() - {0:d} : {1}", e.get_code(), e.what());
                 wxLogDebug(wxString(e.get_sql()));
@@ -974,9 +992,9 @@ bool TaskItemDialog::TransferDataAndValidate()
     }
     pTaskItem->SetProjectId(projectId);
 
-    if (bIsEdit) {
+    // if (bIsEdit) {
         pTaskItem->SetProject(std::move(mProjectData.GetById(projectId)));
-    }
+    // }
 
     if (mType == constants::TaskItemTypes::TimedTask) {
         auto startTime = pStartTimeCtrl->GetValue();

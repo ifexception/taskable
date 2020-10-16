@@ -61,6 +61,9 @@ private:
     void DeleteDatabaseFile();
     bool DatabaseFileExists();
 
+    bool CheckForDatabaseUpgrade();
+    bool CompleteDatabaseUpgrade();
+
     bool InitializeDatabaseTables();
 
     std::shared_ptr<cfg::Configuration> pConfig;

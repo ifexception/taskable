@@ -1,7 +1,7 @@
 ; -- Taskable.iss --
 ; Installer file for Taskable application
 
-#define TaskableVersion "1.3.0"
+#define TaskableVersion "1.4.0"
 
 [Setup]
 AppName=Taskable
@@ -18,7 +18,7 @@ UninstallDisplayIcon={app}\Taskable.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=Installer
-OutputBaseFilename=Taskable-x86.1.3.0-Installer
+OutputBaseFilename=Taskable-x86.1.4.0-Installer
 LicenseFile=License.txt
 WindowResizable=no
 DisableWelcomePage=no
@@ -67,5 +67,6 @@ Type: filesandordirs; Name: "{userdocs}\Taskable"
 Root: HKCU; Subkey: "Software\Taskable"; Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Taskable"; ValueType: dword; ValueName: "Installed"; ValueData: 1;  Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Taskable"; ValueType: string; ValueName: "Version"; ValueData: {#TaskableVersion};  Flags: preservestringtype uninsdeletekey
+Root: HKCU; Subkey: "Software\Taskable"; ValueType: string; ValueName: "DatabaseUpgrade"; ValueData: 1;  Flags: uninsdeletekey
 Root: HKCR; Subkey: "Applications\Taskable.exe"; ValueType: none; ValueName: "IsHostApp"
 

@@ -44,7 +44,7 @@ DatabaseBackup::~DatabaseBackup()
 bool DatabaseBackup::Execute()
 {
     wxString fileName = CreateBackupFileName();
-    wxString filePath = CreateBackupPath(fileName);
+    wxString filePath = GetBackupFullPath(fileName);
     if (fileName.empty() || filePath.empty()) {
         return false;
     }
@@ -75,7 +75,7 @@ wxString DatabaseBackup::CreateBackupFileName()
     return backupFileName;
 }
 
-wxString DatabaseBackup::CreateBackupPath(const wxString& filename)
+wxString DatabaseBackup::GetBackupFullPath(const wxString& filename)
 {
     auto backupDirectory = pConfig->GetBackupPath();
     auto backupFilePath = wxString::Format(wxT("%s\\%s"), backupDirectory, filename);

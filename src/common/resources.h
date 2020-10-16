@@ -19,28 +19,19 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
-
-#include "../database/connectionprovider.h"
-#include "../database/sqliteconnection.h"
-#include "../models/ratetypemodel.h"
-
-namespace app::data
+namespace app::rc
 {
-class RateTypeData
-{
-public:
-    RateTypeData();
-    ~RateTypeData();
-
-    std::unique_ptr<model::RateTypeModel> GetById(const int rateTypeId);
-    std::vector<std::unique_ptr<model::RateTypeModel>> GetAll();
-
-private:
-    std::shared_ptr<db::SqliteConnection> pConnection;
-
-    static const std::string getRateTypeById;
-    static const std::string getRateTypes;
-};
-}
+// TODO Check licensing https://icons8.com/icon/pack/time-and-date/cute-clipart
+extern const char** GetProgramIcon();
+extern const char** GetAboutIcon();
+extern const char** GetCheckForUpdateIcon();
+extern const char** GetEntryTaskIcon();
+extern const char** GetTimedTaskIcon();
+extern const char** GetStopwatchIcon();
+extern const char** GetDatabaseRestoreIcon();
+extern const char** GetDatabaseBackupIcon();
+extern const char** GetProgramIcon64();
+extern const char** GetSettingsIcon();
+extern const char** GetQuitIcon();
+extern const char** GetFeedbackIcon();
+} // namespace app::rc

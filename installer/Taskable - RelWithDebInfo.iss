@@ -66,4 +66,5 @@ Type: filesandordirs; Name: "{userappdata}\Taskable"
 Root: HKCU; Subkey: "Software\Taskable"; Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Taskable"; ValueType: dword; ValueName: "Installed"; ValueData: 1;  Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Taskable"; ValueType: string; ValueName: "Version"; ValueData: {#TaskableVersion};  Flags: preservestringtype uninsdeletekey
+Root: HKCU; Subkey: "Software\Taskable"; ValueType: string; ValueName: "DatabaseUpgrade"; ValueData: 1;  Flags: uninsdeletekey
 Root: HKCR; Subkey: "Applications\Taskable.exe"; ValueType: none; ValueName: "IsHostApp"

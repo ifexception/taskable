@@ -19,33 +19,18 @@
 
 #include "ratetypedata.h"
 
-#include <spdlog/spdlog.h>
+#include <wx/string.h>
 
 namespace app::data
 {
 RateTypeData::RateTypeData()
-    : bBorrowedConnection(false)
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
-    spdlog::get("msvc")->debug("ACQUIRE connection in RateTypeData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
-}
-
-RateTypeData::RateTypeData(std::shared_ptr<db::SqliteConnection> connection)
-    : bBorrowedConnection(true)
-{
-    pConnection = connection;
-    spdlog::get("msvc")->debug("BORROW connection in RateTypeData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 RateTypeData::~RateTypeData()
 {
-    if (!bBorrowedConnection) {
-        db::ConnectionProvider::Get().Handle()->Release(pConnection);
-        spdlog::get("msvc")->debug("RELEASE connection in RateTypeData|ConnectionTally: {0:d}",
-            db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
-    }
+    db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 
 std::unique_ptr<model::RateTypeModel> RateTypeData::GetById(const int rateTypeId)
@@ -64,11 +49,10 @@ std::vector<std::unique_ptr<model::RateTypeModel>> RateTypeData::GetAll()
 {
     std::vector<std::unique_ptr<model::RateTypeModel>> rateTypes;
 
-    *pConnection->DatabaseExecutableHandle() << RateTypeData::getRateTypes >>
-        [&](int rateTypeId, std::string name) {
-            auto rateType = std::make_unique<model::RateTypeModel>(rateTypeId, wxString(name));
-            rateTypes.push_back(std::move(rateType));
-        };
+    *pConnection->DatabaseExecutableHandle() << RateTypeData::getRateTypes >> [&](int rateTypeId, std::string name) {
+        auto rateType = std::make_unique<model::RateTypeModel>(rateTypeId, wxString(name));
+        rateTypes.push_back(std::move(rateType));
+    };
 
     return rateTypes;
 }

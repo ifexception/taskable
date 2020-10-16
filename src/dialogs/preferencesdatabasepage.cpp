@@ -124,7 +124,7 @@ void DatabasePage::CreateControls()
         wxSize(42, -1),
         wxTE_CENTRE,
         integerValidator);
-    pDeleteBackupsAfterCtrl->SetToolTip(wxT("Number of days to keep a backup"));
+    pDeleteBackupsAfterCtrl->SetToolTip(wxT("Number of days to keep a database backup"));
     backupOptionsSizer->Add(pDeleteBackupsAfterCtrl, common::sizers::ControlDefault);
 
     sizer->Add(databaseBackupsSizer, 0, wxLEFT | wxRIGHT | wxEXPAND, 5);

@@ -19,33 +19,18 @@
 
 #include "taskdata.h"
 
-#include <spdlog/spdlog.h>
+#include <wx/string.h>
 
 namespace app::data
 {
 TaskData::TaskData()
-    : bBorrowedConnection(false)
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
-    spdlog::get("msvc")->debug("ACQUIRE connection in TaskData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
-}
-
-TaskData::TaskData(std::shared_ptr<db::SqliteConnection> connection)
-    : bBorrowedConnection(true)
-{
-    pConnection = connection;
-    spdlog::get("msvc")->debug("BORROW connection in TaskData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 TaskData::~TaskData()
 {
-    if (!bBorrowedConnection) {
         db::ConnectionProvider::Get().Handle()->Release(pConnection);
-        spdlog::get("msvc")->debug("RELEASE connection in TaskData|ConnectionTally: {0:d}",
-            db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
-    }
 }
 
 int TaskData::GetId(const wxDateTime& date)

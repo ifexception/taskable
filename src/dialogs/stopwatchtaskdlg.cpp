@@ -23,6 +23,7 @@
 #include <wx/statline.h>
 
 #include "../common/common.h"
+#include "../common/resources.h"
 #include "../common/util.h"
 #include "../services/taskstateservice.h"
 #include "taskitemdlg.h"
@@ -184,7 +185,7 @@ bool StopwatchTaskDialog::Create(wxWindow* parent,
 
         GetSizer()->Fit(this);
         GetSizer()->SetSizeHints(this);
-        SetIcon(common::GetProgramIcon());
+        SetIcon(rc::GetProgramIcon());
         Center();
 
         if (pConfig->IsShowInTray()) {
@@ -411,7 +412,7 @@ void StopwatchTaskDialog::OnTimer(wxTimerEvent& WXUNUSED(event))
     auto message = wxString::Format(TaskRunningForText, elapsed.Format());
 
     wxNotificationMessage taskElaspedMessage(common::GetProgramName(), message, this);
-    taskElaspedMessage.SetIcon(common::GetProgramIcon64());
+    taskElaspedMessage.SetIcon(rc::GetProgramIcon64());
     taskElaspedMessage.Show();
 }
 
@@ -424,7 +425,7 @@ void StopwatchTaskDialog::OnHideWindow(wxTimerEvent& WXUNUSED(event))
 void StopwatchTaskDialog::OnPausedTaskReminder(wxTimerEvent& event)
 {
     wxNotificationMessage pausedTaskMessage(common::GetProgramName(), PendingPausedTaskText, this);
-    pausedTaskMessage.SetIcon(common::GetProgramIcon64());
+    pausedTaskMessage.SetIcon(rc::GetProgramIcon64());
     pausedTaskMessage.Show();
 }
 

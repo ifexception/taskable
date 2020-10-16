@@ -30,6 +30,7 @@
 #include "../common/constants.h"
 #include "../common/common.h"
 #include "../common/ids.h"
+#include "../common/resources.h"
 #include "../common/util.h"
 #include "../common/version.h"
 
@@ -47,6 +48,7 @@
 #include "../dialogs/categoriesdlg.h"
 
 #include "../dialogs/weeklytaskviewdlg.h"
+#include "../dialogs/meetingsviewdlg.h"
 
 #include "../dialogs/preferencesdlg.h"
 
@@ -75,6 +77,7 @@ EVT_MENU(ids::ID_NEW_PROJECT, MainFrame::OnNewProject)
 EVT_MENU(ids::ID_NEW_CLIENT, MainFrame::OnNewClient)
 EVT_MENU(ids::ID_NEW_CATEGORY, MainFrame::OnNewCategory)
 EVT_MENU(ids::ID_WEEKLY_VIEW, MainFrame::OnWeeklyView)
+EVT_MENU(ids::ID_MEETINGS_VIEW, MainFrame::OnMeetingsView)
 EVT_MENU(ids::ID_EDIT_EMPLOYER, MainFrame::OnEditEmployer)
 EVT_MENU(ids::ID_EDIT_CLIENT, MainFrame::OnEditClient)
 EVT_MENU(ids::ID_EDIT_PROJECT, MainFrame::OnEditProject)
@@ -151,7 +154,7 @@ bool MainFrame::CreateFrame()
 
     bool success = Create();
     SetMinSize(wxSize(850, 580));
-    SetIcon(common::GetProgramIcon());
+    SetIcon(rc::GetProgramIcon());
 
     if (pConfig->IsBackupEnabled()) {
         svc::DatabaseBackupDeleter dbBackupDeleter(pConfig);
@@ -190,7 +193,7 @@ void MainFrame::CreateControls()
 
     pFeedbackButton = new wxBitmapButton(pStatusBar,
         IDC_FEEDBACK,
-        common::GetFeedbackIcon(),
+        rc::GetFeedbackIcon(),
         statusBarRect.GetPosition(),
         wxSize(32, 20),
         wxBU_LEFT | wxBU_RIGHT);
@@ -200,17 +203,17 @@ void MainFrame::CreateControls()
 
     auto entryTaskMenuItem =
         fileMenu->Append(ids::ID_NEW_ENTRY_TASK, wxT("New &Entry Task\tCtrl-E"), wxT("Create new entry task"));
-    entryTaskMenuItem->SetBitmap(common::GetEntryTaskIcon());
+    entryTaskMenuItem->SetBitmap(rc::GetEntryTaskIcon());
 
     auto timedTaskMenuItem =
         fileMenu->Append(ids::ID_NEW_TIMED_TASK, wxT("New &Timed Task\tCtrl-T"), wxT("Create new timed task"));
-    timedTaskMenuItem->SetBitmap(common::GetTimedTaskIcon());
+    timedTaskMenuItem->SetBitmap(rc::GetTimedTaskIcon());
 
     fileMenu->AppendSeparator();
 
     auto stopwatchMenuItem =
         fileMenu->Append(ids::ID_STOPWATCH_TASK, wxT("Stop&watch\tCtrl-W"), wxT("Start task stopwatch"));
-    stopwatchMenuItem->SetBitmap(common::GetStopwatchIcon());
+    stopwatchMenuItem->SetBitmap(rc::GetStopwatchIcon());
 
     fileMenu->AppendSeparator();
     fileMenu->Append(ids::ID_NEW_EMPLOYER, wxT("New &Employer"), wxT("Create new employer"));
@@ -220,10 +223,11 @@ void MainFrame::CreateControls()
     fileMenu->AppendSeparator();
     auto fileViewMenu = new wxMenu();
     fileViewMenu->Append(ids::ID_WEEKLY_VIEW, wxT("Week View"));
+    fileViewMenu->Append(ids::ID_MEETINGS_VIEW, wxT("Meetings View"));
     fileMenu->AppendSubMenu(fileViewMenu, wxT("View"));
     fileMenu->AppendSeparator();
     auto exitMenuItem = fileMenu->Append(wxID_EXIT, wxT("Exit"), wxT("Exit the application"));
-    exitMenuItem->SetBitmap(common::GetQuitIcon());
+    exitMenuItem->SetBitmap(rc::GetQuitIcon());
 
     /* Edit Menu Control */
     auto editMenu = new wxMenu();
@@ -234,7 +238,7 @@ void MainFrame::CreateControls()
     editMenu->AppendSeparator();
     auto preferencesMenuItem =
         editMenu->Append(ids::ID_PREFERENCES, wxT("&Preferences\tCtrl-P"), wxT("Edit application preferences"));
-    preferencesMenuItem->SetBitmap(common::GetSettingsIcon());
+    preferencesMenuItem->SetBitmap(rc::GetSettingsIcon());
 
     /* Export Menu Control */
     // auto exportMenu = new wxMenu();
@@ -243,18 +247,18 @@ void MainFrame::CreateControls()
     auto toolsMenu = new wxMenu();
     auto restoreMenuItem = toolsMenu->Append(
         ids::ID_RESTORE_DATABASE, wxT("Restore Database"), wxT("Restore database to a previous point"));
-    restoreMenuItem->SetBitmap(common::GetDatabaseRestoreIcon());
+    restoreMenuItem->SetBitmap(rc::GetDatabaseRestoreIcon());
     auto backupMenuItem = toolsMenu->Append(
         ids::ID_BACKUP_DATABASE, wxT("Backup Database"), wxT("Backup database at the current snapshot"));
-    backupMenuItem->SetBitmap(common::GetDatabaseBackupIcon());
+    backupMenuItem->SetBitmap(rc::GetDatabaseBackupIcon());
 
     /* Help Menu Control */
     wxMenu* helpMenu = new wxMenu();
     auto helpMenuItem = helpMenu->Append(wxID_ABOUT);
-    helpMenuItem->SetBitmap(common::GetAboutIcon());
+    helpMenuItem->SetBitmap(rc::GetAboutIcon());
     auto checkUpdateMenuItem = helpMenu->Append(
         ids::ID_CHECK_FOR_UPDATE, wxT("Check for update"), wxT("Check if an update is available for application"));
-    checkUpdateMenuItem->SetBitmap(common::GetCheckForUpdateIcon());
+    checkUpdateMenuItem->SetBitmap(rc::GetCheckForUpdateIcon());
 
     /* Menu Bar */
     wxMenuBar* menuBar = new wxMenuBar();
@@ -381,7 +385,7 @@ void MainFrame::CreateControls()
 void MainFrame::DataToControls()
 {
     CalculateTotalTime();
-    FillListCtrl();
+    FillListControl();
 }
 
 void MainFrame::OnClose(wxCloseEvent& event)
@@ -436,7 +440,7 @@ void MainFrame::OnDismissInfoBar(wxTimerEvent& event)
 void MainFrame::OnAbout(wxCommandEvent& event)
 {
     wxAboutDialogInfo aboutInfo;
-    aboutInfo.SetIcon(common::GetProgramIcon64());
+    aboutInfo.SetIcon(rc::GetProgramIcon64());
     aboutInfo.SetName(common::GetProgramName());
     aboutInfo.SetVersion(wxString::Format("%d.%d.%d", TASKABLE_MAJOR, TASKABLE_MINOR, TASKABLE_PATCH));
     aboutInfo.SetDescription(wxT("A desktop application to help you manage how you've spent\n"
@@ -460,7 +464,7 @@ void MainFrame::OnNewEntryTask(wxCommandEvent& event)
     wxDateTime date = pDatePickerCtrl->GetValue();
     dlg::TaskItemDialog entryTask(this, pLogger, pConfig, constants::TaskItemTypes::EntryTask, date);
     int retCode = entryTask.ShowModal();
-    ShowInfoBarMessageForAdd(retCode, wxT("task"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnNewTimedTask(wxCommandEvent& event)
@@ -468,35 +472,35 @@ void MainFrame::OnNewTimedTask(wxCommandEvent& event)
     wxDateTime date = pDatePickerCtrl->GetValue();
     dlg::TaskItemDialog timedTask(this, pLogger, pConfig, constants::TaskItemTypes::TimedTask, date);
     int retCode = timedTask.ShowModal();
-    ShowInfoBarMessageForAdd(retCode, wxT("task"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnNewEmployer(wxCommandEvent& event)
 {
     dlg::EmployerDialog newEmployer(this, pLogger);
     int retCode = newEmployer.ShowModal();
-    ShowInfoBarMessageForAdd(retCode, wxT("employer"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnNewClient(wxCommandEvent& event)
 {
     dlg::ClientDialog newClient(this, pLogger);
     int retCode = newClient.ShowModal();
-    ShowInfoBarMessageForAdd(retCode, wxT("client"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnNewProject(wxCommandEvent& event)
 {
     dlg::ProjectDialog newProject(this, pLogger);
     int retCode = newProject.ShowModal();
-    ShowInfoBarMessageForAdd(retCode, wxT("project"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnNewCategory(wxCommandEvent& event)
 {
     dlg::CategoriesDialog categoriesDialog(this, pLogger);
     int retCode = categoriesDialog.ShowModal();
-    ShowInfoBarMessageForAdd(retCode, wxT("categories"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnWeeklyView(wxCommandEvent& event)
@@ -505,32 +509,38 @@ void MainFrame::OnWeeklyView(wxCommandEvent& event)
     weeklyTaskViewDialog->Show(true);
 }
 
+void MainFrame::OnMeetingsView(wxCommandEvent& event)
+{
+    dlg::MeetingsViewDialog* meetingViewDialog = new dlg::MeetingsViewDialog(this, pLogger, pConfig);
+    meetingViewDialog->LaunchModeless();
+}
+
 void MainFrame::OnEditEmployer(wxCommandEvent& event)
 {
     dlg::EditListDialog employerEdit(this, dlg::DialogType::Employer, pLogger);
     int retCode = employerEdit.ShowModal();
-    ShowInfoBarMessageForEdit(retCode, wxT("employer"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnEditClient(wxCommandEvent& event)
 {
     dlg::EditListDialog clientEdit(this, dlg::DialogType::Client, pLogger);
     int retCode = clientEdit.ShowModal();
-    ShowInfoBarMessageForEdit(retCode, wxT("client"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnEditProject(wxCommandEvent& event)
 {
     dlg::EditListDialog projectEdit(this, dlg::DialogType::Project, pLogger);
     int retCode = projectEdit.ShowModal();
-    ShowInfoBarMessageForEdit(retCode, wxT("project"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnEditCategory(wxCommandEvent& event)
 {
     dlg::EditListDialog categoryEdit(this, dlg::DialogType::Category, pLogger);
     int retCode = categoryEdit.ShowModal();
-    ShowInfoBarMessageForEdit(retCode, wxT("category"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnPreferences(wxCommandEvent& event)
@@ -589,8 +599,7 @@ void MainFrame::OnBackupDatabase(wxCommandEvent& event)
 void MainFrame::OnReturnToCurrentDate(wxCommandEvent& WXUNUSED(event))
 {
     wxDateTime currentDate = wxDateTime::Now();
-    if (currentDate.FormatISODate() == pDatePickerCtrl->GetValue().FormatISODate())
-    {
+    if (currentDate.FormatISODate() == pDatePickerCtrl->GetValue().FormatISODate()) {
         return;
     }
 
@@ -668,7 +677,7 @@ void MainFrame::OnItemDoubleClick(wxListEvent& event)
 
     dlg::TaskItemDialog editTask(this, pLogger, pConfig, type, true, taskItemId, dateContext);
     int retCode = editTask.ShowModal();
-    ShowInfoBarMessageForEdit(retCode, wxT("task"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnItemRightClick(wxListEvent& event)
@@ -708,7 +717,7 @@ void MainFrame::OnPopupMenuEdit(wxCommandEvent& event)
 
     dlg::TaskItemDialog editTask(this, pLogger, pConfig, type, true, mSelectedTaskItemId, dateContext);
     int retCode = editTask.ShowModal();
-    ShowInfoBarMessageForEdit(retCode, wxT("task"));
+    ShowInfoBarMessage(retCode);
 }
 
 void MainFrame::OnPopupMenuDelete(wxCommandEvent& event)
@@ -718,11 +727,19 @@ void MainFrame::OnPopupMenuDelete(wxCommandEvent& event)
         data.Delete(mSelectedTaskItemId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured on TaskItemModel::Delete() - {0:d} : {1}", e.get_code(), e.what());
-        ShowInfoBarMessageForDelete(false);
+        ShowInfoBarMessage(ids::ID_ERROR_OCCURED);
         return;
     }
 
-    ShowInfoBarMessageForDelete(true);
+    ShowInfoBarMessage(wxID_OK);
+
+    auto selectedDate = pDatePickerCtrl->GetValue();
+
+    CalculateTotalTime(selectedDate);
+
+    pListCtrl->DeleteItem(mItemIndex);
+
+    mItemIndex = -1;
 }
 
 void MainFrame::OnColumnBeginDrag(wxListEvent& event)
@@ -815,17 +832,6 @@ void MainFrame::OnTaskDeleted(wxCommandEvent& event)
 
     CalculateTotalTime(selectedDate);
 
-    int id = event.GetId();
-
-    data::TaskItemData taskItemData;
-    std::unique_ptr<model::TaskItemModel> taskItem;
-    try {
-        taskItemData.Delete(id);
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured on TaskItemData::GetById() - {0:d} : {1}", e.get_code(), e.what());
-        return;
-    }
-
     pListCtrl->DeleteItem(mItemIndex);
 
     mItemIndex = -1;
@@ -877,7 +883,7 @@ void MainFrame::CalculateTotalTime(wxDateTime date)
     pTotalHoursText->SetLabel(totalDuration.Format(constants::TotalHours));
 }
 
-void MainFrame::FillListCtrl(wxDateTime date)
+void MainFrame::FillListControl(wxDateTime date)
 {
     wxString dateString = date.FormatISODate();
 
@@ -922,34 +928,14 @@ bool MainFrame::RunDatabaseBackup()
     return true;
 }
 
-void MainFrame::ShowInfoBarMessageForAdd(int modalRetCode, const wxString& item)
+void MainFrame::ShowInfoBarMessage(int modalRetCode)
 {
     if (modalRetCode == wxID_OK) {
-        pInfoBar->ShowMessage(constants::OnSuccessfulAdd(item), wxICON_INFORMATION);
+        pInfoBar->ShowMessage(constants::OperationCompletedSuccessfully, wxICON_INFORMATION);
     } else if (modalRetCode == ids::ID_ERROR_OCCURED) {
-        pInfoBar->ShowMessage(constants::OnErrorAdd(item), wxICON_ERROR);
-    }
-
-    pDismissInfoBarTimer->Start(1500);
-}
-
-void MainFrame::ShowInfoBarMessageForEdit(int modalRetCode, const wxString& item)
-{
-    if (modalRetCode == wxID_OK) {
-        pInfoBar->ShowMessage(constants::OnSuccessfulEdit(item), wxICON_INFORMATION);
-    } else if (modalRetCode == ids::ID_ERROR_OCCURED) {
-        pInfoBar->ShowMessage(constants::OnErrorEdit(item), wxICON_ERROR);
-    }
-
-    pDismissInfoBarTimer->Start(1500);
-}
-
-void MainFrame::ShowInfoBarMessageForDelete(bool success)
-{
-    if (success) {
-        pInfoBar->ShowMessage(wxT("Successfully deleted"), wxICON_INFORMATION);
+        pInfoBar->ShowMessage(constants::OperationEncounteredErrors, wxICON_ERROR);
     } else {
-        pInfoBar->ShowMessage(wxT("Error deleting task"), wxICON_ERROR);
+        return;
     }
 
     pDismissInfoBarTimer->Start(1500);
@@ -961,7 +947,7 @@ void MainFrame::DateChangedProcedure(wxDateTime dateTime)
     pDatePickerCtrl->SetValue(dateTime);
 
     CalculateTotalTime(dateTime);
-    FillListCtrl(dateTime);
+    FillListControl(dateTime);
 
     pListCtrl->SetFocus();
 }

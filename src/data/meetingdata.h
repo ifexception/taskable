@@ -21,34 +21,31 @@
 
 #include <cstdint>
 #include <memory>
+#include <vector>
+
+#include <wx/string.h>
 
 #include "../database/connectionprovider.h"
 #include "../database/sqliteconnection.h"
-#include "../models/employermodel.h"
+#include "../models/meetingmodel.h"
 
 namespace app::data
 {
-class EmployerData final
+class MeetingData final
 {
 public:
-    EmployerData();
-    ~EmployerData();
+    MeetingData();
+    ~MeetingData();
 
-    int64_t Create(std::unique_ptr<model::EmployerModel> employer);
-    std::unique_ptr<model::EmployerModel> GetById(const int employerId);
-    std::vector<std::unique_ptr<model::EmployerModel>> GetAll();
-    void Update(std::unique_ptr<model::EmployerModel> employer);
-    void Delete(const int employerId);
-
-    int64_t GetLastInsertId() const;
+    int64_t Create(std::unique_ptr<model::MeetingModel> meeting, int64_t taskId);
+    void Delete(const int64_t taskItemId);
+    std::vector<std::unique_ptr<model::MeetingModel>> GetByDate(const wxString& date);
 
 private:
     std::shared_ptr<db::SqliteConnection> pConnection;
 
-    static const std::string createEmployer;
-    static const std::string getEmployers;
-    static const std::string getEmployer;
-    static const std::string updateEmployer;
-    static const std::string deleteEmployer;
+    static const std::string createMeeting;
+    static const std::string deleteMeeting;
+    static const std::string getByDate;
 };
 } // namespace app::data

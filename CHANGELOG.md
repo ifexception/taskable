@@ -1,5 +1,12 @@
 # Changelog
 
+### 1.4.0
+- Outlook meetings integration
+- Fixed bug when editing a employer
+- Fixed bug when deleting task item through popup menu
+- Simplify InfoBar messages on database operations
+- Database query performance improvements
+
 ### 1.3.0
 - Use connection pooling for SQLite
 - Update Setup Wizard

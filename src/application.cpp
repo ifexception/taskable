@@ -32,6 +32,7 @@
 #include "frame/mainframe.h"
 #include "services/setupdatabase.h"
 #include "services/databasebackup.h"
+#include "services/databasestructureupdater.h"
 #include "wizards/setupwizard.h"
 #include "wizards/databaserestorewizard.h"
 
@@ -114,17 +115,37 @@ bool Application::StartupInitialization()
         InitializeDatabaseConnectionProvider();
     }
 
+    if (CheckForDatabaseUpgrade()) {
+        svc::DatabaseStructureUpdater dbStructureUpdater(pLogger);
+
+        if (!dbStructureUpdater.ExecuteScripts()) {
+            wxString errorMessage =
+                wxString::Format(wxT("%s encountered an error while executing a database update operation.\n"
+                                     "The operation was aborted."),
+                    common::GetProgramName());
+            wxMessageBox(errorMessage, common::GetProgramName(), wxICON_ERROR | wxOK_DEFAULT);
+            return false;
+        }
+
+        if (!CompleteDatabaseUpgrade()) {
+            return false;
+        }
+    }
+
     return true;
 }
 
 bool Application::InitializeLogging()
 {
+    const std::string LoggerName = "Taskable_Daily";
+    const char* LogsFilename = "Taskable.log.txt";
+
     if (!CreateLogsDirectory()) {
         return false;
     }
 
     auto logDirectory =
-        wxString::Format(wxT("%s\\logs\\%s"), wxStandardPaths::Get().GetUserDataDir(), constants::LogsFilename)
+        wxString::Format(wxT("%s\\logs\\%s"), wxStandardPaths::Get().GetUserDataDir(), LogsFilename)
             .ToStdString();
 
     try {
@@ -140,7 +161,7 @@ bool Application::InitializeLogging()
         auto combinedLoggers = std::make_shared<spdlog::sinks::dist_sink_st>();
         combinedLoggers->add_sink(msvcSink);
         combinedLoggers->add_sink(dialySink);
-        pLogger = std::make_shared<spdlog::logger>(constants::LoggerName, combinedLoggers);
+        pLogger = std::make_shared<spdlog::logger>(LoggerName, combinedLoggers);
     } catch (const spdlog::spdlog_ex& e) {
         wxMessageBox(wxString::Format(wxT("Error initializing logger: %s"), e.what()),
             common::GetProgramName(),
@@ -341,6 +362,39 @@ bool Application::DatabaseFileExists()
     }
 
     return true;
+}
+
+bool Application::CheckForDatabaseUpgrade()
+{
+#ifdef TASKABLE_DEBUG
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled");
+#else
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskable");
+#endif // TASKABLE_DEBUG
+
+    if (key.HasValue(wxT("DatabaseUpgrade"))) {
+        long value = 0;
+        key.QueryValue(wxT("DatabaseUpgrade"), &value);
+
+        return !!value;
+    }
+    return false;
+}
+
+bool Application::CompleteDatabaseUpgrade()
+{
+#ifdef TASKABLE_DEBUG
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled");
+#else
+    wxRegKey key(wxRegKey::HKCU, "Software\\Taskable");
+#endif // TASKABLE_DEBUG
+
+    if (key.HasValue(wxT("DatabaseUpgrade"))) {
+        long value = 0;
+        return key.SetValue(wxT("DatabaseUpgrade"), value);
+    }
+
+    return false;
 }
 
 bool Application::InitializeDatabaseTables()

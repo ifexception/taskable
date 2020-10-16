@@ -23,82 +23,10 @@
 #include <wx/richtooltip.h>
 
 #include "constants.h"
-#include "../../res/taskable.xpm"
-#include "../../res/about.xpm"
-#include "../../res/checkforupdate.xpm"
-#include "../../res/entry-task.xpm"
-#include "../../res/timed-task.xpm"
-#include "../../res/stopwatch.xpm"
-#include "../../res/database-restore.xpm"
-#include "../../res/database-backup.xpm"
-#include "../../res/taskable-64.xpm"
-#include "../../res/settings.xpm"
-#include "../../res/quit.xpm"
-#include "../../res/feedback.xpm"
-
-const char** app::common::GetProgramIcon()
-{
-    return taskablexpm;
-}
-
-const char** app::common::GetAboutIcon()
-{
-    return aboutxpm;
-}
-
-const char** app::common::GetCheckForUpdateIcon()
-{
-    return checkforupdatexpm;
-}
-
-const char** app::common::GetEntryTaskIcon()
-{
-    return entrytaskxpm;
-}
-
-const char** app::common::GetTimedTaskIcon()
-{
-    return timedtaskxpm;
-}
-
-const char** app::common::GetStopwatchIcon()
-{
-    return stopwatchxpm;
-}
-
-const char** app::common::GetDatabaseRestoreIcon()
-{
-    return database_restore;
-}
-
-const char** app::common::GetDatabaseBackupIcon()
-{
-    return database_backup_xpm;
-}
-
-const char** app::common::GetProgramIcon64()
-{
-    return taskable_64_xpm;
-}
-
-const char** app::common::GetSettingsIcon()
-{
-    return settings_xpm;
-}
-
-const char** app::common::GetQuitIcon()
-{
-    return quit_xpm;
-}
-
-const char** app::common::GetFeedbackIcon()
-{
-    return feedback_xpm;
-}
 
 std::string app::common::GetLicense()
 {
-    return "Taskable is a desktop that aids you in tracking your timesheets\n"
+    return "Taskable is a desktop app that aids you in tracking your timesheets\n"
            "and seeing what work you have done.\n"
            "Copyright(C) 2019 Szymon Welgus\n"
            "This program is free software : you can redistribute it and /\n"

@@ -26,6 +26,7 @@
 #include <wx/statline.h>
 
 #include "../common/common.h"
+#include "../common/resources.h"
 #include "../common/util.h"
 
 using json = nlohmann::json;
@@ -69,9 +70,9 @@ wxThread::ExitCode CheckForUpdateThread::Entry()
         auto versionSplit = util::lib::split(version, '.');
         auto currentVersionSplit = util::lib::split(common::GetVersion().ToStdString(), '.');
 
-        if (std::stoi(versionSplit[0]) >= std::stoi(currentVersionSplit[0])) {
+        if (std::stoi(versionSplit[0].substr(1,1)) >= std::stoi(currentVersionSplit[0])) {
             if (std::stoi(versionSplit[1]) >= std::stoi(currentVersionSplit[1])) {
-                if (std::stoi(versionSplit[2]) >= std::stoi(currentVersionSplit[2])) {
+                if (std::stoi(versionSplit[2]) > std::stoi(currentVersionSplit[2])) {
                     eventString = version + "," + description + "," + htmlUrl;
                 }
             }
@@ -127,7 +128,7 @@ void CheckForUpdateDialog::Create(wxWindow* parent,
         CreateControls();
 
         GetSizer()->Fit(this);
-        SetIcon(common::GetProgramIcon());
+        SetIcon(rc::GetProgramIcon());
         Center();
     }
 }

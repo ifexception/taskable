@@ -24,6 +24,7 @@
 
 #include "../common/common.h"
 #include "../common/constants.h"
+#include "../common/resources.h"
 #include "../common/util.h"
 #include "../data/taskitemdata.h"
 
@@ -90,7 +91,7 @@ bool WeeklyTaskViewDialog::Create(wxWindow* parent,
         ConfigureEventBindings();
         FillControls();
 
-        SetIcon(common::GetProgramIcon());
+        SetIcon(rc::GetProgramIcon());
         Center();
     }
 

@@ -21,6 +21,8 @@
 
 #include <cstdint>
 
+#include <wx/datetime.h>
+
 #include "../database/connectionprovider.h"
 #include "../database/sqliteconnection.h"
 #include "../models/taskmodel.h"
@@ -31,7 +33,6 @@ class TaskData final
 {
 public:
     TaskData();
-    TaskData(std::shared_ptr<db::SqliteConnection> connection);
     ~TaskData();
 
     std::unique_ptr<model::TaskModel> GetByDate(const wxDateTime& date);
@@ -42,8 +43,6 @@ private:
     int GetId(const wxDateTime& date);
 
     std::shared_ptr<db::SqliteConnection> pConnection;
-
-    bool bBorrowedConnection;
 
     static const std::string getTaskId;
     static const std::string getTaskByDate;

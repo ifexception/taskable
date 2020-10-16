@@ -19,33 +19,18 @@
 
 #include "currencydata.h"
 
-#include <spdlog/spdlog.h>
+#include <wx/string.h>
 
 namespace app::data
 {
 CurrencyData::CurrencyData()
-    : bBorrowedConnection(false)
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
-    spdlog::get("msvc")->debug("ACQUIRE connection in CurrencyData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
-}
-
-CurrencyData::CurrencyData(std::shared_ptr<db::SqliteConnection> connection)
-    : bBorrowedConnection(true)
-{
-    pConnection = connection;
-    spdlog::get("msvc")->debug("BORROW connection in CurrencyData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 CurrencyData::~CurrencyData()
 {
-    if (!bBorrowedConnection) {
-        db::ConnectionProvider::Get().Handle()->Release(pConnection);
-        spdlog::get("msvc")->debug("RELEASE connection in CurrencyData|ConnectionTally: {0:d}",
-            db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
-    }
+    db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 
 std::unique_ptr<model::CurrencyModel> CurrencyData::GetById(const int id)

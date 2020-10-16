@@ -32,22 +32,17 @@ class ProjectData final
 {
 public:
     ProjectData();
-    ProjectData(std::shared_ptr<db::SqliteConnection> connection);
     ~ProjectData();
 
-    void Create(std::unique_ptr<model::ProjectModel> project);
+    int64_t Create(std::unique_ptr<model::ProjectModel> project);
     std::unique_ptr<model::ProjectModel> GetById(const int projectId);
     void Update(std::unique_ptr<model::ProjectModel> project);
     void Delete(const int projectId);
     std::vector<std::unique_ptr<model::ProjectModel>> GetAll();
     void UnmarkDefaultProjects();
 
-    int GetLastInsertId() const;
-
 private:
     std::shared_ptr<db::SqliteConnection> pConnection;
-
-    bool bBorrowedConnection;
 
     static const std::string createProject;
     static const std::string getProject;

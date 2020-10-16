@@ -19,7 +19,7 @@
 
 #include "clientdata.h"
 
-#include <spdlog/spdlog.h>
+#include <wx/string.h>
 
 #include "../common/util.h"
 #include "employerdata.h"
@@ -27,28 +27,13 @@
 namespace app::data
 {
 ClientData::ClientData()
-    : bBorrowedConnection(false)
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
-    spdlog::get("msvc")->debug("ACQUIRE connection in ClientData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
-}
-
-ClientData::ClientData(std::shared_ptr<db::SqliteConnection> connection)
-    : bBorrowedConnection(true)
-{
-    pConnection = connection;
-    spdlog::get("msvc")->debug("BORROW connection in ClientData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 ClientData::~ClientData()
 {
-    if (!bBorrowedConnection) {
-        db::ConnectionProvider::Get().Handle()->Release(pConnection);
-        spdlog::get("msvc")->debug("RELEASE connection in ClientData|ConnectionTally: {0:d}",
-            db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
-    }
+    db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 
 int64_t ClientData::Create(std::unique_ptr<model::ClientModel> client)
@@ -61,14 +46,29 @@ int64_t ClientData::Create(std::unique_ptr<model::ClientModel> client)
 
 std::unique_ptr<model::ClientModel> ClientData::GetById(const int clientId)
 {
-    data::EmployerData data(pConnection);
     std::unique_ptr<model::ClientModel> client = nullptr;
 
-    *pConnection->DatabaseExecutableHandle() << ClientData::getClientById << clientId >>
-        [&](int clientId, std::string clientName, int dateCreated, int dateModified, int isActive, int employerId) {
-            client = std::make_unique<model::ClientModel>(clientId, clientName, dateCreated, dateModified, isActive);
-            client->SetEmployer(data.GetById(employerId));
-        };
+    *pConnection->DatabaseExecutableHandle() << ClientData::getClientById << clientId >> [&](int clientsClientId,
+                                                                                             std::string clientsName,
+                                                                                             int clientsDateCreated,
+                                                                                             int clientsDateModified,
+                                                                                             int clientIsActive,
+                                                                                             int clientsEmployerIdDb,
+                                                                                             int employersEmployerId,
+                                                                                             std::string employersName,
+                                                                                             int employersDateCreated,
+                                                                                             int employersDateModified,
+                                                                                             int employersIsActive) {
+        client = std::make_unique<model::ClientModel>(
+            clientsClientId, wxString(clientsName), clientsDateCreated, clientsDateModified, clientIsActive);
+        client->SetEmployerId(clientsEmployerIdDb);
+        auto employer = std::make_unique<model::EmployerModel>(employersEmployerId,
+            wxString(employersName),
+            employersDateCreated,
+            employersDateModified,
+            employersIsActive);
+        client->SetEmployer(std::move(employer));
+    };
     return client;
 }
 
@@ -86,14 +86,29 @@ void ClientData::Delete(const int clientId)
 
 std::vector<std::unique_ptr<model::ClientModel>> ClientData::GetByEmployerId(const int employerId)
 {
-    data::EmployerData data(pConnection);
     std::vector<std::unique_ptr<model::ClientModel>> clients;
 
     *pConnection->DatabaseExecutableHandle() << ClientData::getClientsByEmployerId << employerId >>
-        [&](int clientId, std::string name, int dateCreated, int dateModified, int isActive, int employerIdDb) {
-            auto client =
-                std::make_unique<model::ClientModel>(clientId, wxString(name), dateCreated, dateModified, isActive);
-            client->SetEmployer(data.GetById(employerId));
+        [&](int clientsClientId,
+            std::string clientsName,
+            int clientsDateCreated,
+            int clientsDateModified,
+            int clientIsActive,
+            int clientsEmployerIdDb,
+            int employersEmployerId,
+            std::string employersName,
+            int employersDateCreated,
+            int employersDateModified,
+            int employersIsActive) {
+            auto client = std::make_unique<model::ClientModel>(
+                clientsClientId, wxString(clientsName), clientsDateCreated, clientsDateModified, clientIsActive);
+            client->SetEmployerId(clientsEmployerIdDb);
+            auto employer = std::make_unique<model::EmployerModel>(employersEmployerId,
+                wxString(employersName),
+                employersDateCreated,
+                employersDateModified,
+                employersIsActive);
+            client->SetEmployer(std::move(employer));
             clients.push_back(std::move(client));
         };
 
@@ -102,23 +117,32 @@ std::vector<std::unique_ptr<model::ClientModel>> ClientData::GetByEmployerId(con
 
 std::vector<std::unique_ptr<model::ClientModel>> ClientData::GetAll()
 {
-    data::EmployerData data(pConnection);
     std::vector<std::unique_ptr<model::ClientModel>> clients;
 
-    *pConnection->DatabaseExecutableHandle() << ClientData::getClients >>
-        [&](int clientId, std::string name, int dateCreated, int dateModified, bool isActive, int employerId) {
-            auto client =
-                std::make_unique<model::ClientModel>(clientId, wxString(name), dateCreated, dateModified, isActive);
-            client->SetEmployer(data.GetById(employerId));
-            clients.push_back(std::move(client));
-        };
+    *pConnection->DatabaseExecutableHandle() << ClientData::getClients >> [&](int clientsClientId,
+                                                                              std::string clientsName,
+                                                                              int clientsDateCreated,
+                                                                              int clientsDateModified,
+                                                                              int clientIsActive,
+                                                                              int clientsEmployerId,
+                                                                              int employersEmployerId,
+                                                                              std::string employersName,
+                                                                              int employersDateCreated,
+                                                                              int employersDateModified,
+                                                                              int employersIsActive) {
+        auto client = std::make_unique<model::ClientModel>(
+            clientsClientId, wxString(clientsName), clientsDateCreated, clientsDateModified, clientIsActive);
+        client->SetEmployerId(clientsEmployerId);
+        auto employer = std::make_unique<model::EmployerModel>(employersEmployerId,
+            wxString(employersName),
+            employersDateCreated,
+            employersDateModified,
+            employersIsActive);
+        client->SetEmployer(std::move(employer));
+        clients.push_back(std::move(client));
+    };
 
     return clients;
-}
-
-int64_t ClientData::GetLastInsertId() const
-{
-    return pConnection->DatabaseExecutableHandle()->last_insert_rowid();
 }
 
 const std::string ClientData::createClient = "INSERT INTO "
@@ -126,21 +150,35 @@ const std::string ClientData::createClient = "INSERT INTO "
                                              "VALUES (?, 1, ?)";
 ;
 const std::string ClientData::getClientsByEmployerId = "SELECT clients.client_id, "
-                                                       "clients.name, "
+                                                       "clients.name AS client_name, "
                                                        "clients.date_created, "
                                                        "clients.date_modified, "
                                                        "clients.is_active, "
-                                                       "clients.employer_id "
+                                                       "clients.employer_id, "
+                                                       "employers.employer_id, "
+                                                       "employers.name AS employer_name, "
+                                                       "employers.date_created, "
+                                                       "employers.date_modified, "
+                                                       "employers.is_active "
                                                        "FROM clients "
-                                                       "WHERE employer_id = ?";
+                                                       "INNER JOIN employers "
+                                                       "ON clients.employer_id = employers.employer_id "
+                                                       "WHERE employers.employer_id = ?";
 ;
 const std::string ClientData::getClients = "SELECT clients.client_id, "
                                            "clients.name AS client_name, "
                                            "clients.date_created, "
                                            "clients.date_modified, "
                                            "clients.is_active, "
-                                           "clients.employer_id "
+                                           "clients.employer_id, "
+                                           "employers.employer_id, "
+                                           "employers.name AS employer_name, "
+                                           "employers.date_created, "
+                                           "employers.date_modified, "
+                                           "employers.is_active "
                                            "FROM clients "
+                                           "INNER JOIN employers "
+                                           "ON clients.employer_id = employers.employer_id "
                                            "WHERE clients.is_active = 1";
 ;
 const std::string ClientData::getClientById = "SELECT clients.client_id, "
@@ -148,8 +186,15 @@ const std::string ClientData::getClientById = "SELECT clients.client_id, "
                                               "clients.date_created, "
                                               "clients.date_modified, "
                                               "clients.is_active, "
-                                              "clients.employer_id "
+                                              "clients.employer_id, "
+                                              "employers.employer_id, "
+                                              "employers.name AS employer_name, "
+                                              "employers.date_created, "
+                                              "employers.date_modified, "
+                                              "employers.is_active "
                                               "FROM clients "
+                                              "INNER JOIN employers "
+                                              "ON clients.employer_id = employers.employer_id "
                                               "WHERE clients.client_id = ?";
 ;
 const std::string ClientData::updateClient = "UPDATE clients "

@@ -19,35 +19,20 @@
 
 #include "employerdata.h"
 
-#include <spdlog/spdlog.h>
+#include <wx/string.h>
 
 #include "../common/util.h"
 
 namespace app::data
 {
 EmployerData::EmployerData()
-    : bBorrowedConnection(false)
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
-    spdlog::get("msvc")->debug("ACQUIRE connection in EmployerData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
-}
-
-EmployerData::EmployerData(std::shared_ptr<db::SqliteConnection> connection)
-    : bBorrowedConnection(true)
-{
-    pConnection = connection;
-    spdlog::get("msvc")->debug("BORROW connection in EmployerData|ConnectionTally: {0:d}",
-        db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
 }
 
 EmployerData::~EmployerData()
 {
-    if (!bBorrowedConnection) {
-        db::ConnectionProvider::Get().Handle()->Release(pConnection);
-        spdlog::get("msvc")->debug("RELEASE connection in EmployerData|ConnectionTally: {0:d}",
-            db::ConnectionProvider::Get().Handle()->ConnectionsInUse());
-    }
+    db::ConnectionProvider::Get().Handle()->Release(pConnection);
 }
 
 int64_t EmployerData::Create(std::unique_ptr<model::EmployerModel> employer)
@@ -117,9 +102,11 @@ const std::string EmployerData::getEmployer = "SELECT employer_id, "
                                               "FROM employers "
                                               "WHERE employer_id = ?";
 
-const std::string EmployerData::updateEmployer =
-    "UPDATE employers SET name = ?, date_modified = ? WHERE employer_id = ?";
+const std::string EmployerData::updateEmployer = "UPDATE employers "
+                                                 "SET name = ?, date_modified = ? "
+                                                 "WHERE employer_id = ?";
 
-const std::string EmployerData::deleteEmployer =
-    "UPDATE employers SET is_active = 0, date_modified = ? WHERE employer_id = ?";
+const std::string EmployerData::deleteEmployer = "UPDATE employers "
+                                                 "SET is_active = 0, date_modified = ? "
+                                                 "WHERE employer_id = ?";
 } // namespace app::data
