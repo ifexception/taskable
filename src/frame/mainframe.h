@@ -90,6 +90,7 @@ private:
     void OnRestoreDatabase(wxCommandEvent& event);
     void OnBackupDatabase(wxCommandEvent& event);
     void OnReturnToCurrentDate(wxCommandEvent& event);
+    void OnExportToCsv(wxCommandEvent& event);
 
     /* Frame Controls Event Handlers */
     void OnPrevDay(wxCommandEvent& event);

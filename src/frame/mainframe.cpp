@@ -88,6 +88,7 @@ EVT_MENU(ids::ID_CHECK_FOR_UPDATE, MainFrame::OnCheckForUpdate)
 EVT_MENU(ids::ID_RESTORE_DATABASE, MainFrame::OnRestoreDatabase)
 EVT_MENU(ids::ID_BACKUP_DATABASE, MainFrame::OnBackupDatabase)
 EVT_MENU(ids::ID_RETURN_TO_CURRENT_DATE, MainFrame::OnReturnToCurrentDate)
+EVT_MENU(ids::ID_EXPORT_CSV, MainFrame::OnExportToCsv)
 /* Frame Control Event Handlers */
 EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 EVT_BUTTON(MainFrame::IDC_FEEDBACK, MainFrame::OnFeedback)
@@ -246,7 +247,8 @@ void MainFrame::CreateControls()
     preferencesMenuItem->SetBitmap(rc::GetSettingsIcon());
 
     /* Export Menu Control */
-    // auto exportMenu = new wxMenu();
+     auto exportMenu = new wxMenu();
+    exportMenu->Append(ids::ID_EXPORT_CSV, "To &CSV", "Export data to CSV file format");
 
     /* Tools Menu Control */
     auto toolsMenu = new wxMenu();
@@ -611,6 +613,11 @@ void MainFrame::OnReturnToCurrentDate(wxCommandEvent& WXUNUSED(event))
     }
 
     DateChangedProcedure(currentDate);
+}
+
+void MainFrame::OnExportToCsv(wxCommandEvent& WXUNUSED(event))
+{
+    // Export to CSV
 }
 
 void MainFrame::OnPrevDay(wxCommandEvent& event)
