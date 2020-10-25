@@ -20,17 +20,13 @@
 #include "databasebackupdeleter.h"
 
 #include <wx/dir.h>
+#include <wx/filename.h>
 #include <wx/regex.h>
 
 #include "../common/common.h"
 
 namespace app::svc
 {
-DatabaseBackupDeleter::DatabaseBackupDeleter(std::shared_ptr<cfg::Configuration> config)
-    : pConfig(config)
-{
-}
-
 bool DatabaseBackupDeleter::Execute()
 {
     auto filesToDelete = GetFilesForDeletion();
@@ -45,8 +41,8 @@ bool DatabaseBackupDeleter::Execute()
 
 wxArrayString DatabaseBackupDeleter::GetFilesForDeletion()
 {
-    auto backupPath = pConfig->GetBackupPath();
-    auto deleteBackupsAfter = pConfig->GetDeleteBackupsAfter();
+    auto backupPath = cfg::ConfigurationProvider::Get().Configuration->GetBackupPath();
+    auto deleteBackupsAfter = cfg::ConfigurationProvider::Get().Configuration->GetDeleteBackupsAfter();
 
     wxArrayString backupPathFileNames;
     wxDir::GetAllFiles(backupPath, &backupPathFileNames, wxEmptyString, wxDIR_FILES);

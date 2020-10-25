@@ -25,7 +25,6 @@
 #include <sqlite_modern_cpp.h>
 #include <wx/string.h>
 
-#include "../config/configuration.h"
 #include "../database/connectionprovider.h"
 #include "../database/sqliteconnection.h"
 
@@ -35,7 +34,7 @@ class DatabaseBackup final
 {
 public:
     DatabaseBackup() = delete;
-    DatabaseBackup(std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger);
+    DatabaseBackup(std::shared_ptr<spdlog::logger> logger);
     ~DatabaseBackup();
 
     bool Execute();
@@ -46,7 +45,6 @@ private:
     bool CreateBackupFile(const wxString& fileName);
     bool ExecuteBackup(const wxString& fileName);
 
-    std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<db::SqliteConnection> pConnection;
 };

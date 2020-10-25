@@ -1,3 +1,4 @@
+#include "configurationprovider.h"
 // Productivity tool to help you track the time you spend on tasks
 // Copyright (C) 2020  Szymon Welgus
 //
@@ -17,27 +18,18 @@
 //  Contact:
 //    szymonwelgus at gmail dot com
 
-#pragma once
+#include "configurationprovider.h"
 
-#include <memory>
-
-#include <wx/arrstr.h>
-#include <wx/string.h>
-
-#include "../config/configurationprovider.h"
-
-namespace app::svc
+namespace app::cfg
 {
-class DatabaseBackupDeleter final
+ConfigurationProvider& ConfigurationProvider::Get()
 {
-public:
-    DatabaseBackupDeleter() = default;
-    ~DatabaseBackupDeleter() = default;
+    static ConfigurationProvider instance;
+    return instance;
+}
 
-    bool Execute();
-
-private:
-    wxArrayString GetFilesForDeletion();
-    bool DeleteFilesAfterSpecifiedDate(const wxArrayString& filesToDelete);
-};
-} // namespace app::svc
+void ConfigurationProvider::Initialize()
+{
+    Configuration = std::make_unique<cfg::Configuration>();
+}
+} // namespace app::cfg

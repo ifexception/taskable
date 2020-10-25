@@ -24,7 +24,7 @@
 #include <wx/listctrl.h>
 
 #include "../common/common.h"
-#include "../config/configuration.h"
+#include "../config/configurationprovider.h"
 #include "../frame/taskbaricon.h"
 
 namespace app::dlg
@@ -35,12 +35,10 @@ EVT_BUTTON(wxID_OK, PreferencesDialog::OnOk)
 wxEND_EVENT_TABLE()
 
 PreferencesDialog::PreferencesDialog(wxWindow* parent,
-    std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     frm::TaskBarIcon* taskBarIcon,
     const wxString& name)
-    : pConfig(config)
-    , pLogger(logger)
+    : pLogger(logger)
     , pTaskBarIcon(taskBarIcon)
     , pParent(parent)
     , pGeneralPage(nullptr)
@@ -76,10 +74,12 @@ void PreferencesDialog::CreateControls()
 {
     auto listBook = static_cast<wxListbook*>(GetBookCtrl());
 
-    pGeneralPage = new GeneralPage(listBook, pConfig);
-    pDatabasePage = new DatabasePage(listBook, pConfig);
-    pStopwatchPage = new StopwatchPage(listBook, pConfig);
-    pTaskItemPage = new TaskItemPage(listBook, pConfig);
+    auto* config = cfg::ConfigurationProvider::Get().Configuration.get();
+
+    pGeneralPage = new GeneralPage(listBook, config);
+    pDatabasePage = new DatabasePage(listBook, config);
+    pStopwatchPage = new StopwatchPage(listBook, config);
+    pTaskItemPage = new TaskItemPage(listBook, config);
 
     listBook->AddPage(pGeneralPage, wxT("General"), true);
     listBook->AddPage(pDatabasePage, wxT("Database"), false);
@@ -100,17 +100,27 @@ void PreferencesDialog::OnOk(wxCommandEvent& event)
     pGeneralPage->Apply();
     pDatabasePage->Apply();
     pStopwatchPage->Apply();
+    pTaskItemPage->Apply();
 
-    if (pConfig->IsBackupEnabled() && pConfig->GetBackupPath().length() == 0) {
+    if (cfg::ConfigurationProvider::Get().Configuration->IsBackupEnabled() &&
+        cfg::ConfigurationProvider::Get().Configuration->GetBackupPath().length() == 0) {
         wxMessageBox(wxT("A backup path must be selected."), common::GetProgramName(), wxOK_DEFAULT | wxICON_WARNING);
         return;
     }
 
-    pConfig->Save();
+    if (cfg::ConfigurationProvider::Get().Configuration->IsBackupEnabled() &&
+        cfg::ConfigurationProvider::Get().Configuration->GetDeleteBackupsAfter() <= 0) {
+        wxMessageBox(wxT("A positive non-zero value is required if backups are enabled"),
+            common::GetProgramName(),
+            wxOK_DEFAULT | wxICON_WARNING);
+        return;
+    }
 
-    if (pConfig->IsShowInTray() && !pTaskBarIcon->IsIconInstalled()) {
+    cfg::ConfigurationProvider::Get().Configuration->Save();
+
+    if (cfg::ConfigurationProvider::Get().Configuration->IsShowInTray() && !pTaskBarIcon->IsIconInstalled()) {
         pTaskBarIcon->SetTaskBarIcon();
-    } else if (!pConfig->IsShowInTray() && pTaskBarIcon->IsIconInstalled()) {
+    } else if (!cfg::ConfigurationProvider::Get().Configuration->IsShowInTray() && pTaskBarIcon->IsIconInstalled()) {
         pTaskBarIcon->RemoveIcon();
     }
 

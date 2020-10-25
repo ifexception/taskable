@@ -26,12 +26,12 @@
 #include <wx/stdpaths.h>
 
 #include "../common/common.h"
+#include "../config/configurationprovider.h"
 
 namespace app::svc
 {
-DatabaseBackup::DatabaseBackup(std::shared_ptr<cfg::Configuration> config, std::shared_ptr<spdlog::logger> logger)
-    : pConfig(config)
-    , pLogger(logger)
+DatabaseBackup::DatabaseBackup(std::shared_ptr<spdlog::logger> logger)
+    : pLogger(logger)
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
@@ -77,7 +77,7 @@ wxString DatabaseBackup::CreateBackupFileName()
 
 wxString DatabaseBackup::GetBackupFullPath(const wxString& filename)
 {
-    auto backupDirectory = pConfig->GetBackupPath();
+    auto backupDirectory = cfg::ConfigurationProvider::Get().Configuration->GetBackupPath();
     auto backupFilePath = wxString::Format(wxT("%s\\%s"), backupDirectory, filename);
     return backupFilePath;
 }

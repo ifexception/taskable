@@ -21,11 +21,13 @@
 
 #include <algorithm>
 
+#include <wx/file.h>
 #include <wx/stdpaths.h>
 #include <wx/msw/registry.h>
 
 #include "common/common.h"
 #include "common/constants.h"
+#include "config/configurationprovider.h"
 #include "database/sqliteconnectionfactory.h"
 #include "database/sqliteconnection.h"
 #include "database/connectionprovider.h"
@@ -40,7 +42,6 @@ namespace app
 {
 Application::Application()
     : pInstanceChecker(std::make_unique<wxSingleInstanceChecker>())
-    , pConfig(nullptr)
 {
 }
 
@@ -74,7 +75,7 @@ bool Application::OnInit()
         }
     }
 
-    auto frame = new frm::MainFrame(pConfig, pLogger);
+    auto frame = new frm::MainFrame(pLogger);
     frame->CreateFrame();
     frame->Show(true);
     SetTopWindow(frame);
@@ -145,8 +146,7 @@ bool Application::InitializeLogging()
     }
 
     auto logDirectory =
-        wxString::Format(wxT("%s\\logs\\%s"), wxStandardPaths::Get().GetUserDataDir(), LogsFilename)
-            .ToStdString();
+        wxString::Format(wxT("%s\\logs\\%s"), wxStandardPaths::Get().GetUserDataDir(), LogsFilename).ToStdString();
 
     try {
         auto msvcSink = std::make_shared<spdlog::sinks::msvc_sink_st>();
@@ -192,7 +192,7 @@ bool Application::InitializeDatabaseConnectionProvider()
     static int ConnectionPoolSize = 14;
 
     auto sqliteConnectionFactory = std::make_shared<db::SqliteConnectionFactory>(
-        common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString());
+        common::GetDatabaseFilePath(cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath()).ToStdString());
     auto connectionPool =
         std::make_unique<db::ConnectionPool<db::SqliteConnection>>(sqliteConnectionFactory, ConnectionPoolSize);
     db::ConnectionProvider::Get().InitializeConnectionPool(std::move(connectionPool));
@@ -219,7 +219,7 @@ bool Application::IsSetup()
 
 bool Application::RunSetupWizard()
 {
-    auto wizard = new wizard::SetupWizard(nullptr, pConfig, pLogger);
+    auto wizard = new wizard::SetupWizard(nullptr, pLogger);
     wizard->CenterOnScreen();
     bool result = wizard->Run();
 
@@ -258,11 +258,11 @@ bool Application::ConfigurationFileExists()
         return false;
     }
 
-    pConfig = std::make_shared<cfg::Configuration>();
+    cfg::ConfigurationProvider::Get().Initialize();
 
-    if (pConfig->GetDatabasePath().empty()) {
-        pConfig->SetDatabasePath(wxStandardPaths::Get().GetAppDocumentsDir());
-        pConfig->Save();
+    if (cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath().empty()) {
+        cfg::ConfigurationProvider::Get().Configuration->SetDatabasePath(wxStandardPaths::Get().GetAppDocumentsDir());
+        cfg::ConfigurationProvider::Get().Configuration->Save();
     }
 
     return configFileExists;
@@ -271,8 +271,8 @@ bool Application::ConfigurationFileExists()
 bool Application::CreateBackupsDirectory()
 {
     wxString backupsDirectory;
-    if (IsSetup() && !pConfig->GetBackupPath().empty()) {
-        backupsDirectory = pConfig->GetBackupPath();
+    if (IsSetup() && !cfg::ConfigurationProvider::Get().Configuration->GetBackupPath().empty()) {
+        backupsDirectory = cfg::ConfigurationProvider::Get().Configuration->GetBackupPath();
     } else {
         backupsDirectory = wxString::Format(wxT("%s\\backups"), wxStandardPaths::Get().GetUserDataDir());
     }
@@ -287,14 +287,15 @@ bool Application::CreateBackupsDirectory()
 
 bool Application::CreateDatabaseFile()
 {
-    if (!wxDirExists(pConfig->GetDatabasePath())) {
-        if (!wxMkdir(pConfig->GetDatabasePath())) {
+    if (!wxDirExists(cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath())) {
+        if (!wxMkdir(cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath())) {
             pLogger->error("Unable to create database directory at specified location.");
         }
     }
 
     wxFile file;
-    auto succeeded = file.Create(common::GetDatabaseFilePath(pConfig->GetDatabasePath()));
+    auto succeeded =
+        file.Create(common::GetDatabaseFilePath(cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath()));
     if (!succeeded) {
         pLogger->error("Unable to create database file at specified location.");
     }
@@ -305,8 +306,9 @@ bool Application::CreateDatabaseFile()
 
 void Application::DeleteDatabaseFile()
 {
-    if (wxFileExists(common::GetDatabaseFilePath(pConfig->GetDatabasePath()))) {
-        if (!wxRemoveFile(common::GetDatabaseFilePath(pConfig->GetDatabasePath()))) {
+    if (wxFileExists(common::GetDatabaseFilePath(cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath()))) {
+        if (!wxRemoveFile(
+                common::GetDatabaseFilePath(cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath()))) {
             pLogger->error("Unable to delete database file.");
         }
     }
@@ -315,22 +317,23 @@ void Application::DeleteDatabaseFile()
 bool Application::DatabaseFileExists()
 {
     /* Check if the database directory is missing */
-    if (!wxDirExists(pConfig->GetDatabasePath())) {
+    if (!wxDirExists(cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath())) {
         /* Create the database directory */
-        if (!wxMkdir(pConfig->GetDatabasePath())) {
+        if (!wxMkdir(cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath())) {
             return false;
         }
     }
 
     /* Check if the database file is missing */
-    if (!wxFileExists(common::GetDatabaseFilePath(pConfig->GetDatabasePath()))) {
+    if (!wxFileExists(
+            common::GetDatabaseFilePath(cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath()))) {
         /* Backups are enabled so run the database restore wizard to restore database */
-        if (pConfig->IsBackupEnabled()) {
+        if (cfg::ConfigurationProvider::Get().Configuration->IsBackupEnabled()) {
             int ret = wxMessageBox(wxT("Error: Program cannot find database file\nRestore database from backup?"),
                 common::GetProgramName(),
                 wxYES_NO | wxICON_ERROR);
             if (ret == wxYES) {
-                auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pConfig, pLogger, true);
+                auto restoreDatabase = new wizard::DatabaseRestoreWizard(nullptr, pLogger, true);
                 restoreDatabase->CenterOnParent();
                 return restoreDatabase->Run();
             }

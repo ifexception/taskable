@@ -16,6 +16,8 @@ find_package (spdlog CONFIG REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
+find_path(TOML11_INCLUDE_DIRS "toml.hpp")
+
 message (STATUS "ZLIB found: ${ZLIB_FOUND}")
 message (STATUS "sqlite3 found: ${sqlite3_FOUND}")
 message (STATUS "spdlog found: ${spdlog_FOUND}")
@@ -30,7 +32,9 @@ set (SRC
     "common/util.cpp"
     "common/datetraverser.cpp"
     "common/constants.cpp"
+
     "config/configuration.cpp"
+    "config/configurationprovider.cpp"
 
     "database/connection.cpp"
     "database/connectionfactory.cpp"
@@ -128,6 +132,9 @@ target_compile_definitions (${PROJECT_NAME} PUBLIC
     $<$<CONFIG:Debug>:TASKABLE_DEBUG>
     $<$<CONFIG:Release>:NDEBUG>
     $<$<CONFIG:Debug>:WXDEBUG>)
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${TOML11_INCLUDE_DIRS})
 
 target_link_libraries (${PROJECT_NAME}
     ${wxWidgets_LIBRARIES}

@@ -50,7 +50,6 @@ class PreferencesDialog final : public wxPropertySheetDialog
 public:
     PreferencesDialog() = delete;
     PreferencesDialog(wxWindow* parent,
-        std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> pLogger,
         frm::TaskBarIcon* taskBarIcon,
         const wxString& name = wxT("preferencesdlg"));
@@ -71,7 +70,6 @@ private:
 
     void OnOk(wxCommandEvent& event);
 
-    std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
     frm::TaskBarIcon* pTaskBarIcon;
 

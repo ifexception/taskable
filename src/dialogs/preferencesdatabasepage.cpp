@@ -19,6 +19,7 @@
 
 #include "preferencesdatabasepage.h"
 
+#include <wx/stdpaths.h>
 #include <wx/valnum.h>
 
 #include "../common/common.h"
@@ -26,7 +27,7 @@
 
 namespace app::dlg
 {
-DatabasePage::DatabasePage(wxWindow* parent, std::shared_ptr<cfg::Configuration> config)
+DatabasePage::DatabasePage(wxWindow* parent, cfg::Configuration* config)
     : wxPanel(parent, wxID_ANY)
     , pConfig(config)
     , pParent(parent)

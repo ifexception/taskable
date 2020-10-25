@@ -21,37 +21,25 @@
 
 #include <memory>
 
-#include <sqlite_modern_cpp.h>
-#include <wx/wx.h>
-#include <wx/taskbar.h>
+#include "configuration.h"
 
-#include <spdlog/spdlog.h>
-
-namespace app::frm
+namespace app::cfg
 {
-class TaskBarIcon : public wxTaskBarIcon
+class ConfigurationProvider final
 {
 public:
-    TaskBarIcon(wxFrame* parent,
-        std::shared_ptr<spdlog::logger> logger);
-    virtual ~TaskBarIcon() = default;
+    static ConfigurationProvider& Get();
 
-    void SetTaskBarIcon();
+    ConfigurationProvider(const ConfigurationProvider&) = delete;
+    ConfigurationProvider& operator=(const ConfigurationProvider&) = delete;
+
+    ~ConfigurationProvider() = default;
+
+    void Initialize();
+
+    std::unique_ptr<cfg::Configuration> Configuration;
 
 private:
-    wxDECLARE_EVENT_TABLE();
-
-    wxMenu* CreatePopupMenu() override;
-
-    void OnNewEntryTask(wxCommandEvent& event);
-    void OnNewTimedTask(wxCommandEvent& event);
-    void OnPreferences(wxCommandEvent& event);
-    void OnExit(wxCommandEvent& event);
-    void OnLeftButtonDown(wxTaskBarIconEvent& event);
-
-    wxFrame* pParent;
-    std::shared_ptr<spdlog::logger> pLogger;
-
-    enum { ID_ADD_ENTRY_TASK = wxID_HIGHEST + 1, ID_ADD_TIMED_TASK, ID_SETTINGS };
+    ConfigurationProvider() = default;
 };
-} // namespace app::frm
+} // namespace app::cfg

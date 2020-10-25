@@ -44,7 +44,6 @@ public:
     WeeklyTaskViewDialog() = delete;
     WeeklyTaskViewDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
-        std::shared_ptr<cfg::Configuration> config,
         const wxString& name = wxT("weeklytaskviewdlg"));
     virtual ~WeeklyTaskViewDialog() = default;
 
@@ -72,7 +71,6 @@ private:
     void GetTaskItemHoursByDateRange(const wxString& fromDate, const wxString& toDate);
 
     std::shared_ptr<spdlog::logger> pLogger;
-    std::shared_ptr<cfg::Configuration> pConfig;
 
     wxWindow* pParent;
     wxStaticText* pWeekDatesLabel;

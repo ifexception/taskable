@@ -34,7 +34,7 @@ class TaskItemPage final : public wxPanel
 {
 public:
     TaskItemPage() = delete;
-    TaskItemPage(wxWindow* parent, std::shared_ptr<cfg::Configuration> config);
+    TaskItemPage(wxWindow* parent, cfg::Configuration* config);
     virtual ~TaskItemPage() = default;
 
     void Apply();
@@ -46,7 +46,7 @@ private:
 
     void OnTimeRoundingCheck(wxCommandEvent& event);
 
-    std::shared_ptr<cfg::Configuration> pConfig;
+    cfg::Configuration* pConfig;
 
     wxWindow* pParent;
 

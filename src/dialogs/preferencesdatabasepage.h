@@ -34,7 +34,7 @@ class DatabasePage final : public wxPanel
 {
 public:
     DatabasePage() = delete;
-    DatabasePage(wxWindow* parent, std::shared_ptr<cfg::Configuration> config);
+    DatabasePage(wxWindow* parent, cfg::Configuration* config);
     virtual ~DatabasePage() = default;
 
     void Apply();
@@ -48,7 +48,7 @@ private:
     void OnBackupDatabaseCheck(wxCommandEvent& event);
     void OnOpenDirectoryForBackupLocation(wxCommandEvent& event);
 
-    std::shared_ptr<cfg::Configuration> pConfig;
+    cfg::Configuration* pConfig;
 
     wxWindow* pParent;
 
