@@ -52,6 +52,8 @@
 
 #include "../dialogs/preferencesdlg.h"
 
+#include "../dialogs/exporttocsvdlg.h"
+
 #include "../wizards/databaserestorewizard.h"
 #include "taskbaricon.h"
 
@@ -247,7 +249,7 @@ void MainFrame::CreateControls()
     preferencesMenuItem->SetBitmap(rc::GetSettingsIcon());
 
     /* Export Menu Control */
-     auto exportMenu = new wxMenu();
+    auto exportMenu = new wxMenu();
     exportMenu->Append(ids::ID_EXPORT_CSV, "To &CSV", "Export data to CSV file format");
 
     /* Tools Menu Control */
@@ -271,7 +273,7 @@ void MainFrame::CreateControls()
     wxMenuBar* menuBar = new wxMenuBar();
     menuBar->Append(fileMenu, wxT("File"));
     menuBar->Append(editMenu, wxT("Edit"));
-    // menuBar->Append(exportMenu, wxT("Export"));
+    menuBar->Append(exportMenu, wxT("Export"));
     menuBar->Append(toolsMenu, wxT("Tools"));
     menuBar->Append(helpMenu, wxT("Help"));
 
@@ -618,6 +620,8 @@ void MainFrame::OnReturnToCurrentDate(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnExportToCsv(wxCommandEvent& WXUNUSED(event))
 {
     // Export to CSV
+    dlg::ExportToCsvDialog exportToCsv(this, pLogger);
+    exportToCsv.ShowModal();
 }
 
 void MainFrame::OnPrevDay(wxCommandEvent& event)

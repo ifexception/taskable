@@ -50,6 +50,7 @@ set (SRC
     "services/databasebackupdeleter.cpp"
     "services/setupdatabase.cpp"
     "services/databasestructureupdater.cpp"
+    "services/csvexporter.cpp"
 
     "application.cpp"
     "resources.rc"
@@ -110,6 +111,8 @@ set (SRC
     "data/meetingdata.cpp"
     "models/meetingmodel.cpp"
     "dialogs/meetingsviewdlg.cpp"
+
+    "dialogs/exporttocsvdlg.cpp"
     )
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
