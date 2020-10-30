@@ -25,3 +25,7 @@ timeToRoundTo=5
 
 [persistence]
 dimensions="600,500"
+
+[export]
+delimiter=","
+exportPath=""

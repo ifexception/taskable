@@ -59,6 +59,9 @@ public:
 
     std::string GetFrameSize() const;
 
+    std::string GetDelimiter() const;
+    std::string GetExportPath() const;
+
     /* Setters */
     void SetConfirmOnExit(bool value);
     void SetStartOnBoot(bool value);
@@ -83,6 +86,9 @@ public:
 
     void SetFrameSize(const std::string& value);
 
+    void SetDelimiter(const std::string& value);
+    void SetExportPath(const std::string& value);
+
 private:
     void LoadConfigFile();
 
@@ -91,6 +97,7 @@ private:
     void GetStopwatchConfig(const toml::value& config);
     void GetTaskItemConfig(const toml::value& config);
     void GetPersistenceConfig(const toml::value& config);
+    void GetExportConfig(const toml::value& config);
 
     struct Sections {
         static const std::string GeneralSection;
@@ -98,6 +105,7 @@ private:
         static const std::string StopwatchSection;
         static const std::string TaskItemSection;
         static const std::string PersistenceSection;
+        static const std::string ExportSection;
     };
 
     struct Settings {
@@ -123,6 +131,9 @@ private:
         int TimeToRoundTo;
 
         std::string Dimension;
+
+        std::string Delimiter;
+        std::string ExportPath;
 
         Settings() = default;
         ~Settings() = default;

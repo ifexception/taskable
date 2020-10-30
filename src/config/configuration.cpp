@@ -33,6 +33,7 @@ const std::string Configuration::Sections::DatabaseSection = "database";
 const std::string Configuration::Sections::StopwatchSection = "stopwatch";
 const std::string Configuration::Sections::TaskItemSection = "task_item";
 const std::string Configuration::Sections::PersistenceSection = "persistence";
+const std::string Configuration::Sections::ExportSection = "export";
 
 Configuration::Configuration()
     : mSettings()
@@ -87,6 +88,13 @@ void Configuration::Save()
             {
                 { "dimensions", mSettings.Dimension }
             }
+        },
+        {
+            Sections::ExportSection,
+            {
+                { "delimiter", mSettings.Delimiter },
+                { "exportPath", mSettings.ExportPath }
+            }
         }
     };
 
@@ -105,7 +113,7 @@ void Configuration::Save()
 
     configFile.close();
 }
-//clang-format on
+// clang-format on
 
 bool Configuration::IsConfirmOnExit() const
 {
@@ -195,6 +203,16 @@ int Configuration::GetTimeToRoundTo() const
 std::string Configuration::GetFrameSize() const
 {
     return mSettings.Dimension;
+}
+
+std::string Configuration::GetDelimiter() const
+{
+    return mSettings.Delimiter;
+}
+
+std::string Configuration::GetExportPath() const
+{
+    return mSettings.ExportPath;
 }
 
 void Configuration::SetConfirmOnExit(bool value)
@@ -287,6 +305,16 @@ void Configuration::SetFrameSize(const std::string& value)
     mSettings.Dimension = value;
 }
 
+void Configuration::SetDelimiter(const std::string& value)
+{
+    mSettings.Delimiter = value;
+}
+
+void Configuration::SetExportPath(const std::string& value)
+{
+    mSettings.ExportPath = value;
+}
+
 void Configuration::LoadConfigFile()
 {
     auto data = toml::parse(common::GetConfigFilePath());
@@ -296,6 +324,7 @@ void Configuration::LoadConfigFile()
     GetStopwatchConfig(data);
     GetTaskItemConfig(data);
     GetPersistenceConfig(data);
+    GetExportConfig(data);
 }
 
 void Configuration::GetGeneralConfig(const toml::value& config)
@@ -323,12 +352,12 @@ void Configuration::GetStopwatchConfig(const toml::value& config)
 {
     const auto& stopwatchSection = toml::find(config, Sections::StopwatchSection);
 
-    mSettings.MinimizeStopwatchWindow = toml::find<bool>(stopwatchSection,      "minimizeStopwatchWindow");
-    mSettings.HideWindowTimerInterval = toml::find<int>(stopwatchSection,       "hideWindowTimer");
-    mSettings.NotificationTimerInterval = toml::find<int>(stopwatchSection,     "notificationTimer");
-    mSettings.PausedTaskReminderInterval = toml::find<int>(stopwatchSection,    "pausedTaskReminder");
-    mSettings.StartStopwatchOnLaunch = toml::find<bool>(stopwatchSection,       "startStopwatchOnLaunch");
-    mSettings.StartStopwatchOnResume = toml::find<bool>(stopwatchSection,       "startStopwatchOnResume");
+    mSettings.MinimizeStopwatchWindow = toml::find<bool>(stopwatchSection, "minimizeStopwatchWindow");
+    mSettings.HideWindowTimerInterval = toml::find<int>(stopwatchSection, "hideWindowTimer");
+    mSettings.NotificationTimerInterval = toml::find<int>(stopwatchSection, "notificationTimer");
+    mSettings.PausedTaskReminderInterval = toml::find<int>(stopwatchSection, "pausedTaskReminder");
+    mSettings.StartStopwatchOnLaunch = toml::find<bool>(stopwatchSection, "startStopwatchOnLaunch");
+    mSettings.StartStopwatchOnResume = toml::find<bool>(stopwatchSection, "startStopwatchOnResume");
 }
 
 void Configuration::GetTaskItemConfig(const toml::value& config)
@@ -343,8 +372,13 @@ void Configuration::GetPersistenceConfig(const toml::value& config)
 {
     const auto& persistenceSection = toml::find(config, Sections::PersistenceSection);
 
-    auto dimensions = toml::find<std::string>(persistenceSection, "dimensions");
+    mSettings.Dimension = toml::find<std::string>(persistenceSection, "dimensions");
+}
+void Configuration::GetExportConfig(const toml::value& config)
+{
+    const auto exportSection = toml::find(config, Sections::ExportSection);
 
-    mSettings.Dimension = dimensions;
+    mSettings.Delimiter = toml::find<std::string>(exportSection, "delimiter");
+    mSettings.ExportPath = toml::find<std::string>(exportSection, "exportPath");
 }
 } // namespace app::cfg
