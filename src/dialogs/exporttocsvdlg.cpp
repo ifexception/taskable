@@ -18,10 +18,14 @@
 
 #include "exporttocsvdlg.h"
 
+#include <wx/richtooltip.h>
 #include <wx/statline.h>
+#include <wx/stdpaths.h>
 
 #include "../common/common.h"
 #include "../common/resources.h"
+#include "../config/configurationprovider.h"
+#include "../services/csvexporter.h"
 
 namespace app::dlg
 {
@@ -172,11 +176,16 @@ void ExportToCsvDialog::CreateControls()
     exportFileSizer->Add(exportFileLabel, common::sizers::ControlCenter);
 
     /* Export File Name text control */
-    pExportFileNameCtrl =
-        new wxTextCtrl(fileOptionsStaticBox, IDC_EXPORTFILE, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
+    pExportFileNameCtrl = new wxTextCtrl(
+        fileOptionsStaticBox, IDC_EXPORTFILE, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT);
     pExportFileNameCtrl->SetHint("Exported Data.csv");
     pExportFileNameCtrl->SetToolTip("Specify a file name for the exported data (can be blank)");
     exportFileSizer->Add(pExportFileNameCtrl, common::sizers::ControlDefault);
+
+    /* Feedback label */
+    rightSizer->AddSpacer(28);
+    pFeedbackLabel = new wxStaticText(this, IDC_FEEDBACK, "Feedback");
+    rightSizer->Add(pFeedbackLabel, common::sizers::ControlCenterHorizontal);
 
     /* Bottom */
     /* Horizontal Line*/
@@ -194,24 +203,174 @@ void ExportToCsvDialog::CreateControls()
     pExportButton = new wxButton(buttonPanel, IDC_EXPORTBUTTON, "Export");
     buttonPanelSizer->Add(pExportButton, common::sizers::ControlDefault);
 
-    pOkButton = new wxButton(buttonPanel, wxID_OK, wxT("OK"));
+    pOkButton = new wxButton(buttonPanel, wxID_OK, "OK");
     buttonPanelSizer->Add(pOkButton, wxSizerFlags().Border(wxALL, 5));
 }
 
 // clang-format off
 void ExportToCsvDialog::ConfigureEventBindings()
 {
+    pStartDateCtrl->Bind(
+            wxEVT_KILL_FOCUS,
+            &ExportToCsvDialog::OnStartDateFocusLost,
+            this
+        );
 
+    pEndDateCtrl->Bind(
+        wxEVT_KILL_FOCUS,
+        &ExportToCsvDialog::OnEndDateFocusLost,
+        this
+    );
+
+    pDelimiterTextCtrl->Bind(
+        wxEVT_TEXT,
+        &ExportToCsvDialog::OnDelimiterChange,
+        this
+    );
+
+    pBrowseExportPathButton->Bind(
+        wxEVT_BUTTON,
+        &ExportToCsvDialog::OnOpenDirectoryForExportLocation,
+        this,
+        IDC_EXPORTPATHBUTTON
+    );
+
+    pExportButton->Bind(
+        wxEVT_BUTTON,
+        &ExportToCsvDialog::OnExport,
+        this,
+        IDC_EXPORTBUTTON
+    );
 }
 // clang-format on
 
 void ExportToCsvDialog::FillControls()
 {
     const wxString DefaultDelimiter = ",";
-    pDelimiterTextCtrl->ChangeValue(DefaultDelimiter);
+    auto configDelimiter = cfg::ConfigurationProvider::Get().Configuration->GetDelimiter();
+    if (configDelimiter.empty()) {
+        pDelimiterTextCtrl->ChangeValue(DefaultDelimiter);
+    } else {
+        pDelimiterTextCtrl->ChangeValue(configDelimiter);
+    }
+
+    auto exportPath = cfg::ConfigurationProvider::Get().Configuration->GetExportPath();
+    if (exportPath.length() > 0 && wxDirExists(exportPath)) {
+        pExportFilePathCtrl->ChangeValue(exportPath);
+        pExportFilePathCtrl->SetToolTip(exportPath);
+    }
 }
-void ExportToCsvDialog::OnStartDateFocusLost(wxFocusEvent& event) {}
-void ExportToCsvDialog::OnEndDateFocusLost(wxFocusEvent& event) {}
-void ExportToCsvDialog::OnOpenDirectoryForExportLocation(wxCommandEvent& event) {}
-void ExportToCsvDialog::OnExport(wxCommandEvent& event) {}
+
+void ExportToCsvDialog::OnStartDateFocusLost(wxFocusEvent& event)
+{
+    DateValidationProcedure();
+    event.Skip();
+}
+
+void ExportToCsvDialog::OnEndDateFocusLost(wxFocusEvent& event)
+{
+    DateValidationProcedure();
+    event.Skip();
+}
+
+void ExportToCsvDialog::OnOpenDirectoryForExportLocation(wxCommandEvent& event)
+{
+    wxString pathDirectory = wxGetEmptyString();
+    if (cfg::ConfigurationProvider::Get().Configuration->GetExportPath().length() == 0 &&
+        !wxDirExists(cfg::ConfigurationProvider::Get().Configuration->GetExportPath())) {
+        pathDirectory = wxStandardPaths::Get().GetAppDocumentsDir();
+    } else {
+        pathDirectory = cfg::ConfigurationProvider::Get().Configuration->GetExportPath();
+    }
+
+    auto openDirDialog =
+        new wxDirDialog(this, "Select a Export Directory", pathDirectory, wxDD_DEFAULT_STYLE, wxDefaultPosition);
+    int res = openDirDialog->ShowModal();
+
+    if (res == wxID_OK) {
+        auto selectedExportPath = openDirDialog->GetPath();
+        pExportFilePathCtrl->SetValue(selectedExportPath);
+        pExportFilePathCtrl->SetToolTip(selectedExportPath);
+        cfg::ConfigurationProvider::Get().Configuration->SetExportPath(selectedExportPath.ToStdString());
+        cfg::ConfigurationProvider::Get().Configuration->Save();
+    }
+
+    openDirDialog->Destroy();
+}
+
+void ExportToCsvDialog::OnExport(wxCommandEvent& event)
+{
+    /* check if dates are correctly selected */
+    auto start = pStartDateCtrl->GetValue();
+    auto end = pEndDateCtrl->GetValue();
+
+    if (start.IsLaterThan(end)) {
+        return;
+    }
+
+    if (end.IsEarlierThan(start)) {
+        return;
+    }
+
+    /* format dates to ISO strings */
+    auto startDate = start.FormatISODate();
+    auto endDate = end.FormatISODate();
+
+    /* get the export path and validate it */
+    auto exportPath = pExportFilePathCtrl->GetValue();
+    if (exportPath.empty() || !wxDirExists(exportPath)) {
+        wxRichToolTip tooltip("Export Path", "Please specify a valid export directory");
+        tooltip.SetIcon(wxICON_WARNING);
+        tooltip.ShowFor(pExportFilePathCtrl);
+        return;
+    }
+
+    /* get the filename and validate or generate it */
+    auto fileName = pExportFileNameCtrl->GetValue();
+    if (fileName.empty()) {
+        fileName = "Taskable_Export_" + startDate + "_" + endDate + ".csv";
+    } else {
+        if (!fileName.Contains(".csv")) {
+            fileName += ".csv";
+        }
+    }
+
+    /* do the export and display the operation output */
+    svc::CsvExporter exporter(pLogger, startDate.ToStdString(), endDate.ToStdString(), fileName.ToStdString());
+    if (exporter.ExportData()) {
+        pFeedbackLabel->SetLabel("Success! Click 'OK' to close the dialog.");
+    } else {
+        wxString errorMessage = "Data export encountered an error!";
+        pFeedbackLabel->SetLabel(errorMessage);
+    }
+
+    GetSizer()->Layout();
+}
+
+void ExportToCsvDialog::OnDelimiterChange(wxCommandEvent& event)
+{
+    auto text = event.GetString();
+    if (!text.empty()) {
+        cfg::ConfigurationProvider::Get().Configuration->SetDelimiter(text);
+        cfg::ConfigurationProvider::Get().Configuration->Save();
+    }
+}
+
+void ExportToCsvDialog::DateValidationProcedure()
+{
+    auto startDate = pStartDateCtrl->GetValue();
+    auto endDate = pEndDateCtrl->GetValue();
+
+    if (startDate.IsLaterThan(endDate)) {
+        wxRichToolTip tooltip("Start Date", "End date cannot go before start date");
+        tooltip.SetIcon(wxICON_WARNING);
+        tooltip.ShowFor(pStartDateCtrl);
+    }
+
+    if (endDate.IsEarlierThan(startDate)) {
+        wxRichToolTip tooltip("End Date", "End date cannot precede start date");
+        tooltip.SetIcon(wxICON_WARNING);
+        tooltip.ShowFor(pEndDateCtrl);
+    }
+}
 } // namespace app::dlg

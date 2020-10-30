@@ -49,6 +49,9 @@ private:
     void OnEndDateFocusLost(wxFocusEvent& event);
     void OnOpenDirectoryForExportLocation(wxCommandEvent& event);
     void OnExport(wxCommandEvent& event);
+    void OnDelimiterChange(wxCommandEvent& event);
+
+    void DateValidationProcedure();
 
     std::shared_ptr<spdlog::logger> pLogger;
 
