@@ -266,7 +266,7 @@ void MainFrame::CreateControls()
     auto helpMenuItem = helpMenu->Append(wxID_ABOUT);
     helpMenuItem->SetBitmap(rc::GetAboutIcon());
     auto checkUpdateMenuItem = helpMenu->Append(
-        ids::ID_CHECK_FOR_UPDATE, wxT("Check for update"), wxT("Check if an update is available for application"));
+        ids::ID_CHECK_FOR_UPDATE, wxT("Check for Update"), wxT("Check if an update is available for application"));
     checkUpdateMenuItem->SetBitmap(rc::GetCheckForUpdateIcon());
 
     /* Menu Bar */
