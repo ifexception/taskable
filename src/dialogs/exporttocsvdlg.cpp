@@ -21,6 +21,7 @@
 #include <wx/richtooltip.h>
 #include <wx/statline.h>
 #include <wx/stdpaths.h>
+#include <wx/utils.h>
 
 #include "../common/common.h"
 #include "../common/resources.h"
@@ -184,7 +185,7 @@ void ExportToCsvDialog::CreateControls()
 
     /* Feedback label */
     rightSizer->AddSpacer(28);
-    pFeedbackLabel = new wxStaticText(this, IDC_FEEDBACK, "Feedback");
+    pFeedbackLabel = new wxStaticText(this, IDC_FEEDBACK, wxGetEmptyString());
     rightSizer->Add(pFeedbackLabel, common::sizers::ControlCenterHorizontal);
 
     /* Bottom */
@@ -335,13 +336,22 @@ void ExportToCsvDialog::OnExport(wxCommandEvent& event)
         }
     }
 
+    wxBeginBusyCursor();
+
     /* do the export and display the operation output */
-    svc::CsvExporter exporter(pLogger, startDate.ToStdString(), endDate.ToStdString(), fileName.ToStdString());
-    if (exporter.ExportData()) {
+    svc::CsvExporter csvExporter(pLogger, startDate.ToStdString(), endDate.ToStdString(), fileName.ToStdString());
+    if (csvExporter.ExportData()) {
         pFeedbackLabel->SetLabel("Success! Click 'OK' to close the dialog.");
     } else {
         wxString errorMessage = "Data export encountered an error!";
         pFeedbackLabel->SetLabel(errorMessage);
+    }
+
+    wxEndBusyCursor();
+
+    {
+        /* open file explorer */
+        ShellExecute(nullptr, L"open", exportPath.c_str(), nullptr, nullptr, SW_SHOWDEFAULT);
     }
 
     GetSizer()->Layout();
