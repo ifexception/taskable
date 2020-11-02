@@ -32,7 +32,6 @@ std::string CsvExporter::Query = "SELECT "
                                  ", task_items.end_time "
                                  ", task_items.duration "
                                  ", task_items.description "
-                                 ", task_items.billable "
                                  ", task_items.calculated_rate "
                                  ", task_item_types.name "
                                  ", projects.name "
@@ -139,6 +138,7 @@ std::vector<CsvExporter::DataSet*> CsvExporter::GetDataSet()
             std::unique_ptr<double> projectsRate,
             std::string categoriesName,
             std::string tasksDate) {
+
             DataSet* data = new DataSet;
             data->StartTime = std::move(taskItemsStartTime);
             data->EndTime = std::move(taskItemsEndTime);
