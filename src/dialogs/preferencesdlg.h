@@ -30,6 +30,7 @@
 #include "preferencesdatabasepage.h"
 #include "preferencesstopwatchpage.h"
 #include "preferencestaskitempage.h"
+#include "preferencesexportpage.h"
 
 namespace app
 {
@@ -78,5 +79,6 @@ private:
     DatabasePage* pDatabasePage;
     StopwatchPage* pStopwatchPage;
     TaskItemPage* pTaskItemPage;
+    ExportPage* pExportPage;
 };
 } // namespace app::dlg

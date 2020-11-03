@@ -45,11 +45,12 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent,
     , pDatabasePage(nullptr)
     , pStopwatchPage(nullptr)
     , pTaskItemPage(nullptr)
+    , pExportPage(nullptr)
 {
     SetName(name);
     SetSheetStyle(wxPROPSHEET_LISTBOOK);
 
-    Create(pParent, wxID_ANY, wxT("Preferences"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER, name);
+    Create(pParent, wxID_ANY, "Preferences", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER, name);
     SetMinClientSize(wxSize(510, 380));
     SetSize(wxSize(510, 380));
 }
@@ -80,11 +81,13 @@ void PreferencesDialog::CreateControls()
     pDatabasePage = new DatabasePage(listBook, config);
     pStopwatchPage = new StopwatchPage(listBook, config);
     pTaskItemPage = new TaskItemPage(listBook, config);
+    pExportPage = new ExportPage(listBook, config);
 
-    listBook->AddPage(pGeneralPage, wxT("General"), true);
-    listBook->AddPage(pDatabasePage, wxT("Database"), false);
-    listBook->AddPage(pStopwatchPage, wxT("Stopwatch"), false);
-    listBook->AddPage(pTaskItemPage, wxT("Task Item"), false);
+    listBook->AddPage(pGeneralPage, "General", true);
+    listBook->AddPage(pDatabasePage, "Database", false);
+    listBook->AddPage(pStopwatchPage, "Stopwatch", false);
+    listBook->AddPage(pTaskItemPage, "Task Item", false);
+    listBook->AddPage(pExportPage, "Export", false);
 
     CreateButtons(wxOK | wxCANCEL);
     LayoutDialog();
@@ -104,13 +107,27 @@ void PreferencesDialog::OnOk(wxCommandEvent& event)
 
     if (cfg::ConfigurationProvider::Get().Configuration->IsBackupEnabled() &&
         cfg::ConfigurationProvider::Get().Configuration->GetBackupPath().length() == 0) {
-        wxMessageBox(wxT("A backup path must be selected."), common::GetProgramName(), wxOK_DEFAULT | wxICON_WARNING);
+        wxMessageBox("A backup path must be selected.", common::GetProgramName(), wxOK_DEFAULT | wxICON_WARNING);
         return;
     }
 
     if (cfg::ConfigurationProvider::Get().Configuration->IsBackupEnabled() &&
         cfg::ConfigurationProvider::Get().Configuration->GetDeleteBackupsAfter() <= 0) {
-        wxMessageBox(wxT("A positive non-zero value is required if backups are enabled"),
+        wxMessageBox("A positive non-zero value is required if backups are enabled",
+            common::GetProgramName(),
+            wxOK_DEFAULT | wxICON_WARNING);
+        return;
+    }
+
+    if (cfg::ConfigurationProvider::Get().Configuration->GetExportPath().length() == 0) {
+        wxMessageBox("A export path must be selected",
+            common::GetProgramName(),
+            wxOK_DEFAULT | wxICON_WARNING);
+        return;
+    }
+
+    if (cfg::ConfigurationProvider::Get().Configuration->GetDelimiter().length() == 0) {
+        wxMessageBox("A delimiter is required",
             common::GetProgramName(),
             wxOK_DEFAULT | wxICON_WARNING);
         return;

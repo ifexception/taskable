@@ -71,6 +71,7 @@ set (SRC
     "dialogs/preferencesdatabasepage.cpp"
     "dialogs/preferencesstopwatchpage.cpp"
     "dialogs/preferencestaskitempage.cpp"
+    "dialogs/preferencesexportpage.cpp"
     "dialogs/preferencesdlg.cpp"
 
     "wizards/setupwizard.cpp"
