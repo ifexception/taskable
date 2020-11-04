@@ -138,7 +138,6 @@ std::vector<CsvExporter::DataSet*> CsvExporter::GetDataSet()
             std::unique_ptr<double> projectsRate,
             std::string categoriesName,
             std::string tasksDate) {
-
             DataSet* data = new DataSet;
             data->StartTime = std::move(taskItemsStartTime);
             data->EndTime = std::move(taskItemsEndTime);
