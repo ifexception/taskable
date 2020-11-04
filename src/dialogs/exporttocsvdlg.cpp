@@ -349,9 +349,10 @@ void ExportToCsvDialog::OnExport(wxCommandEvent& event)
 
     wxEndBusyCursor();
 
+    // TODO: Wrap this if Windows is defined
     {
         /* open file explorer */
-        ShellExecute(nullptr, L"open", exportPath.c_str(), nullptr, nullptr, SW_SHOWDEFAULT);
+        ShellExecute(nullptr, wxT("open"), exportPath.c_str(), nullptr, nullptr, SW_SHOWDEFAULT);
     }
 
     GetSizer()->Layout();
