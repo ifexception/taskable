@@ -20,6 +20,7 @@ Once you've installed and configured `vcpkg`, install the following libraries:
 - cpr (1.3 +)
 - nlohmann-json (3.7 +)
 - toml11 (3.5+)
+- tinyxml2 (8.0+)
 
 Ensure that the Visual Studio _Ouput Window_ when the _CMake Server_ is runng that it does not give any warnings about missing packages.
 You can now use Visual Studio to build the project by selecting the `x86-Release` configuration in the toolbar.
