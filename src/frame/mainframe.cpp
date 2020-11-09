@@ -53,6 +53,7 @@
 #include "../dialogs/preferencesdlg.h"
 
 #include "../dialogs/exporttocsvdlg.h"
+#include "../dialogs/exporttospreadsheetdlg.h"
 
 #include "../wizards/databaserestorewizard.h"
 #include "taskbaricon.h"
@@ -91,6 +92,7 @@ EVT_MENU(ids::ID_RESTORE_DATABASE, MainFrame::OnRestoreDatabase)
 EVT_MENU(ids::ID_BACKUP_DATABASE, MainFrame::OnBackupDatabase)
 EVT_MENU(ids::ID_RETURN_TO_CURRENT_DATE, MainFrame::OnReturnToCurrentDate)
 EVT_MENU(ids::ID_EXPORT_CSV, MainFrame::OnExportToCsv)
+EVT_MENU(ids::ID_EXPORT_SPREADSHEET, MainFrame::OnExportToSpreadsheet)
 /* Frame Control Event Handlers */
 EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 EVT_BUTTON(MainFrame::IDC_FEEDBACK, MainFrame::OnFeedback)
@@ -250,7 +252,8 @@ void MainFrame::CreateControls()
 
     /* Export Menu Control */
     auto exportMenu = new wxMenu();
-    exportMenu->Append(ids::ID_EXPORT_CSV, "To &CSV", "Export data to CSV file format");
+    exportMenu->Append(ids::ID_EXPORT_CSV, "To &CSV", "Export data to a CSV file");
+    exportMenu->Append(ids::ID_EXPORT_SPREADSHEET, "To &Spreadsheet", "Export data to a spreadsheet file");
 
     /* Tools Menu Control */
     auto toolsMenu = new wxMenu();
@@ -619,9 +622,14 @@ void MainFrame::OnReturnToCurrentDate(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnExportToCsv(wxCommandEvent& WXUNUSED(event))
 {
-    // Export to CSV
     dlg::ExportToCsvDialog exportToCsv(this, pLogger);
     exportToCsv.ShowModal();
+}
+
+void MainFrame::OnExportToSpreadsheet(wxCommandEvent& event)
+{
+    dlg::ExportToSpreadsheetDialog exportToSpreadsheet(this, pLogger);
+    exportToSpreadsheet.ShowModal();
 }
 
 void MainFrame::OnPrevDay(wxCommandEvent& event)
