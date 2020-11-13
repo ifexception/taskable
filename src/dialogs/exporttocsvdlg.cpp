@@ -212,10 +212,10 @@ void ExportToCsvDialog::CreateControls()
 void ExportToCsvDialog::ConfigureEventBindings()
 {
     pStartDateCtrl->Bind(
-            wxEVT_KILL_FOCUS,
-            &ExportToCsvDialog::OnStartDateFocusLost,
-            this
-        );
+        wxEVT_KILL_FOCUS,
+        &ExportToCsvDialog::OnStartDateFocusLost,
+        this
+    );
 
     pEndDateCtrl->Bind(
         wxEVT_KILL_FOCUS,
