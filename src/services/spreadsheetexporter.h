@@ -20,24 +20,35 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include <spdlog/spdlog.h>
 #include <tinyxml2.h>
 
+#include "../common/constants.h"
 #include "../database/sqliteconnection.h"
 #include "../database/connectionprovider.h"
 
 namespace app::svc
 {
+struct SpreadsheetExportOptions {
+    std::string FromDate;
+    std::string ToDate;
+    constants::ExportFormats Format;
+    std::string Extension;
+};
+
 class SpreadsheetExporter
 {
 public:
     SpreadsheetExporter() = default;
-    SpreadsheetExporter(std::shared_ptr<spdlog::logger> logger);
+    SpreadsheetExporter(std::shared_ptr<spdlog::logger> logger, SpreadsheetExportOptions& options);
     ~SpreadsheetExporter();
 
 private:
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<db::SqliteConnection> pConnection;
+
+    SpreadsheetExportOptions mOptions;
 };
 } // namespace app::svc

@@ -21,8 +21,9 @@
 
 namespace app::svc
 {
-SpreadsheetExporter::SpreadsheetExporter(std::shared_ptr<spdlog::logger> logger)
+SpreadsheetExporter::SpreadsheetExporter(std::shared_ptr<spdlog::logger> logger, SpreadsheetExportOptions& options)
     : pLogger(logger)
+    , mOptions(options)
 {
     pConnection = db::ConnectionProvider::Get().Handle()->Acquire();
 }
