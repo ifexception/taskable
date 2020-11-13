@@ -20,13 +20,22 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include <spdlog/spdlog.h>
 #include <wx/wx.h>
+#include <wx/datectrl.h>
 #include <wx/listctrl.h>
+
+#include "../common/constants.h"
 
 namespace app::dlg
 {
+struct ExportFormatOptions final {
+    std::string DisplayValue;
+    constants::ExportFormats Value;
+};
+
 class ExportToSpreadsheetDialog final : public wxDialog
 {
 public:
@@ -49,21 +58,36 @@ private:
     void ConfigureEventBindings();
     void FillControls();
 
+    void OnStartDateFocusLost(wxFocusEvent& event);
+    void OnEndDateFocusLost(wxFocusEvent& event);
+    void OnAddColumn(wxCommandEvent& event);
+    void OnExportFormatChoice(wxCommandEvent& event);
+    void OnOpenDirectoryForExportLocation(wxCommandEvent& event);
+    void OnExport(wxCommandEvent& event);
+
+    void DateValidationProcedure();
+
     std::shared_ptr<spdlog::logger> pLogger;
 
+    wxDatePickerCtrl* pStartDateCtrl;
+    wxDatePickerCtrl* pEndDateCtrl;
     wxChoice* pAddColumnsChoice;
     wxButton* pAddColumnButton;
     wxListCtrl* pColumnListCtrl;
     wxChoice* pExportFormatChoice;
-    wxChoice* pExportFileFormat;
+    wxChoice* pExportFileFormatChoice;
     wxTextCtrl* pExportFilePathCtrl;
     wxButton* pBrowseExportPathButton;
     wxTextCtrl* pExportFileNameCtrl;
     wxButton* pExportButton;
     wxButton* pOkButton;
 
+    ExportFormatOptions exportFormatOptions[2];
+
     enum {
-        IDC_ADDCOLUMNS = wxID_HIGHEST + 1,
+        IDC_STARTDATE = wxID_HIGHEST + 1,
+        IDC_ENDDATE,
+        IDC_ADDCOLUMNS,
         IDC_ADDCOLUMNBUTTON,
         IDC_COLUMNLIST,
         IDC_EXPORTFORMATCHOICE,
