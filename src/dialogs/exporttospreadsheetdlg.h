@@ -79,10 +79,12 @@ private:
     wxTextCtrl* pExportFilePathCtrl;
     wxButton* pBrowseExportPathButton;
     wxTextCtrl* pExportFileNameCtrl;
+    wxStaticText* pFeedbackLabel;
     wxButton* pExportButton;
     wxButton* pOkButton;
 
     ExportFormatOptions exportFormatOptions[2];
+    std::vector<std::string> mSelectedColumns;
 
     enum {
         IDC_STARTDATE = wxID_HIGHEST + 1,
@@ -95,6 +97,7 @@ private:
         IDC_EXPORTPATH,
         IDC_EXPORTPATHBUTTON,
         IDC_EXPORTFILE,
+        IDC_FEEDBACK,
         IDC_EXPORTBUTTON,
     };
 };

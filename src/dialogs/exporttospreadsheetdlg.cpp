@@ -50,6 +50,7 @@ ExportToSpreadsheetDialog::ExportToSpreadsheetDialog(wxWindow* parent,
     , pOkButton(nullptr)
     , exportFormatOptions{ { "Office XML", constants::ExportFormats::OfficeXml },
         { "Excel", constants::ExportFormats::Excel } }
+    , mSelectedColumns()
 {
     Create(parent, wxID_ANY, "Export to Spreadsheet", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxCLOSE_BOX, name);
 }
@@ -242,6 +243,11 @@ void ExportToSpreadsheetDialog::CreateControls()
     pExportFileNameCtrl->SetToolTip("Specify a file name for the exported data (can be blank)");
     exportFileSizer->Add(pExportFileNameCtrl, common::sizers::ControlDefault);
 
+    /* Feedback label */
+    rightSizer->AddSpacer(28);
+    pFeedbackLabel = new wxStaticText(this, IDC_FEEDBACK, wxGetEmptyString());
+    rightSizer->Add(pFeedbackLabel, common::sizers::ControlCenterHorizontal);
+
     /* Bottom */
     /* Horizontal Line*/
     auto bottomSeparationLine = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(2, 2), wxLI_HORIZONTAL);
@@ -308,6 +314,13 @@ void ExportToSpreadsheetDialog::ConfigureEventBindings()
 
 void ExportToSpreadsheetDialog::FillControls()
 {
+    pAddColumnsChoice->AppendString("Employer");
+    pAddColumnsChoice->AppendString("Client");
+    pAddColumnsChoice->AppendString("Billable");
+    pAddColumnsChoice->AppendString("Rate");
+    pAddColumnsChoice->AppendString("Currency");
+    pAddColumnsChoice->AppendString("Calculated Task Rate");
+
     for (const auto& exportFormatOption : exportFormatOptions) {
         int integerEnumValue = static_cast<int>(exportFormatOption.Value);
         pExportFormatChoice->Append(exportFormatOption.DisplayValue, util::IntToVoidPointer(integerEnumValue));
@@ -345,6 +358,8 @@ void ExportToSpreadsheetDialog::OnAddColumn(wxCommandEvent& event)
     auto selectedColumnName = pAddColumnsChoice->GetStringSelection();
 
     pColumnListCtrl->InsertItem(0, selectedColumnName);
+
+    mSelectedColumns.push_back(selectedColumnName.ToStdString());
 }
 
 void ExportToSpreadsheetDialog::OnExportFormatChoice(wxCommandEvent& event)
@@ -434,10 +449,11 @@ void ExportToSpreadsheetDialog::OnExport(wxCommandEvent& event)
     /* get the filename and validate or generate it */
     auto fileName = pExportFileNameCtrl->GetValue();
     if (fileName.empty()) {
-        fileName = "Taskable_Export_" + startDate + "_" + endDate + ".csv";
+        fileName = "Taskable_Export_" + startDate + "_" + endDate;
     } else {
-        if (!fileName.Contains(".csv")) {
-            fileName += ".csv";
+        auto indexOfPeriod = fileName.find_last_of(".");
+        if (indexOfPeriod != std::string::npos) {
+            fileName = fileName.substr(0, indexOfPeriod);
         }
     }
 
@@ -446,11 +462,14 @@ void ExportToSpreadsheetDialog::OnExport(wxCommandEvent& event)
     auto selectedEnum = static_cast<constants::ExportFormats>(formatChoiceSelection);
     auto fileChoiceSelection = pExportFileFormatChoice->GetStringSelection().ToStdString();
 
-    svc::SpreadsheetExportOptions options{ startDate, endDate, selectedEnum, fileChoiceSelection };
+    svc::SpreadsheetExportOptions options{
+        startDate, endDate, selectedEnum, fileChoiceSelection, fileName, mSelectedColumns
+    };
 
     wxBeginBusyCursor();
 
     svc::SpreadsheetExporter spreadsheetExporter(pLogger, options);
+    spreadsheetExporter.Export();
 
     wxEndBusyCursor();
 }
