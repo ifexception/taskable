@@ -48,7 +48,6 @@ struct SpreadsheetExportOptions {
     std::string FromDate;
     std::string ToDate;
     constants::ExportFormats Format;
-    std::string Extension;
     std::string FileName;
     std::vector<std::string> AdditionalColumns;
 };

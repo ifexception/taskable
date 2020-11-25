@@ -42,7 +42,6 @@ ExportToSpreadsheetDialog::ExportToSpreadsheetDialog(wxWindow* parent,
     , pAddColumnButton(nullptr)
     , pColumnListCtrl(nullptr)
     , pExportFormatChoice(nullptr)
-    , pExportFileFormatChoice(nullptr)
     , pExportFilePathCtrl(nullptr)
     , pBrowseExportPathButton(nullptr)
     , pExportFileNameCtrl(nullptr)
@@ -190,20 +189,7 @@ void ExportToSpreadsheetDialog::CreateControls()
     pExportFormatChoice->SetToolTip("Select a format to export the data to");
     exportFlexGridSizer->Add(pExportFormatChoice, common::sizers::ControlDefault);
 
-    /* Export File label */
-    auto extensionTypeLabel = new wxStaticText(spreadsheetOptionsStaticBox, wxID_ANY, "File Extension");
-    exportFlexGridSizer->Add(extensionTypeLabel, common::sizers::ControlCenterVertical);
-
-    /* Export File choice */
-    pExportFileFormatChoice =
-        new wxChoice(spreadsheetOptionsStaticBox, IDC_EXPORTFILEFORMAT, wxDefaultPosition, wxSize(150, -1));
-    pExportFileFormatChoice->AppendString("Select a extension");
-    pExportFileFormatChoice->SetSelection(0);
-    pExportFileFormatChoice->SetToolTip("Select a file extension to export to");
-    pExportFileFormatChoice->Disable();
-    exportFlexGridSizer->Add(pExportFileFormatChoice, common::sizers::ControlDefault);
-
-    exportFlexGridSizer->AddSpacer(4);
+    exportFlexGridSizer->AddSpacer(36);
 
     /* File Options static box*/
     auto fileOptionsStaticBox = new wxStaticBox(this, wxID_ANY, "File Options");
@@ -290,12 +276,6 @@ void ExportToSpreadsheetDialog::ConfigureEventBindings()
         IDC_ADDCOLUMNBUTTON
     );
 
-    pExportFormatChoice->Bind(
-        wxEVT_CHOICE,
-        &ExportToSpreadsheetDialog::OnExportFormatChoice,
-        this
-    );
-
     pBrowseExportPathButton->Bind(
         wxEVT_BUTTON,
         &ExportToSpreadsheetDialog::OnOpenDirectoryForExportLocation,
@@ -360,38 +340,6 @@ void ExportToSpreadsheetDialog::OnAddColumn(wxCommandEvent& event)
     pColumnListCtrl->InsertItem(0, selectedColumnName);
 
     mSelectedColumns.push_back(selectedColumnName.ToStdString());
-}
-
-void ExportToSpreadsheetDialog::OnExportFormatChoice(wxCommandEvent& event)
-{
-    auto selection = event.GetSelection();
-    if (selection == 0) {
-        wxRichToolTip tooltip("Export Format", "A valid export format selection is required");
-        tooltip.SetIcon(wxICON_WARNING);
-        tooltip.ShowFor(pExportFormatChoice);
-        pExportFileFormatChoice->Disable();
-        return;
-    }
-
-    pExportFileFormatChoice->Clear();
-    pExportFileFormatChoice->AppendString("Select a extension");
-    pExportFileFormatChoice->SetSelection(0);
-
-    auto selectionData = event.GetClientData();
-    auto data = util::VoidPointerToInt(selectionData);
-    auto enumData = static_cast<constants::ExportFormats>(data);
-
-    wxArrayString exportFileOptions;
-
-    if (enumData == constants::ExportFormats::OfficeXml) {
-        exportFileOptions.Add("XML");
-        exportFileOptions.Add("XLS");
-    } else if (enumData == constants::ExportFormats::Excel) {
-        exportFileOptions.Add("XLSX");
-    }
-
-    pExportFileFormatChoice->Append(exportFileOptions);
-    pExportFileFormatChoice->Enable();
 }
 
 void ExportToSpreadsheetDialog::OnOpenDirectoryForExportLocation(wxCommandEvent& event)
@@ -460,10 +408,9 @@ void ExportToSpreadsheetDialog::OnExport(wxCommandEvent& event)
     auto formatChoiceSelection =
         util::VoidPointerToInt(pExportFormatChoice->GetClientData(pExportFormatChoice->GetSelection()));
     auto selectedEnum = static_cast<constants::ExportFormats>(formatChoiceSelection);
-    auto fileChoiceSelection = pExportFileFormatChoice->GetStringSelection().ToStdString();
 
     svc::SpreadsheetExportOptions options{
-        startDate, endDate, selectedEnum, fileChoiceSelection, fileName, mSelectedColumns
+        startDate, endDate, selectedEnum, fileName, mSelectedColumns
     };
 
     wxBeginBusyCursor();

@@ -61,7 +61,6 @@ private:
     void OnStartDateFocusLost(wxFocusEvent& event);
     void OnEndDateFocusLost(wxFocusEvent& event);
     void OnAddColumn(wxCommandEvent& event);
-    void OnExportFormatChoice(wxCommandEvent& event);
     void OnOpenDirectoryForExportLocation(wxCommandEvent& event);
     void OnExport(wxCommandEvent& event);
 
@@ -75,7 +74,6 @@ private:
     wxButton* pAddColumnButton;
     wxListCtrl* pColumnListCtrl;
     wxChoice* pExportFormatChoice;
-    wxChoice* pExportFileFormatChoice;
     wxTextCtrl* pExportFilePathCtrl;
     wxButton* pBrowseExportPathButton;
     wxTextCtrl* pExportFileNameCtrl;
@@ -93,7 +91,6 @@ private:
         IDC_ADDCOLUMNBUTTON,
         IDC_COLUMNLIST,
         IDC_EXPORTFORMATCHOICE,
-        IDC_EXPORTFILEFORMAT,
         IDC_EXPORTPATH,
         IDC_EXPORTPATHBUTTON,
         IDC_EXPORTFILE,

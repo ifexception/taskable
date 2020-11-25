@@ -242,6 +242,11 @@ bool SpreadsheetExporter::Export()
 
     pExporterFactory = new XmlExporter(dataSets, mOptions.AdditionalColumns, mOptions.FileName);
 
+    while (!dataSets.empty()) {
+        delete dataSets.back();
+        dataSets.pop_back();
+    }
+
     return pExporterFactory->Export();
 }
 
