@@ -63,6 +63,8 @@ private:
     void OnAddColumn(wxCommandEvent& event);
     void OnOpenDirectoryForExportLocation(wxCommandEvent& event);
     void OnExport(wxCommandEvent& event);
+    void OnRemove(wxCommandEvent& event);
+    void OnItemRightClick(wxListEvent& event);
 
     void DateValidationProcedure();
 
@@ -83,6 +85,8 @@ private:
 
     ExportFormatOptions exportFormatOptions[2];
     std::vector<std::string> mSelectedColumns;
+
+    long mListCtrlIndex;
 
     enum {
         IDC_STARTDATE = wxID_HIGHEST + 1,

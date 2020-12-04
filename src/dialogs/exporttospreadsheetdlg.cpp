@@ -50,6 +50,7 @@ ExportToSpreadsheetDialog::ExportToSpreadsheetDialog(wxWindow* parent,
     , exportFormatOptions{ { "Office XML", constants::ExportFormats::OfficeXml },
         { "Excel", constants::ExportFormats::Excel } }
     , mSelectedColumns()
+    , mListCtrlIndex(-1)
 {
     Create(parent, wxID_ANY, "Export to Spreadsheet", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxCLOSE_BOX, name);
 }
@@ -276,6 +277,19 @@ void ExportToSpreadsheetDialog::ConfigureEventBindings()
         IDC_ADDCOLUMNBUTTON
     );
 
+    pColumnListCtrl->Bind(
+        wxEVT_LIST_ITEM_RIGHT_CLICK,
+        &ExportToSpreadsheetDialog::OnItemRightClick,
+        this
+    );
+
+    Bind(
+        wxEVT_MENU,
+        &ExportToSpreadsheetDialog::OnRemove,
+        this,
+        wxID_REMOVE
+    );
+
     pBrowseExportPathButton->Bind(
         wxEVT_BUTTON,
         &ExportToSpreadsheetDialog::OnOpenDirectoryForExportLocation,
@@ -340,6 +354,12 @@ void ExportToSpreadsheetDialog::OnAddColumn(wxCommandEvent& event)
     pColumnListCtrl->InsertItem(0, selectedColumnName);
 
     mSelectedColumns.push_back(selectedColumnName.ToStdString());
+
+    auto selections = pAddColumnsChoice->GetStrings();
+    selections.Remove(selectedColumnName);
+    pAddColumnsChoice->Clear();
+    pAddColumnsChoice->Insert(selections, 0);
+    pAddColumnsChoice->SetSelection(0);
 }
 
 void ExportToSpreadsheetDialog::OnOpenDirectoryForExportLocation(wxCommandEvent& event)
@@ -409,9 +429,7 @@ void ExportToSpreadsheetDialog::OnExport(wxCommandEvent& event)
         util::VoidPointerToInt(pExportFormatChoice->GetClientData(pExportFormatChoice->GetSelection()));
     auto selectedEnum = static_cast<constants::ExportFormats>(formatChoiceSelection);
 
-    svc::SpreadsheetExportOptions options{
-        startDate, endDate, selectedEnum, fileName, mSelectedColumns
-    };
+    svc::SpreadsheetExportOptions options{ startDate, endDate, selectedEnum, fileName, mSelectedColumns };
 
     wxBeginBusyCursor();
 
@@ -419,6 +437,36 @@ void ExportToSpreadsheetDialog::OnExport(wxCommandEvent& event)
     spreadsheetExporter.Export();
 
     wxEndBusyCursor();
+}
+
+void ExportToSpreadsheetDialog::OnRemove(wxCommandEvent& event)
+{
+    assert(mListCtrlIndex != -1);
+
+    wxListItem item;
+    item.m_itemId = mListCtrlIndex;
+    item.m_col = 0;
+    item.m_mask = wxLIST_MASK_TEXT;
+    pColumnListCtrl->GetItem(item);
+
+    auto columnName = item.GetText();
+
+    mSelectedColumns.erase(std::remove(mSelectedColumns.begin(), mSelectedColumns.end(), columnName.ToStdString()),
+        mSelectedColumns.end());
+
+    pColumnListCtrl->DeleteItem(mListCtrlIndex);
+    pAddColumnsChoice->AppendString(columnName);
+}
+
+void ExportToSpreadsheetDialog::OnItemRightClick(wxListEvent& event)
+{
+    mListCtrlIndex = event.GetIndex();
+
+    wxMenu menu;
+
+    menu.Append(wxID_REMOVE, wxT("&Remove"));
+
+    PopupMenu(&menu);
 }
 
 void ExportToSpreadsheetDialog::DateValidationProcedure()
