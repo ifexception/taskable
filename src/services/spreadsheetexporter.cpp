@@ -233,14 +233,13 @@ bool SpreadsheetExporter::Export()
     /* initialize relevant factory type */
     switch (mOptions.Format) {
     case constants::ExportFormats::OfficeXml:
+        pExporterFactory = new XmlExporter(dataSets, mOptions.AdditionalColumns, mOptions.FileName);
         break;
     case constants::ExportFormats::Excel:
         break;
     default:
         break;
     }
-
-    pExporterFactory = new XmlExporter(dataSets, mOptions.AdditionalColumns, mOptions.FileName);
 
     while (!dataSets.empty()) {
         delete dataSets.back();
