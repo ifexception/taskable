@@ -46,6 +46,7 @@ set (SRC
     "database/connectionprovider.cpp"
 
     "services/outlookintegrator.cpp"
+    "services/excelintegrator.cpp"
 
     "services/taskstateservice.cpp"
     "services/taskstorageservice.cpp"
@@ -156,7 +157,7 @@ target_link_libraries (${PROJECT_NAME}
     ${wxWidgets_LIBRARIES}
     ZLIB::ZLIB
     unofficial::sqlite3::sqlite3
-    spdlog::spdlog
+    spdlog::spdlog spdlog::spdlog_header_only
     cpr
     nlohmann_json nlohmann_json::nlohmann_json
     tinyxml2::tinyxml2
