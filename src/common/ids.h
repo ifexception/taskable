@@ -37,7 +37,6 @@ enum class MenuIds : int {
     Edit_EditCategoryId,
     Edit_PreferencesId,
     Export_ToCsv,
-    Export_ToSpreadsheet,
     Help_CheckForUpdateId,
     Tools_RestoreDatabaseId,
     Tools_BackupDatabaseId,
@@ -68,7 +67,6 @@ static const int ID_RESTORE_DATABASE = static_cast<int>(MenuIds::Tools_RestoreDa
 static const int ID_BACKUP_DATABASE = static_cast<int>(MenuIds::Tools_BackupDatabaseId);
 
 static const int ID_EXPORT_CSV = static_cast<int>(MenuIds::Export_ToCsv);
-static const int ID_EXPORT_SPREADSHEET = static_cast<int>(MenuIds::Export_ToSpreadsheet);
 
 static const int ID_RETURN_TO_CURRENT_DATE = static_cast<int>(MenuIds::Unp_ReturnToCurrentDate);
 

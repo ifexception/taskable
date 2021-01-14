@@ -46,7 +46,6 @@ set (SRC
     "database/connectionprovider.cpp"
 
     "services/outlookintegrator.cpp"
-    "services/excelintegrator.cpp"
 
     "services/taskstateservice.cpp"
     "services/taskstorageservice.cpp"
@@ -57,7 +56,6 @@ set (SRC
     "services/databasestructureupdater.cpp"
 
     "services/csvexporter.cpp"
-    "services/spreadsheetexporter.cpp"
 
     "application.cpp"
     "resources.rc"
@@ -121,8 +119,6 @@ set (SRC
     "dialogs/meetingsviewdlg.cpp"
 
     "dialogs/exporttocsvdlg.cpp"
-
-    "dialogs/exporttospreadsheetdlg.cpp"
     )
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
