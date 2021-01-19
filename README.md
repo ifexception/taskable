@@ -33,11 +33,9 @@ You can get a Windows Installer [here](https://github.com/ifexception/taskable/r
 
 ## Version
 
-`v1.3.0`
+`v1.4.0`
 
 ## Roadmap
-`v1.4.0` - October 2020
-- Outlook integration
 
 `v1.5.0` - March 2021
 - Export [Excel|CSV]
