@@ -29,8 +29,6 @@
 #include <spdlog/sinks/daily_file_sink.h>
 #include <spdlog/sinks/msvc_sink.h>
 
-#include "config/configuration.h"
-
 namespace app
 {
 class Application : public wxApp
@@ -66,7 +64,6 @@ private:
 
     bool InitializeDatabaseTables();
 
-    std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
     std::unique_ptr<wxSingleInstanceChecker> pInstanceChecker;
 };

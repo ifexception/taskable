@@ -44,6 +44,8 @@ enum class TaskItemTypes : int {
 
 enum Days { Monday = 0, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday };
 
+enum class ExportFormats : int { OfficeXml = 1, Excel };
+
 Days MapIndexToEnum(int index);
 
 static const wxString DateCreatedLabel = wxT("Created: %s");

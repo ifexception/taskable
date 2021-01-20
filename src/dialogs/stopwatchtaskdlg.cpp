@@ -25,6 +25,7 @@
 #include "../common/common.h"
 #include "../common/resources.h"
 #include "../common/util.h"
+#include "../config/configurationprovider.h"
 #include "../services/taskstateservice.h"
 #include "taskitemdlg.h"
 
@@ -51,7 +52,6 @@ EVT_BUTTON(StopwatchTaskDialog::IDC_CANCEL, StopwatchTaskDialog::OnCancel)
 wxEND_EVENT_TABLE()
 
 StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
-    std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<services::TaskStateService> taskState,
     frm::TaskBarIcon *taskBarIcon,
@@ -70,7 +70,6 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
     , pNotificationTimer(std::make_unique<wxTimer>(this, IDC_NOTIFICATION_TIMER))
     , pHideWindowTimer(std::make_unique<wxTimer>(this, IDC_HIDE_WINDOW_TIMER))
     , pPausedTaskReminder(std::make_unique<wxTimer>(this, IDC_PAUSED_TASK_REMINDER))
-    , pConfig(config)
     , pTaskState(taskState)
     , pTaskBarIcon(taskBarIcon)
     , mStartTime(wxDefaultDateTime)
@@ -89,7 +88,6 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
 }
 
 StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
-    std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     std::shared_ptr<services::TaskStateService> taskState,
     frm::TaskBarIcon* taskBarIcon,
@@ -109,7 +107,6 @@ StopwatchTaskDialog::StopwatchTaskDialog(wxWindow* parent,
     , pNotificationTimer(std::make_unique<wxTimer>(this, IDC_NOTIFICATION_TIMER))
     , pHideWindowTimer(std::make_unique<wxTimer>(this, IDC_HIDE_WINDOW_TIMER))
     , pPausedTaskReminder(std::make_unique<wxTimer>(this, IDC_PAUSED_TASK_REMINDER))
-    , pConfig(config)
     , pTaskState(taskState)
     , pTaskBarIcon(taskBarIcon)
     , mStartTime(wxDefaultDateTime)
@@ -132,7 +129,7 @@ void StopwatchTaskDialog::Launch()
     pStopButton->Disable();
     pStartNewTask->Disable();
 
-    if (pConfig->IsStartStopwatchOnLaunch()) {
+    if (cfg::ConfigurationProvider::Get().Configuration->IsStartStopwatchOnLaunch()) {
         ExecuteStartupProcedure();
         pPauseButton->SetDefault();
     } else {
@@ -145,7 +142,7 @@ void StopwatchTaskDialog::Launch()
 void StopwatchTaskDialog::Relaunch()
 {
     // if we can start stopwatch on resume, then execute startup procedure
-    if (pConfig->IsStartStopwatchOnResume()) {
+    if (cfg::ConfigurationProvider::Get().Configuration->IsStartStopwatchOnResume()) {
         ExecuteStartupProcedure();
         pPauseButton->SetDefault();
     } else {
@@ -188,7 +185,7 @@ bool StopwatchTaskDialog::Create(wxWindow* parent,
         SetIcon(rc::GetProgramIcon());
         Center();
 
-        if (pConfig->IsShowInTray()) {
+        if (cfg::ConfigurationProvider::Get().Configuration->IsShowInTray()) {
             wxNotificationMessage::UseTaskBarIcon(pTaskBarIcon);
         } else {
 #ifdef TASKABLE_DEBUG
@@ -283,7 +280,8 @@ void StopwatchTaskDialog::ExecuteStartupProcedure()
 
     /* start the timers */
     pElapsedTimer->Start(1000 /*milliseconds*/);
-    pNotificationTimer->Start(util::MinutesToMilliseconds(pConfig->GetNotificationTimerInterval()));
+    pNotificationTimer->Start(
+        util::MinutesToMilliseconds(cfg::ConfigurationProvider::Get().Configuration->GetNotificationTimerInterval()));
 
     /* stop paused task reminder */
     if (pPausedTaskReminder->IsRunning()) {
@@ -326,7 +324,8 @@ void StopwatchTaskDialog::ExecutePauseProcedure()
     pElapsedTimer->Stop();
 
     /* start timer */
-    pPausedTaskReminder->Start(util::MinutesToMilliseconds(pConfig->GetPausedTaskReminderInterval()));
+    pPausedTaskReminder->Start(
+        util::MinutesToMilliseconds(cfg::ConfigurationProvider::Get().Configuration->GetPausedTaskReminderInterval()));
 
     /* get the current end time */
     mEndTime = wxDateTime::Now();
@@ -385,13 +384,13 @@ void StopwatchTaskDialog::ExecuteStopProcedure()
         auto durationOfTask = pTaskState->GetAccumulatedTime();
 
         /* launch dialog */
-        dlg::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, constants::TaskItemTypes::EntryTask);
+        dlg::TaskItemDialog newTask(this->GetParent(), pLogger, constants::TaskItemTypes::EntryTask);
         newTask.SetDurationFromStopwatchTask(durationOfTask);
         newTask.SetDescriptionFromStopwatchTask(pStopwatchDescription->GetValue());
         newTask.ShowModal();
     } else {
         /* launch dialog */
-        dlg::TaskItemDialog newTask(this->GetParent(), pLogger, pConfig, constants::TaskItemTypes::TimedTask);
+        dlg::TaskItemDialog newTask(this->GetParent(), pLogger, constants::TaskItemTypes::TimedTask);
         newTask.SetTimesFromStopwatchTask(mStartTime, mEndTime);
         newTask.SetDescriptionFromStopwatchTask(pStopwatchDescription->GetValue());
         newTask.ShowModal();

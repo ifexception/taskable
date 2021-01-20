@@ -34,7 +34,7 @@
 
 #include <spdlog/spdlog.h>
 
-#include "../config/configuration.h"
+#include "../config/configurationprovider.h"
 #include "../services/taskstateservice.h"
 #include "../services/taskstorageservice.h"
 #include "feedbackpopup.h"
@@ -46,8 +46,7 @@ class TaskBarIcon;
 class MainFrame : public wxFrame
 {
 public:
-    MainFrame(std::shared_ptr<cfg::Configuration> config,
-        std::shared_ptr<spdlog::logger> logger,
+    MainFrame(std::shared_ptr<spdlog::logger> logger,
         const wxString& name = wxT("mainfrm"));
     MainFrame(const MainFrame&) = delete;
     virtual ~MainFrame();
@@ -91,6 +90,7 @@ private:
     void OnRestoreDatabase(wxCommandEvent& event);
     void OnBackupDatabase(wxCommandEvent& event);
     void OnReturnToCurrentDate(wxCommandEvent& event);
+    void OnExportToCsv(wxCommandEvent& event);
 
     /* Frame Controls Event Handlers */
     void OnPrevDay(wxCommandEvent& event);
@@ -124,7 +124,6 @@ private:
     void CopyToClipboardProcedure(long itemIndex);
 
     std::shared_ptr<spdlog::logger> pLogger;
-    std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<services::TaskStateService> pTaskState;
     std::unique_ptr<services::TaskStorage> pTaskStorage;
 

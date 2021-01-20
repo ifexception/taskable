@@ -1,7 +1,7 @@
 ; -- Taskable.iss --
 ; Installer file for Taskable application
 
-#define TaskableVersion "1.4.0"
+#define TaskableVersion "1.5.0"
 
 [Setup]
 AppName=Taskable
@@ -18,7 +18,7 @@ UninstallDisplayIcon={app}\Taskable.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=Installer
-OutputBaseFilename=Taskable-x86.1.4.0-Installer
+OutputBaseFilename=Taskable-x86.1.5.0-Installer
 LicenseFile=License.txt
 WindowResizable=no
 DisableWelcomePage=no
@@ -33,8 +33,8 @@ Source: "libpng16.dll"; DestDir: "{app}"
 Source: "lzma.dll"; DestDir: "{app}"
 Source: "sqlite3.dll"; DestDir: "{app}"
 Source: "tiff.dll"; DestDir: "{app}"
-Source: "wxbase313u_vc_custom.dll"; DestDir: "{app}"
-Source: "wxmsw313u_core_vc_custom.dll"; DestDir: "{app}"
+Source: "wxbase314u_vc_custom.dll"; DestDir: "{app}"
+Source: "wxmsw314u_core_vc_custom.dll"; DestDir: "{app}"
 Source: "zlib1.dll"; DestDir: "{app}"
 Source: "taskable.ini"; DestDir: "{userappdata}\Taskable"; Flags: onlyifdoesntexist
 Source: "create-taskable.sql"; DestDir: "{app}"
@@ -59,7 +59,7 @@ WelcomeLabel1=Welcome to the Taskable Installation Wizard
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{userappdata}\Taskable\logs"
-Type: files; Name: "{userappdata}\Taskable\taskable.ini"
+Type: files; Name: "{userappdata}\Taskable\taskable.toml"
 Type: filesandordirs; Name: "{userappdata}\Taskable"
 Type: filesandordirs; Name: "{userdocs}\Taskable"
 
@@ -67,6 +67,6 @@ Type: filesandordirs; Name: "{userdocs}\Taskable"
 Root: HKCU; Subkey: "Software\Taskable"; Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Taskable"; ValueType: dword; ValueName: "Installed"; ValueData: 1;  Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Taskable"; ValueType: string; ValueName: "Version"; ValueData: {#TaskableVersion};  Flags: preservestringtype uninsdeletekey
-Root: HKCU; Subkey: "Software\Taskable"; ValueType: string; ValueName: "DatabaseUpgrade"; ValueData: 1;  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Taskable"; ValueType: dword; ValueName: "DatabaseUpgrade"; ValueData: 1;  Flags: uninsdeletekey
 Root: HKCR; Subkey: "Applications\Taskable.exe"; ValueType: none; ValueName: "IsHostApp"
 

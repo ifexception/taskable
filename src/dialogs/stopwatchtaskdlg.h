@@ -25,7 +25,6 @@
 
 #include <spdlog/spdlog.h>
 
-#include "../config/configuration.h"
 #include "../services/taskstateservice.h"
 #include "../frame/taskbaricon.h"
 
@@ -39,14 +38,12 @@ public:
     StopwatchTaskDialog() = delete;
 
     explicit StopwatchTaskDialog(wxWindow* parent,
-        std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
         std::shared_ptr<services::TaskStateService> taskState,
         frm::TaskBarIcon *taskBarIcon,
         const wxString& name = wxT("stopwatchtaskdlg"));
 
     explicit StopwatchTaskDialog(wxWindow* parent,
-        std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
         std::shared_ptr<services::TaskStateService> taskState,
         frm::TaskBarIcon *taskBarIcon,
@@ -86,7 +83,6 @@ private:
     void OnClose(wxCloseEvent& event);
 
     std::shared_ptr<spdlog::logger> pLogger;
-    std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<services::TaskStateService> pTaskState;
 
     wxWindow* pParent;

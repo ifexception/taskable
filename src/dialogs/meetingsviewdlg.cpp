@@ -88,12 +88,10 @@ void GetMeetingsThread::OnExit()
 
 MeetingsViewDialog::MeetingsViewDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
-    std::shared_ptr<cfg::Configuration> config,
     const wxString& name)
     : pThread(nullptr)
     , mCriticalSection()
     , pLogger(logger)
-    , pConfig(config)
     , pScrolledWindow(nullptr)
     , pTodayDateLabel(nullptr)
     , pActivityIndicator(nullptr)
@@ -364,7 +362,7 @@ void MeetingsViewDialog::OnAttendedCheckboxCheck(wxCommandEvent& event)
         auto meeting = *iterator;
 
         dlg::TaskItemDialog taskItemMeetingDialog(
-            this->GetParent(), pLogger, pConfig, constants::TaskItemTypes::TimedTask);
+            this->GetParent(), pLogger, constants::TaskItemTypes::TimedTask);
         taskItemMeetingDialog.SetMeetingData(meeting);
         int retCode = taskItemMeetingDialog.ShowModal();
         int64_t taskItemId = taskItemMeetingDialog.GetTaskItemId();

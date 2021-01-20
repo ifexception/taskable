@@ -19,39 +19,43 @@
 
 #pragma once
 
-#include <memory>
-
-#include <sqlite_modern_cpp.h>
 #include <wx/wx.h>
-#include <wx/taskbar.h>
 
-#include <spdlog/spdlog.h>
-
-namespace app::frm
+namespace app::cfg
 {
-class TaskBarIcon : public wxTaskBarIcon
+class Configuration;
+}
+
+namespace app::dlg
+{
+class ExportPage final : public wxPanel
 {
 public:
-    TaskBarIcon(wxFrame* parent,
-        std::shared_ptr<spdlog::logger> logger);
-    virtual ~TaskBarIcon() = default;
+    ExportPage() = delete;
+    ExportPage(wxWindow* parent, cfg::Configuration* config);
+    virtual ~ExportPage() = default;
 
-    void SetTaskBarIcon();
+    void Apply();
 
 private:
-    wxDECLARE_EVENT_TABLE();
+    void CreateControls();
+    void ConfigureEventBindings();
+    void FillControls();
 
-    wxMenu* CreatePopupMenu() override;
+    void OnOpenDirectoryForExportLocation(wxCommandEvent& event);
 
-    void OnNewEntryTask(wxCommandEvent& event);
-    void OnNewTimedTask(wxCommandEvent& event);
-    void OnPreferences(wxCommandEvent& event);
-    void OnExit(wxCommandEvent& event);
-    void OnLeftButtonDown(wxTaskBarIconEvent& event);
+    cfg::Configuration* pConfig;
 
-    wxFrame* pParent;
-    std::shared_ptr<spdlog::logger> pLogger;
+    wxWindow* pParent;
 
-    enum { ID_ADD_ENTRY_TASK = wxID_HIGHEST + 1, ID_ADD_TIMED_TASK, ID_SETTINGS };
+    wxTextCtrl* pDelimiterTextCtrl;
+    wxTextCtrl* pExportFilePathCtrl;
+    wxButton* pBrowseExportPathButton;
+
+    enum {
+        IDC_DELIMITER = wxID_HIGHEST + 1,
+        IDC_EXPORTPATH,
+        IDC_EXPORTPATHBUTTON,
+    };
 };
-} // namespace app::frm
+} // namespace app::dlg

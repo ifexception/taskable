@@ -25,8 +25,6 @@
 
 #include <spdlog/spdlog.h>
 
-#include "../config/configuration.h"
-
 #include "../models/projectmodel.h"
 #include "../models/taskmodel.h"
 #include "../models/taskitemmodel.h"
@@ -53,14 +51,12 @@ public:
     TaskItemDialog() = delete;
     explicit TaskItemDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
-        std::shared_ptr<cfg::Configuration> config,
         constants::TaskItemTypes taskItemType,
         wxDateTime dateTimeContext = wxDateTime::Now(),
         const wxString& name = wxT("taskitemdlg"));
 
     explicit TaskItemDialog(wxWindow* parent,
         std::shared_ptr<spdlog::logger> logger,
-        std::shared_ptr<cfg::Configuration> config,
         constants::TaskItemTypes taskItemType,
         bool edit,
         int taskId,
@@ -118,7 +114,6 @@ private:
     bool TransferDataAndValidate();
 
     std::shared_ptr<spdlog::logger> pLogger;
-    std::shared_ptr<cfg::Configuration> pConfig;
 
     wxWindow* pParent;
     wxStaticText* pTaskContextTextCtrl;

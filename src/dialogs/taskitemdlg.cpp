@@ -33,6 +33,8 @@
 #include "../common/resources.h"
 #include "../common/util.h"
 
+#include "../config/configurationprovider.h"
+
 #include "../data/taskdata.h"
 
 wxDEFINE_EVENT(EVT_TASK_ITEM_INSERTED, wxCommandEvent);
@@ -49,13 +51,11 @@ const wxString TaskItemDialog::CalculatedRateLabelBillableHourlyRate = wxT("%s %
 
 TaskItemDialog::TaskItemDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
-    std::shared_ptr<cfg::Configuration> config,
     constants::TaskItemTypes taskItemType,
     wxDateTime dateTimeContext,
     const wxString& name)
     : pParent(parent)
     , pLogger(logger)
-    , pConfig(config)
     , mType(taskItemType)
     , bIsEdit(false)
     , mTaskItemId(-1)
@@ -92,7 +92,6 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
 
 TaskItemDialog::TaskItemDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
-    std::shared_ptr<cfg::Configuration> config,
     constants::TaskItemTypes taskItemType,
     bool edit,
     int taskId,
@@ -100,7 +99,6 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
     const wxString& name)
     : pParent(parent)
     , pLogger(logger)
-    , pConfig(config)
     , mType(taskItemType)
     , bIsEdit(edit)
     , mTaskItemId(taskId)
@@ -600,9 +598,7 @@ void TaskItemDialog::DataToControls()
 
     try {
         pProject = mProjectData.GetById(taskItem->GetProjectId());
-    }
-    catch(const sqlite::sqlite_exception& e)
-    {
+    } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in ProjectData::GetById() - {0:d} : {1}", e.get_code(), e.what());
         wxLogDebug(wxString(e.get_sql()));
     }
@@ -642,11 +638,11 @@ void TaskItemDialog::DataToControls()
 
     pDescriptionCtrl->SetValue(taskItem->GetDescription());
 
-    pDateCreatedTextCtrl->SetLabel(wxString::Format(constants::DateCreatedLabel,
-        util::ToFriendlyDateTimeString(taskItem->GetDateCreated())));
+    pDateCreatedTextCtrl->SetLabel(
+        wxString::Format(constants::DateCreatedLabel, util::ToFriendlyDateTimeString(taskItem->GetDateCreated())));
 
-    pDateModifiedTextCtrl->SetLabel(wxString::Format(constants::DateModifiedLabel,
-        util::ToFriendlyDateTimeString(taskItem->GetDateModified())));
+    pDateModifiedTextCtrl->SetLabel(
+        wxString::Format(constants::DateModifiedLabel, util::ToFriendlyDateTimeString(taskItem->GetDateModified())));
 
     pIsActiveCtrl->SetValue(taskItem->IsActive());
 }
@@ -773,9 +769,10 @@ void TaskItemDialog::OnStartTimeChange(wxDateEvent& event)
 {
     auto start = event.GetDate();
 
-    if (pConfig->IsTimeRoundingEnabled()) {
+    if (cfg::ConfigurationProvider::Get().Configuration->IsTimeRoundingEnabled()) {
         auto date = start;
-        auto roundedDate = util::RoundToNearestInterval(date, pConfig->GetTimeToRoundTo());
+        auto roundedDate =
+            util::RoundToNearestInterval(date, cfg::ConfigurationProvider::Get().Configuration->GetTimeToRoundTo());
         pStartTimeCtrl->SetValue(roundedDate);
     }
 
@@ -787,9 +784,10 @@ void TaskItemDialog::OnEndTimeChange(wxDateEvent& event)
 {
     auto end = event.GetDate();
 
-    if (pConfig->IsTimeRoundingEnabled()) {
+    if (cfg::ConfigurationProvider::Get().Configuration->IsTimeRoundingEnabled()) {
         auto date = end;
-        auto roundedDate = util::RoundToNearestInterval(date, pConfig->GetTimeToRoundTo());
+        auto roundedDate =
+            util::RoundToNearestInterval(date, cfg::ConfigurationProvider::Get().Configuration->GetTimeToRoundTo());
         pEndTimeCtrl->SetValue(roundedDate);
     }
 
@@ -859,9 +857,10 @@ void TaskItemDialog::OnDurationTimeFocusLost(wxFocusEvent& event)
 
 void TaskItemDialog::OnDurationTimeChange(wxDateEvent& event)
 {
-    if (pConfig->IsTimeRoundingEnabled()) {
+    if (cfg::ConfigurationProvider::Get().Configuration->IsTimeRoundingEnabled()) {
         auto date = event.GetDate();
-        auto roundedDate = util::RoundToNearestInterval(date, pConfig->GetTimeToRoundTo());
+        auto roundedDate =
+            util::RoundToNearestInterval(date, cfg::ConfigurationProvider::Get().Configuration->GetTimeToRoundTo());
         pDurationTimeCtrl->SetValue(roundedDate);
     }
 }
@@ -993,7 +992,7 @@ bool TaskItemDialog::TransferDataAndValidate()
     pTaskItem->SetProjectId(projectId);
 
     // if (bIsEdit) {
-        pTaskItem->SetProject(std::move(mProjectData.GetById(projectId)));
+    pTaskItem->SetProject(std::move(mProjectData.GetById(projectId)));
     // }
 
     if (mType == constants::TaskItemTypes::TimedTask) {

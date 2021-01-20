@@ -56,7 +56,7 @@ struct AutoRun {
     wxRegKey mKey;
 };
 
-GeneralPage::GeneralPage(wxWindow* parent, std::shared_ptr<cfg::Configuration> config)
+GeneralPage::GeneralPage(wxWindow* parent, cfg::Configuration* config)
     : wxPanel(parent, wxID_ANY)
     , pConfig(config)
     , pParent(parent)

@@ -6,7 +6,7 @@ A desktop app to help you manage your tasks done during the day by helping you t
 
 ## Getting Started
 
-Ensure you have downloaded a suitable [version](https://cmake.org/download/) of CMake and Visual Studio. CMake **3.8** is the minimum supported version. Visual Studio 2019 is used (not sure about previous versions).
+Ensure you have downloaded a suitable [version](https://cmake.org/download/) of CMake and Visual Studio. CMake **3.16** is the minimum supported version. Visual Studio 2019 is used (not sure about previous versions).
 
 ### Windows
 
@@ -19,6 +19,8 @@ Once you've installed and configured `vcpkg`, install the following libraries:
 - wxwidgets (3.1 +)
 - cpr (1.3 +)
 - nlohmann-json (3.7 +)
+- toml11 (3.5+)
+- tinyxml2 (8.0+)
 
 Ensure that the Visual Studio _Ouput Window_ when the _CMake Server_ is runng that it does not give any warnings about missing packages.
 You can now use Visual Studio to build the project by selecting the `x86-Release` configuration in the toolbar.

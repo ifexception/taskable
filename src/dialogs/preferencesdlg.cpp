@@ -24,7 +24,7 @@
 #include <wx/listctrl.h>
 
 #include "../common/common.h"
-#include "../config/configuration.h"
+#include "../config/configurationprovider.h"
 #include "../frame/taskbaricon.h"
 
 namespace app::dlg
@@ -35,23 +35,22 @@ EVT_BUTTON(wxID_OK, PreferencesDialog::OnOk)
 wxEND_EVENT_TABLE()
 
 PreferencesDialog::PreferencesDialog(wxWindow* parent,
-    std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     frm::TaskBarIcon* taskBarIcon,
     const wxString& name)
-    : pConfig(config)
-    , pLogger(logger)
+    : pLogger(logger)
     , pTaskBarIcon(taskBarIcon)
     , pParent(parent)
     , pGeneralPage(nullptr)
     , pDatabasePage(nullptr)
     , pStopwatchPage(nullptr)
     , pTaskItemPage(nullptr)
+    , pExportPage(nullptr)
 {
     SetName(name);
     SetSheetStyle(wxPROPSHEET_LISTBOOK);
 
-    Create(pParent, wxID_ANY, wxT("Preferences"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER, name);
+    Create(pParent, wxID_ANY, "Preferences", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER, name);
     SetMinClientSize(wxSize(510, 380));
     SetSize(wxSize(510, 380));
 }
@@ -76,15 +75,19 @@ void PreferencesDialog::CreateControls()
 {
     auto listBook = static_cast<wxListbook*>(GetBookCtrl());
 
-    pGeneralPage = new GeneralPage(listBook, pConfig);
-    pDatabasePage = new DatabasePage(listBook, pConfig);
-    pStopwatchPage = new StopwatchPage(listBook, pConfig);
-    pTaskItemPage = new TaskItemPage(listBook, pConfig);
+    auto* config = cfg::ConfigurationProvider::Get().Configuration.get();
 
-    listBook->AddPage(pGeneralPage, wxT("General"), true);
-    listBook->AddPage(pDatabasePage, wxT("Database"), false);
-    listBook->AddPage(pStopwatchPage, wxT("Stopwatch"), false);
-    listBook->AddPage(pTaskItemPage, wxT("Task Item"), false);
+    pGeneralPage = new GeneralPage(listBook, config);
+    pDatabasePage = new DatabasePage(listBook, config);
+    pStopwatchPage = new StopwatchPage(listBook, config);
+    pTaskItemPage = new TaskItemPage(listBook, config);
+    pExportPage = new ExportPage(listBook, config);
+
+    listBook->AddPage(pGeneralPage, "General", true);
+    listBook->AddPage(pDatabasePage, "Database", false);
+    listBook->AddPage(pStopwatchPage, "Stopwatch", false);
+    listBook->AddPage(pTaskItemPage, "Task Item", false);
+    listBook->AddPage(pExportPage, "Export", false);
 
     CreateButtons(wxOK | wxCANCEL);
     LayoutDialog();
@@ -100,17 +103,41 @@ void PreferencesDialog::OnOk(wxCommandEvent& event)
     pGeneralPage->Apply();
     pDatabasePage->Apply();
     pStopwatchPage->Apply();
+    pTaskItemPage->Apply();
 
-    if (pConfig->IsBackupEnabled() && pConfig->GetBackupPath().length() == 0) {
-        wxMessageBox(wxT("A backup path must be selected."), common::GetProgramName(), wxOK_DEFAULT | wxICON_WARNING);
+    if (cfg::ConfigurationProvider::Get().Configuration->IsBackupEnabled() &&
+        cfg::ConfigurationProvider::Get().Configuration->GetBackupPath().length() == 0) {
+        wxMessageBox("A backup path must be selected.", common::GetProgramName(), wxOK_DEFAULT | wxICON_WARNING);
         return;
     }
 
-    pConfig->Save();
+    if (cfg::ConfigurationProvider::Get().Configuration->IsBackupEnabled() &&
+        cfg::ConfigurationProvider::Get().Configuration->GetDeleteBackupsAfter() <= 0) {
+        wxMessageBox("A positive non-zero value is required if backups are enabled",
+            common::GetProgramName(),
+            wxOK_DEFAULT | wxICON_WARNING);
+        return;
+    }
 
-    if (pConfig->IsShowInTray() && !pTaskBarIcon->IsIconInstalled()) {
+    if (cfg::ConfigurationProvider::Get().Configuration->GetExportPath().length() == 0) {
+        wxMessageBox("A export path must be selected",
+            common::GetProgramName(),
+            wxOK_DEFAULT | wxICON_WARNING);
+        return;
+    }
+
+    if (cfg::ConfigurationProvider::Get().Configuration->GetDelimiter().length() == 0) {
+        wxMessageBox("A delimiter is required",
+            common::GetProgramName(),
+            wxOK_DEFAULT | wxICON_WARNING);
+        return;
+    }
+
+    cfg::ConfigurationProvider::Get().Configuration->Save();
+
+    if (cfg::ConfigurationProvider::Get().Configuration->IsShowInTray() && !pTaskBarIcon->IsIconInstalled()) {
         pTaskBarIcon->SetTaskBarIcon();
-    } else if (!pConfig->IsShowInTray() && pTaskBarIcon->IsIconInstalled()) {
+    } else if (!cfg::ConfigurationProvider::Get().Configuration->IsShowInTray() && pTaskBarIcon->IsIconInstalled()) {
         pTaskBarIcon->RemoveIcon();
     }
 

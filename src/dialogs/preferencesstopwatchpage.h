@@ -34,7 +34,7 @@ class StopwatchPage final : public wxPanel
 {
 public:
     StopwatchPage() = delete;
-    StopwatchPage(wxWindow* parent, std::shared_ptr<cfg::Configuration> config);
+    StopwatchPage(wxWindow* parent, cfg::Configuration* config);
     virtual ~StopwatchPage() = default;
 
     void Apply();
@@ -46,7 +46,7 @@ private:
 
     void OnMinimizeTimedTaskWindowCheck(wxCommandEvent& event);
 
-    std::shared_ptr<cfg::Configuration> pConfig;
+    cfg::Configuration* pConfig;
 
     wxWindow* pParent;
 

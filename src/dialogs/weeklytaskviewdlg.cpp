@@ -56,11 +56,9 @@ wxString DayLabels[7] = {
 
 WeeklyTaskViewDialog::WeeklyTaskViewDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
-    std::shared_ptr<cfg::Configuration> config,
     const wxString& name)
     : pParent(parent)
     , pLogger(logger)
-    , pConfig(config)
     , pWeekDatesLabel(nullptr)
     , pCalendarCtrl(nullptr)
     , pDailyHoursBreakdownTextCtrlArray()
@@ -370,7 +368,7 @@ void WeeklyTaskViewDialog::OnContextMenuEdit(wxCommandEvent& WXUNUSED(event))
     constants::TaskItemTypes type = static_cast<constants::TaskItemTypes>(taskItemTypeId);
     wxDateTime dateContext = mDaySelected;
 
-    dlg::TaskItemDialog editTask(this, pLogger, pConfig, type, true, mSelectedTaskItemId, dateContext);
+    dlg::TaskItemDialog editTask(this, pLogger, type, true, mSelectedTaskItemId, dateContext);
     editTask.ShowModal();
 }
 

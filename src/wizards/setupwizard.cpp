@@ -26,7 +26,6 @@
 #include <wx/statline.h>
 #include <wx/valnum.h>
 
-#include "../config/configuration.h"
 #include "../common/common.h"
 #include "../common/util.h"
 
@@ -42,10 +41,8 @@
 namespace app::wizard
 {
 SetupWizard::SetupWizard(wxFrame* frame,
-    std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger)
     : wxWizard(frame, wxID_ANY, wxT("Setup Wizard"), wxBitmap(setupwizard), wxDefaultPosition, wxDEFAULT_DIALOG_STYLE)
-    , pConfig(config)
     , pLogger(logger)
     , pCompositor(std::make_shared<EntityCompositor>(logger))
     , pPage1(nullptr)

@@ -30,7 +30,6 @@
 #include <spdlog/spdlog.h>
 
 #include "../common/common.h"
-#include "../config/configuration.h"
 #include "../frame/mainframe.h"
 #include "../../res/database-restore-wizard.xpm"
 
@@ -43,7 +42,6 @@ class DatabaseRestoreWizard final : public wxWizard
 public:
     DatabaseRestoreWizard() = default;
     DatabaseRestoreWizard(frm::MainFrame* frame,
-        std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger,
         bool restoreWithNoPreviousFileExisting = false);
     virtual ~DatabaseRestoreWizard() = default;
@@ -57,7 +55,6 @@ public:
 
 private:
     frm::MainFrame* pFrame;
-    std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
 
     DatabaseRestoreWelcomePage* pPage1;
@@ -81,7 +78,7 @@ class SelectDatabaseVersionPage final : public wxWizardPageSimple
 {
 public:
     SelectDatabaseVersionPage() = delete;
-    SelectDatabaseVersionPage(DatabaseRestoreWizard* parent, std::shared_ptr<cfg::Configuration> config);
+    SelectDatabaseVersionPage(DatabaseRestoreWizard* parent);
     virtual ~SelectDatabaseVersionPage() = default;
 
     bool TransferDataFromWindow() override;
@@ -96,7 +93,6 @@ private:
     void OnWizardCancel(wxWizardEvent& event);
 
     DatabaseRestoreWizard* pParent;
-    std::shared_ptr<cfg::Configuration> pConfig;
     wxListCtrl* pListCtrl;
 
     int mSelectedIndex;
@@ -107,7 +103,6 @@ class DatabaseRestoredPage final : public wxWizardPageSimple
 public:
     DatabaseRestoredPage() = delete;
     DatabaseRestoredPage(DatabaseRestoreWizard* parent,
-        std::shared_ptr<cfg::Configuration> config,
         std::shared_ptr<spdlog::logger> logger);
     virtual ~DatabaseRestoredPage() = default;
 
@@ -123,7 +118,6 @@ private:
     bool InitializeDatabaseConnectionProvider();
 
     DatabaseRestoreWizard* pParent;
-    std::shared_ptr<cfg::Configuration> pConfig;
     std::shared_ptr<spdlog::logger> pLogger;
 
     wxStaticText* pStatusInOperationLabel;

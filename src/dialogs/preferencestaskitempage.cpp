@@ -24,7 +24,7 @@
 
 namespace app::dlg
 {
-TaskItemPage::TaskItemPage(wxWindow* parent, std::shared_ptr<cfg::Configuration> config)
+TaskItemPage::TaskItemPage(wxWindow* parent, cfg::Configuration* config)
     : wxPanel(parent, wxID_ANY)
     , pConfig(config)
     , pParent(parent)

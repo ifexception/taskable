@@ -27,6 +27,7 @@
 #include <wx/regex.h>
 #include <wx/stdpaths.h>
 
+#include "../config/configurationprovider.h"
 #include "../database/sqliteconnectionfactory.h"
 #include "../database/sqliteconnection.h"
 #include "../database/connectionprovider.h"
@@ -34,7 +35,6 @@
 namespace app::wizard
 {
 DatabaseRestoreWizard::DatabaseRestoreWizard(frm::MainFrame* frame,
-    std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger,
     bool restoreWithNoPreviousFileExisting)
     : wxWizard(frame,
@@ -44,15 +44,14 @@ DatabaseRestoreWizard::DatabaseRestoreWizard(frm::MainFrame* frame,
           wxDefaultPosition,
           wxDEFAULT_DIALOG_STYLE)
     , pFrame(frame)
-    , pConfig(config)
     , pLogger(logger)
     , pPage1(nullptr)
     , mDatabaseFileToRestore(wxGetEmptyString())
     , bRestoreWithNoPreviousFileExisting(restoreWithNoPreviousFileExisting)
 {
     pPage1 = new DatabaseRestoreWelcomePage(this);
-    auto page2 = new SelectDatabaseVersionPage(this, pConfig);
-    auto page3 = new DatabaseRestoredPage(this, pConfig, pLogger);
+    auto page2 = new SelectDatabaseVersionPage(this);
+    auto page3 = new DatabaseRestoredPage(this, pLogger);
 
     wxWizardPageSimple::Chain(pPage1, page2);
     wxWizardPageSimple::Chain(page2, page3);
@@ -115,11 +114,9 @@ void DatabaseRestoreWelcomePage::CreateControls()
     SetSizerAndFit(mainSizer);
 }
 
-SelectDatabaseVersionPage::SelectDatabaseVersionPage(DatabaseRestoreWizard* parent,
-    std::shared_ptr<cfg::Configuration> config)
+SelectDatabaseVersionPage::SelectDatabaseVersionPage(DatabaseRestoreWizard* parent)
     : wxWizardPageSimple(parent)
     , pParent(parent)
-    , pConfig(config)
     , pListCtrl(nullptr)
     , mSelectedIndex(-1)
 {
@@ -207,7 +204,7 @@ void SelectDatabaseVersionPage::ConfigureEventBindings()
 
 void SelectDatabaseVersionPage::FillControls()
 {
-    const wxString& backupPath = pConfig->GetBackupPath();
+    const wxString backupPath = cfg::ConfigurationProvider::Get().Configuration->GetBackupPath();
     wxArrayString files;
     wxDir::GetAllFiles(backupPath, &files, wxEmptyString, wxDIR_FILES);
 
@@ -246,12 +243,9 @@ void SelectDatabaseVersionPage::OnWizardCancel(wxWizardEvent& event)
     }
 }
 
-DatabaseRestoredPage::DatabaseRestoredPage(DatabaseRestoreWizard* parent,
-    std::shared_ptr<cfg::Configuration> config,
-    std::shared_ptr<spdlog::logger> logger)
+DatabaseRestoredPage::DatabaseRestoredPage(DatabaseRestoreWizard* parent, std::shared_ptr<spdlog::logger> logger)
     : wxWizardPageSimple(parent)
     , pParent(parent)
-    , pConfig(config)
     , pLogger(logger)
     , pStatusInOperationLabel(nullptr)
     , pGaugeCtrl(nullptr)
@@ -306,8 +300,8 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
 
     const wxString fileToRestore = pParent->GetDatabaseFileVersionToRestore();
 
-    const wxString backupPath = pConfig->GetBackupPath();
-    const wxString dataPath = pConfig->GetDatabasePath();
+    const wxString backupPath = cfg::ConfigurationProvider::Get().Configuration->GetBackupPath();
+    const wxString dataPath = cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath();
 
     auto fullBackupDatabaseFilePath = wxString::Format(wxT("%s\\%s"), backupPath, fileToRestore);
     auto toCopyDatabaseFilePath = wxString::Format(wxT("%s\\%s"), dataPath, fileToRestore);
@@ -325,7 +319,8 @@ void DatabaseRestoredPage::OnWizardPageShown(wxWizardEvent& event)
         }
     }
 
-    auto existingDatabaseFile = common::GetDatabaseFilePath(pConfig->GetDatabasePath());
+    auto existingDatabaseFile =
+        common::GetDatabaseFilePath(cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath());
 
     /* If there is a existing 'db' file */
     if (!pParent->IsRestoreWithNoPreviousFileExisting()) {
@@ -403,7 +398,7 @@ void DatabaseRestoredPage::FileOperationErrorFeedback()
 bool DatabaseRestoredPage::InitializeDatabaseConnectionProvider()
 {
     auto sqliteConnectionFactory = std::make_shared<db::SqliteConnectionFactory>(
-        common::GetDatabaseFilePath(pConfig->GetDatabasePath()).ToStdString());
+        common::GetDatabaseFilePath(cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath()).ToStdString());
     auto connectionPool = std::make_unique<db::ConnectionPool<db::SqliteConnection>>(sqliteConnectionFactory, 14);
     db::ConnectionProvider::Get().ReInitializeConnectionPool(std::move(connectionPool));
 

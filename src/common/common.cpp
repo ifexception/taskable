@@ -77,7 +77,7 @@ wxString app::common::GetConfigFilePath()
 
 wxString app::common::GetConfigFileName()
 {
-    return wxT("taskable.ini");
+    return wxT("taskable.toml");
 }
 
 wxString app::common::GetAppId()

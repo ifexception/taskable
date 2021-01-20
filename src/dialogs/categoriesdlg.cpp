@@ -407,8 +407,8 @@ void CategoriesDialog::OnRemove(wxCommandEvent& event)
     for (long index : mItemIndexes) {
         auto categoryAtIndex = ExtractCategoryDataFromListIndex(index);
 
-        mCategories.erase(
-            std::remove_if(mCategories.begin(), mCategories.end(), [&](std::unique_ptr<model::CategoryModel>& category) {
+        mCategories.erase(std::remove_if(
+            mCategories.begin(), mCategories.end(), [&](std::unique_ptr<model::CategoryModel>& category) {
                 return category->GetName() == categoryAtIndex->GetName();
             }));
 

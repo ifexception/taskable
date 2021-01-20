@@ -1,5 +1,10 @@
 # Changelog
 
+### 1.5.0
+- Export to CSV
+- Use toml for configuration
+- Add export configuration options
+
 ### 1.4.0
 - Outlook meetings integration
 - Fixed bug when editing a employer

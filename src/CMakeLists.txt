@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.16)
 project ("Taskable")
 
 if (MSVC)
@@ -15,6 +15,9 @@ find_package(unofficial-sqlite3 CONFIG REQUIRED)
 find_package (spdlog CONFIG REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(tinyxml2 CONFIG REQUIRED)
+
+find_path(TOML11_INCLUDE_DIRS "toml.hpp")
 
 message (STATUS "ZLIB found: ${ZLIB_FOUND}")
 message (STATUS "sqlite3 found: ${sqlite3_FOUND}")
@@ -22,6 +25,7 @@ message (STATUS "spdlog found: ${spdlog_FOUND}")
 message (STATUS "wxWidgets_FOUND: ${wxWidgets_FOUND}")
 message (STATUS "cpr_FOUND: ${cpr_FOUND}")
 message (STATUS "nlohmann_json_FOUND: ${nlohmann_json_FOUND}")
+message (STATUS "tinyxml2_FOUND: ${tinyxml2_FOUND}")
 
 set (SRC
     "common/ids.cpp"
@@ -30,7 +34,9 @@ set (SRC
     "common/util.cpp"
     "common/datetraverser.cpp"
     "common/constants.cpp"
+
     "config/configuration.cpp"
+    "config/configurationprovider.cpp"
 
     "database/connection.cpp"
     "database/connectionfactory.cpp"
@@ -40,12 +46,16 @@ set (SRC
     "database/connectionprovider.cpp"
 
     "services/outlookintegrator.cpp"
+
     "services/taskstateservice.cpp"
     "services/taskstorageservice.cpp"
+
     "services/databasebackup.cpp"
     "services/databasebackupdeleter.cpp"
     "services/setupdatabase.cpp"
     "services/databasestructureupdater.cpp"
+
+    "services/csvexporter.cpp"
 
     "application.cpp"
     "resources.rc"
@@ -66,6 +76,7 @@ set (SRC
     "dialogs/preferencesdatabasepage.cpp"
     "dialogs/preferencesstopwatchpage.cpp"
     "dialogs/preferencestaskitempage.cpp"
+    "dialogs/preferencesexportpage.cpp"
     "dialogs/preferencesdlg.cpp"
 
     "wizards/setupwizard.cpp"
@@ -106,16 +117,20 @@ set (SRC
     "data/meetingdata.cpp"
     "models/meetingmodel.cpp"
     "dialogs/meetingsviewdlg.cpp"
+
+    "dialogs/exporttocsvdlg.cpp"
     )
 
 add_executable (${PROJECT_NAME} WIN32 ${SRC})
 
 target_compile_options (${PROJECT_NAME} PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W3 /permissive- /TP /EHsc>
-    $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra>)
+    $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra>
+)
 
 target_compile_features (${PROJECT_NAME} PRIVATE
-    cxx_std_17)
+    cxx_std_17
+)
 
 target_compile_definitions (${PROJECT_NAME} PUBLIC
     _CRT_SECURE_NO_WARNINGS
@@ -127,12 +142,19 @@ target_compile_definitions (${PROJECT_NAME} PUBLIC
     __WXMSW__
     $<$<CONFIG:Debug>:TASKABLE_DEBUG>
     $<$<CONFIG:Release>:NDEBUG>
-    $<$<CONFIG:Debug>:WXDEBUG>)
+    $<$<CONFIG:Debug>:WXDEBUG>
+)
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${TOML11_INCLUDE_DIRS}
+)
 
 target_link_libraries (${PROJECT_NAME}
     ${wxWidgets_LIBRARIES}
     ZLIB::ZLIB
     unofficial::sqlite3::sqlite3
-    spdlog::spdlog
+    spdlog::spdlog spdlog::spdlog_header_only
     cpr
-    nlohmann_json nlohmann_json::nlohmann_json)
+    nlohmann_json nlohmann_json::nlohmann_json
+    tinyxml2::tinyxml2
+)

@@ -38,11 +38,9 @@ wxBEGIN_EVENT_TABLE(TaskBarIcon, wxTaskBarIcon)
 wxEND_EVENT_TABLE()
 
 TaskBarIcon::TaskBarIcon(wxFrame* parent,
-    std::shared_ptr<cfg::Configuration> config,
     std::shared_ptr<spdlog::logger> logger)
     : pParent(parent)
     , pLogger(logger)
-    , pConfig(config)
 // clang-format on
 {
 }
@@ -75,19 +73,19 @@ wxMenu* TaskBarIcon::CreatePopupMenu()
 
 void TaskBarIcon::OnNewEntryTask(wxCommandEvent& WXUNUSED(event))
 {
-    dlg::TaskItemDialog entryTask(pParent, pLogger, pConfig, constants::TaskItemTypes::EntryTask);
+    dlg::TaskItemDialog entryTask(pParent, pLogger, constants::TaskItemTypes::EntryTask);
     entryTask.ShowModal();
 }
 
 void TaskBarIcon::OnNewTimedTask(wxCommandEvent& WXUNUSED(event))
 {
-    dlg::TaskItemDialog timedTask(pParent, pLogger, pConfig, constants::TaskItemTypes::TimedTask);
+    dlg::TaskItemDialog timedTask(pParent, pLogger, constants::TaskItemTypes::TimedTask);
     timedTask.ShowModal();
 }
 
 void TaskBarIcon::OnPreferences(wxCommandEvent& WXUNUSED(event))
 {
-    dlg::PreferencesDialog preferences(pParent, pConfig, pLogger, this);
+    dlg::PreferencesDialog preferences(pParent, pLogger, this);
     preferences.ShowModal();
 }
 

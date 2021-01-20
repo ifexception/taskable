@@ -23,7 +23,7 @@
 
 namespace app::dlg
 {
-StopwatchPage::StopwatchPage(wxWindow* parent, std::shared_ptr<cfg::Configuration> config)
+StopwatchPage::StopwatchPage(wxWindow* parent, cfg::Configuration* config)
     : wxPanel(parent, wxID_ANY)
     , pConfig(config)
     , pParent(parent)

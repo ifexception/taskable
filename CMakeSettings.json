@@ -7,7 +7,6 @@
       "buildRoot": "${projectDir}\\build\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-m -v:minimal",
-      "addressSanitizerEnabled": true,
       "variables": [
         {
           "name": "CMAKE_TOOLCHAIN_FILE",
@@ -27,7 +26,6 @@
       "buildRoot": "${projectDir}\\build\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-m -v:minimal",
-      "addressSanitizerEnabled": true,
       "variables": [
         {
           "name": "CMAKE_TOOLCHAIN_FILE",

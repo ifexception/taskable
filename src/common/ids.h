@@ -30,12 +30,13 @@ enum class MenuIds : int {
     File_NewCategoryId,
     File_View_WeeklyView,
     File_View_MeetingsView,
+    File_StopwatchTaskId,
     Edit_EditEmployerId,
     Edit_EditClientId,
     Edit_EditProjectId,
     Edit_EditCategoryId,
     Edit_PreferencesId,
-    File_StopwatchTaskId,
+    Export_ToCsv,
     Help_CheckForUpdateId,
     Tools_RestoreDatabaseId,
     Tools_BackupDatabaseId,
@@ -64,6 +65,8 @@ static const int ID_CHECK_FOR_UPDATE = static_cast<int>(MenuIds::Help_CheckForUp
 
 static const int ID_RESTORE_DATABASE = static_cast<int>(MenuIds::Tools_RestoreDatabaseId);
 static const int ID_BACKUP_DATABASE = static_cast<int>(MenuIds::Tools_BackupDatabaseId);
+
+static const int ID_EXPORT_CSV = static_cast<int>(MenuIds::Export_ToCsv);
 
 static const int ID_RETURN_TO_CURRENT_DATE = static_cast<int>(MenuIds::Unp_ReturnToCurrentDate);
 

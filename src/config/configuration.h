@@ -19,10 +19,11 @@
 
 #pragma once
 
-#include <wx/sizer.h>
-#include <wx/string.h>
-#include <wx/stdpaths.h>
-#include <wx/fileconf.h>
+#include <string>
+
+#include <toml.hpp>
+
+#include <wx/gdicmn.h>
 
 namespace app::cfg
 {
@@ -30,89 +31,114 @@ class Configuration
 {
 public:
     Configuration();
-    ~Configuration();
+    ~Configuration() = default;
 
     void Save();
 
+    /* Getters */
     bool IsConfirmOnExit() const;
-    void SetConfirmOnExit(bool value);
-
     bool IsStartOnBoot() const;
-    void SetStartOnBoot(bool value);
-
     bool IsShowInTray() const;
-    void SetShowInTray(bool value);
-
     bool IsMinimizeToTray() const;
-    void SetMinimizeToTray(bool value);
-
     bool IsCloseToTray() const;
-    void SetCloseToTray(bool value);
 
-    wxString GetDatabasePath() const;
-    void SetDatabasePath(const wxString& value);
-
+    std::string GetDatabasePath() const;
     bool IsBackupEnabled() const;
-    void SetBackupEnabled(bool value);
-
-    wxString GetBackupPath() const;
-    void SetBackupPath(const wxString& value);
-
+    std::string GetBackupPath() const;
     int GetDeleteBackupsAfter() const;
-    void SetDeleteBackupsAfter(int value);
 
     bool IsMinimizeStopwatchWindow() const;
-    void SetMinimizeStopwatchWindow(bool value);
-
     int GetHideWindowTimerInterval() const;
-    void SetHideWindowTimerInterval(int value);
-
     int GetNotificationTimerInterval() const;
-    void SetNotificationTimerInterval(int value);
-
     int GetPausedTaskReminderInterval() const;
-    void SetPausedTaskReminderInterval(int value);
-
     bool IsStartStopwatchOnLaunch() const;
-    void SetStartStopwatchOnLaunch(bool value);
-
     bool IsStartStopwatchOnResume() const;
-    void SetStartStopwatchOnResume(bool value);
-
-    wxSize GetFrameSize() const;
-    void SetFrameSize(const wxSize value);
 
     bool IsTimeRoundingEnabled() const;
-    void SetTimeRounding(const bool value);
-
     int GetTimeToRoundTo() const;
-    void SetTimeToRoundTo(const int value);
+
+    std::string GetFrameSize() const;
+
+    std::string GetDelimiter() const;
+    std::string GetExportPath() const;
+
+    /* Setters */
+    void SetConfirmOnExit(bool value);
+    void SetStartOnBoot(bool value);
+    void SetShowInTray(bool value);
+    void SetMinimizeToTray(bool value);
+    void SetCloseToTray(bool value);
+
+    void SetDatabasePath(const std::string& value);
+    void SetBackupEnabled(bool value);
+    void SetBackupPath(const std::string& value);
+    void SetDeleteBackupsAfter(int value);
+
+    void SetMinimizeStopwatchWindow(bool value);
+    void SetHideWindowTimerInterval(int value);
+    void SetNotificationTimerInterval(int value);
+    void SetPausedTaskReminderInterval(int value);
+    void SetStartStopwatchOnLaunch(bool value);
+    void SetStartStopwatchOnResume(bool value);
+
+    void SetTimeRounding(bool value);
+    void SetTimeToRoundTo(int value);
+
+    void SetFrameSize(const std::string& value);
+
+    void SetDelimiter(const std::string& value);
+    void SetExportPath(const std::string& value);
 
 private:
-    template<class T>
-    T Get(const wxString& group, const wxString& key) const;
+    void LoadConfigFile();
 
-    template<class T>
-    void Set(const wxString& group, const wxString& key, T value);
+    void GetGeneralConfig(const toml::value& config);
+    void GetDatabaseConfig(const toml::value& config);
+    void GetStopwatchConfig(const toml::value& config);
+    void GetTaskItemConfig(const toml::value& config);
+    void GetPersistenceConfig(const toml::value& config);
+    void GetExportConfig(const toml::value& config);
 
-    wxFileConfig* pConfig;
+    struct Sections {
+        static const std::string GeneralSection;
+        static const std::string DatabaseSection;
+        static const std::string StopwatchSection;
+        static const std::string TaskItemSection;
+        static const std::string PersistenceSection;
+        static const std::string ExportSection;
+    };
+
+    struct Settings {
+        bool ConfirmOnExit;
+        bool StartOnBoot;
+        bool ShowInTray;
+        bool MinimizeToTray;
+        bool CloseToTray;
+
+        std::string DatabasePath;
+        bool BackupEnabled;
+        std::string BackupPath;
+        int DeleteBackupsAfter;
+
+        bool MinimizeStopwatchWindow;
+        int HideWindowTimerInterval;
+        int NotificationTimerInterval;
+        int PausedTaskReminderInterval;
+        bool StartStopwatchOnLaunch;
+        bool StartStopwatchOnResume;
+
+        bool TimeRounding;
+        int TimeToRoundTo;
+
+        std::string Dimension;
+
+        std::string Delimiter;
+        std::string ExportPath;
+
+        Settings() = default;
+        ~Settings() = default;
+    };
+
+    Settings mSettings;
 };
-
-template<class T>
-T Configuration::Get(const wxString& group, const wxString& key) const
-{
-    pConfig->SetPath(group);
-    T value;
-    pConfig->Read(key, &value);
-    pConfig->SetPath("/");
-    return value;
-}
-
-template<class T>
-void Configuration::Set(const wxString& group, const wxString& key, T value)
-{
-    pConfig->SetPath(group);
-    pConfig->Write(key, value);
-    pConfig->SetPath("/");
-}
 } // namespace app::cfg

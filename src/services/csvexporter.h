@@ -20,32 +20,46 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include <spdlog/spdlog.h>
-#include <sqlite_modern_cpp.h>
-#include <wx/string.h>
 
-#include "../database/connectionprovider.h"
 #include "../database/sqliteconnection.h"
+#include "../database/connectionprovider.h"
 
 namespace app::svc
 {
-class DatabaseBackup final
+class CsvExporter
 {
 public:
-    DatabaseBackup() = delete;
-    DatabaseBackup(std::shared_ptr<spdlog::logger> logger);
-    ~DatabaseBackup();
+    CsvExporter(std::shared_ptr<spdlog::logger> logger, const std::string& fromDate, const std::string& toDate, const std::string& fileName);
+    ~CsvExporter();
 
-    bool Execute();
+    bool ExportData();
 
 private:
-    wxString CreateBackupFileName();
-    wxString GetBackupFullPath(const wxString& fileName);
-    bool CreateBackupFile(const wxString& fileName);
-    bool ExecuteBackup(const wxString& fileName);
+    struct DataSet {
+        std::unique_ptr<std::string> StartTime;
+        std::unique_ptr<std::string> EndTime;
+        std::string Duration;
+        std::string Description;
+        std::unique_ptr<double> CalculatedRate;
+        std::string TaskItemType;
+        std::string ProjectName;
+        bool Billable;
+        std::unique_ptr<double> Rate;
+        std::string CategoryName;
+        std::string TaskDate;
+    };
+
+    std::vector<CsvExporter::DataSet*> GetDataSet();
 
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<db::SqliteConnection> pConnection;
+    std::string mFromDate;
+    std::string mToDate;
+    std::string mFileName;
+
+    static std::string Query;
 };
 } // namespace app::svc

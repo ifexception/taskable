@@ -34,7 +34,7 @@ class GeneralPage final : public wxPanel
 {
 public:
     GeneralPage() = delete;
-    GeneralPage(wxWindow* parent, std::shared_ptr<cfg::Configuration> config);
+    GeneralPage(wxWindow* parent, cfg::Configuration* config);
     virtual ~GeneralPage() = default;
 
     void Apply();
@@ -46,7 +46,7 @@ private:
 
     void OnShowInTrayCheck(wxCommandEvent& event);
 
-    std::shared_ptr<cfg::Configuration> pConfig;
+    cfg::Configuration* pConfig;
 
     wxWindow* pParent;
 

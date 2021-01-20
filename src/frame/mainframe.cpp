@@ -52,6 +52,8 @@
 
 #include "../dialogs/preferencesdlg.h"
 
+#include "../dialogs/exporttocsvdlg.h"
+
 #include "../wizards/databaserestorewizard.h"
 #include "taskbaricon.h"
 
@@ -88,6 +90,7 @@ EVT_MENU(ids::ID_CHECK_FOR_UPDATE, MainFrame::OnCheckForUpdate)
 EVT_MENU(ids::ID_RESTORE_DATABASE, MainFrame::OnRestoreDatabase)
 EVT_MENU(ids::ID_BACKUP_DATABASE, MainFrame::OnBackupDatabase)
 EVT_MENU(ids::ID_RETURN_TO_CURRENT_DATE, MainFrame::OnReturnToCurrentDate)
+EVT_MENU(ids::ID_EXPORT_CSV, MainFrame::OnExportToCsv)
 /* Frame Control Event Handlers */
 EVT_DATE_CHANGED(MainFrame::IDC_GO_TO_DATE, MainFrame::OnDateChanged)
 EVT_BUTTON(MainFrame::IDC_FEEDBACK, MainFrame::OnFeedback)
@@ -108,12 +111,10 @@ EVT_COMMAND(wxID_ANY, EVT_TASK_ITEM_DELETED, MainFrame::OnTaskDeleted)
 EVT_COMMAND(wxID_ANY, START_NEW_STOPWATCH_TASK, MainFrame::OnNewStopwatchTaskFromPausedStopwatchTask)
 wxEND_EVENT_TABLE()
 
-MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
-    std::shared_ptr<spdlog::logger> logger,
+MainFrame::MainFrame(std::shared_ptr<spdlog::logger> logger,
     const wxString& name)
     :wxFrame(
         nullptr, wxID_ANY, common::GetProgramName(), wxDefaultPosition, wxSize(600, 500), wxDEFAULT_FRAME_STYLE, name)
-    , pConfig(config)
     , pLogger(logger)
     , pTaskState(std::make_shared<services::TaskStateService>())
     , pTaskStorage(std::make_unique<services::TaskStorage>())
@@ -138,7 +139,11 @@ MainFrame::MainFrame(std::shared_ptr<cfg::Configuration> config,
 MainFrame::~MainFrame()
 {
     auto size = GetSize();
-    pConfig->SetFrameSize(size);
+    int w = size.GetWidth();
+    int h = size.GetHeight();
+    auto newSize = wxString::Format(wxT("%s,%s"), std::to_string(w), std::to_string(h));
+    cfg::ConfigurationProvider::Get().Configuration->SetFrameSize(newSize.ToStdString());
+    cfg::ConfigurationProvider::Get().Configuration->Save();
 
     if (pTaskBarIcon) {
         delete pTaskBarIcon;
@@ -149,20 +154,23 @@ MainFrame::~MainFrame()
 
 bool MainFrame::CreateFrame()
 {
-    auto configSize = pConfig->GetFrameSize();
-    SetSize(configSize);
+    auto configSize = cfg::ConfigurationProvider::Get().Configuration->GetFrameSize();
+    auto dimensionsSplit = util::lib::split(configSize, ',');
+    int w = std::stoi(dimensionsSplit[0]);
+    int h = std::stoi(dimensionsSplit[1]);
+    SetSize(wxSize(w, h));
 
     bool success = Create();
     SetMinSize(wxSize(850, 580));
     SetIcon(rc::GetProgramIcon());
 
-    if (pConfig->IsBackupEnabled()) {
-        svc::DatabaseBackupDeleter dbBackupDeleter(pConfig);
+    if (cfg::ConfigurationProvider::Get().Configuration->IsBackupEnabled()) {
+        svc::DatabaseBackupDeleter dbBackupDeleter;
         dbBackupDeleter.Execute();
     }
 
-    pTaskBarIcon = new TaskBarIcon(this, pConfig, pLogger);
-    if (pConfig->IsShowInTray()) {
+    pTaskBarIcon = new TaskBarIcon(this, pLogger);
+    if (cfg::ConfigurationProvider::Get().Configuration->IsShowInTray()) {
         pTaskBarIcon->SetTaskBarIcon();
     }
 
@@ -241,7 +249,8 @@ void MainFrame::CreateControls()
     preferencesMenuItem->SetBitmap(rc::GetSettingsIcon());
 
     /* Export Menu Control */
-    // auto exportMenu = new wxMenu();
+    auto exportMenu = new wxMenu();
+    exportMenu->Append(ids::ID_EXPORT_CSV, "To &CSV", "Export data to a CSV file");
 
     /* Tools Menu Control */
     auto toolsMenu = new wxMenu();
@@ -257,14 +266,14 @@ void MainFrame::CreateControls()
     auto helpMenuItem = helpMenu->Append(wxID_ABOUT);
     helpMenuItem->SetBitmap(rc::GetAboutIcon());
     auto checkUpdateMenuItem = helpMenu->Append(
-        ids::ID_CHECK_FOR_UPDATE, wxT("Check for update"), wxT("Check if an update is available for application"));
+        ids::ID_CHECK_FOR_UPDATE, wxT("Check for Update"), wxT("Check if an update is available for application"));
     checkUpdateMenuItem->SetBitmap(rc::GetCheckForUpdateIcon());
 
     /* Menu Bar */
     wxMenuBar* menuBar = new wxMenuBar();
     menuBar->Append(fileMenu, wxT("File"));
     menuBar->Append(editMenu, wxT("Edit"));
-    // menuBar->Append(exportMenu, wxT("Export"));
+    menuBar->Append(exportMenu, wxT("Export"));
     menuBar->Append(toolsMenu, wxT("Tools"));
     menuBar->Append(helpMenu, wxT("Help"));
 
@@ -390,14 +399,15 @@ void MainFrame::DataToControls()
 
 void MainFrame::OnClose(wxCloseEvent& event)
 {
-    if (pConfig->IsConfirmOnExit() && event.CanVeto()) {
+    if (cfg::ConfigurationProvider::Get().Configuration->IsConfirmOnExit() && event.CanVeto()) {
         int ret = wxMessageBox(
             wxT("Are you sure to exit the application?"), common::GetProgramName(), wxICON_QUESTION | wxYES_NO);
         if (ret == wxNO) {
             event.Veto();
             return;
         }
-    } else if (pConfig->IsCloseToTray() && pConfig->IsShowInTray() && event.CanVeto()) {
+    } else if (cfg::ConfigurationProvider::Get().Configuration->IsCloseToTray() &&
+               cfg::ConfigurationProvider::Get().Configuration->IsShowInTray() && event.CanVeto()) {
         Hide();
         MSWGetTaskBarButton()->Hide();
         return;
@@ -407,7 +417,8 @@ void MainFrame::OnClose(wxCloseEvent& event)
 
 void MainFrame::OnIconize(wxIconizeEvent& event)
 {
-    if (event.IsIconized() && pConfig->IsShowInTray() && pConfig->IsMinimizeToTray()) {
+    if (event.IsIconized() && cfg::ConfigurationProvider::Get().Configuration->IsShowInTray() &&
+        cfg::ConfigurationProvider::Get().Configuration->IsMinimizeToTray()) {
         MSWGetTaskBarButton()->Hide();
     }
 }
@@ -462,7 +473,7 @@ void MainFrame::OnExit(wxCommandEvent& event)
 void MainFrame::OnNewEntryTask(wxCommandEvent& event)
 {
     wxDateTime date = pDatePickerCtrl->GetValue();
-    dlg::TaskItemDialog entryTask(this, pLogger, pConfig, constants::TaskItemTypes::EntryTask, date);
+    dlg::TaskItemDialog entryTask(this, pLogger, constants::TaskItemTypes::EntryTask, date);
     int retCode = entryTask.ShowModal();
     ShowInfoBarMessage(retCode);
 }
@@ -470,7 +481,7 @@ void MainFrame::OnNewEntryTask(wxCommandEvent& event)
 void MainFrame::OnNewTimedTask(wxCommandEvent& event)
 {
     wxDateTime date = pDatePickerCtrl->GetValue();
-    dlg::TaskItemDialog timedTask(this, pLogger, pConfig, constants::TaskItemTypes::TimedTask, date);
+    dlg::TaskItemDialog timedTask(this, pLogger, constants::TaskItemTypes::TimedTask, date);
     int retCode = timedTask.ShowModal();
     ShowInfoBarMessage(retCode);
 }
@@ -505,13 +516,13 @@ void MainFrame::OnNewCategory(wxCommandEvent& event)
 
 void MainFrame::OnWeeklyView(wxCommandEvent& event)
 {
-    dlg::WeeklyTaskViewDialog* weeklyTaskViewDialog = new dlg::WeeklyTaskViewDialog(this, pLogger, pConfig);
+    dlg::WeeklyTaskViewDialog* weeklyTaskViewDialog = new dlg::WeeklyTaskViewDialog(this, pLogger);
     weeklyTaskViewDialog->Show(true);
 }
 
 void MainFrame::OnMeetingsView(wxCommandEvent& event)
 {
-    dlg::MeetingsViewDialog* meetingViewDialog = new dlg::MeetingsViewDialog(this, pLogger, pConfig);
+    dlg::MeetingsViewDialog* meetingViewDialog = new dlg::MeetingsViewDialog(this, pLogger);
     meetingViewDialog->LaunchModeless();
 }
 
@@ -545,13 +556,13 @@ void MainFrame::OnEditCategory(wxCommandEvent& event)
 
 void MainFrame::OnPreferences(wxCommandEvent& event)
 {
-    dlg::PreferencesDialog preferences(this, pConfig, pLogger, pTaskBarIcon);
+    dlg::PreferencesDialog preferences(this, pLogger, pTaskBarIcon);
     preferences.ShowModal();
 }
 
 void MainFrame::OnTaskStopwatch(wxCommandEvent& event)
 {
-    dlg::StopwatchTaskDialog stopwatchTask(this, pConfig, pLogger, pTaskState, pTaskBarIcon);
+    dlg::StopwatchTaskDialog stopwatchTask(this, pLogger, pTaskState, pTaskBarIcon);
     stopwatchTask.Launch();
 
     pListCtrl->SetFocus();
@@ -565,8 +576,8 @@ void MainFrame::OnCheckForUpdate(wxCommandEvent& event)
 
 void MainFrame::OnRestoreDatabase(wxCommandEvent& event)
 {
-    if (pConfig->IsBackupEnabled()) {
-        auto wizard = new wizard::DatabaseRestoreWizard(this, pConfig, pLogger);
+    if (cfg::ConfigurationProvider::Get().Configuration->IsBackupEnabled()) {
+        auto wizard = new wizard::DatabaseRestoreWizard(this, pLogger);
         wizard->CenterOnParent();
         wizard->Run();
     } else {
@@ -579,8 +590,8 @@ void MainFrame::OnRestoreDatabase(wxCommandEvent& event)
 
 void MainFrame::OnBackupDatabase(wxCommandEvent& event)
 {
-    if (pConfig->IsBackupEnabled()) {
-        svc::DatabaseBackup databaseBackup(pConfig, pLogger);
+    if (cfg::ConfigurationProvider::Get().Configuration->IsBackupEnabled()) {
+        svc::DatabaseBackup databaseBackup(pLogger);
         bool result = databaseBackup.Execute();
         if (result) {
             wxMessageBox(
@@ -604,6 +615,12 @@ void MainFrame::OnReturnToCurrentDate(wxCommandEvent& WXUNUSED(event))
     }
 
     DateChangedProcedure(currentDate);
+}
+
+void MainFrame::OnExportToCsv(wxCommandEvent& WXUNUSED(event))
+{
+    dlg::ExportToCsvDialog exportToCsv(this, pLogger);
+    exportToCsv.ShowModal();
 }
 
 void MainFrame::OnPrevDay(wxCommandEvent& event)
@@ -675,7 +692,7 @@ void MainFrame::OnItemDoubleClick(wxListEvent& event)
     constants::TaskItemTypes type = static_cast<constants::TaskItemTypes>(taskItemTypeId);
     wxDateTime dateContext = pDatePickerCtrl->GetValue();
 
-    dlg::TaskItemDialog editTask(this, pLogger, pConfig, type, true, taskItemId, dateContext);
+    dlg::TaskItemDialog editTask(this, pLogger, type, true, taskItemId, dateContext);
     int retCode = editTask.ShowModal();
     ShowInfoBarMessage(retCode);
 }
@@ -715,7 +732,7 @@ void MainFrame::OnPopupMenuEdit(wxCommandEvent& event)
     constants::TaskItemTypes type = static_cast<constants::TaskItemTypes>(taskItemTypeId);
     wxDateTime dateContext = pDatePickerCtrl->GetValue();
 
-    dlg::TaskItemDialog editTask(this, pLogger, pConfig, type, true, mSelectedTaskItemId, dateContext);
+    dlg::TaskItemDialog editTask(this, pLogger, type, true, mSelectedTaskItemId, dateContext);
     int retCode = editTask.ShowModal();
     ShowInfoBarMessage(retCode);
 }
@@ -842,14 +859,13 @@ void MainFrame::OnNewStopwatchTaskFromPausedStopwatchTask(wxCommandEvent& event)
     pTaskStorage->Store(pTaskState);
     pTaskState->mTimes.clear();
 
-    dlg::StopwatchTaskDialog stopwatchTask(
-        this, pConfig, pLogger, pTaskState, pTaskBarIcon, /* hasPendingPausedTask */ true);
+    dlg::StopwatchTaskDialog stopwatchTask(this, pLogger, pTaskState, pTaskBarIcon, /* hasPendingPausedTask */ true);
     stopwatchTask.Launch();
 
     pTaskState->mTimes.clear();
     pTaskStorage->Restore(pTaskState);
 
-    dlg::StopwatchTaskDialog stopwatchPausedTask(this, pConfig, pLogger, pTaskState, pTaskBarIcon);
+    dlg::StopwatchTaskDialog stopwatchPausedTask(this, pLogger, pTaskState, pTaskBarIcon);
     stopwatchPausedTask.Relaunch();
 
     pTaskStorage->mTimes.clear();
@@ -920,8 +936,8 @@ void MainFrame::FillListControl(wxDateTime date)
 
 bool MainFrame::RunDatabaseBackup()
 {
-    if (pConfig->IsBackupEnabled()) {
-        svc::DatabaseBackup dbBackup(pConfig, pLogger);
+    if (cfg::ConfigurationProvider::Get().Configuration->IsBackupEnabled()) {
+        svc::DatabaseBackup dbBackup(pLogger);
         return dbBackup.Execute();
     }
 
