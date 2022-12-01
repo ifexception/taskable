@@ -2,7 +2,7 @@
   "configurations": [
     {
       "name": "x86-Debug",
-      "generator": "Visual Studio 16 2019",
+      "generator": "Visual Studio 17 2022",
       "configurationType": "Debug",
       "buildRoot": "${projectDir}\\build\\${name}",
       "cmakeCommandArgs": "",
@@ -21,7 +21,7 @@
     },
     {
       "name": "x86-Release",
-      "generator": "Visual Studio 16 2019",
+      "generator": "Visual Studio 17 2022",
       "configurationType": "Release",
       "buildRoot": "${projectDir}\\build\\${name}",
       "cmakeCommandArgs": "",
@@ -40,7 +40,7 @@
     },
     {
       "name": "x86-RelWithDebInfo",
-      "generator": "Visual Studio 16 2019",
+      "generator": "Visual Studio 17 2022",
       "configurationType": "RelWithDebInfo",
       "buildRoot": "${projectDir}\\build\\${name}",
       "cmakeCommandArgs": "",
