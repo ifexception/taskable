@@ -15,7 +15,6 @@ find_package(unofficial-sqlite3 CONFIG REQUIRED)
 find_package (spdlog CONFIG REQUIRED)
 find_package(cpr CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(tinyxml2 CONFIG REQUIRED)
 
 find_path(TOML11_INCLUDE_DIRS "toml.hpp")
 
@@ -25,7 +24,6 @@ message (STATUS "spdlog found: ${spdlog_FOUND}")
 message (STATUS "wxWidgets_FOUND: ${wxWidgets_FOUND}")
 message (STATUS "cpr_FOUND: ${cpr_FOUND}")
 message (STATUS "nlohmann_json_FOUND: ${nlohmann_json_FOUND}")
-message (STATUS "tinyxml2_FOUND: ${tinyxml2_FOUND}")
 
 set (SRC
     "common/ids.cpp"
@@ -156,5 +154,4 @@ target_link_libraries (${PROJECT_NAME}
     spdlog::spdlog spdlog::spdlog_header_only
     cpr
     nlohmann_json nlohmann_json::nlohmann_json
-    tinyxml2::tinyxml2
 )
