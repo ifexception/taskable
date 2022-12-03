@@ -152,6 +152,6 @@ target_link_libraries (${PROJECT_NAME}
     ZLIB::ZLIB
     unofficial::sqlite3::sqlite3
     spdlog::spdlog spdlog::spdlog_header_only
-    cpr
-    nlohmann_json nlohmann_json::nlohmann_json
+    cpr::cpr
+    nlohmann_json::nlohmann_json
 )
