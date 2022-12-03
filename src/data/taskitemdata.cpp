@@ -288,7 +288,7 @@ std::vector<std::unique_ptr<model::TaskItemModel>> TaskItemData::GetByDate(const
 {
     std::vector<std::unique_ptr<model::TaskItemModel>> taskItems;
 
-    *pConnection->DatabaseExecutableHandle() << TaskItemData::getTaskItemsByDate << date >>
+    *pConnection->DatabaseExecutableHandle() << TaskItemData::getTaskItemsByDate << date.ToStdString() >>
         [&](int taskItemsTaskItemId,
             std::unique_ptr<std::string> taskItemsStartTime,
             std::unique_ptr<std::string> taskItemsEndTime,

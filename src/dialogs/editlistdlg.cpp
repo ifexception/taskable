@@ -350,7 +350,7 @@ void ProjectStrategy::DataToControl(wxListCtrl* control)
     for (const auto& project : projects) {
         listIndex = control->InsertItem(columnIndex++, project->GetEmployer()->GetName());
         control->SetItem(
-            listIndex, columnIndex++, project->HasClientLinked() ? project->GetClient()->GetName() : wxT("n/a"));
+            listIndex, columnIndex++, project->HasClientLinked() ? project->GetClient()->GetName() : wxString("n/a"));
         control->SetItem(listIndex, columnIndex++, project->GetName());
         control->SetItem(listIndex, columnIndex++, util::ToFriendlyDateTimeString(project->GetDateModified()));
         control->SetItemPtrData(listIndex, project->GetProjectId());

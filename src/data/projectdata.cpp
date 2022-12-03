@@ -42,7 +42,8 @@ ProjectData::~ProjectData()
 int64_t ProjectData::Create(std::unique_ptr<model::ProjectModel> project)
 {
     auto ps = *pConnection->DatabaseExecutableHandle() << ProjectData::createProject;
-    ps << project->GetName() << project->GetDisplayName() << project->IsBillable() << project->IsDefault()
+    ps << project->GetName().ToStdString() << project->GetDisplayName().ToStdString() << project->IsBillable()
+       << project->IsDefault()
        << project->GetEmployerId();
 
     if (project->HasClientLinked())
@@ -152,7 +153,9 @@ std::unique_ptr<model::ProjectModel> ProjectData::GetById(const int projectId)
 void ProjectData::Update(std::unique_ptr<model::ProjectModel> project)
 {
     auto ps = *pConnection->DatabaseExecutableHandle()
-              << ProjectData::updateProject << project->GetName() << project->GetDisplayName() << project->IsBillable()
+              << ProjectData::updateProject << project->GetName().ToStdString()
+              << project->GetDisplayName().ToStdString()
+              << project->IsBillable()
               << project->IsDefault() << util::UnixTimestamp() << project->GetEmployerId();
 
     if (project->HasClientLinked())

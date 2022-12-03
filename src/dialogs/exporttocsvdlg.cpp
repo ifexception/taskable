@@ -362,7 +362,7 @@ void ExportToCsvDialog::OnDelimiterChange(wxCommandEvent& event)
 {
     auto text = event.GetString();
     if (!text.empty()) {
-        cfg::ConfigurationProvider::Get().Configuration->SetDelimiter(text);
+        cfg::ConfigurationProvider::Get().Configuration->SetDelimiter(text.ToStdString());
         cfg::ConfigurationProvider::Get().Configuration->Save();
     }
 }

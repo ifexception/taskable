@@ -45,9 +45,9 @@ DatabasePage::DatabasePage(wxWindow* parent, cfg::Configuration* config)
 
 void DatabasePage::Apply()
 {
-    pConfig->SetDatabasePath(pDatabasePathTextCtrl->GetValue());
+    pConfig->SetDatabasePath(pDatabasePathTextCtrl->GetValue().ToStdString());
     pConfig->SetBackupEnabled(pBackupDatabaseCtrl->GetValue());
-    pConfig->SetBackupPath(pBackupPathTextCtrl->GetValue());
+    pConfig->SetBackupPath(pBackupPathTextCtrl->GetValue().ToStdString());
     pConfig->SetDeleteBackupsAfter(std::stoi(pDeleteBackupsAfterCtrl->GetValue().ToStdString()));
 }
 

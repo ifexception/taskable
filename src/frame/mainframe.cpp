@@ -793,9 +793,9 @@ void MainFrame::OnTaskInserted(wxCommandEvent& event)
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetTask()->GetTaskDate());
         pListCtrl->SetItem(listIndex,
             columnIndex++,
-            taskItem->GetStartTime() ? taskItem->GetStartTime()->FormatISOTime() : wxT("N/A"));
+            taskItem->GetStartTime() ? taskItem->GetStartTime()->FormatISOTime() : wxString("N/A"));
         pListCtrl->SetItem(
-            listIndex, columnIndex++, taskItem->GetEndTime() ? taskItem->GetEndTime()->FormatISOTime() : wxT("N/A"));
+            listIndex, columnIndex++, taskItem->GetEndTime() ? taskItem->GetEndTime()->FormatISOTime() : wxString("N/A"));
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDuration());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetCategory()->GetName());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDescription());
@@ -827,9 +827,9 @@ void MainFrame::OnTaskUpdated(wxCommandEvent& event)
     pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetProject()->GetDisplayName());
     pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetTask()->GetTaskDate());
     pListCtrl->SetItem(
-        mItemIndex, columnIndex++, taskItem->GetStartTime() ? taskItem->GetStartTime()->FormatISOTime() : wxT("N/A"));
+        mItemIndex, columnIndex++, taskItem->GetStartTime() ? taskItem->GetStartTime()->FormatISOTime() : wxString("N/A"));
     pListCtrl->SetItem(
-        mItemIndex, columnIndex++, taskItem->GetEndTime() ? taskItem->GetEndTime()->FormatISOTime() : wxT("N/A"));
+        mItemIndex, columnIndex++, taskItem->GetEndTime() ? taskItem->GetEndTime()->FormatISOTime() : wxString("N/A"));
     pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetDuration());
     pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetCategory()->GetName());
     pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetDescription());
@@ -919,9 +919,9 @@ void MainFrame::FillListControl(wxDateTime date)
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetTask()->GetTaskDate());
         pListCtrl->SetItem(listIndex,
             columnIndex++,
-            taskItem->GetStartTime() ? taskItem->GetStartTime()->FormatISOTime() : wxT("N/A"));
+            taskItem->GetStartTime() ? taskItem->GetStartTime()->FormatISOTime() : wxString("N/A"));
         pListCtrl->SetItem(
-            listIndex, columnIndex++, taskItem->GetEndTime() ? taskItem->GetEndTime()->FormatISOTime() : wxT("N/A"));
+            listIndex, columnIndex++, taskItem->GetEndTime() ? taskItem->GetEndTime()->FormatISOTime() : wxString("N/A"));
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDuration());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetCategory()->GetName());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDescription());

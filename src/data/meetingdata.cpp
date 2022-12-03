@@ -44,8 +44,8 @@ int64_t MeetingData::Create(std::unique_ptr<model::MeetingModel> meeting, int64_
     }
 
     ps << meeting->GetDuration() << meeting->GetStart().FormatISOCombined().ToStdString()
-       << meeting->GetEnd().FormatISOCombined().ToStdString() << meeting->GetLocation() << meeting->GetSubject()
-       << meeting->GetBody();
+       << meeting->GetEnd().FormatISOCombined().ToStdString() << meeting->GetLocation().ToStdString()
+       << meeting->GetSubject().ToStdString() << meeting->GetBody().ToStdString();
 
     ps << taskId;
 
