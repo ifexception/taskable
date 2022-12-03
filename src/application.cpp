@@ -144,9 +144,14 @@ bool Application::InitializeLogging()
     if (!CreateLogsDirectory()) {
         return false;
     }
-
+#ifdef TASKABLE_DEBUG
+    auto logDirectory =
+        wxString::Format(wxT("%s\\logs\\%s"), wxPathOnly(wxStandardPaths::Get().GetExecutablePath()), LogsFilename)
+            .ToStdString();
+#else
     auto logDirectory =
         wxString::Format(wxT("%s\\logs\\%s"), wxStandardPaths::Get().GetUserDataDir(), LogsFilename).ToStdString();
+#endif // TASKABLE_DEBUG
 
     try {
         auto msvcSink = std::make_shared<spdlog::sinks::msvc_sink_st>();
@@ -177,7 +182,12 @@ bool Application::InitializeLogging()
 
 bool Application::CreateLogsDirectory()
 {
+#ifdef TASKABLE_DEBUG
+    wxString logs = wxString::Format(wxT("%s\\logs"), wxPathOnly(wxStandardPaths::Get().GetExecutablePath()));
+#else
     wxString logs = wxString::Format(wxT("%s\\logs"), wxStandardPaths::Get().GetUserDataDir());
+#endif // TASKABLE_DEBUG
+
     bool logDirectoryExists = wxDirExists(logs);
     if (!logDirectoryExists) {
         bool success = wxMkDir(logs);
@@ -230,6 +240,12 @@ bool Application::ConfigureRegistry()
 {
 #ifdef TASKABLE_DEBUG
     wxRegKey key(wxRegKey::HKCU, "Software\\Taskabled");
+    if (!key.Exists()) {
+        bool res = key.Create("Software\\Taskabled");
+        if (!res) {
+            pLogger->error("Unable to create registry key \"Taskabled\"");
+        }
+    }
 #else
     wxRegKey key(wxRegKey::HKCU, "Software\\Taskable");
 #endif // TASKABLE_DEBUG
@@ -261,7 +277,14 @@ bool Application::ConfigurationFileExists()
     cfg::ConfigurationProvider::Get().Initialize();
 
     if (cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath().empty()) {
-        cfg::ConfigurationProvider::Get().Configuration->SetDatabasePath(wxStandardPaths::Get().GetAppDocumentsDir());
+#ifdef TASKABLE_DEBUG
+        cfg::ConfigurationProvider::Get().Configuration->SetDatabasePath(
+            wxPathOnly(wxStandardPaths::Get().GetExecutablePath()).ToStdString());
+#else
+        cfg::ConfigurationProvider::Get().Configuration->SetDatabasePath(
+            wxStandardPaths::Get().GetAppDocumentsDir().ToStdString());
+#endif // TASKABLE_DEBUG
+
         cfg::ConfigurationProvider::Get().Configuration->Save();
     }
 
@@ -294,8 +317,8 @@ bool Application::CreateDatabaseFile()
     }
 
     wxFile file;
-    auto succeeded =
-        file.Create(common::GetDatabaseFilePath(cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath()));
+    auto path = common::GetDatabaseFilePath(cfg::ConfigurationProvider::Get().Configuration->GetDatabasePath());
+    auto succeeded = file.Create(path);
     if (!succeeded) {
         pLogger->error("Unable to create database file at specified location.");
     }

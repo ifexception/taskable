@@ -72,7 +72,12 @@ wxString app::common::GetDatabaseFilePath(const wxString& databasePath)
 
 wxString app::common::GetConfigFilePath()
 {
+#ifdef TASKABLE_DEBUG
+    return wxString::Format(
+        wxT("%s\\%s"), wxPathOnly(wxStandardPaths::Get().GetExecutablePath()), common::GetConfigFileName());
+#else
     return wxString::Format(wxT("%s\\%s"), wxStandardPaths::Get().GetUserDataDir(), common::GetConfigFileName());
+#endif // TASKABLE_DEBUG
 }
 
 wxString app::common::GetConfigFileName()
