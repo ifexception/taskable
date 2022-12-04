@@ -1,4 +1,4 @@
-// Productivity tool to help you track the time you spend on tasks
+// Productivity tool to help you track the time you spend on taskss
 // Copyright (C) 2020  Szymon Welgus
 //
 // This program is free software: you can redistribute it and/or modify
@@ -37,9 +37,10 @@ wxDEFINE_EVENT(GET_MEETINGS_THREAD_ERROR, wxThreadEvent);
 
 namespace app::dlg
 {
-GetMeetingsThread::GetMeetingsThread(MeetingsViewDialog* handler)
+GetMeetingsThread::GetMeetingsThread(MeetingsViewDialog* handler, std::shared_ptr<spdlog::logger> logger)
     : wxThread(wxTHREAD_DETACHED)
     , pHandler(handler)
+    , pLogger(logger)
 {
 }
 
@@ -52,7 +53,7 @@ GetMeetingsThread::~GetMeetingsThread()
 wxThread::ExitCode GetMeetingsThread::Entry()
 {
     wxOleInitialize();
-    svc::OutlookIntegrator outlookIntegrator;
+    svc::OutlookIntegrator outlookIntegrator(pLogger);
 
     wxString eventMessage = wxEmptyString;
     if (!outlookIntegrator.TryGetOutlookInstance()) {
@@ -262,7 +263,6 @@ void MeetingsViewDialog::AppendMeetingControls(svc::Meeting* meeting, bool atten
     auto subjectLabel = new wxStaticText(meetingStaticBox, wxID_ANY, meeting->Subject);
     meetingStaticBoxSizer->Add(subjectLabel, common::sizers::ControlDefault);
 
-    /* Horizontal Line*/
     auto separation_line =
         new wxStaticLine(meetingStaticBox, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
     meetingStaticBoxSizer->Add(separation_line, 0, wxEXPAND | wxALL, 1);
@@ -299,7 +299,7 @@ void MeetingsViewDialog::AppendMeetingControls(svc::Meeting* meeting, bool atten
 
 void MeetingsViewDialog::StartThread()
 {
-    pThread = new GetMeetingsThread(this);
+    pThread = new GetMeetingsThread(this, pLogger);
     auto ret = pThread->Run();
     if (ret != wxTHREAD_NO_ERROR) {
         delete pThread;

@@ -19,11 +19,14 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include <wx/wx.h>
 #include <wx/msw/ole/automtn.h>
 #include <wx/msw/ole/oleutils.h>
+
+#include <spdlog/spdlog.h>
 
 #include "../models/meetingmodel.h"
 
@@ -56,7 +59,7 @@ struct Meeting {
 class OutlookIntegrator
 {
 public:
-    OutlookIntegrator();
+    OutlookIntegrator(std::shared_ptr<spdlog::logger> logger);
     ~OutlookIntegrator() = default;
 
     bool TryGetOutlookInstance();
@@ -70,6 +73,7 @@ private:
 
     wxAutomationObject mOutlookApplication;
 
+    std::shared_ptr<spdlog::logger> pLogger;
     std::vector<Meeting*> mMeetingsList;
 };
 } // namespace app::svc

@@ -40,7 +40,7 @@ class GetMeetingsThread : public wxThread
 {
 public:
     GetMeetingsThread() = delete;
-    GetMeetingsThread(MeetingsViewDialog* handler);
+    GetMeetingsThread(MeetingsViewDialog* handler, std::shared_ptr<spdlog::logger> logger);
     virtual ~GetMeetingsThread();
 
 protected:
@@ -49,6 +49,7 @@ protected:
 
 private:
     MeetingsViewDialog* pHandler;
+    std::shared_ptr<spdlog::logger> pLogger;
 };
 
 class MeetingsViewDialog : public wxDialog

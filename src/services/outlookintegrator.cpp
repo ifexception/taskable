@@ -42,9 +42,10 @@ namespace app::svc
 {
 const wxString OutlookName = wxT("Outlook.Application");
 
-OutlookIntegrator::OutlookIntegrator()
+OutlookIntegrator::OutlookIntegrator(std::shared_ptr<spdlog::logger> logger)
     : mOutlookApplication()
     , mMeetingsList()
+    , pLogger(logger)
 {
 }
 
@@ -53,7 +54,7 @@ bool OutlookIntegrator::TryGetOutlookInstance()
     mOutlookApplication.SetLCID(MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT));
     if (!mOutlookApplication.GetInstance(OutlookName)) {
         if (!mOutlookApplication.CreateInstance(OutlookName)) {
-            // log error
+            pLogger->error("Failed to create instance of Outlook");
             return false;
         }
     }
@@ -76,7 +77,7 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
     const wxVariant namespaceDispatchPtr = mOutlookApplication.CallMethod("GetNamespace", mAPI);
 
     if (namespaceDispatchPtr.IsNull()) {
-        wxLogError("GetNamespace call failed.");
+        pLogger->error("GetNamespace call failed.");
         return false;
     }
 
@@ -88,7 +89,7 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
 
     const wxVariant accountsDispatchPtr = namespaceObject.GetProperty("Accounts");
     if (accountsDispatchPtr.IsNull()) {
-        wxLogError("Failed to get \"Accounts\" property");
+        pLogger->error("Failed to get \"Accounts\" property");
         return false;
     }
 
@@ -97,7 +98,7 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
 
     const wxVariant accountCountProperty = accountsObject.GetProperty("Count");
     if (accountCountProperty.IsNull()) {
-        wxLogError("Failed to get \"Count\" property");
+        pLogger->error("Failed to get \"Count\" property");
         return false;
     }
 
@@ -110,7 +111,7 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
         wxVariant indexParam = i;
         const wxVariant accountDispatchPtr = accountsObject.CallMethod("Item", indexParam);
         if (accountDispatchPtr.IsNull()) {
-            wxLogError("Failed to call \"Item\" with index %ld", i);
+            pLogger->error("Failed to call \"Item\" with index {0:d}", i);
             return false;
         }
 
@@ -119,13 +120,13 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
 
         const wxVariant displayName = accountObject.GetProperty("DisplayName");
         if (displayName.IsNull() || !displayName.IsType("string")) {
-            // log error
+            pLogger->error("Failed to get property \"DisplayName\"");
             return false;
         }
 
         const wxVariant deliveryStoreDispatchPtr = accountObject.GetProperty("DeliveryStore");
         if (deliveryStoreDispatchPtr.IsNull() || !deliveryStoreDispatchPtr.IsType("void*")) {
-            wxLogError("Failed to get \"DeliveryStore\" property");
+            pLogger->error("Failed to get \"DeliveryStore\" property");
             return false;
         }
 
@@ -135,7 +136,8 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
         wxVariant calendarFolderParam = 9; // olFolderCalendar
         wxVariant calendarFolderDispatchPtr = deliveryStoreObject.CallMethod("GetDefaultFolder", calendarFolderParam);
         if (calendarFolderDispatchPtr.IsNull() || !calendarFolderDispatchPtr.IsType("void*")) {
-            wxLogError("Failed to call \"GetDefaultFolder\" with %d parameter", calendarFolderParam.GetInteger());
+            pLogger->error(
+                "Failed to call \"GetDefaultFolder\" with {0:d} parameter", calendarFolderParam.GetInteger());
             return false;
         }
 
@@ -144,13 +146,13 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
 
         wxAutomationObject calendarFolderItemsObject;
         if (!calendarFolderObject.GetObject(calendarFolderItemsObject, "Items")) {
-            wxLogError("Failed to get \"Items\" object");
+            pLogger->error("Failed to get \"Items\" object");
             return false;
         }
 
         wxVariant includeRecurrencesParam(true);
         if (!calendarFolderItemsObject.PutProperty("IncludeRecurrences", includeRecurrencesParam)) {
-            wxLogError("Failed to set \"IncludeRecurrences\" property");
+            pLogger->error("Failed to set \"IncludeRecurrences\" property");
             return false;
         }
 
@@ -164,7 +166,7 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
         wxVariant restrictionParam(strRestriction);
         const wxVariant filteredItemsDispatchPtr = calendarFolderItemsObject.CallMethod("Restrict", restrictionParam);
         if (filteredItemsDispatchPtr.IsNull() || !filteredItemsDispatchPtr.IsType("void*")) {
-            wxLogError("Failed to call \"Restrict\" method with %s", strRestriction);
+            pLogger->error("Failed to call \"Restrict\" method with {0}", strRestriction);
             return false;
         }
 
@@ -173,7 +175,7 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
 
         wxVariant itemObjectDispatchPtr = filteredItemsObject.CallMethod("GetFirst");
         if (itemObjectDispatchPtr.IsNull() || !itemObjectDispatchPtr.IsType("void*")) {
-            wxLogError("Error calling \"GetFirst\" method");
+            pLogger->error("Error calling \"GetFirst\" method");
             return false;
         }
 
@@ -216,7 +218,7 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
 
             itemObjectDispatchPtr = filteredItemsObject.CallMethod("GetNext");
             if (itemObjectDispatchPtr.IsNull() || !itemObjectDispatchPtr.IsType("void*")) {
-                // log error
+                pLogger->error("Failed to call \"GetNext()\" method");
                 break;
             }
 
