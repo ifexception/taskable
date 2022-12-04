@@ -166,7 +166,7 @@ bool OutlookIntegrator::IterateAndGetCalendarMeetings()
         wxVariant restrictionParam(strRestriction);
         const wxVariant filteredItemsDispatchPtr = calendarFolderItemsObject.CallMethod("Restrict", restrictionParam);
         if (filteredItemsDispatchPtr.IsNull() || !filteredItemsDispatchPtr.IsType("void*")) {
-            pLogger->error("Failed to call \"Restrict\" method with {0}", strRestriction);
+            pLogger->error("Failed to call \"Restrict\" method with {0}", strRestriction.ToStdString());
             return false;
         }
 
