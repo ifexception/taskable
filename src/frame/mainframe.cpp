@@ -48,7 +48,7 @@
 #include "../dialogs/categoriesdlg.h"
 
 #include "../dialogs/weeklytaskviewdlg.h"
-#include "../dialogs/meetingsviewdlg.h"
+//#include "../dialogs/meetingsviewdlg.h"
 
 #include "../dialogs/preferencesdlg.h"
 
@@ -79,7 +79,7 @@ EVT_MENU(ids::ID_NEW_PROJECT, MainFrame::OnNewProject)
 EVT_MENU(ids::ID_NEW_CLIENT, MainFrame::OnNewClient)
 EVT_MENU(ids::ID_NEW_CATEGORY, MainFrame::OnNewCategory)
 EVT_MENU(ids::ID_WEEKLY_VIEW, MainFrame::OnWeeklyView)
-EVT_MENU(ids::ID_MEETINGS_VIEW, MainFrame::OnMeetingsView)
+//EVT_MENU(ids::ID_MEETINGS_VIEW, MainFrame::OnMeetingsView)
 EVT_MENU(ids::ID_EDIT_EMPLOYER, MainFrame::OnEditEmployer)
 EVT_MENU(ids::ID_EDIT_CLIENT, MainFrame::OnEditClient)
 EVT_MENU(ids::ID_EDIT_PROJECT, MainFrame::OnEditProject)
@@ -231,7 +231,7 @@ void MainFrame::CreateControls()
     fileMenu->AppendSeparator();
     auto fileViewMenu = new wxMenu();
     fileViewMenu->Append(ids::ID_WEEKLY_VIEW, wxT("Week View"));
-    fileViewMenu->Append(ids::ID_MEETINGS_VIEW, wxT("Meetings View"));
+    //fileViewMenu->Append(ids::ID_MEETINGS_VIEW, wxT("Meetings View"));
     fileMenu->AppendSubMenu(fileViewMenu, wxT("View"));
     fileMenu->AppendSeparator();
     auto exitMenuItem = fileMenu->Append(wxID_EXIT, wxT("Exit"), wxT("Exit the application"));
@@ -520,11 +520,11 @@ void MainFrame::OnWeeklyView(wxCommandEvent& event)
     weeklyTaskViewDialog->Show(true);
 }
 
-void MainFrame::OnMeetingsView(wxCommandEvent& event)
-{
-    dlg::MeetingsViewDialog* meetingViewDialog = new dlg::MeetingsViewDialog(this, pLogger);
-    meetingViewDialog->LaunchModeless();
-}
+//void MainFrame::OnMeetingsView(wxCommandEvent& event)
+//{
+//    dlg::MeetingsViewDialog* meetingViewDialog = new dlg::MeetingsViewDialog(this, pLogger);
+//    meetingViewDialog->LaunchModeless();
+//}
 
 void MainFrame::OnEditEmployer(wxCommandEvent& event)
 {
