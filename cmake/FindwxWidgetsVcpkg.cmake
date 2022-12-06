@@ -22,7 +22,7 @@ elseif ("${CMAKE_CONFIGURATION_TYPES}" MATCHES "Release")
     include_directories (${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib/mswu ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include)
     set (wxWidgets_LIB_DIR ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib)
     set (wxWidgets_LIBRARIES
-        ${wxWidgets_LIB_DIR}/wxbase31u.lib
+        ${wxWidgets_LIB_DIR}/wxbase32u.lib
         ${wxWidgets_LIB_DIR}/wxmsw32u_core.lib
         ${wxWidgets_LIB_DIR}/libpng16.lib
         ${wxWidgets_LIB_DIR}/zlib.lib
