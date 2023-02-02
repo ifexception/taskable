@@ -104,6 +104,7 @@ void PreferencesDialog::OnOk(wxCommandEvent& event)
     pDatabasePage->Apply();
     pStopwatchPage->Apply();
     pTaskItemPage->Apply();
+    pExportPage->Apply();
 
     if (cfg::ConfigurationProvider::Get().Configuration->IsBackupEnabled() &&
         cfg::ConfigurationProvider::Get().Configuration->GetBackupPath().length() == 0) {
