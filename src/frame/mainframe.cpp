@@ -399,14 +399,7 @@ void MainFrame::DataToControls()
 
 void MainFrame::OnClose(wxCloseEvent& event)
 {
-    if (cfg::ConfigurationProvider::Get().Configuration->IsConfirmOnExit() && event.CanVeto()) {
-        int ret = wxMessageBox(
-            wxT("Are you sure to exit the application?"), common::GetProgramName(), wxICON_QUESTION | wxYES_NO);
-        if (ret == wxNO) {
-            event.Veto();
-            return;
-        }
-    } else if (cfg::ConfigurationProvider::Get().Configuration->IsCloseToTray() &&
+    if (cfg::ConfigurationProvider::Get().Configuration->IsCloseToTray() &&
                cfg::ConfigurationProvider::Get().Configuration->IsShowInTray() && event.CanVeto()) {
         Hide();
         MSWGetTaskBarButton()->Hide();

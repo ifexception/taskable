@@ -1,5 +1,4 @@
 [general]
-confirmOnExit=false
 startOnBoot=false
 showInTray=false
 minimizeToTray=false

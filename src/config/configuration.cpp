@@ -49,7 +49,6 @@ void Configuration::Save()
         {
             Sections::GeneralSection,
             {
-                { "confirmOnExit", mSettings.ConfirmOnExit },
                 { "startOnBoot", mSettings.StartOnBoot },
                 { "showInTray", mSettings.ShowInTray },
                 { "minimizeToTray", mSettings.MinimizeToTray },
@@ -114,11 +113,6 @@ void Configuration::Save()
     configFile.close();
 }
 // clang-format on
-
-bool Configuration::IsConfirmOnExit() const
-{
-    return mSettings.ConfirmOnExit;
-}
 
 bool Configuration::IsStartOnBoot() const
 {
@@ -213,11 +207,6 @@ std::string Configuration::GetDelimiter() const
 std::string Configuration::GetExportPath() const
 {
     return mSettings.ExportPath;
-}
-
-void Configuration::SetConfirmOnExit(bool value)
-{
-    mSettings.ConfirmOnExit = value;
 }
 
 void Configuration::SetStartOnBoot(bool value)
@@ -331,7 +320,6 @@ void Configuration::GetGeneralConfig(const toml::value& config)
 {
     const auto& generalSection = toml::find(config, Sections::GeneralSection);
 
-    mSettings.ConfirmOnExit = toml::find<bool>(generalSection, "confirmOnExit");
     mSettings.StartOnBoot = toml::find<bool>(generalSection, "startOnBoot");
     mSettings.ShowInTray = toml::find<bool>(generalSection, "showInTray");
     mSettings.MinimizeToTray = toml::find<bool>(generalSection, "minimizeToTray");

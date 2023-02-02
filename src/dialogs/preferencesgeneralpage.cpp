@@ -60,7 +60,6 @@ GeneralPage::GeneralPage(wxWindow* parent, cfg::Configuration* config)
     : wxPanel(parent, wxID_ANY)
     , pConfig(config)
     , pParent(parent)
-    , pDialogOnExitCtrl(nullptr)
     , pStartWithWindowsCtrl(nullptr)
     , pShowInTrayCtrl(nullptr)
     , pMinimizeToTrayCtrl(nullptr)
@@ -73,7 +72,6 @@ GeneralPage::GeneralPage(wxWindow* parent, cfg::Configuration* config)
 
 void GeneralPage::Apply()
 {
-    pConfig->SetConfirmOnExit(pDialogOnExitCtrl->GetValue());
     pConfig->SetStartOnBoot(pStartWithWindowsCtrl->GetValue());
 
     pConfig->SetShowInTray(pShowInTrayCtrl->GetValue());
@@ -100,11 +98,6 @@ void GeneralPage::CreateControls()
     auto displaySettingsBox = new wxStaticBox(this, wxID_ANY, wxT("Display Options"));
     auto displaySettingsSizer = new wxStaticBoxSizer(displaySettingsBox, wxHORIZONTAL);
     auto displayGridSizer = new wxFlexGridSizer(2, 10, 10);
-
-    pDialogOnExitCtrl = new wxCheckBox(displaySettingsBox, IDC_DIALOG_EXIT, wxT("Show confirmation dialog on exit"));
-    displayGridSizer->Add(pDialogOnExitCtrl, common::sizers::ControlDefault);
-
-    displayGridSizer->Add(0, 0);
 
     pStartWithWindowsCtrl =
         new wxCheckBox(displaySettingsBox, IDC_START_WITH_WINDOWS, wxT("Start application with Windows"));
@@ -152,7 +145,6 @@ void GeneralPage::ConfigureEventBindings()
 
 void GeneralPage::FillControls()
 {
-    pDialogOnExitCtrl->SetValue(pConfig->IsConfirmOnExit());
     pStartWithWindowsCtrl->SetValue(pConfig->IsStartOnBoot());
 
     pShowInTrayCtrl->SetValue(pConfig->IsShowInTray());

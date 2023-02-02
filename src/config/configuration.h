@@ -36,7 +36,6 @@ public:
     void Save();
 
     /* Getters */
-    bool IsConfirmOnExit() const;
     bool IsStartOnBoot() const;
     bool IsShowInTray() const;
     bool IsMinimizeToTray() const;
@@ -63,7 +62,6 @@ public:
     std::string GetExportPath() const;
 
     /* Setters */
-    void SetConfirmOnExit(bool value);
     void SetStartOnBoot(bool value);
     void SetShowInTray(bool value);
     void SetMinimizeToTray(bool value);
@@ -109,7 +107,6 @@ private:
     };
 
     struct Settings {
-        bool ConfirmOnExit;
         bool StartOnBoot;
         bool ShowInTray;
         bool MinimizeToTray;
