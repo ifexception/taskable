@@ -41,8 +41,11 @@ bool DatabaseStructureUpdater::ExecuteScripts()
     bool projectsHoursColumnDropped = DropProjectsHoursColumn();
     bool meetingsTableCreated = CreateMeetingsTableScript();
     bool meetingForeignKeyAdded = AddMeetingForeignKeyToTaskItemsTable();
+    bool updateProjects = SoftDropProjectBillableColumns();
+    bool updateTaskItems = SoftDropTaskItemBillableColumns();
 
-    return projectsHoursColumnDropped && meetingsTableCreated && meetingForeignKeyAdded;
+    return projectsHoursColumnDropped && meetingsTableCreated && meetingForeignKeyAdded && updateProjects &&
+           updateTaskItems;
 }
 
 bool DatabaseStructureUpdater::DropProjectsHoursColumn()
@@ -263,6 +266,48 @@ bool DatabaseStructureUpdater::AddMeetingForeignKeyToTaskItemsTable()
         *pConnection->DatabaseExecutableHandle() << "ROLLBACK";
         pLogger->error("Error in database structure update operation {0} | {1:d} : {2}",
             AddMeetingForeignKeyToTaskItemsTableOperationName,
+            e.get_code(),
+            e.what());
+        return false;
+    }
+    return true;
+}
+
+bool DatabaseStructureUpdater::SoftDropProjectBillableColumns()
+{
+    const std::string UpdateProjectsTableOperationName = "SoftDropProjectBillableColumns";
+    const std::string UpdateProjects =
+        "UPDATE projects SET billable = 0, rate = NULL, rate_type_id = NULL, currency_id = NULL;";
+    try {
+        *pConnection->DatabaseExecutableHandle() << "BEGIN";
+
+        *pConnection->DatabaseExecutableHandle() << UpdateProjects;
+
+        *pConnection->DatabaseExecutableHandle() << "COMMIT";
+    } catch (const sqlite::sqlite_exception& e) {
+        *pConnection->DatabaseExecutableHandle() << "ROLLBACK";
+        pLogger->error("Error in database structure update operation {0} | {1:d} : {2}",
+            UpdateProjectsTableOperationName,
+            e.get_code(),
+            e.what());
+        return false;
+    }
+    return true;
+}
+bool DatabaseStructureUpdater::SoftDropTaskItemBillableColumns()
+{
+    const std::string UpdateTaskItemsTableOperationName = "SoftDropTaskItemBillableColumns";
+    const std::string UpdateTaskItems = "UPDATE task_items SET billable = 0, calculated_rate = NULL;";
+    try {
+        *pConnection->DatabaseExecutableHandle() << "BEGIN";
+
+        *pConnection->DatabaseExecutableHandle() << UpdateTaskItems;
+
+        *pConnection->DatabaseExecutableHandle() << "COMMIT";
+    } catch (const sqlite::sqlite_exception& e) {
+        *pConnection->DatabaseExecutableHandle() << "ROLLBACK";
+        pLogger->error("Error in database structure update operation {0} | {1:d} : {2}",
+            UpdateTaskItemsTableOperationName,
             e.get_code(),
             e.what());
         return false;

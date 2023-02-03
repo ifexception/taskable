@@ -41,6 +41,8 @@ private:
     bool DropProjectsHoursColumn();
     bool CreateMeetingsTableScript();
     bool AddMeetingForeignKeyToTaskItemsTable();
+    bool SoftDropProjectBillableColumns();
+    bool SoftDropTaskItemBillableColumns();
 
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<db::SqliteConnection> pConnection;
