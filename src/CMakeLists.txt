@@ -89,11 +89,11 @@ set (SRC
     "models/clientmodel.cpp"
     "data/clientdata.cpp"
 
-    "data/ratetypedata.cpp"
-    "models/ratetypemodel.cpp"
+    
+    
 
-    "data/currencydata.cpp"
-    "models/currencymodel.cpp"
+    
+    
 
     "dialogs/projectdlg.cpp"
     "models/projectmodel.cpp"
