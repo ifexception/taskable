@@ -32,8 +32,6 @@ TaskItemModel::TaskItemModel()
     , pEndTime(nullptr)
     , mDuration(wxGetEmptyString())
     , mDescription(wxGetEmptyString())
-    , bBillable(false)
-    , pCalculatedRate(nullptr)
     , mDateCreated(wxDefaultDateTime)
     , mDateModified(wxDefaultDateTime)
     , bIsActive(false)
@@ -59,7 +57,6 @@ TaskItemModel::TaskItemModel(int taskItemId)
 TaskItemModel::TaskItemModel(int taskItemId,
     wxString duration,
     wxString description,
-    bool billable,
     int dateCreated,
     int dateModified,
     bool isActive)
@@ -68,7 +65,6 @@ TaskItemModel::TaskItemModel(int taskItemId,
     mTaskItemId = taskItemId;
     mDuration = duration;
     mDescription = description;
-    bBillable = billable;
     mDateCreated = util::ToDateTime(dateCreated);
     mDateModified = util::ToDateTime(dateModified);
     bIsActive = isActive;
@@ -114,16 +110,6 @@ const wxString TaskItemModel::GetDuration() const
 const wxString TaskItemModel::GetDescription() const
 {
     return mDescription;
-}
-
-const bool TaskItemModel::IsBillable() const
-{
-    return bBillable;
-}
-
-const double* TaskItemModel::GetCalculatedRate() const
-{
-    return pCalculatedRate.get();
 }
 
 const wxDateTime TaskItemModel::GetDateCreated()
@@ -240,16 +226,6 @@ void TaskItemModel::SetDuration(const wxString& duration)
 void TaskItemModel::SetDescription(const wxString& description)
 {
     mDescription = description;
-}
-
-void TaskItemModel::IsBillable(const bool billable)
-{
-    bBillable = billable;
-}
-
-void TaskItemModel::SetCalculatedRate(std::unique_ptr<double> calculatedRate)
-{
-    pCalculatedRate = std::move(calculatedRate);
 }
 
 void TaskItemModel::SetDateCreated(const wxDateTime& dateCreated)

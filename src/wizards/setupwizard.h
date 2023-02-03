@@ -40,8 +40,7 @@ class SetupWizard final : public wxWizard
 {
 public:
     SetupWizard() = default;
-    explicit SetupWizard(wxFrame* frame,
-        std::shared_ptr<spdlog::logger> logger);
+    explicit SetupWizard(wxFrame* frame, std::shared_ptr<spdlog::logger> logger);
     virtual ~SetupWizard() = default;
 
     bool Run();
@@ -111,8 +110,9 @@ class AddProjectPage final : public wxWizardPageSimple
 {
 public:
     AddProjectPage() = default;
-    explicit AddProjectPage(SetupWizard* parent, std::shared_ptr<spdlog::logger> logger,
-                            std::shared_ptr<EntityCompositor> compositor );
+    explicit AddProjectPage(SetupWizard* parent,
+        std::shared_ptr<spdlog::logger> logger,
+        std::shared_ptr<EntityCompositor> compositor);
     virtual ~AddProjectPage() = default;
 
     bool TransferDataFromWindow() override;
@@ -122,11 +122,8 @@ private:
 
     void OnWizardCancel(wxWizardEvent& event);
     void OnNameChange(wxCommandEvent& event);
-    void OnBillableCheck(wxCommandEvent& event);
-    void OnRateChoiceSelection(wxCommandEvent& event);
 
     void CreateControls();
-    void FillControls();
 
     std::shared_ptr<spdlog::logger> pLogger;
     std::shared_ptr<EntityCompositor> pCompositor;
@@ -135,17 +132,7 @@ private:
 
     wxTextCtrl* pNameTextCtrl;
     wxTextCtrl* pDisplayNameTextCtrl;
-    wxCheckBox* pBillableCheckBoxCtrl;
-    wxChoice* pRateChoiceCtrl;
-    wxTextCtrl* pRateTextCtrl;
-    wxComboBox* pCurrencyComboBoxCtrl;
 
-    wxArrayString mCurrencyChoices;
-
-    enum {
-        IDC_NAME = wxID_HIGHEST + 1,
-        IDC_BILLABLE,
-        IDC_RATECHOICE,
-    };
+    enum { IDC_NAME = wxID_HIGHEST + 1 };
 };
 } // namespace app::wizard

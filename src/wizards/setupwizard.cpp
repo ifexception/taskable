@@ -29,9 +29,6 @@
 #include "../common/common.h"
 #include "../common/util.h"
 
-#include "../data/ratetypedata.h"
-#include "../data/currencydata.h"
-
 #include "../models/employermodel.h"
 #include "../models/clientmodel.h"
 #include "../models/projectmodel.h"
@@ -353,8 +350,6 @@ void AddClientPage::CreateControls()
 wxBEGIN_EVENT_TABLE(AddProjectPage, wxWizardPageSimple)
     EVT_WIZARD_CANCEL(wxID_ANY, AddProjectPage::OnWizardCancel)
     EVT_TEXT(IDC_NAME, AddProjectPage::OnNameChange)
-    EVT_CHECKBOX(IDC_BILLABLE, AddProjectPage::OnBillableCheck)
-    EVT_CHOICE(IDC_RATECHOICE, AddProjectPage::OnRateChoiceSelection)
 wxEND_EVENT_TABLE()
 
 AddProjectPage::AddProjectPage(SetupWizard* parent,
@@ -366,21 +361,13 @@ AddProjectPage::AddProjectPage(SetupWizard* parent,
     , pParent(parent)
     , pNameTextCtrl(nullptr)
     , pDisplayNameTextCtrl(nullptr)
-    , pBillableCheckBoxCtrl(nullptr)
-    , pRateChoiceCtrl(nullptr)
-    , pRateTextCtrl(nullptr)
-    , pCurrencyComboBoxCtrl(nullptr)
-    , mCurrencyChoices()
 // clang-format on
 {
     CreateControls();
-    FillControls();
 }
 
 bool AddProjectPage::TransferDataFromWindow()
 {
-    std::unique_ptr<model::ProjectModel> project = nullptr;
-
     const wxString projectName = pNameTextCtrl->GetValue().Trim();
     if (projectName.empty()) {
         wxMessageBox(wxT("A project name is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
@@ -393,42 +380,9 @@ bool AddProjectPage::TransferDataFromWindow()
         return false;
     }
 
-    bool isBillable = pBillableCheckBoxCtrl->GetValue();
-    if (!isBillable) {
-        project = std::make_unique<model::ProjectModel>(projectName, displayName, isBillable, nullptr, -1, -1);
-    } else {
-        int rateChoiceId = util::VoidPointerToInt(pRateChoiceCtrl->GetClientData(pRateChoiceCtrl->GetSelection()));
-        if (rateChoiceId == 0) {
-            wxMessageBox(wxT("A rate selection is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
-            return false;
-        }
-
-        if (rateChoiceId == static_cast<int>(constants::RateTypes::Unknown)) {
-            project =
-                std::make_unique<model::ProjectModel>(projectName, displayName, isBillable, nullptr, rateChoiceId, -1);
-        }
-
-        if (rateChoiceId == static_cast<int>(constants::RateTypes::Hourly)) {
-            wxString value = pRateTextCtrl->GetValue();
-            if (value.empty()) {
-                wxMessageBox(wxT("A rate value is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
-                return false;
-            }
-            std::unique_ptr<double> rate = std::make_unique<double>(std::stod(pRateTextCtrl->GetValue().ToStdString()));
-
-            if (pCurrencyComboBoxCtrl->GetSelection() == 0) {
-                wxMessageBox(wxT("A currency selection is required"), wxT("Taskable"), wxOK | wxICON_ERROR, this);
-                return false;
-            }
-
-            int selection = pCurrencyComboBoxCtrl->GetStrings().Index(pCurrencyComboBoxCtrl->GetValue());
-            int currencyId = util::VoidPointerToInt(pCurrencyComboBoxCtrl->GetClientData(selection));
-
-            project = std::make_unique<model::ProjectModel>(
-                projectName, displayName, isBillable, std::move(rate), rateChoiceId, currencyId);
-        }
-    }
-
+    std::unique_ptr<model::ProjectModel> project = std::make_unique<model::ProjectModel>();
+    project->SetName(projectName);
+    project->SetDisplayName(projectName);
     if (!pCompositor->ComposeProjectEntity(std::move(project))) {
         wxMessageBox(wxT("An error occured during the Project save operation."),
             common::GetProgramName(),
@@ -453,37 +407,6 @@ void AddProjectPage::OnNameChange(wxCommandEvent& event)
 {
     wxString name = pNameTextCtrl->GetValue();
     pDisplayNameTextCtrl->ChangeValue(name);
-}
-
-void AddProjectPage::OnBillableCheck(wxCommandEvent& event)
-{
-    if (event.IsChecked()) {
-        pRateChoiceCtrl->Enable();
-    } else {
-        pRateChoiceCtrl->Disable();
-        pRateTextCtrl->Disable();
-        pCurrencyComboBoxCtrl->Disable();
-
-        pRateChoiceCtrl->SetSelection(0);
-        pRateTextCtrl->ChangeValue(wxGetEmptyString());
-        pCurrencyComboBoxCtrl->SetSelection(0);
-    }
-}
-
-void AddProjectPage::OnRateChoiceSelection(wxCommandEvent& event)
-{
-    int selection = util::VoidPointerToInt(pRateChoiceCtrl->GetClientData(pRateChoiceCtrl->GetSelection()));
-    if (selection == static_cast<int>(constants::RateTypes::Unknown) || selection == 0) {
-        pRateTextCtrl->Disable();
-        pCurrencyComboBoxCtrl->Disable();
-
-        pRateTextCtrl->ChangeValue(wxGetEmptyString());
-        pCurrencyComboBoxCtrl->SetSelection(0);
-    }
-    if (selection == static_cast<int>(constants::RateTypes::Hourly)) {
-        pRateTextCtrl->Enable();
-        pCurrencyComboBoxCtrl->Enable();
-    }
 }
 
 void AddProjectPage::CreateControls()
@@ -555,85 +478,6 @@ void AddProjectPage::CreateControls()
     pDisplayNameTextCtrl->SetToolTip(wxT("Specify a shortened version of the project name"));
     projectFlexGridSizer->Add(pDisplayNameTextCtrl, wxSizerFlags().Border(wxALL, 5).CenterVertical());
 
-    /* Billable Checkbox Control */
-    projectFlexGridSizer->Add(0, 0);
-
-    pBillableCheckBoxCtrl = new wxCheckBox(this, IDC_BILLABLE, wxT("Billable"));
-    pBillableCheckBoxCtrl->SetToolTip(wxT("Indicates that work on this project is billable"));
-    projectFlexGridSizer->Add(pBillableCheckBoxCtrl, wxSizerFlags().Border(wxALL, 5));
-
-    /* Rate Choice Control */
-    auto rateText = new wxStaticText(this, wxID_STATIC, wxT("Rate"));
-    projectFlexGridSizer->Add(rateText, wxSizerFlags().Border(wxALL, 5).CenterVertical());
-
-    pRateChoiceCtrl = new wxChoice(this, IDC_RATECHOICE, wxDefaultPosition, wxDefaultSize);
-    pRateChoiceCtrl->SetToolTip(wxT("Select a rate at which to charge work at"));
-    pRateChoiceCtrl->AppendString(wxT("Select a rate"));
-    pRateChoiceCtrl->SetSelection(0);
-    pRateChoiceCtrl->Disable();
-    projectFlexGridSizer->Add(pRateChoiceCtrl, wxSizerFlags().Border(wxALL, 5).Expand());
-
-    /* Rate Text Control */
-    auto rateValueText = new wxStaticText(this, wxID_STATIC, wxT("Rate Value"));
-    projectFlexGridSizer->Add(rateValueText, wxSizerFlags().Border(wxALL, 5).CenterVertical());
-
-    wxFloatingPointValidator<double> rateValueValidator(2, nullptr, wxNUM_VAL_ZERO_AS_BLANK);
-    rateValueValidator.SetRange(0.0, 1000000.0);
-
-    pRateTextCtrl = new wxTextCtrl(
-        this, wxID_ANY, wxGetEmptyString(), wxDefaultPosition, wxSize(150, -1), wxTE_LEFT, rateValueValidator);
-    pRateTextCtrl->SetHint(wxT("Rate value"));
-    pRateTextCtrl->SetToolTip(wxT("Enter the rate at which to charge work at"));
-    pRateTextCtrl->Disable();
-    projectFlexGridSizer->Add(pRateTextCtrl, wxSizerFlags().Border(wxALL, 5));
-
-    /* Currency ComboBox Control */
-    auto currencyText = new wxStaticText(this, wxID_STATIC, wxT("Currency"));
-    projectFlexGridSizer->Add(currencyText, wxSizerFlags().Border(wxALL, 5));
-
-    mCurrencyChoices.Add(wxT("Select a currency"));
-    pCurrencyComboBoxCtrl = new wxComboBox(
-        this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, mCurrencyChoices, wxCB_DROPDOWN);
-    pCurrencyComboBoxCtrl->SetToolTip(wxT("Select a currency to associate the rate value with"));
-    pCurrencyComboBoxCtrl->SetSelection(0);
-    pCurrencyComboBoxCtrl->Disable();
-    projectFlexGridSizer->Add(pCurrencyComboBoxCtrl, wxSizerFlags().Border(wxALL, 5).Expand());
-
     SetSizerAndFit(mainSizer);
-}
-
-void AddProjectPage::FillControls()
-{
-    /* Load Rate Types */
-    data::RateTypeData rateTypeData;
-    std::vector<std::unique_ptr<model::RateTypeModel>> rateTypes;
-
-    try {
-        rateTypes = rateTypeData.GetAll();
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in RateTypeModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
-    }
-
-    for (const auto& rateType : rateTypes) {
-        pRateChoiceCtrl->Append(rateType->GetName(), util::IntToVoidPointer(rateType->GetRateTypeId()));
-    }
-
-    /* Load Currencies */
-    data::CurrencyData currencyData;
-    std::vector<std::unique_ptr<model::CurrencyModel>> curriencies;
-
-    try {
-        curriencies = currencyData.GetAll();
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in CurrencyModel::GetAll() - {0:d} : {1}", e.get_code(), e.what());
-    }
-
-    for (const auto& currency : curriencies) {
-        auto currencyString = wxString::Format(wxT("%s (%s)"), currency->GetName(), currency->GetCode());
-        pCurrencyComboBoxCtrl->Append(currencyString, util::IntToVoidPointer(currency->GetCurrencyId()));
-        mCurrencyChoices.Add(currencyString);
-    }
-
-    pCurrencyComboBoxCtrl->AutoComplete(mCurrencyChoices);
 }
 } // namespace app::wizard

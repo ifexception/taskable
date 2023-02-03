@@ -45,9 +45,6 @@ namespace app::dlg
 {
 static const wxString TaskContextWithoutClient = wxT("Employer %s");
 static const wxString TaskContextWithClient = wxT("Employer %s | Client %s");
-const wxString TaskItemDialog::CalculatedRateLabelNonBillable = wxT("%s is not billable");
-const wxString TaskItemDialog::CalculatedRateLabelBillableUnknownRate = wxT("%s is billable with unknown rate");
-const wxString TaskItemDialog::CalculatedRateLabelBillableHourlyRate = wxT("%s %.2f");
 
 TaskItemDialog::TaskItemDialog(wxWindow* parent,
     std::shared_ptr<spdlog::logger> logger,
@@ -66,8 +63,6 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
     , pStartTimeCtrl(nullptr)
     , pEndTimeCtrl(nullptr)
     , pDurationCtrl(nullptr)
-    , pBillableCtrl(nullptr)
-    , pCalculatedRateTextCtrl(nullptr)
     , pDescriptionCtrl(nullptr)
     , pCategoryChoiceCtrl(nullptr)
     , pDateCreatedTextCtrl(nullptr)
@@ -109,8 +104,6 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
     , pStartTimeCtrl(nullptr)
     , pEndTimeCtrl(nullptr)
     , pDurationCtrl(nullptr)
-    , pBillableCtrl(nullptr)
-    , pCalculatedRateTextCtrl(nullptr)
     , pDescriptionCtrl(nullptr)
     , pCategoryChoiceCtrl(nullptr)
     , pDateCreatedTextCtrl(nullptr)
@@ -280,6 +273,16 @@ void TaskItemDialog::CreateControls()
     pProjectChoiceCtrl->SetToolTip(wxT("Select a project to associate this task with"));
     flexGridSizer->Add(pProjectChoiceCtrl, common::sizers::ControlDefault);
 
+    /* Category Choice Control */
+    auto taskCategory = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Category"));
+    flexGridSizer->Add(taskCategory, common::sizers::ControlCenterVertical);
+
+    pCategoryChoiceCtrl = new wxChoice(taskDetailsPanel, IDC_CATEGORYCHOICE, wxDefaultPosition, wxSize(150, -1));
+    pCategoryChoiceCtrl->AppendString(wxT("Select a category"));
+    pCategoryChoiceCtrl->SetSelection(0);
+    pCategoryChoiceCtrl->Disable();
+    flexGridSizer->Add(pCategoryChoiceCtrl, common::sizers::ControlDefault);
+
     if (mType == constants::TaskItemTypes::TimedTask) {
         /* Start Time Control */
         auto startTimeLabel = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Start Time"));
@@ -319,44 +322,6 @@ void TaskItemDialog::CreateControls()
         flexGridSizer->Add(pDurationTimeCtrl, common::sizers::ControlDefault);
     }
 
-    /* Category Choice Control */
-    auto taskCategory = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Category"));
-    flexGridSizer->Add(taskCategory, common::sizers::ControlCenterVertical);
-
-    pCategoryChoiceCtrl = new wxChoice(taskDetailsPanel, IDC_CATEGORYCHOICE, wxDefaultPosition, wxSize(150, -1));
-    pCategoryChoiceCtrl->AppendString(wxT("Select a category"));
-    pCategoryChoiceCtrl->SetSelection(0);
-    pCategoryChoiceCtrl->Disable();
-    flexGridSizer->Add(pCategoryChoiceCtrl, common::sizers::ControlDefault);
-
-    /* Task Billable Box */
-    auto billableBox = new wxStaticBox(this, wxID_ANY, wxT("Billable"));
-    auto billableBoxSizer = new wxStaticBoxSizer(billableBox, wxVERTICAL);
-    rightSizer->Add(billableBoxSizer, common::sizers::ControlExpand);
-
-    auto taskBillablePanel = new wxPanel(this, wxID_STATIC);
-    billableBoxSizer->Add(taskBillablePanel, common::sizers::ControlExpand);
-
-    auto billableSizer = new wxBoxSizer(wxVERTICAL);
-    taskBillablePanel->SetSizer(billableSizer);
-
-    /* Billable Checkbox Control */
-    pBillableCtrl = new wxCheckBox(taskBillablePanel, IDC_BILLABLE, wxT("Billable"));
-    pBillableCtrl->SetToolTip(wxT("Set whether this task is billable or not"));
-    billableSizer->Add(pBillableCtrl, common::sizers::ControlDefault);
-
-    /* Billable Rate Text Control */
-    auto billableRateSizer = new wxBoxSizer(wxHORIZONTAL);
-    billableSizer->Add(billableRateSizer, common::sizers::ControlDefault);
-
-    auto billableRateLabel = new wxStaticText(taskBillablePanel, wxID_ANY, wxT("Rate"));
-    billableRateSizer->Add(billableRateLabel, common::sizers::ControlCenterVertical);
-
-    pCalculatedRateTextCtrl = new wxStaticText(taskBillablePanel, IDC_CALCULATEDRATE, wxT("Select a project..."));
-    pCalculatedRateTextCtrl->SetToolTip(
-        wxT("Shows the estimated rate at which this task will be charged at (if applicable)"));
-    billableRateSizer->Add(pCalculatedRateTextCtrl, common::sizers::ControlDefault);
-
     /* Task Description Box */
     auto descriptionBox = new wxStaticBox(this, wxID_ANY, wxGetEmptyString());
     auto descriptionBoxSizer = new wxStaticBoxSizer(descriptionBox, wxVERTICAL);
@@ -381,17 +346,24 @@ void TaskItemDialog::CreateControls()
     allowedChars.Add(wxT("&"));
     descriptionValidator.SetIncludes(allowedChars);
 
+    wxSize descriptionSize;
+    if (mType == constants::TaskItemTypes::EntryTask) {
+        descriptionSize.Set(275, 209);
+    } else {
+        descriptionSize.Set(275, 270);
+    }
+
     pDescriptionCtrl = new wxTextCtrl(taskDescriptionPanel,
         IDC_DESCRIPTION,
         wxGetEmptyString(),
         wxDefaultPosition,
-        wxSize(280, 167),
+        descriptionSize,
         wxTE_MULTILINE,
         descriptionValidator);
     pDescriptionCtrl->SetHint(wxT("Description of task"));
     pDescriptionCtrl->SetToolTip(wxT("Enter a description for the task done"));
     pDescriptionCtrl->SetMaxLength(1024);
-    descriptionSizer->Add(pDescriptionCtrl, common::sizers::ControlExpand);
+    descriptionSizer->Add(pDescriptionCtrl, wxSizerFlags().Border(wxALL, 5).Expand().Proportion(1));
 
     /* Bottom */
     if (bIsEdit) {
@@ -472,18 +444,6 @@ void TaskItemDialog::ConfigureEventBindings()
             &TaskItemDialog::OnEndTimeChange,
             this
         );
-
-        pStartTimeCtrl->Bind(
-            wxEVT_KILL_FOCUS,
-            &TaskItemDialog::OnStartTimeFocusLost,
-            this
-        );
-
-        pEndTimeCtrl->Bind(
-            wxEVT_KILL_FOCUS,
-            &TaskItemDialog::OnEndTimeFocusLost,
-            this
-        );
     }
 
     if (mType == constants::TaskItemTypes::EntryTask) {
@@ -492,12 +452,6 @@ void TaskItemDialog::ConfigureEventBindings()
             &TaskItemDialog::OnDurationTimeChange,
             this
          );
-
-        pDurationTimeCtrl->Bind(
-            wxEVT_KILL_FOCUS,
-            &TaskItemDialog::OnDurationTimeFocusLost,
-            this
-        );
     }
 
     if (bIsEdit) {
@@ -558,8 +512,6 @@ void TaskItemDialog::FillControls()
                 pTaskContextTextCtrl->SetLabel(
                     wxString::Format(TaskContextWithoutClient, wxString(iterator->get()->GetEmployer()->GetName())));
             }
-
-            SetRateLabel(iterator->get());
         }
     }
 
@@ -632,10 +584,6 @@ void TaskItemDialog::DataToControls()
     FillCategoryControl(taskItem->GetProjectId());
     pCategoryChoiceCtrl->SetStringSelection(taskItem->GetCategory()->GetName());
 
-    pBillableCtrl->SetValue(taskItem->IsBillable());
-
-    SetRateLabel(taskItem->GetProject());
-
     pDescriptionCtrl->SetValue(taskItem->GetDescription());
 
     pDateCreatedTextCtrl->SetLabel(
@@ -652,58 +600,6 @@ void TaskItemDialog::CalculateTimeDiff(wxDateTime start, wxDateTime end)
     auto diff = end.Subtract(start);
     auto formated = diff.Format(wxT("%H:%M:%S"));
     pDurationCtrl->SetLabelText(formated);
-}
-
-void TaskItemDialog::CalculateRate()
-{
-    if (mType == constants::TaskItemTypes::EntryTask) {
-        auto time = pDurationTimeCtrl->GetValue();
-        CalculateRate(time);
-    }
-
-    if (mType == constants::TaskItemTypes::TimedTask) {
-        auto start = pStartTimeCtrl->GetValue();
-        auto end = pEndTimeCtrl->GetValue();
-
-        CalculateRate(start, end);
-    }
-}
-
-void TaskItemDialog::CalculateRate(wxDateTime time)
-{
-    auto hours = time.GetHour();
-    auto minutes = time.GetMinute();
-    auto seconds = time.GetSecond();
-    auto milliseconds = time.GetMillisecond();
-
-    wxTimeSpan timeSpan(hours, minutes, seconds, milliseconds);
-    CalculateRate(timeSpan);
-}
-
-void TaskItemDialog::CalculateRate(wxDateTime start, wxDateTime end)
-{
-    if (pProject != nullptr && pProject->GetRateType() != nullptr) {
-        if (pProject->GetRateType()->GetType() == constants::RateTypes::Hourly) {
-            wxTimeSpan diff = end.Subtract(start);
-            CalculateRate(diff);
-        }
-    }
-}
-
-void TaskItemDialog::CalculateRate(wxTimeSpan time)
-{
-    if (pProject != nullptr && pProject->GetRateType() != nullptr) {
-        if (pProject->GetRateType()->GetType() == constants::RateTypes::Hourly) {
-            int minutes = time.GetMinutes();
-            double time = ((double) minutes / 60.0);
-            mCalculatedRate = time * *pProject->GetRate();
-
-            wxString rate = wxString::Format(TaskItemDialog::CalculatedRateLabelBillableHourlyRate,
-                pProject->GetCurrency()->GetSymbol(),
-                mCalculatedRate);
-            pCalculatedRateTextCtrl->SetLabel(rate);
-        }
-    }
 }
 
 void TaskItemDialog::GenerateTaskInsertedEvent(int taskItemId)
@@ -739,11 +635,6 @@ void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
     pCategoryChoiceCtrl->SetSelection(0);
     int projectId = util::VoidPointerToInt(event.GetClientData());
 
-    if (event.GetSelection() == 0) {
-        SetRateLabel(nullptr);
-        return;
-    }
-
     FillCategoryControl(projectId);
 
     try {
@@ -761,8 +652,6 @@ void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
         pTaskContextTextCtrl->SetLabel(
             wxString::Format(TaskContextWithoutClient, wxString(pProject->GetEmployer()->GetName())));
     }
-
-    SetRateLabel(pProject.get());
 }
 
 void TaskItemDialog::OnStartTimeChange(wxDateEvent& event)
@@ -807,7 +696,6 @@ void TaskItemDialog::OnIsActiveCheck(wxCommandEvent& event)
         if (mType == constants::TaskItemTypes::EntryTask) {
             pDurationTimeCtrl->Enable();
         }
-        pBillableCtrl->Enable();
         pDescriptionCtrl->Enable();
         pCategoryChoiceCtrl->Enable();
     } else {
@@ -820,39 +708,9 @@ void TaskItemDialog::OnIsActiveCheck(wxCommandEvent& event)
         if (mType == constants::TaskItemTypes::EntryTask) {
             pDurationTimeCtrl->Disable();
         }
-        pBillableCtrl->Disable();
         pDescriptionCtrl->Disable();
         pCategoryChoiceCtrl->Disable();
     }
-}
-
-void TaskItemDialog::OnStartTimeFocusLost(wxFocusEvent& event)
-{
-    auto start = pStartTimeCtrl->GetValue();
-    auto end = pEndTimeCtrl->GetValue();
-
-    CalculateRate(start, end);
-
-    event.Skip();
-}
-
-void TaskItemDialog::OnEndTimeFocusLost(wxFocusEvent& event)
-{
-    auto start = pStartTimeCtrl->GetValue();
-    auto end = pEndTimeCtrl->GetValue();
-
-    CalculateRate(start, end);
-
-    event.Skip();
-}
-
-void TaskItemDialog::OnDurationTimeFocusLost(wxFocusEvent& event)
-{
-    auto time = pDurationTimeCtrl->GetValue();
-
-    CalculateRate(time);
-
-    event.Skip();
 }
 
 void TaskItemDialog::OnDurationTimeChange(wxDateEvent& event)
@@ -932,49 +790,6 @@ void TaskItemDialog::FillCategoryControl(int projectId)
     }
 }
 
-void TaskItemDialog::SetRateLabel(model::ProjectModel* project)
-{
-    if (project == nullptr) {
-        pBillableCtrl->Disable();
-        pCalculatedRateTextCtrl->SetLabel(wxT("Select a project..."));
-        return;
-    }
-
-    auto font = pCalculatedRateTextCtrl->GetFont();
-    if (font.GetWeight() == wxFONTWEIGHT_BOLD) {
-        font.SetWeight(wxFONTWEIGHT_NORMAL);
-        font.SetPointSize(9);
-    }
-
-    if (project->IsNonBillableScenario()) {
-        pBillableCtrl->Disable();
-        wxString label = wxString::Format(TaskItemDialog::CalculatedRateLabelNonBillable, project->GetDisplayName());
-        pCalculatedRateTextCtrl->SetLabel(label);
-    }
-
-    if (project->IsBillableWithUnknownRateScenario()) {
-        pBillableCtrl->Enable();
-        pBillableCtrl->SetValue(true);
-        wxString label =
-            wxString::Format(TaskItemDialog::CalculatedRateLabelBillableUnknownRate, project->GetDisplayName());
-        pCalculatedRateTextCtrl->SetLabel(label);
-    }
-
-    if (project->IsBillableScenarioWithHourlyRate()) {
-        pBillableCtrl->Enable();
-        pBillableCtrl->SetValue(true);
-
-        if (font.GetWeight() != wxFONTWEIGHT_BOLD) {
-            font.SetPointSize(11);
-            font.SetWeight(wxFONTWEIGHT_BOLD);
-        }
-
-        CalculateRate();
-    }
-
-    pCalculatedRateTextCtrl->SetFont(font);
-}
-
 bool TaskItemDialog::TransferDataAndValidate()
 {
     pTaskItem->SetTaskItemTypeId(static_cast<int>(mType));
@@ -1045,11 +860,6 @@ bool TaskItemDialog::TransferDataAndValidate()
         return false;
     }
     pTaskItem->SetCategoryId(categoryId);
-
-    pTaskItem->IsBillable(pBillableCtrl->GetValue());
-    if (pProject->IsBillableScenarioWithHourlyRate()) {
-        pTaskItem->SetCalculatedRate(std::move(std::make_unique<double>(mCalculatedRate)));
-    }
 
     wxString description = pDescriptionCtrl->GetValue().Trim();
     if (description.empty() || description.length() < 4 || description.length() > 1024) {

@@ -60,16 +60,12 @@ std::unique_ptr<model::CategoryModel> CategoryData::GetById(const int id)
             int projectsProjectId,
             std::string projectsName,
             std::string projectsDisplayName,
-            int projectsBillable,
             int projectsIsDefault,
-            std::unique_ptr<double> projectsRate,
             int projectsDateCreated,
             int projectsDateModified,
             int projectsIsActive,
             int projectsEmployerId,
-            std::unique_ptr<int> projectsClientId,
-            std::unique_ptr<int> projectsRateTypeId,
-            std::unique_ptr<int> projectsCurrencyId) {
+            std::unique_ptr<int> projectsClientId) {
             category = std::make_unique<model::CategoryModel>(categoriesCategoryId,
                 categoriesName,
                 categoriesColor,
@@ -80,28 +76,15 @@ std::unique_ptr<model::CategoryModel> CategoryData::GetById(const int id)
             auto project = std::make_unique<model::ProjectModel>(projectsProjectId,
                 wxString(projectsName),
                 wxString(projectsDisplayName),
-                projectsBillable,
                 projectsIsDefault,
                 projectsDateCreated,
                 projectsDateModified,
                 projectsIsActive);
 
-            if (projectsRate != nullptr) {
-                project->SetRate(std::move(projectsRate));
-            }
-
             project->SetEmployerId(projectsEmployerId);
 
             if (projectsClientId != nullptr) {
                 project->SetClientId(*projectsClientId);
-            }
-
-            if (projectsRateTypeId != nullptr) {
-                project->SetRateTypeId(*projectsRateTypeId);
-            }
-
-            if (projectsCurrencyId != nullptr) {
-                project->SetCurrencyId(*projectsCurrencyId);
             }
 
             category->SetProject(std::move(project));
@@ -139,16 +122,12 @@ std::vector<std::unique_ptr<model::CategoryModel>> CategoryData::GetByProjectId(
             int projectsProjectId,
             std::string projectsName,
             std::string projectsDisplayName,
-            int projectsBillable,
             int projectsIsDefault,
-            std::unique_ptr<double> projectsRate,
             int projectsDateCreated,
             int projectsDateModified,
             int projectsIsActive,
             int projectsEmployerId,
-            std::unique_ptr<int> projectsClientId,
-            std::unique_ptr<int> projectsRateTypeId,
-            std::unique_ptr<int> projectsCurrencyId) {
+            std::unique_ptr<int> projectsClientId) {
             auto category = std::make_unique<model::CategoryModel>(categoriesCategoryId,
                 categoriesName,
                 categoriesColor,
@@ -159,28 +138,15 @@ std::vector<std::unique_ptr<model::CategoryModel>> CategoryData::GetByProjectId(
             auto project = std::make_unique<model::ProjectModel>(projectsProjectId,
                 wxString(projectsName),
                 wxString(projectsDisplayName),
-                projectsBillable,
                 projectsIsDefault,
                 projectsDateCreated,
                 projectsDateModified,
                 projectsIsActive);
 
-            if (projectsRate != nullptr) {
-                project->SetRate(std::move(projectsRate));
-            }
-
             project->SetEmployerId(projectsEmployerId);
 
             if (projectsClientId != nullptr) {
                 project->SetClientId(*projectsClientId);
-            }
-
-            if (projectsRateTypeId != nullptr) {
-                project->SetRateTypeId(*projectsRateTypeId);
-            }
-
-            if (projectsCurrencyId != nullptr) {
-                project->SetCurrencyId(*projectsCurrencyId);
             }
 
             category->SetProject(std::move(project));
@@ -205,16 +171,12 @@ std::vector<std::unique_ptr<model::CategoryModel>> CategoryData::GetAll()
             int projectsProjectId,
             std::string projectsName,
             std::string projectsDisplayName,
-            int projectsBillable,
             int projectsIsDefault,
-            std::unique_ptr<double> projectsRate,
             int projectsDateCreated,
             int projectsDateModified,
             int projectsIsActive,
             int projectsEmployerId,
-            std::unique_ptr<int> projectsClientId,
-            std::unique_ptr<int> projectsRateTypeId,
-            std::unique_ptr<int> projectsCurrencyId) {
+            std::unique_ptr<int> projectsClientId) {
             auto category = std::make_unique<model::CategoryModel>(categoriesCategoryId,
                 categoriesName,
                 categoriesColor,
@@ -225,28 +187,15 @@ std::vector<std::unique_ptr<model::CategoryModel>> CategoryData::GetAll()
             auto project = std::make_unique<model::ProjectModel>(projectsProjectId,
                 wxString(projectsName),
                 wxString(projectsDisplayName),
-                projectsBillable,
                 projectsIsDefault,
                 projectsDateCreated,
                 projectsDateModified,
                 projectsIsActive);
 
-            if (projectsRate != nullptr) {
-                project->SetRate(std::move(projectsRate));
-            }
-
             project->SetEmployerId(projectsEmployerId);
 
             if (projectsClientId != nullptr) {
                 project->SetClientId(*projectsClientId);
-            }
-
-            if (projectsRateTypeId != nullptr) {
-                project->SetRateTypeId(*projectsRateTypeId);
-            }
-
-            if (projectsCurrencyId != nullptr) {
-                project->SetCurrencyId(*projectsCurrencyId);
             }
 
             category->SetProject(std::move(project));
@@ -269,16 +218,12 @@ const std::string CategoryData::getCategoryById = "SELECT categories.category_id
                                                   "projects.project_id, "
                                                   "projects.name AS project_name, "
                                                   "projects.display_name, "
-                                                  "projects.billable, "
                                                   "projects.is_default, "
-                                                  "projects.rate, "
                                                   "projects.date_created, "
                                                   "projects.date_modified, "
                                                   "projects.is_active, "
                                                   "projects.employer_id, "
-                                                  "projects.client_id, "
-                                                  "projects.rate_type_id, "
-                                                  "projects.currency_id "
+                                                  "projects.client_id "
                                                   "FROM categories "
                                                   "INNER JOIN projects ON categories.project_id = projects.project_id "
                                                   "WHERE categories.category_id = ? "
@@ -301,16 +246,12 @@ const std::string CategoryData::getCategoriesByProjectId =
     "projects.project_id, "
     "projects.name AS project_name, "
     "projects.display_name, "
-    "projects.billable, "
     "projects.is_default, "
-    "projects.rate, "
     "projects.date_created, "
     "projects.date_modified, "
     "projects.is_active, "
     "projects.employer_id, "
-    "projects.client_id, "
-    "projects.rate_type_id, "
-    "projects.currency_id "
+    "projects.client_id "
     "FROM categories "
     "INNER JOIN projects ON categories.project_id = projects.project_id "
     "WHERE categories.project_id = ?";
@@ -325,16 +266,12 @@ const std::string CategoryData::getCategories = "SELECT categories.category_id, 
                                                 "projects.project_id, "
                                                 "projects.name AS project_name, "
                                                 "projects.display_name, "
-                                                "projects.billable, "
                                                 "projects.is_default, "
-                                                "projects.rate, "
                                                 "projects.date_created, "
                                                 "projects.date_modified, "
                                                 "projects.is_active, "
                                                 "projects.employer_id, "
-                                                "projects.client_id, "
-                                                "projects.rate_type_id, "
-                                                "projects.currency_id "
+                                                "projects.client_id "
                                                 "FROM categories "
                                                 "INNER JOIN projects ON categories.project_id = projects.project_id "
                                                 "WHERE categories.is_active = 1";

@@ -64,8 +64,6 @@ private:
 
     void OnNameChange(wxCommandEvent& event);
     void OnEmployerChoiceSelection(wxCommandEvent& event);
-    void OnBillableCheck(wxCommandEvent& event);
-    void OnRateChoiceSelection(wxCommandEvent& event);
     void OnIsDefaultCheck(wxCommandEvent& event);
 
     void OnOk(wxCommandEvent& event);
@@ -80,10 +78,6 @@ private:
     wxTextCtrl* pDisplayNameCtrl;
     wxChoice* pEmployerChoiceCtrl;
     wxChoice* pClientChoiceCtrl;
-    wxCheckBox* pBillableCtrl;
-    wxChoice* pRateChoiceCtrl;
-    wxTextCtrl* pRateTextCtrl;
-    wxComboBox* pCurrencyComboBoxCtrl;
     wxCheckBox* pIsActiveCtrl;
     wxCheckBox* pIsDefaultCtrl;
     wxStaticText* pDateTextCtrl;
@@ -102,10 +96,6 @@ private:
         IDC_DISPLAYNAME,
         IDC_EMPLOYERCHOICE,
         IDC_CLIENTCHOICE,
-        IDC_BILLABLE,
-        IDC_RATECHOICE,
-        IDC_RATEVALUE,
-        IDC_CURRENCYCHOICE,
         IDC_ISDEFAULT,
         IDC_ISACTIVE
     };

@@ -52,17 +52,7 @@ int64_t TaskItemData::Create(std::unique_ptr<model::TaskItemModel> taskItem)
 
     ps << taskItem->GetDuration().ToStdString() << taskItem->GetDescription().ToStdString();
 
-    if (taskItem->GetProject()->IsNonBillableScenario()) {
-        ps << taskItem->IsBillable() << nullptr;
-    }
-
-    if (taskItem->GetProject()->IsBillableWithUnknownRateScenario()) {
-        ps << taskItem->IsBillable() << nullptr;
-    }
-
-    if (taskItem->GetProject()->IsBillableScenarioWithHourlyRate()) {
-        ps << taskItem->IsBillable() << *taskItem->GetCalculatedRate();
-    }
+    ps << false << nullptr;
 
     ps << taskItem->GetTaskItemTypeId() << taskItem->GetProjectId() << taskItem->GetCategoryId()
        << taskItem->GetTaskId();
@@ -88,8 +78,6 @@ std::unique_ptr<model::TaskItemModel> TaskItemData::GetById(const int taskItemId
             std::unique_ptr<std::string> taskItemsEndTime,
             std::string taskItemsDuration,
             std::string taskItemsDescription,
-            bool taskItemsBillable,
-            std::unique_ptr<double> taskItemsCalculatedRate,
             int taskItemsDateCreated,
             int taskItemsDateModified,
             bool taskItemsIsActive,
@@ -103,16 +91,12 @@ std::unique_ptr<model::TaskItemModel> TaskItemData::GetById(const int taskItemId
             int projectsProjectId,
             std::string projectsName,
             std::string projectsDisplayName,
-            int projectsBillable,
             int projectsIsDefault,
-            std::unique_ptr<double> projectsRate,
             int projectsDateCreated,
             int projectsDateModified,
             int projectsIsActive,
             int projectsEmployerId,
             std::unique_ptr<int> projectsClientId,
-            std::unique_ptr<int> projectsRateTypeId,
-            std::unique_ptr<int> projectsCurrencyId,
             int categoriesCategoryId,
             std::string categoriesName,
             unsigned int categoriesColor,
@@ -140,7 +124,6 @@ std::unique_ptr<model::TaskItemModel> TaskItemData::GetById(const int taskItemId
             taskItem = std::make_unique<model::TaskItemModel>(taskItemsTaskItemId,
                 taskItemsDuration,
                 taskItemsDescription,
-                taskItemsBillable,
                 taskItemsDateCreated,
                 taskItemsDateModified,
                 taskItemsIsActive);
@@ -154,10 +137,6 @@ std::unique_ptr<model::TaskItemModel> TaskItemData::GetById(const int taskItemId
                 taskItem->SetEndTime(wxString(*taskItemsEndTime));
             }
 
-            if (taskItemsCalculatedRate != nullptr) {
-                taskItem->SetCalculatedRate(std::move(taskItemsCalculatedRate));
-            }
-
             taskItem->SetTaskItemTypeId(taskItemsTaskItemTypeId);
 
             auto taskItemType =
@@ -169,15 +148,10 @@ std::unique_ptr<model::TaskItemModel> TaskItemData::GetById(const int taskItemId
             auto project = std::make_unique<model::ProjectModel>(projectsProjectId,
                 wxString(projectsName),
                 wxString(projectsDisplayName),
-                projectsBillable,
                 projectsIsDefault,
                 projectsDateCreated,
                 projectsDateModified,
                 projectsIsActive);
-
-            if (projectsRate != nullptr) {
-                project->SetRate(std::move(projectsRate));
-            }
 
             project->SetEmployerId(projectsEmployerId);
 
@@ -185,13 +159,6 @@ std::unique_ptr<model::TaskItemModel> TaskItemData::GetById(const int taskItemId
                 project->SetClientId(*projectsClientId);
             }
 
-            if (projectsRateTypeId != nullptr) {
-                project->SetRateTypeId(*projectsRateTypeId);
-            }
-
-            if (projectsCurrencyId != nullptr) {
-                project->SetCurrencyId(*projectsCurrencyId);
-            }
             taskItem->SetProject(std::move(project));
 
             taskItem->SetCategoryId(taskItemsCategoryId);
@@ -252,17 +219,7 @@ void TaskItemData::Update(std::unique_ptr<model::TaskItemModel> taskItem)
 
     ps << taskItem->GetDuration().ToStdString() << taskItem->GetDescription().ToStdString();
 
-    if (taskItem->GetProject()->IsNonBillableScenario()) {
-        ps << taskItem->IsBillable() << nullptr;
-    }
-
-    if (taskItem->GetProject()->IsBillableWithUnknownRateScenario()) {
-        ps << taskItem->IsBillable() << nullptr;
-    }
-
-    if (taskItem->GetProject()->IsBillableScenarioWithHourlyRate()) {
-        ps << taskItem->IsBillable() << *taskItem->GetCalculatedRate();
-    }
+    ps << false << nullptr;
 
     ps << util::UnixTimestamp();
 
@@ -294,8 +251,6 @@ std::vector<std::unique_ptr<model::TaskItemModel>> TaskItemData::GetByDate(const
             std::unique_ptr<std::string> taskItemsEndTime,
             std::string taskItemsDuration,
             std::string taskItemsDescription,
-            bool taskItemsBillable,
-            std::unique_ptr<double> taskItemsCalculatedRate,
             int taskItemsDateCreated,
             int taskItemsDateModified,
             bool taskItemsIsActive,
@@ -309,16 +264,12 @@ std::vector<std::unique_ptr<model::TaskItemModel>> TaskItemData::GetByDate(const
             int projectsProjectId,
             std::string projectsName,
             std::string projectsDisplayName,
-            int projectsBillable,
             int projectsIsDefault,
-            std::unique_ptr<double> projectsRate,
             int projectsDateCreated,
             int projectsDateModified,
             int projectsIsActive,
             int projectsEmployerId,
             std::unique_ptr<int> projectsClientId,
-            std::unique_ptr<int> projectsRateTypeId,
-            std::unique_ptr<int> projectsCurrencyId,
             int categoriesCategoryId,
             std::string categoriesName,
             unsigned int categoriesColor,
@@ -346,7 +297,6 @@ std::vector<std::unique_ptr<model::TaskItemModel>> TaskItemData::GetByDate(const
             auto taskItem = std::make_unique<model::TaskItemModel>(taskItemsTaskItemId,
                 taskItemsDuration,
                 taskItemsDescription,
-                taskItemsBillable,
                 taskItemsDateCreated,
                 taskItemsDateModified,
                 taskItemsIsActive);
@@ -360,10 +310,6 @@ std::vector<std::unique_ptr<model::TaskItemModel>> TaskItemData::GetByDate(const
                 taskItem->SetEndTime(wxString(*taskItemsEndTime));
             }
 
-            if (taskItemsCalculatedRate != nullptr) {
-                taskItem->SetCalculatedRate(std::move(taskItemsCalculatedRate));
-            }
-
             taskItem->SetTaskItemTypeId(taskItemsTaskItemTypeId);
 
             auto taskItemType =
@@ -375,28 +321,15 @@ std::vector<std::unique_ptr<model::TaskItemModel>> TaskItemData::GetByDate(const
             auto project = std::make_unique<model::ProjectModel>(projectsProjectId,
                 wxString(projectsName),
                 wxString(projectsDisplayName),
-                projectsBillable,
                 projectsIsDefault,
                 projectsDateCreated,
                 projectsDateModified,
                 projectsIsActive);
 
-            if (projectsRate != nullptr) {
-                project->SetRate(std::move(projectsRate));
-            }
-
             project->SetEmployerId(projectsEmployerId);
 
             if (projectsClientId != nullptr) {
                 project->SetClientId(*projectsClientId);
-            }
-
-            if (projectsRateTypeId != nullptr) {
-                project->SetRateTypeId(*projectsRateTypeId);
-            }
-
-            if (projectsCurrencyId != nullptr) {
-                project->SetCurrencyId(*projectsCurrencyId);
             }
             taskItem->SetProject(std::move(project));
 
@@ -518,8 +451,6 @@ const std::string TaskItemData::getTaskItemById = "SELECT "
                                                   ", task_items.end_time "
                                                   ", task_items.duration "
                                                   ", task_items.description "
-                                                  ", task_items.billable "
-                                                  ", task_items.calculated_rate "
                                                   ", task_items.date_created "
                                                   ", task_items.date_modified "
                                                   ", task_items.is_active "
@@ -533,16 +464,12 @@ const std::string TaskItemData::getTaskItemById = "SELECT "
                                                   ", projects.project_id "
                                                   ", projects.name "
                                                   ", projects.display_name "
-                                                  ", projects.billable "
                                                   ", projects.is_default "
-                                                  ", projects.rate "
                                                   ", projects.date_created "
                                                   ", projects.date_modified "
                                                   ", projects.is_active "
                                                   ", projects.employer_id "
                                                   ", projects.client_id "
-                                                  ", projects.rate_type_id "
-                                                  ", projects.currency_id "
                                                   ", categories.category_id "
                                                   ", categories.name "
                                                   ", categories.color "
@@ -598,8 +525,6 @@ const std::string TaskItemData::getTaskItemsByDate =
     ", task_items.end_time "
     ", task_items.duration "
     ", task_items.description "
-    ", task_items.billable "
-    ", task_items.calculated_rate "
     ", task_items.date_created "
     ", task_items.date_modified "
     ", task_items.is_active "
@@ -613,16 +538,12 @@ const std::string TaskItemData::getTaskItemsByDate =
     ", projects.project_id "
     ", projects.name "
     ", projects.display_name "
-    ", projects.billable "
     ", projects.is_default "
-    ", projects.rate "
     ", projects.date_created "
     ", projects.date_modified "
     ", projects.is_active "
     ", projects.employer_id "
     ", projects.client_id "
-    ", projects.rate_type_id "
-    ", projects.currency_id "
     ", categories.category_id "
     ", categories.name "
     ", categories.color "

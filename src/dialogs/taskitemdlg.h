@@ -92,20 +92,12 @@ private:
     void OnEndTimeChange(wxDateEvent& event);
     void OnDurationTimeChange(wxDateEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
-    void OnStartTimeFocusLost(wxFocusEvent& event);
-    void OnEndTimeFocusLost(wxFocusEvent& event);
-    void OnDurationTimeFocusLost(wxFocusEvent& event);
     void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
 
     void FillCategoryControl(int projectId);
-    void SetRateLabel(model::ProjectModel* project);
 
     void CalculateTimeDiff(wxDateTime start, wxDateTime end);
-    void CalculateRate();
-    void CalculateRate(wxDateTime time);
-    void CalculateRate(wxDateTime start, wxDateTime end);
-    void CalculateRate(wxTimeSpan timeSpan);
 
     void GenerateTaskInsertedEvent(int taskItemId);
     void GenerateTaskUpdatedEvent(int taskItemId);
@@ -123,8 +115,6 @@ private:
     wxTimePickerCtrl* pEndTimeCtrl;
     wxStaticText* pDurationCtrl;
     wxTimePickerCtrl* pDurationTimeCtrl;
-    wxCheckBox* pBillableCtrl;
-    wxStaticText* pCalculatedRateTextCtrl;
     wxTextCtrl* pDescriptionCtrl;
     wxChoice* pCategoryChoiceCtrl;
     wxStaticText* pDateCreatedTextCtrl;
@@ -155,14 +145,9 @@ private:
         IDC_DURATIONTIME,
         IDC_CATEGORYCHOICE,
         IDC_DESCRIPTION,
-        IDC_BILLABLE,
-        IDC_CALCULATEDRATE,
         IDC_DATECREATED,
         IDC_DATEUPDATED,
         IDC_ISACTIVE
     };
-    static const wxString CalculatedRateLabelNonBillable;
-    static const wxString CalculatedRateLabelBillableUnknownRate;
-    static const wxString CalculatedRateLabelBillableHourlyRate;
 };
 } // namespace app::dlg

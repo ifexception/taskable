@@ -29,8 +29,6 @@
 #include "../common/resources.h"
 #include "../common/util.h"
 
-#include "../data/ratetypedata.h"
-#include "../data/currencydata.h"
 #include "../data/employerdata.h"
 
 #include "../models/employermodel.h"
@@ -44,10 +42,6 @@ ProjectDialog::ProjectDialog(wxWindow* parent, std::shared_ptr<spdlog::logger> l
     , pDisplayNameCtrl(nullptr)
     , pEmployerChoiceCtrl(nullptr)
     , pClientChoiceCtrl(nullptr)
-    , pBillableCtrl(nullptr)
-    , pRateChoiceCtrl(nullptr)
-    , pRateTextCtrl(nullptr)
-    , pCurrencyComboBoxCtrl(nullptr)
     , pIsActiveCtrl(nullptr)
     , pIsDefaultCtrl(nullptr)
     , pDateTextCtrl(nullptr)
@@ -78,10 +72,6 @@ ProjectDialog::ProjectDialog(wxWindow* parent,
     , pDisplayNameCtrl(nullptr)
     , pEmployerChoiceCtrl(nullptr)
     , pClientChoiceCtrl(nullptr)
-    , pBillableCtrl(nullptr)
-    , pRateChoiceCtrl(nullptr)
-    , pRateTextCtrl(nullptr)
-    , pCurrencyComboBoxCtrl(nullptr)
     , pIsActiveCtrl(nullptr)
     , pIsDefaultCtrl(nullptr)
     , pDateTextCtrl(nullptr)
@@ -222,69 +212,6 @@ void ProjectDialog::CreateControls()
         flexGridSizer->Add(pIsActiveCtrl, common::sizers::ControlDefault);
     }
 
-    /* Billable Controls */
-    /* Billable Project Details Box */
-    auto billabilityBox = new wxStaticBox(this, wxID_ANY, wxT("Billable Details"));
-    auto billabilityBoxSizer = new wxStaticBoxSizer(billabilityBox, wxVERTICAL);
-    mainSizer->Add(billabilityBoxSizer, common::sizers::ControlExpand);
-
-    auto billablePanel = new wxPanel(this, wxID_ANY);
-    billabilityBoxSizer->Add(billablePanel, common::sizers::ControlExpand);
-
-    auto billableFlexGridSizer = new wxFlexGridSizer(2, 1, 1);
-    billablePanel->SetSizer(billableFlexGridSizer);
-
-    /* Billable Checkbox */
-    auto billableFiller = new wxStaticText(billablePanel, wxID_STATIC, wxGetEmptyString());
-    billableFlexGridSizer->Add(billableFiller, common::sizers::ControlDefault);
-
-    pBillableCtrl = new wxCheckBox(billablePanel, IDC_BILLABLE, wxT("Billable"));
-    pBillableCtrl->SetToolTip(wxT("Indicates that work on this project is billable"));
-    billableFlexGridSizer->Add(pBillableCtrl, common::sizers::ControlDefault);
-
-    /* Rate Choice Control */
-    auto rateText = new wxStaticText(billablePanel, wxID_STATIC, wxT("Rate"));
-    billableFlexGridSizer->Add(rateText, common::sizers::ControlDefault);
-
-    pRateChoiceCtrl = new wxChoice(billablePanel, IDC_RATECHOICE, wxDefaultPosition, wxDefaultSize);
-    pRateChoiceCtrl->SetToolTip(wxT("Select a rate at which to charge work at"));
-    pRateChoiceCtrl->AppendString(wxT("Select a rate"));
-    pRateChoiceCtrl->SetSelection(0);
-    pRateChoiceCtrl->Disable();
-    billableFlexGridSizer->Add(pRateChoiceCtrl, common::sizers::ControlDefault);
-
-    /* Rate Text Control */
-    auto rateValueText = new wxStaticText(billablePanel, wxID_STATIC, wxT("Rate Value"));
-    billableFlexGridSizer->Add(rateValueText, common::sizers::ControlDefault);
-
-    wxFloatingPointValidator<double> rateValueValidator(2, nullptr, wxNUM_VAL_ZERO_AS_BLANK);
-    rateValueValidator.SetRange(0.0, 1000000.0);
-
-    pRateTextCtrl = new wxTextCtrl(billablePanel,
-        IDC_RATEVALUE,
-        wxGetEmptyString(),
-        wxDefaultPosition,
-        wxSize(150, -1),
-        wxTE_LEFT,
-        rateValueValidator);
-    pRateTextCtrl->SetHint(wxT("Rate value"));
-    pRateTextCtrl->SetToolTip(wxT("Enter the rate at which to charge work at"));
-    pRateTextCtrl->Disable();
-    billableFlexGridSizer->Add(pRateTextCtrl, common::sizers::ControlDefault);
-
-    /* Currency ComboBox Control */
-    auto currencyText = new wxStaticText(billablePanel, wxID_STATIC, wxT("Currency"));
-    billableFlexGridSizer->Add(currencyText, common::sizers::ControlDefault);
-
-    wxArrayString choices;
-    choices.Add(wxT("Select a currency"));
-    pCurrencyComboBoxCtrl = new wxComboBox(
-        billablePanel, IDC_CURRENCYCHOICE, wxEmptyString, wxDefaultPosition, wxDefaultSize, choices, wxCB_DROPDOWN);
-    pCurrencyComboBoxCtrl->SetToolTip(wxT("Select a currency to associate the rate value with"));
-    pCurrencyComboBoxCtrl->SetSelection(0);
-    pCurrencyComboBoxCtrl->Disable();
-    billableFlexGridSizer->Add(pCurrencyComboBoxCtrl, common::sizers::ControlExpand);
-
     if (bIsEdit) {
         /* Date Text Control */
         pDateTextCtrl = new wxStaticText(this, wxID_STATIC, wxT("Created on: %s"));
@@ -327,18 +254,6 @@ void ProjectDialog::ConfigureEventBindings()
         this
     );
 
-    pBillableCtrl->Bind(
-        wxEVT_CHECKBOX,
-        &ProjectDialog::OnBillableCheck,
-        this
-    );
-
-    pRateChoiceCtrl->Bind(
-        wxEVT_CHOICE,
-        &ProjectDialog::OnRateChoiceSelection,
-        this
-    );
-
     if (bIsEdit) {
         pIsActiveCtrl->Bind(
             wxEVT_CHECKBOX,
@@ -376,33 +291,6 @@ void ProjectDialog::FillControls()
 
     for (const auto& employer : employers) {
         pEmployerChoiceCtrl->Append(employer->GetName(), util::IntToVoidPointer(employer->GetEmployerId()));
-    }
-
-    /* Load Rate Types */
-    data::RateTypeData rateTypeData;
-    std::vector<std::unique_ptr<model::RateTypeModel>> rateTypes;
-    try {
-        rateTypes = rateTypeData.GetAll();
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in RateTypeData::GetAll() - {0:d} : {1}", e.get_code(), e.what());
-    }
-
-    for (const auto& rateType : rateTypes) {
-        pRateChoiceCtrl->Append(rateType->GetName(), util::IntToVoidPointer(rateType->GetRateTypeId()));
-    }
-
-    /* Load Currencies */
-    data::CurrencyData currencyData;
-    std::vector<std::unique_ptr<model::CurrencyModel>> curriencies;
-    try {
-        curriencies = currencyData.GetAll();
-    } catch (const sqlite::sqlite_exception& e) {
-        pLogger->error("Error occured in CurrencyData::GetAll() - {0:d} : {1}", e.get_code(), e.what());
-    }
-
-    for (const auto& currency : curriencies) {
-        pCurrencyComboBoxCtrl->Append(wxString::Format(wxT("%s (%s)"), currency->GetName(), currency->GetCode()),
-            util::IntToVoidPointer(currency->GetCurrencyId()));
     }
 }
 
@@ -443,34 +331,6 @@ void ProjectDialog::DataToControls()
             pClientChoiceCtrl->Enable();
         }
         pClientChoiceCtrl->SetStringSelection(project->GetClient()->GetName());
-    }
-
-    /* Set project billable check */
-    pBillableCtrl->SetValue(project->IsBillable());
-
-    /* Set project is default check */
-    pIsDefaultCtrl->SetValue(project->IsDefault());
-
-    if (project->IsBillableWithUnknownRateScenario()) {
-        /* Project is billable, set the billable attributes */
-        pRateChoiceCtrl->Enable();
-        /* Set the rate choice */
-        pRateChoiceCtrl->SetStringSelection(project->GetRateType()->GetName());
-    }
-
-    if (project->IsBillableScenarioWithHourlyRate()) {
-        /* Project is billable, set the billable attributes */
-        pRateChoiceCtrl->Enable();
-        /* Set the rate choice */
-        pRateChoiceCtrl->SetStringSelection(project->GetRateType()->GetName());
-        pRateTextCtrl->Enable();
-        /* Set the rate value */
-        pRateTextCtrl->SetValue(wxString::Format(wxT("%.2f"), *project->GetRate()));
-
-        pCurrencyComboBoxCtrl->Enable();
-        /* Set the currency for project */
-        pCurrencyComboBoxCtrl->SetStringSelection(
-            wxString::Format(wxT("%s (%s)"), project->GetCurrency()->GetName(), project->GetCurrency()->GetCode()));
     }
 
     /* Is the project active (i.e. not deleted) */
@@ -517,42 +377,6 @@ void ProjectDialog::OnEmployerChoiceSelection(wxCommandEvent& event)
         } else {
             pClientChoiceCtrl->Disable();
         }
-    }
-}
-
-void ProjectDialog::OnBillableCheck(wxCommandEvent& event)
-{
-    pProject->IsBillable(event.IsChecked());
-    if (event.IsChecked()) {
-        pRateChoiceCtrl->Enable();
-    } else {
-        pRateChoiceCtrl->Disable();
-        pRateTextCtrl->Disable();
-        pCurrencyComboBoxCtrl->Disable();
-
-        {
-            pProject->SwitchOutOfBillableScenario();
-
-            pRateChoiceCtrl->SetSelection(0);
-            pRateTextCtrl->ChangeValue(wxGetEmptyString());
-            pCurrencyComboBoxCtrl->SetSelection(0);
-        }
-    }
-}
-
-void ProjectDialog::OnRateChoiceSelection(wxCommandEvent& event)
-{
-    int selection = util::VoidPointerToInt(pRateChoiceCtrl->GetClientData(pRateChoiceCtrl->GetSelection()));
-    if (selection == static_cast<int>(constants::RateTypes::Unknown) || selection == 0) {
-        pRateTextCtrl->Disable();
-        pCurrencyComboBoxCtrl->Disable();
-
-        pRateTextCtrl->ChangeValue(wxGetEmptyString());
-        pCurrencyComboBoxCtrl->SetSelection(0);
-    }
-    if (selection == static_cast<int>(constants::RateTypes::Hourly)) {
-        pRateTextCtrl->Enable();
-        pCurrencyComboBoxCtrl->Enable();
     }
 }
 
@@ -613,29 +437,14 @@ void ProjectDialog::OnIsActiveCheck(wxCommandEvent& event)
             pClientChoiceCtrl->Enable();
         }
 
-        pBillableCtrl->Enable();
         pIsDefaultCtrl->Enable();
-
-        if (pProject->IsBillableWithUnknownRateScenario()) {
-            pRateChoiceCtrl->Enable();
-        }
-
-        if (pProject->IsBillableScenarioWithHourlyRate()) {
-            pRateChoiceCtrl->Enable();
-            pRateTextCtrl->Enable();
-            pCurrencyComboBoxCtrl->Enable();
-        }
 
     } else {
         pNameTextCtrl->Disable();
         pDisplayNameCtrl->Disable();
         pEmployerChoiceCtrl->Disable();
         pClientChoiceCtrl->Disable();
-        pBillableCtrl->Disable();
         pIsDefaultCtrl->Disable();
-        pRateChoiceCtrl->Disable();
-        pRateTextCtrl->Disable();
-        pCurrencyComboBoxCtrl->Disable();
     }
 }
 
@@ -667,37 +476,7 @@ bool ProjectDialog::TryTransferValuesFromControls()
         pProject->SetClientId(
             util::VoidPointerToInt(pClientChoiceCtrl->GetClientData(pClientChoiceCtrl->GetSelection())));
     }
-
-    pProject->IsBillable(pBillableCtrl->GetValue());
     pProject->IsDefault(pIsDefaultCtrl->GetValue());
-
-    if (pProject->IsBillable()) {
-        if (pRateChoiceCtrl->GetSelection() == 0) {
-            common::validations::ForRequiredChoiceSelection(pRateChoiceCtrl, wxT("rate"));
-            return false;
-        }
-        pProject->SetRateTypeId(
-            util::VoidPointerToInt(pRateChoiceCtrl->GetClientData(pRateChoiceCtrl->GetSelection())));
-
-        int selection = pRateChoiceCtrl->GetSelection();
-        if (selection == static_cast<int>(constants::RateTypes::Unknown)) {
-            // nothing to do
-        }
-        if (selection == static_cast<int>(constants::RateTypes::Hourly)) {
-            wxString value = pRateTextCtrl->GetValue();
-            if (value.empty()) {
-                common::validations::ForRequiredNumber(pRateTextCtrl, wxT("Rate amount"));
-                return false;
-            }
-            pProject->SetRate(std::move(std::make_unique<double>(std::stod(pRateTextCtrl->GetValue().ToStdString()))));
-            if (pCurrencyComboBoxCtrl->GetSelection() == 0) {
-                common::validations::ForRequiredChoiceSelection(pCurrencyComboBoxCtrl, wxT("currency"));
-                return false;
-            }
-            pProject->SetCurrencyId(
-                util::VoidPointerToInt(pCurrencyComboBoxCtrl->GetClientData(pCurrencyComboBoxCtrl->GetSelection())));
-        }
-    }
 
     return true;
 }

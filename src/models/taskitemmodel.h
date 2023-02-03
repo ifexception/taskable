@@ -40,7 +40,6 @@ public:
     TaskItemModel(int taskItemId,
         wxString duration,
         wxString description,
-        bool billable,
         int dateCreated,
         int dateModified,
         bool isActive);
@@ -55,8 +54,6 @@ public:
     const wxDateTime* GetDurationTime() const;
     const wxString GetDuration() const;
     const wxString GetDescription() const;
-    const bool IsBillable() const;
-    const double* GetCalculatedRate() const;
     const wxDateTime GetDateCreated();
     const wxDateTime GetDateModified();
     const bool IsActive() const;
@@ -82,8 +79,6 @@ public:
     void SetDurationTime(const wxString& durationTime);
     void SetDuration(const wxString& duration);
     void SetDescription(const wxString& description);
-    void IsBillable(const bool billable);
-    void SetCalculatedRate(std::unique_ptr<double> calculatedRate);
     void SetDateCreated(const wxDateTime& dateCreated);
     void SetDateUpdated(const wxDateTime& dateModified);
     void IsActive(const bool isActive);
@@ -107,8 +102,6 @@ private:
     std::unique_ptr<wxDateTime> pDurationTime;
     wxString mDuration;
     wxString mDescription;
-    bool bBillable;
-    std::unique_ptr<double> pCalculatedRate;
     wxDateTime mDateCreated;
     wxDateTime mDateModified;
     bool bIsActive;

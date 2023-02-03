@@ -27,20 +27,14 @@ ProjectModel::ProjectModel()
     : mProjectId(-1)
     , mName(wxGetEmptyString())
     , mDisplayName(wxGetEmptyString())
-    , bIsBillable(false)
-    , pRate(nullptr)
     , bIsDefault(false)
     , mDateCreated(wxDefaultDateTime)
     , mDateModified(wxDefaultDateTime)
     , bIsActive(false)
     , mEmployerId(-1)
     , mClientId(-1)
-    , mRateTypeId(-1)
-    , mCurrencyId(-1)
     , pEmployer(std::make_unique<EmployerModel>())
     , pClient(nullptr)
-    , pRateType(nullptr)
-    , pCurrency(nullptr)
 {
 }
 
@@ -58,26 +52,9 @@ ProjectModel::ProjectModel(int projectId, wxString name, wxString displayName)
     mDisplayName = displayName;
 }
 
-ProjectModel::ProjectModel(wxString name,
-    wxString displayName,
-    bool billable,
-    std::unique_ptr<double> rate,
-    int rateTypeId,
-    int currencyId)
-    : ProjectModel()
-{
-    mName = name;
-    mDisplayName = displayName;
-    bIsBillable = billable;
-    pRate = std::move(rate);
-    mRateTypeId = rateTypeId;
-    mCurrencyId = currencyId;
-}
-
 ProjectModel::ProjectModel(int projectId,
     wxString name,
     wxString displayName,
-    bool billable,
     bool isDefault,
     int dateCreated,
     int dateModified,
@@ -87,46 +64,15 @@ ProjectModel::ProjectModel(int projectId,
     mProjectId = projectId;
     mName = name;
     mDisplayName = displayName;
-    bIsBillable = billable;
     bIsDefault = isDefault;
     mDateCreated = util::ToDateTime(dateCreated);
     mDateModified = util::ToDateTime(dateModified);
     bIsActive = isActive;
 }
 
-bool ProjectModel::IsNonBillableScenario()
-{
-    return bIsBillable == false && pRate == nullptr && mRateTypeId == -1 && mCurrencyId == -1;
-}
-
-bool ProjectModel::IsBillableWithUnknownRateScenario()
-{
-    return bIsBillable == true && mRateTypeId == static_cast<int>(constants::RateTypes::Unknown) && pRate == nullptr &&
-           mCurrencyId == -1;
-}
-
-bool ProjectModel::IsBillableScenarioWithHourlyRate()
-{
-    return bIsBillable == true && mRateTypeId == static_cast<int>(constants::RateTypes::Hourly) && pRate != nullptr &&
-           mCurrencyId > 0;
-}
-
 bool ProjectModel::HasClientLinked()
 {
     return pClient != nullptr || mClientId > 0;
-}
-
-void ProjectModel::SwitchOutOfBillableScenario()
-{
-    pRate.reset();
-    mRateTypeId = -1;
-    mCurrencyId = -1;
-}
-
-void ProjectModel::SwitchInToUnknownRateBillableScenario()
-{
-    pRate.reset();
-    mCurrencyId = -1;
 }
 
 const int ProjectModel::GetProjectId() const
@@ -142,16 +88,6 @@ const wxString ProjectModel::GetName() const
 const wxString ProjectModel::GetDisplayName() const
 {
     return mDisplayName;
-}
-
-const bool ProjectModel::IsBillable() const
-{
-    return bIsBillable;
-}
-
-const double* ProjectModel::GetRate() const
-{
-    return pRate.get();
 }
 
 const bool ProjectModel::IsDefault() const
@@ -184,16 +120,6 @@ const int ProjectModel::GetClientId() const
     return mClientId;
 }
 
-const int ProjectModel::GetRateTypeId() const
-{
-    return mRateTypeId;
-}
-
-const int ProjectModel::GetCurrencyId() const
-{
-    return mCurrencyId;
-}
-
 EmployerModel* ProjectModel::GetEmployer()
 {
     return pEmployer.get();
@@ -202,16 +128,6 @@ EmployerModel* ProjectModel::GetEmployer()
 ClientModel* ProjectModel::GetClient()
 {
     return pClient.get();
-}
-
-RateTypeModel* ProjectModel::GetRateType()
-{
-    return pRateType.get();
-}
-
-CurrencyModel* ProjectModel::GetCurrency()
-{
-    return pCurrency.get();
 }
 
 void ProjectModel::SetProjectId(const int projectId)
@@ -227,16 +143,6 @@ void ProjectModel::SetName(const wxString& name)
 void ProjectModel::SetDisplayName(const wxString& displayName)
 {
     mDisplayName = displayName;
-}
-
-void ProjectModel::IsBillable(const bool billable)
-{
-    bIsBillable = billable;
-}
-
-void ProjectModel::SetRate(std::unique_ptr<double> rate)
-{
-    pRate = std::move(rate);
 }
 
 void ProjectModel::IsDefault(const bool isDefault)
@@ -269,16 +175,6 @@ void ProjectModel::SetClientId(const int clientId)
     mClientId = clientId;
 }
 
-void ProjectModel::SetRateTypeId(const int rateTypeId)
-{
-    mRateTypeId = rateTypeId;
-}
-
-void ProjectModel::SetCurrencyId(const int currencyId)
-{
-    mCurrencyId = currencyId;
-}
-
 void ProjectModel::SetEmployer(std::unique_ptr<EmployerModel> employer)
 {
     pEmployer = std::move(employer);
@@ -287,15 +183,5 @@ void ProjectModel::SetEmployer(std::unique_ptr<EmployerModel> employer)
 void ProjectModel::SetClient(std::unique_ptr<ClientModel> client)
 {
     pClient = std::move(client);
-}
-
-void ProjectModel::SetRateType(std::unique_ptr<RateTypeModel> rateType)
-{
-    pRateType = std::move(rateType);
-}
-
-void ProjectModel::SetCurrency(std::unique_ptr<CurrencyModel> currency)
-{
-    pCurrency = std::move(currency);
 }
 } // namespace app::model
