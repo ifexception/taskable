@@ -1,13 +1,13 @@
 ; -- Taskable.iss --
 ; Installer file for Taskable application
 
-#define TaskableVersion "1.5.1"
+#define TaskableVersion "1.6.0"
 
 [Setup]
 AppName=Taskable
 AppVersion={#TaskableVersion}
 AppContact=szymonwelgus at gmail dot com
-AppCopyright=Copyright (C) 2022 Szymon Welgus
+AppCopyright=Copyright (C) 2023 Szymon Welgus
 AppPublisher=Szymon Welgus
 AppId={{6BE5E5E6-68BF-4AF7-A9E5-FF919709E86C}
 AppVerName=Taskable {#TaskableVersion}
@@ -18,7 +18,7 @@ UninstallDisplayIcon={app}\Taskable.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=Installer
-OutputBaseFilename=Taskable-x86.1.5.1-Installer
+OutputBaseFilename=Taskable-x86.1.6.0-Installer
 LicenseFile=License.txt
 WindowResizable=no
 DisableWelcomePage=no
