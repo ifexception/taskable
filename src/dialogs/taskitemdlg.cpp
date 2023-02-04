@@ -63,6 +63,8 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
     , pStartTimeCtrl(nullptr)
     , pEndTimeCtrl(nullptr)
     , pDurationCtrl(nullptr)
+    , pDurationHoursCtrl(nullptr)
+    , pDurationMinutesCtrl(nullptr)
     , pDescriptionCtrl(nullptr)
     , pCategoryChoiceCtrl(nullptr)
     , pDateCreatedTextCtrl(nullptr)
@@ -104,6 +106,8 @@ TaskItemDialog::TaskItemDialog(wxWindow* parent,
     , pStartTimeCtrl(nullptr)
     , pEndTimeCtrl(nullptr)
     , pDurationCtrl(nullptr)
+    , pDurationHoursCtrl(nullptr)
+    , pDurationMinutesCtrl(nullptr)
     , pDescriptionCtrl(nullptr)
     , pCategoryChoiceCtrl(nullptr)
     , pDateCreatedTextCtrl(nullptr)
@@ -135,7 +139,10 @@ void TaskItemDialog::SetDurationFromStopwatchTask(wxTimeSpan duration)
 {
     wxDateTime durationTime;
     durationTime.ParseISOTime(duration.Format());
-    pDurationTimeCtrl->SetValue(durationTime);
+    auto hours = durationTime.GetHour();
+    auto minutes = durationTime.GetMinute();
+    pDurationHoursCtrl->SetValue(hours);
+    pDurationMinutesCtrl->SetValue(minutes);
 }
 
 void TaskItemDialog::SetTimesFromStopwatchTask(wxDateTime startTime, wxDateTime endTime)
@@ -246,6 +253,8 @@ void TaskItemDialog::CreateControls()
     auto dateContextLabel = new wxStaticText(taskContextPanel, wxID_STATIC, wxT("Date"));
     dateContextSizer->Add(dateContextLabel, common::sizers::ControlCenter);
 
+    dateContextSizer->AddStretchSpacer(8);
+
     pDateContextCtrl = new wxDatePickerCtrl(
         taskContextPanel, IDC_DATECONTEXT, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1), wxDP_DROPDOWN);
     pDateContextCtrl->SetToolTip(wxT("The date under which this task will be saved under"));
@@ -312,14 +321,37 @@ void TaskItemDialog::CreateControls()
     }
 
     if (mType == constants::TaskItemTypes::EntryTask) {
-        /* Task Duration Time Control */
-        auto durationLabel = new wxStaticText(taskDetailsPanel, wxID_STATIC, wxT("Duration"));
-        flexGridSizer->Add(durationLabel, common::sizers::ControlCenterVertical);
+        auto durationBox = new wxStaticBox(this, wxID_ANY, wxEmptyString);
+        auto durationBoxSizer = new wxStaticBoxSizer(durationBox, wxHORIZONTAL);
+        leftSizer->Add(durationBoxSizer, common::sizers::ControlExpand);
 
-        pDurationTimeCtrl = new wxTimePickerCtrl(
-            taskDetailsPanel, IDC_DURATIONTIME, wxDefaultDateTime, wxDefaultPosition, wxSize(150, -1));
-        pDurationTimeCtrl->SetToolTip(wxT("Enter the elasped time for the task"));
-        flexGridSizer->Add(pDurationTimeCtrl, common::sizers::ControlDefault);
+        auto durationLabel = new wxStaticText(durationBox, wxID_STATIC, "Duration");
+        durationBoxSizer->Add(durationLabel, common::sizers::ControlCenterVertical);
+
+        durationBoxSizer->AddStretchSpacer(4);
+
+        pDurationHoursCtrl = new wxSpinCtrl(durationBox,
+            IDC_DURATIONHOURS,
+            wxEmptyString,
+            wxDefaultPosition,
+            wxDefaultSize,
+            wxSP_ARROW_KEYS | wxSP_WRAP | wxALIGN_CENTRE_HORIZONTAL,
+            0,
+            16);
+        pDurationHoursCtrl->SetToolTip("Number of hours the task took");
+        durationBoxSizer->Add(pDurationHoursCtrl, common::sizers::ControlDefault);
+
+        pDurationMinutesCtrl = new wxSpinCtrl(durationBox,
+            IDC_DURATIONMINUTES,
+            wxEmptyString,
+            wxDefaultPosition,
+            wxDefaultSize,
+            wxSP_ARROW_KEYS | wxSP_WRAP | wxALIGN_CENTRE_HORIZONTAL,
+            0,
+            59);
+        pDurationMinutesCtrl->SetToolTip("Number of minutes the task took");
+        pDurationMinutesCtrl->SetValue(15);
+        durationBoxSizer->Add(pDurationMinutesCtrl, common::sizers::ControlDefault);
     }
 
     /* Task Description Box */
@@ -348,7 +380,7 @@ void TaskItemDialog::CreateControls()
 
     wxSize descriptionSize;
     if (mType == constants::TaskItemTypes::EntryTask) {
-        descriptionSize.Set(275, 209);
+        descriptionSize.Set(275, 239);
     } else {
         descriptionSize.Set(275, 270);
     }
@@ -437,7 +469,7 @@ void TaskItemDialog::ConfigureEventBindings()
             wxEVT_TIME_CHANGED,
             &TaskItemDialog::OnStartTimeChange,
             this
-         );
+        );
 
         pEndTimeCtrl->Bind(
             wxEVT_TIME_CHANGED,
@@ -446,20 +478,12 @@ void TaskItemDialog::ConfigureEventBindings()
         );
     }
 
-    if (mType == constants::TaskItemTypes::EntryTask) {
-        pDurationTimeCtrl->Bind(
-            wxEVT_TIME_CHANGED,
-            &TaskItemDialog::OnDurationTimeChange,
-            this
-         );
-    }
-
     if (bIsEdit) {
         pIsActiveCtrl->Bind(
             wxEVT_CHECKBOX,
             &TaskItemDialog::OnIsActiveCheck,
             this
-         );
+        );
     }
 
     pOkButton->Bind(
@@ -523,14 +547,6 @@ void TaskItemDialog::FillControls()
         pEndTimeCtrl->SetValue(timeInitializedToZero);
     }
 
-    if (mType == constants::TaskItemTypes::EntryTask) {
-        timeInitializedToZero.SetSecond(0);
-        timeInitializedToZero.SetMinute(0);
-        timeInitializedToZero.SetHour(0);
-
-        pDurationTimeCtrl->SetValue(timeInitializedToZero);
-    }
-
     pDateContextCtrl->SetValue(mDateContext);
     auto bottomRangeDate = wxDateTime::GetCurrentYear() - 1;
     auto bottomDateContext = wxDateTime::Now().SetYear(bottomRangeDate);
@@ -578,7 +594,12 @@ void TaskItemDialog::DataToControls()
         pDurationCtrl->SetLabel(taskItem->GetDuration());
     }
     if (mType == constants::TaskItemTypes::EntryTask) {
-        pDurationTimeCtrl->SetValue(*taskItem->GetDurationTime());
+        auto durationTime = *taskItem->GetDurationTime();
+
+        auto hours = durationTime.GetHour();
+        auto minutes = durationTime.GetMinute();
+        pDurationHoursCtrl->SetValue(hours);
+        pDurationMinutesCtrl->SetValue(minutes);
     }
 
     FillCategoryControl(taskItem->GetProjectId());
@@ -656,12 +677,11 @@ void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
 
 void TaskItemDialog::OnStartTimeChange(wxDateEvent& event)
 {
-    auto start = event.GetDate();
+    auto& start = event.GetDate();
 
     if (cfg::ConfigurationProvider::Get().Configuration->IsTimeRoundingEnabled()) {
-        auto date = start;
         auto roundedDate =
-            util::RoundToNearestInterval(date, cfg::ConfigurationProvider::Get().Configuration->GetTimeToRoundTo());
+            util::RoundToNearestInterval(start, cfg::ConfigurationProvider::Get().Configuration->GetTimeToRoundTo());
         pStartTimeCtrl->SetValue(roundedDate);
     }
 
@@ -671,12 +691,11 @@ void TaskItemDialog::OnStartTimeChange(wxDateEvent& event)
 
 void TaskItemDialog::OnEndTimeChange(wxDateEvent& event)
 {
-    auto end = event.GetDate();
+    auto& end = event.GetDate();
 
     if (cfg::ConfigurationProvider::Get().Configuration->IsTimeRoundingEnabled()) {
-        auto date = end;
         auto roundedDate =
-            util::RoundToNearestInterval(date, cfg::ConfigurationProvider::Get().Configuration->GetTimeToRoundTo());
+            util::RoundToNearestInterval(end, cfg::ConfigurationProvider::Get().Configuration->GetTimeToRoundTo());
         pEndTimeCtrl->SetValue(roundedDate);
     }
 
@@ -694,7 +713,8 @@ void TaskItemDialog::OnIsActiveCheck(wxCommandEvent& event)
             pDurationCtrl->Enable();
         }
         if (mType == constants::TaskItemTypes::EntryTask) {
-            pDurationTimeCtrl->Enable();
+            pDurationHoursCtrl->Enable();
+            pDurationMinutesCtrl->Enable();
         }
         pDescriptionCtrl->Enable();
         pCategoryChoiceCtrl->Enable();
@@ -706,20 +726,11 @@ void TaskItemDialog::OnIsActiveCheck(wxCommandEvent& event)
             pDurationCtrl->Disable();
         }
         if (mType == constants::TaskItemTypes::EntryTask) {
-            pDurationTimeCtrl->Disable();
+            pDurationHoursCtrl->Disable();
+            pDurationMinutesCtrl->Disable();
         }
         pDescriptionCtrl->Disable();
         pCategoryChoiceCtrl->Disable();
-    }
-}
-
-void TaskItemDialog::OnDurationTimeChange(wxDateEvent& event)
-{
-    if (cfg::ConfigurationProvider::Get().Configuration->IsTimeRoundingEnabled()) {
-        auto date = event.GetDate();
-        auto roundedDate =
-            util::RoundToNearestInterval(date, cfg::ConfigurationProvider::Get().Configuration->GetTimeToRoundTo());
-        pDurationTimeCtrl->SetValue(roundedDate);
     }
 }
 
@@ -828,9 +839,9 @@ bool TaskItemDialog::TransferDataAndValidate()
         }
 
         auto taskTimeSpan = endTime - startTime;
-        auto isTaskLessThan5Minutes = taskTimeSpan.IsShorterThan(wxTimeSpan::Minutes(5));
-        if (isTaskLessThan5Minutes) {
-            common::validations::ForInvalidTime(pEndTimeCtrl, wxT("A task cannot be less than 5 minutes long"));
+        auto isTaskLessThan15Minutes = taskTimeSpan.IsShorterThan(wxTimeSpan::Minutes(15));
+        if (isTaskLessThan15Minutes) {
+            common::validations::ForInvalidTime(pEndTimeCtrl, wxT("A task cannot be less than 15 minutes long"));
             return false;
         }
 
@@ -839,14 +850,17 @@ bool TaskItemDialog::TransferDataAndValidate()
         pTaskItem->SetDuration(pDurationCtrl->GetLabel());
     }
     if (mType == constants::TaskItemTypes::EntryTask) {
-        auto isTaskLessThan5Minutes = pDurationTimeCtrl->GetValue().Subtract(wxTimeSpan::Minutes(5));
-        if (isTaskLessThan5Minutes.GetHour() < 0 && isTaskLessThan5Minutes.GetMinute() < 0 &&
-            isTaskLessThan5Minutes.GetSecond() < 0) {
-            common::validations::ForInvalidTime(pEndTimeCtrl, wxT("A task cannot be less than 5 minutes long"));
-            return false;
+        auto hours = pDurationHoursCtrl->GetValue();
+        auto minutes = pDurationMinutesCtrl->GetValue();
+        if (hours == 0) {
+            if (minutes < 15) {
+                common::validations::ForInvalidTime(pDurationMinutesCtrl, wxT("A task cannot be less than 15 minutes long"));
+                return false;
+            }
         }
 
-        pTaskItem->SetDuration(pDurationTimeCtrl->GetValue().FormatISOTime());
+        auto asFormattedTime = wxString::Format("%d:%d:00", hours, minutes);
+        pTaskItem->SetDuration(asFormattedTime);
     }
 
     if (pCategoryChoiceCtrl->GetCount() <= 1) {
@@ -874,7 +888,6 @@ bool TaskItemDialog::TransferDataAndValidate()
         taskId = taskData.GetByDate(pDateContextCtrl->GetValue())->GetTaskId();
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in TaskModel::GetByDate() - {0:d} : {1}", e.get_code(), e.what());
-        wxLogDebug(wxString(e.get_sql()));
     }
     pTaskItem->SetTaskId(taskId);
 

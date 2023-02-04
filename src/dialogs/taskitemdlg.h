@@ -22,6 +22,7 @@
 #include <memory>
 
 #include <wx/wx.h>
+#include <wx/spinctrl.h>
 
 #include <spdlog/spdlog.h>
 
@@ -90,7 +91,6 @@ private:
     void OnProjectChoice(wxCommandEvent& event);
     void OnStartTimeChange(wxDateEvent& event);
     void OnEndTimeChange(wxDateEvent& event);
-    void OnDurationTimeChange(wxDateEvent& event);
     void OnIsActiveCheck(wxCommandEvent& event);
     void OnOk(wxCommandEvent& event);
     void OnCancel(wxCommandEvent& event);
@@ -114,7 +114,8 @@ private:
     wxTimePickerCtrl* pStartTimeCtrl;
     wxTimePickerCtrl* pEndTimeCtrl;
     wxStaticText* pDurationCtrl;
-    wxTimePickerCtrl* pDurationTimeCtrl;
+    wxSpinCtrl* pDurationHoursCtrl;
+    wxSpinCtrl* pDurationMinutesCtrl;
     wxTextCtrl* pDescriptionCtrl;
     wxChoice* pCategoryChoiceCtrl;
     wxStaticText* pDateCreatedTextCtrl;
@@ -141,8 +142,9 @@ private:
         IDC_PROJECTCHOICE,
         IDC_STARTTIME,
         IDC_ENDTIME,
+        IDC_DURATIONHOURS,
+        IDC_DURATIONMINUTES,
         IDC_DURATION,
-        IDC_DURATIONTIME,
         IDC_CATEGORYCHOICE,
         IDC_DESCRIPTION,
         IDC_DATECREATED,
