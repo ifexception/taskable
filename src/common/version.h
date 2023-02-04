@@ -18,8 +18,8 @@
 //    szymonwelgus at gmail dot com
 
 #define TASKABLE_MAJOR 1
-#define TASKABLE_MINOR 5
-#define TASKABLE_PATCH 1
+#define TASKABLE_MINOR 6
+#define TASKABLE_PATCH 0
 
 #define TASKABLE_VERSION (TASKABLE_MAJOR * 1000 + TASKABLE_MINOR * 100 + TASKABLE_PATCH)
 
@@ -27,7 +27,7 @@
 #define STRINGIFY(s) _STRINGIFY(s)
 
 #define COMPANY_NAME "Szymon Welgus"
-#define COPYRIGHT_STR "Copyright (C) 2020 Szymon Welgus"
+#define COPYRIGHT_STR "Copyright (C) 2023 Szymon Welgus"
 
 #define FILE_DESCRIPTION "Taskable"
 #define FILE_DESCRIPTION_STR "Task Management Software"
