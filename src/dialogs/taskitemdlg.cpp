@@ -859,7 +859,7 @@ bool TaskItemDialog::TransferDataAndValidate()
             }
         }
 
-        auto asFormattedTime = wxString::Format("%d:%d:00", hours, minutes);
+        auto asFormattedTime = wxString::Format("%02d:%02d:00", hours, minutes);
         pTaskItem->SetDuration(asFormattedTime);
     }
 
