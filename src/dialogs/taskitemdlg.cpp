@@ -651,6 +651,11 @@ void TaskItemDialog::OnDateContextChange(wxDateEvent& event)
 
 void TaskItemDialog::OnProjectChoice(wxCommandEvent& event)
 {
+    int selectedId = event.GetSelection();
+    if (selectedId < 1) {
+        return;
+    }
+
     pCategoryChoiceCtrl->Clear();
     pCategoryChoiceCtrl->AppendString(wxT("Select a category"));
     pCategoryChoiceCtrl->SetSelection(0);
