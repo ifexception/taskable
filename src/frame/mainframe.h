@@ -1,6 +1,6 @@
 // Productivity tool to help you track the time you spend on tasks
 // Productivity tool to help you track the time you spend on tasks
-// Copyright (C) 2020  Szymon Welgus
+// Copyright (C) 2023  Szymon Welgus
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

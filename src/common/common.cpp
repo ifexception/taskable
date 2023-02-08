@@ -1,5 +1,5 @@
 // Productivity tool to help you track the time you spend on tasks
-// Copyright (C) 2020  Szymon Welgus
+// Copyright (C) 2023  Szymon Welgus
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ std::string app::common::GetLicense()
 {
     return "Taskable is a desktop app that aids you in tracking your timesheets\n"
            "and seeing what work you have done.\n"
-           "Copyright(C) 2019 Szymon Welgus\n"
+           "Copyright(C) 2023 Szymon Welgus\n"
            "This program is free software : you can redistribute it and /\n"
            "or modify it under the terms of the GNU General Public License as published\n"
            "by the Free Software Foundation\n"
