@@ -450,7 +450,7 @@ void MainFrame::OnAbout(wxCommandEvent& event)
     aboutInfo.SetDescription(wxT("A desktop application to help you manage how you've spent\n"
                                  "your time on tasks during the day by tracking the time\n"
                                  "you've spent on those tasks throughout the day"));
-    aboutInfo.SetCopyright("(C) 2018-2020");
+    aboutInfo.SetCopyright("(C) 2018-2023");
     aboutInfo.SetWebSite(wxT("https://github.com/ifexception/taskable"));
     aboutInfo.SetLicence(common::GetLicense());
     aboutInfo.AddDeveloper(wxT("Szymon Welgus"));
