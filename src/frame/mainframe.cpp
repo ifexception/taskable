@@ -350,45 +350,25 @@ void MainFrame::CreateControls()
     dateColumn.SetWidth(wxLIST_AUTOSIZE);
     pListCtrl->InsertColumn(1, dateColumn);
 
-    wxListItem startTimeColumn;
-    startTimeColumn.SetAlign(wxLIST_FORMAT_CENTER);
-    startTimeColumn.SetText(wxT("Start"));
-    mask = startTimeColumn.GetMask();
-    mask |= wxLIST_MASK_FORMAT;
-    startTimeColumn.SetId(2);
-    startTimeColumn.SetMask(mask);
-    startTimeColumn.SetWidth(wxLIST_AUTOSIZE);
-    pListCtrl->InsertColumn(2, startTimeColumn);
-
-    wxListItem endTimeColumn;
-    endTimeColumn.SetAlign(wxLIST_FORMAT_CENTER);
-    endTimeColumn.SetText(wxT("End"));
-    mask = endTimeColumn.GetMask();
-    mask |= wxLIST_MASK_FORMAT;
-    endTimeColumn.SetId(3);
-    endTimeColumn.SetMask(mask);
-    endTimeColumn.SetWidth(wxLIST_AUTOSIZE);
-    pListCtrl->InsertColumn(3, endTimeColumn);
-
     wxListItem durationColumn;
     durationColumn.SetAlign(wxLIST_FORMAT_CENTER);
-    durationColumn.SetId(4);
+    durationColumn.SetId(2);
     mask = durationColumn.GetMask();
     mask |= wxLIST_MASK_FORMAT;
     durationColumn.SetMask(mask);
     durationColumn.SetText(wxT("Duration"));
     durationColumn.SetWidth(wxLIST_AUTOSIZE);
-    pListCtrl->InsertColumn(4, durationColumn);
+    pListCtrl->InsertColumn(2, durationColumn);
 
     wxListItem categoryColumn;
-    categoryColumn.SetId(5);
+    categoryColumn.SetId(3);
     categoryColumn.SetText(wxT("Category"));
-    pListCtrl->InsertColumn(5, categoryColumn);
+    pListCtrl->InsertColumn(3, categoryColumn);
 
     wxListItem descriptionColumn;
-    descriptionColumn.SetId(6);
+    descriptionColumn.SetId(4);
     descriptionColumn.SetText(wxT("Description"));
-    pListCtrl->InsertColumn(6, descriptionColumn);
+    pListCtrl->InsertColumn(4, descriptionColumn);
 }
 
 void MainFrame::DataToControls()
@@ -427,9 +407,9 @@ void MainFrame::OnResize(wxSizeEvent& event)
     wxSize frameSize = GetClientSize();
     int width = frameSize.GetWidth();
     if (pListCtrl) {
-        pListCtrl->SetColumnWidth(0, width * 0.10); // project
-        pListCtrl->SetColumnWidth(5, width * 0.10); // category
-        pListCtrl->SetColumnWidth(6, width * 0.40); // description
+        pListCtrl->SetColumnWidth(0, width * 0.12); // project
+        pListCtrl->SetColumnWidth(3, width * 0.12); // category
+        pListCtrl->SetColumnWidth(4, width * 0.55); // description
     }
 
     event.Skip();
@@ -755,9 +735,7 @@ void MainFrame::OnPopupMenuDelete(wxCommandEvent& event)
 void MainFrame::OnColumnBeginDrag(wxListEvent& event)
 {
     if (event.GetColumn() == 1 // date column
-        || event.GetColumn() == 2 // start column
-        || event.GetColumn() == 3 // end column
-        || event.GetColumn() == 4 // duration colum
+        || event.GetColumn() == 2 // duration colum
     ) {
         event.Veto();
     }
@@ -784,11 +762,6 @@ void MainFrame::OnTaskInserted(wxCommandEvent& event)
         int columnIndex = 0;
         int listIndex = pListCtrl->InsertItem(columnIndex++, taskItem->GetProject()->GetDisplayName());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetTask()->GetTaskDate());
-        pListCtrl->SetItem(listIndex,
-            columnIndex++,
-            taskItem->GetStartTime() ? taskItem->GetStartTime()->FormatISOTime() : wxString("N/A"));
-        pListCtrl->SetItem(
-            listIndex, columnIndex++, taskItem->GetEndTime() ? taskItem->GetEndTime()->FormatISOTime() : wxString("N/A"));
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDuration());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetCategory()->GetName());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDescription());
@@ -819,10 +792,6 @@ void MainFrame::OnTaskUpdated(wxCommandEvent& event)
     int columnIndex = 0;
     pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetProject()->GetDisplayName());
     pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetTask()->GetTaskDate());
-    pListCtrl->SetItem(
-        mItemIndex, columnIndex++, taskItem->GetStartTime() ? taskItem->GetStartTime()->FormatISOTime() : wxString("N/A"));
-    pListCtrl->SetItem(
-        mItemIndex, columnIndex++, taskItem->GetEndTime() ? taskItem->GetEndTime()->FormatISOTime() : wxString("N/A"));
     pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetDuration());
     pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetCategory()->GetName());
     pListCtrl->SetItem(mItemIndex, columnIndex++, taskItem->GetDescription());
@@ -910,11 +879,6 @@ void MainFrame::FillListControl(wxDateTime date)
     for (const auto& taskItem : taskItems) {
         listIndex = pListCtrl->InsertItem(columnIndex++, taskItem->GetProject()->GetDisplayName());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetTask()->GetTaskDate());
-        pListCtrl->SetItem(listIndex,
-            columnIndex++,
-            taskItem->GetStartTime() ? taskItem->GetStartTime()->FormatISOTime() : wxString("N/A"));
-        pListCtrl->SetItem(
-            listIndex, columnIndex++, taskItem->GetEndTime() ? taskItem->GetEndTime()->FormatISOTime() : wxString("N/A"));
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDuration());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetCategory()->GetName());
         pListCtrl->SetItem(listIndex, columnIndex++, taskItem->GetDescription());
