@@ -1,7 +1,7 @@
 ; -- Taskable.iss --
 ; Installer file for Taskable application
 
-#define TaskableVersion "1.6.2"
+#define TaskableVersion "1.6.3"
 
 [Setup]
 AppName=Taskable
@@ -18,7 +18,7 @@ UninstallDisplayIcon={app}\Taskable.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=Installer
-OutputBaseFilename=Taskable-x86.1.6.2-Installer
+OutputBaseFilename=Taskable-x86.1.6.3-Installer
 LicenseFile=License.txt
 WindowResizable=no
 DisableWelcomePage=no
@@ -28,7 +28,7 @@ SetupIconFile=taskable.ico
 Source: "Taskable.exe"; DestDir: "{app}"
 Source: "fmt.dll"; DestDir: "{app}"
 Source: "jpeg62.dll"; DestDir: "{app}"
-Source: "libcurl.dll"; DestDir: "{app}"   
+Source: "libcurl.dll"; DestDir: "{app}"
 Source: "liblzma.dll"; DestDir: "{app}"
 Source: "libpng16.dll"; DestDir: "{app}"
 Source: "pcre2-16.dll"; DestDir: "{app}"
