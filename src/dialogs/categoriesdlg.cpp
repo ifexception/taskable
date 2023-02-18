@@ -83,7 +83,10 @@ bool CategoriesDialog::Create(wxWindow* parent,
 
         GetSizer()->Fit(this);
         GetSizer()->SetSizeHints(this);
-        SetIcon(rc::GetProgramIcon());
+
+        wxIconBundle iconBundle("AppIcon", 0);
+        SetIcons(iconBundle);
+
         Center();
     }
 

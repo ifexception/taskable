@@ -67,6 +67,10 @@ bool PreferencesDialog::Create(wxWindow* parent,
     bool created = wxPropertySheetDialog::Create(parent, windowId, title, position, size, style, name);
     if (created) {
         CreateControls();
+
+        wxIconBundle iconBundle("AppIcon", 0);
+        SetIcons(iconBundle);
+
     }
     return created;
 }

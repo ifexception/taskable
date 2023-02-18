@@ -59,7 +59,10 @@ bool ExportToCsvDialog::Create(wxWindow* parent,
         FillControls();
 
         GetSizer()->Fit(this);
-        SetIcon(rc::GetProgramIcon());
+
+        wxIconBundle iconBundle("AppIcon", 0);
+        SetIcons(iconBundle);
+
         Centre();
     }
     return created;

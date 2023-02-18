@@ -79,7 +79,10 @@ bool CategoryDialog::Create(wxWindow* parent,
 
         GetSizer()->Fit(this);
         GetSizer()->SetSizeHints(this);
-        SetIcon(rc::GetProgramIcon());
+
+        wxIconBundle iconBundle("AppIcon", 0);
+        SetIcons(iconBundle);
+
         Center();
     }
 
@@ -210,7 +213,7 @@ void CategoryDialog::DataToControls()
     std::unique_ptr<model::CategoryModel> category = nullptr;
 
     try {
-        category =mCategoryData.GetById(mCategoryId);
+        category = mCategoryData.GetById(mCategoryId);
     } catch (const sqlite::sqlite_exception& e) {
         pLogger->error("Error occured in get_category_by_id() - {0:d} : {1}", e.get_code(), e.what());
     }

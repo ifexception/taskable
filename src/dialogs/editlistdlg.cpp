@@ -86,7 +86,10 @@ bool EditListDialog::Create(wxWindow* parent,
         DataToControls();
 
         GetSizer()->Fit(this);
-        SetIcon(rc::GetProgramIcon());
+
+        wxIconBundle iconBundle("AppIcon", 0);
+        SetIcons(iconBundle);
+
         Center();
     }
 

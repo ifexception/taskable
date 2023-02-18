@@ -47,7 +47,9 @@ TaskBarIcon::TaskBarIcon(wxFrame* parent,
 
 void TaskBarIcon::SetTaskBarIcon()
 {
-    SetIcon(wxIcon(rc::GetProgramIcon()), common::GetProgramName());
+    wxIconBundle iconBundle("AppIcon", 0);
+
+    SetIcon(iconBundle.GetIcon(wxDefaultSize), common::GetProgramName());
 }
 
 wxMenu* TaskBarIcon::CreatePopupMenu()

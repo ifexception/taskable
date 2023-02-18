@@ -87,7 +87,10 @@ bool EmployerDialog::Create(wxWindow* parent,
         }
 
         GetSizer()->Fit(this);
-        SetIcon(rc::GetProgramIcon());
+
+        wxIconBundle iconBundle("AppIcon", 0);
+        SetIcons(iconBundle);
+
         Centre();
     }
 

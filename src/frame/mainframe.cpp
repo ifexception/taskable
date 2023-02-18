@@ -162,7 +162,9 @@ bool MainFrame::CreateFrame()
 
     bool success = Create();
     SetMinSize(wxSize(850, 580));
-    SetIcon(rc::GetProgramIcon());
+
+    wxIconBundle iconBundle("AppIcon", 0);
+    SetIcons(iconBundle);
 
     if (cfg::ConfigurationProvider::Get().Configuration->IsBackupEnabled()) {
         svc::DatabaseBackupDeleter dbBackupDeleter;

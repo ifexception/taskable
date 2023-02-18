@@ -89,7 +89,9 @@ bool WeeklyTaskViewDialog::Create(wxWindow* parent,
         ConfigureEventBindings();
         FillControls();
 
-        SetIcon(rc::GetProgramIcon());
+        wxIconBundle iconBundle("AppIcon", 0);
+        SetIcons(iconBundle);
+
         Center();
     }
 

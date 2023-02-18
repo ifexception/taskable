@@ -128,7 +128,10 @@ void CheckForUpdateDialog::Create(wxWindow* parent,
         CreateControls();
 
         GetSizer()->Fit(this);
-        SetIcon(rc::GetProgramIcon());
+
+        wxIconBundle iconBundle("AppIcon", 0);
+        SetIcons(iconBundle);
+
         Center();
     }
 }
