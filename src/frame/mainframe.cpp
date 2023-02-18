@@ -933,7 +933,7 @@ void MainFrame::CopyToClipboardProcedure(long itemIndex)
     if (canOpen) {
         wxListItem listItem;
         listItem.m_itemId = itemIndex;
-        listItem.m_col = 6;
+        listItem.m_col = 4;
         listItem.m_mask = wxLIST_MASK_TEXT;
         pListCtrl->GetItem(listItem);
 
